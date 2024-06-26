@@ -1,3 +1,5 @@
+"use client"
+
 import { getSession, logout } from "@/utils/authlib";
 import { useRouter } from "next/navigation";
 import { Button } from "rizzui";
