@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import NotFoundImg from "@public/illustration/not-found.png";
+import NotFoundImg from "@public/not-found.png";
 import { Button, Title } from "rizzui";
 import { PiHouseLineBold } from "react-icons/pi";
 

@@ -7,5 +7,8 @@ const config = {
   tabWidth: 2,
   useTabs: false,
   plugins: ['prettier-plugin-tailwindcss'],
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
 };
 export default config;

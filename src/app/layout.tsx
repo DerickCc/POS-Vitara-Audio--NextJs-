@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { inter, lexendDeca } from "@/app/fonts";
-import MainLayout from "@/layouts/(main-layout-components)/layout";
 import GlobalDrawer from "@/app/shared/drawer-views/container";
 import GlobalModal from "@/app/shared/modal-views/container";
 import { cn } from "@/utils/class-names";
 import NextProgress from "@/components/next-progress";
 import { siteConfig } from "@/config/site.config";
 import "@/app/globals.css";
+import { getSession } from "@/utils/authlib";
 
 export const metadata: Metadata = {
   title: siteConfig.title,
   description: siteConfig.description,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSession();
+
   return (
     <html
       lang="en"
@@ -33,7 +35,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <NextProgress />
-            {children}
+          {children}
           <GlobalDrawer />
           <GlobalModal />
         </ThemeProvider>

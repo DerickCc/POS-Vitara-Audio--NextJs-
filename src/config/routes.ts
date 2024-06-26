@@ -1,5 +1,5 @@
 export const routes = {
-  dashboard: '/dashboard',
+  dashboard: '/',
   master: {
     supplier: '/master/supplier',
     customer: '/master/customer',

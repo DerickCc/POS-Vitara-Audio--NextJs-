@@ -1,4 +1,4 @@
-## Isomorphic Starter Template
+## Starter Guide
 
 First, run the development server:
 

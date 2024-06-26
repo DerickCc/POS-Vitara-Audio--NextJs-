@@ -45,9 +45,14 @@
     /* ----------------------------------- */
     /* primary/brand colors */
     /* ----------------------------------- */
-    --primary-lighter: 215 227 254; /* #d7e3fe */
-    --primary-default: 56 114 250; /* #3872fa */
-    --primary-dark: 29 88 216; /* #1d58d8 */
+    
+    /*--primary-lighter: 215 227 254; /* #d7e3fe */
+    /*--primary-default: 56 114 250; /* #3872fa */
+    /*--primary-dark: 29 88 216; /* #1d58d8 */
+    /*--primary-foreground: 255 255 255; /* #ffffff */
+    --primary-lighter: 227 227 227; /* #e3e3e3 */
+    --primary-default: 17 17 17; /* #111111 */
+    --primary-dark: 0 0 0; /* #000000 */
     --primary-foreground: 255 255 255; /* #ffffff */
 
     /* ----------------------------------- */
@@ -1122,10 +1127,10 @@ td.rc-table-cell-fix-right {
   @apply dark:fill-gray-400/50;
 }
 
-input::placeholder,
+/* input::placeholder,
 textarea::placeholder {
   @apply dark:!text-gray-300;
-}
+} */
 
 /* ................................................... */
 /* Google Map Styles */

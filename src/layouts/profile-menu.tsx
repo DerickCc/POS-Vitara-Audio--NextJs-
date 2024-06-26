@@ -6,6 +6,7 @@ import cn from "@/utils/class-names";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import LogOut from "@/app/(auth)/logout/page";
 
 // const menuItems = [
 //   {
@@ -40,14 +41,8 @@ function DropdownMenu() {
           </Link>
         ))}
       </div> */}
-      <div className="border-t border-gray-300 px-6 pb-6 pt-5">
-        <Button
-          className="h-auto w-full justify-start p-0 font-medium text-gray-700 outline-none focus-within:text-gray-600 hover:text-gray-900 focus-visible:ring-0"
-          variant="text"
-          // onClick={() => signOut()}
-        >
-          Sign Out
-        </Button>
+      <div className="border-t border-gray-300 px-3 pb-3 pt-2">
+        <LogOut />
       </div>
     </div>
   );
