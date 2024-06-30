@@ -7,7 +7,7 @@ import { cn } from "@/utils/class-names";
 import NextProgress from "@/components/next-progress";
 import { siteConfig } from "@/config/site.config";
 import "@/app/globals.css";
-import { getSession } from "@/utils/authlib";
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: siteConfig.title,
@@ -19,8 +19,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-
   return (
     <html
       lang="en"
@@ -36,6 +34,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <NextProgress />
           {children}
+          <Toaster position="top-right" />
           <GlobalDrawer />
           <GlobalModal />
         </ThemeProvider>

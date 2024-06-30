@@ -1,9 +1,11 @@
+import { LoginModel } from "@/types/login.type";
 import { db } from "@/utils/prisma";
-import { compare, hash } from "bcryptjs";
+import { saveSession } from "@/utils/sessionlib";
+import { compare } from "bcryptjs";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const data: { username: string; password: string } = await request.json();
+  const data: LoginModel = new LoginModel(await request.json());
   // const hashPassword = await hash(data.password, 10);
 
   // await db.user.create({
@@ -15,10 +17,14 @@ export async function POST(request: Request) {
   //   }
   // })
 
-  // if username or password is empty
-  if (!data.username || !data.password) {
+  const validatedData = data.validate();
+
+  if (!validatedData.success) {
     return NextResponse.json(
-      { message: "Username dan Password harus diisi" },
+      {
+        message: "Terdapat kesalahan pada data yang dikirim.",
+        error: validatedData.error.flatten().fieldErrors,
+      },
       { status: 400 }
     );
   }
@@ -31,7 +37,7 @@ export async function POST(request: Request) {
     // if username not found on db
     if (!user) {
       return NextResponse.json(
-        { message: "Username tidak ditemukan" },
+        { message: "Username tidak ditemukan." },
         { status: 404 }
       );
     }
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
     // if password doesn't match
     if (!passwordMatch) {
       return NextResponse.json(
-        { message: "Password Anda salah" },
+        { message: "Password Anda salah." },
         { status: 401 }
       );
     }
@@ -50,27 +56,23 @@ export async function POST(request: Request) {
     // if account status is not active
     if (!user.accountStatus) {
       return NextResponse.json(
-        { message: "Akun telah di-nonaktifkan" },
+        { message: "Akun telah di-nonaktifkan." },
         { status: 401 }
       );
     }
 
-    return NextResponse.json(
-      { message: "Credentials valid", 
-        result: {
-          id: user.id,
-          name: user.name,
-          username: user.username,
-          role: user.role,
-        } 
-      }, 
-      { status: 200 },
-    );
+    await saveSession({
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      role: user.role,
+    });
+    return NextResponse.json({ message: "Credentials valid" }, { status: 200 });
   } catch (e) {
     console.log("checkCredential Error: " + e);
     return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 200 }
+      { message: "Internal Server Error." },
+      { status: 500 }
     );
   }
 }

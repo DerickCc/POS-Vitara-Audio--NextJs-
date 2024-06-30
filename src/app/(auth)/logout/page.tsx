@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { getSession, logout } from "@/utils/authlib";
+import { getSession, destroySession } from "@/utils/sessionlib";
 import { useRouter } from "next/navigation";
 import { Button } from "rizzui";
 
 export default function LogOut() {
   const router = useRouter();
-  
+
   function logoutAndRedirect() {
-    logout();
-    router.push('/login');
+    destroySession();
+    router.push("/login");
   }
 
   return (
@@ -20,5 +20,5 @@ export default function LogOut() {
     >
       Log Out
     </Button>
-  )
+  );
 }

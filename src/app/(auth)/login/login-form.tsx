@@ -1,88 +1,82 @@
 "use client";
 
 import { routes } from "@/config/routes";
-import { saveSession } from "@/utils/authlib";
+import { LoginModel, LoginSchema } from "@/types/login.type";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { PiArrowRightBold } from "react-icons/pi";
-import { Button, Input, Password } from "rizzui";
+import { Button, Input, Loader, Password } from "rizzui";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
 
 export default function LogInForm() {
-  
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  // const { register, handleSubmit, formState: { errors } } = useForm();
-  const [error, setError] = useState("");
   const router = useRouter();
 
-  const validations = {
-    username: { required: "Username harus diisi" },
-    password: {
-      required: "Password harus diisi",
-      minLength: { value: 6, message: "Password harus minimal 6 karakter " },
-    },
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginModel>({
+    defaultValues: new LoginModel(),
+    resolver: zodResolver(LoginSchema),
+  });
 
-  async function login (event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!username || !password) {
-      setError("Username dan Password harus diisi");
-      return;
-    }
-
+  async function login(data: LoginModel) {
     try {
-      const res = await fetch("api/user/check-credentials", {
+      const response = await fetch("api/user/check-credentials", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
+      const responseJson = await response.json();
 
-      if (!res.ok) {
-        setError(data.message);
-        return;
+      if (!response.ok) {
+        console.log(responseJson);
+        throw new Error(responseJson.message);
       }
 
-      await saveSession(data.result);
       router.push(routes.dashboard);
     } catch (e) {
-      console.log("Login error: " + e);
-      setError("Gagal login, mohon dicoba lagi");
+      console.log("Error: " + e);
+      toast.error(e + ".");
     }
-  };
+  }
 
   return (
-    <form onSubmit={login}>
+    <form onSubmit={handleSubmit(login)}>
       <div className="space-y-5">
         <Input
+          id="username"
           type="text"
           size="lg"
           label="Username"
           className="[&>label>span]:font-medium"
           inputClassName="text-sm"
           placeholder="Masukkan username Anda"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          error=""
+          error={errors.username?.message}
+          {...register("username")}
         />
         <Password
+          id="password"
           size="lg"
           label="Password"
-          name="password"
           className="pb-2 [&>label>span]:font-medium"
           inputClassName="text-sm"
           placeholder="Masukkan password Anda"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          error={errors.password?.message}
+          {...register("password")}
         />
 
-        {error && <p className="text-red-500">{error}</p>}
-
-        <Button className="w-full" type="submit" size="lg">
+        <Button
+          className="w-full"
+          type="submit"
+          size="lg"
+          disabled={isSubmitting}
+        >
+          {isSubmitting && <Loader variant="spinner" size="md" className="me-2" />}
           <span>Log in</span>
           <PiArrowRightBold className="ms-2"></PiArrowRightBold>
         </Button>

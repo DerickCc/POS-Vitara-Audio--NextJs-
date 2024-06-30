@@ -1,7 +1,7 @@
 "use server"
 
-import { SessionData, sessionOptions } from "types/session.type"
-import { IronSession, getIronSession } from "iron-session"
+import { SessionData, sessionOptions } from "@/types/session.type"
+import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"
 
 export const getSession = async() => {
@@ -20,7 +20,7 @@ export async function saveSession(user: SessionData): Promise<void> {
   await session.save();
 }
 
-export const logout = async () => {
+export const destroySession = async () => {
   const session = await getSession();
   session.destroy();
 }
