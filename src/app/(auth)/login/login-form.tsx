@@ -41,7 +41,7 @@ export default function LogInForm() {
       router.push(routes.dashboard);
     } catch (e) {
       console.log("Error: " + e);
-      toast.error(e + ".");
+      toast.error(e + "");
     }
   }
 
