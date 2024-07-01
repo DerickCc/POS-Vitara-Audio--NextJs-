@@ -70,9 +70,8 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ message: "Credentials valid" }, { status: 200 });
   } catch (e) {
-    console.log("checkCredential Error: " + e);
     return NextResponse.json(
-      { message: "Internal Server Error." },
+      { message: "Internal Server Error: " + e },
       { status: 500 }
     );
   }
