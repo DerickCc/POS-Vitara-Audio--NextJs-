@@ -19,6 +19,7 @@ export async function POST(request: Request) {
 
   const validatedData = data.validate();
 
+  // if validation failed
   if (!validatedData.success) {
     return NextResponse.json(
       {
