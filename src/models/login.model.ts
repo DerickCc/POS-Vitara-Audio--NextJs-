@@ -10,8 +10,8 @@ export class LoginModel {
   password: string;
 
   constructor(data: any = {}) {
-    this.username = data.username || "";
-    this.password = data.password || "";
+    this.username = data.username || null;
+    this.password = data.password || null;
   }
 
   validate() {

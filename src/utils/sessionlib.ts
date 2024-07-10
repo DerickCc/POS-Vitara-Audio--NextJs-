@@ -1,6 +1,6 @@
 "use server"
 
-import { SessionData, sessionOptions } from "@/types/session.type"
+import { SessionData, sessionOptions } from "@/models/session.model"
 import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"
 

@@ -1,4 +1,4 @@
-import { LoginModel } from "@/types/login.type";
+import { LoginModel } from "@/models/login.model";
 import { db } from "@/utils/prisma";
 import { saveSession } from "@/utils/sessionlib";
 import { compare } from "bcryptjs";
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       username: user.username,
       role: user.role,
     });
-    return NextResponse.json({ message: "Credentials valid" }, { status: 200 });
+    return NextResponse.json({ message: "Login berhasil! Selamat datang, " + user.name + "." }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { message: "Internal Server Error: " + e },

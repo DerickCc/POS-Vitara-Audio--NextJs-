@@ -19,4 +19,24 @@ export const UserSchema = z.object({
   updatedAt: z.string().optional(),
 });
 
-export type UserModel = z.infer<typeof UserSchema>;
+export class UserModel {
+  id: number;
+  name: string;
+  username: string;
+  password: string;
+  accountStatus: boolean;
+  role: "Admin" | "Kasir" | string;
+
+  constructor(data: any = {}) {
+    this.id = data.id || null;
+    this.name = data.name || null;
+    this.username = data.username || null;
+    this.password = data.password || null;
+    this.accountStatus = data.accountStatus ?? true;
+    this.role = data.role || "Kasir";
+  }
+
+  validate() {
+    return UserSchema.safeParse(this);
+  }
+}

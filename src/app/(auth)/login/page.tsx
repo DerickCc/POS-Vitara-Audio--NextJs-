@@ -15,11 +15,11 @@ export default function LogIn() {
         </div>
 
         {/* right */}
-        <div className="w-full max-w-sm md:max-w-md lg:py-7 lg:ps-3">
+        <div className="w-full max-w-sm md:max-w-md lg:py-7 lg:px-3">
           <div className="mb-7 lg:mb-8">
             <Title
               as="h2"
-              className="text-[26px] md:text-3xl lg:text-[28px] xl:text-4xl"
+              className="md:text-3xl xl:text-4xl"
             >
               POS Vitara Audio
             </Title>

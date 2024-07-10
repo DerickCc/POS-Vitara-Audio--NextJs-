@@ -1,7 +1,7 @@
 "use client";
 
 import { routes } from "@/config/routes";
-import { LoginModel, LoginSchema } from "@/types/login.type";
+import { LoginModel, LoginSchema } from "@/models/login.model";
 import { useRouter } from "next/navigation";
 import { PiArrowRightBold } from "react-icons/pi";
 import { Button, Input, Loader, Password } from "rizzui";
@@ -37,11 +37,14 @@ export default function LogInForm() {
         console.log(responseJson);
         throw new Error(responseJson.message);
       }
+      else {
+        toast.success(responseJson.message, { duration: 6000});
+      }
 
       router.push(routes.dashboard);
     } catch (e) {
       console.log("Error: " + e);
-      toast.error(e + "");
+      toast.error(e + "", { duration: 5000});
     }
   }
 
@@ -76,7 +79,9 @@ export default function LogInForm() {
           size="lg"
           disabled={isSubmitting}
         >
-          {isSubmitting && <Loader variant="spinner" size="md" className="me-2" />}
+          {isSubmitting && (
+            <Loader variant="spinner" size="md" className="me-2" />
+          )}
           <span>Log in</span>
           <PiArrowRightBold className="ms-2"></PiArrowRightBold>
         </Button>
