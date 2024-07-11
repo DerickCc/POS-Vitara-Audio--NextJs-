@@ -30,7 +30,7 @@ export default function SearchWidget() {
 
   return (
     <>
-      <SearchBar onClick={() => setOpen(true)} />
+      <SearchBar openModal={() => setOpen(true)} />
 
       <Modal
         isOpen={open}
@@ -38,7 +38,7 @@ export default function SearchWidget() {
         overlayClassName="dark:bg-opacity-50 dark:backdrop-blur-sm"
         className="z-[9999]"
       >
-        <SearchList onClose={() => setOpen(false)} />
+        <SearchList closeModal={() => setOpen(false)} />
       </Modal>
     </>
   );

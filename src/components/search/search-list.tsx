@@ -17,7 +17,7 @@ import {
 import { pageLinks } from "./page-links.data";
 import Link from "next/link";
 
-export default function SearchList({ onClose }: { onClose?: () => void }) {
+export default function SearchList({ closeModal }: { closeModal?: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchText, setSearchText] = useState("");
 
@@ -71,7 +71,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
           variant="text"
           size="sm"
           className="ms-3 text-gray-500 hover:text-primary-dark"
-          onClick={onClose}
+          onClick={closeModal}
         >
           <PiXBold className="h-5 w-5"></PiXBold>
         </ActionIcon>
@@ -94,11 +94,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
               {item?.href ? (
                 <Link
                   href={item.href}
-                  onClick={() =>
-                    setTimeout(() => {
-                      onClose;
-                    }, 100)
-                  }
+                  onClick={closeModal}
                   className="my-0.5 flex items-center px-3 py-2 rounded-lg hover:bg-gray-100"
                 >
                   <span className="inline-flex items-center justify-content-center rounded-md border border-gray-300 p-2 text-gray-500">
