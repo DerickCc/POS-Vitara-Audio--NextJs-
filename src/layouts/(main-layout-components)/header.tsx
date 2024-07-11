@@ -7,6 +7,7 @@ import HeaderMenuRight from "@/layouts/header-menu-right";
 import StickyHeader from "@/layouts/sticky-header";
 import { Title } from "rizzui";
 import SearchBar from "@/components/search/search-bar";
+import SearchWidget from "@/components/search/search-widget";
 
 export default function Header() {
   return (
@@ -22,7 +23,7 @@ export default function Header() {
         >
           <Title as="h2" className="text-md">Vitara Audio</Title>
         </Link>
-        <SearchBar />
+        <SearchWidget />
       </div>
 
       <HeaderMenuRight />
