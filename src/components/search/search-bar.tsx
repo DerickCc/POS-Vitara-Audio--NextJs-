@@ -11,7 +11,7 @@ export default function SearchBar({ openModal }: { openModal?: () => void }) {
       "
       onClick={openModal}
     >
-      <PiMagnifyingGlassBold className="me-2 h-[20px] w-[20px]" />
+      <PiMagnifyingGlassBold className="mx-1.5 h-[20px] w-[20px]" />
       <span className="hidden text-sm text-gray-600 group-hover:text-primary-dark md:inline-flex">
         Cari menu...
       </span>

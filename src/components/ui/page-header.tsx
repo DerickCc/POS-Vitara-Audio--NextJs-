@@ -22,12 +22,11 @@ export default function PageHeader({
           </Title>
 
           {breadcrumb.map((item, idx) => (
-            <div className="inline-flex items-center text-sm">
+            <div key={item.name} className="inline-flex items-center text-sm">
               <Link
-                key={item.name}
                 href={item.href ? item.href : "javascript:void(0)"}
                 role="button"
-                className={item.href ? "text-blue-600" : ""}
+                className={item.href ? "text-primary" : "cursor-default"}
               >
                 {item.name}
               </Link>
