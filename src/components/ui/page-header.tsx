@@ -14,10 +14,10 @@ export default function PageHeader({
   const numOfItems = breadcrumb.length;
 
   return (
-    <header className="mb-7">
-      <div className="flex">
+    <header className="mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Title as="h2" className="mb-2 text-[22px] lg:text-2xl">
+          <Title className="mb-2 text-[22px] lg:text-2xl">
             {title}
           </Title>
 
