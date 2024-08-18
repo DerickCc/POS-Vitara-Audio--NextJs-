@@ -1,6 +1,16 @@
-export default function Card({ children }: { children: React.ReactNode }) {
+import cn from "@/utils/class-names";
+
+export default function Card({
+  className,
+  children,
+}: React.PropsWithChildren<{ className?: string }>) {
   return (
-    <div className="border border-muted bg-gray-0 p-5 dark:bg-gray-50 lg:p-7 rounded-lg shadow-sm">
+    <div
+      className={cn(
+        "border border-muted bg-gray-0 p-7 dark:bg-gray-50 rounded-lg shadow-sm",
+        className
+      )}
+    >
       {children}
     </div>
   );

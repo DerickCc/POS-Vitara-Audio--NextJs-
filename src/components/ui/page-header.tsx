@@ -24,7 +24,7 @@ export default function PageHeader({
           {breadcrumb.map((item, idx) => (
             <div key={item.name} className="inline-flex items-center text-sm">
               <Link
-                href={item.href ? item.href : "javascript:void(0)"}
+                href={item.href ? item.href : "#"}
                 role="button"
                 className={item.href ? "text-primary" : "cursor-default"}
               >

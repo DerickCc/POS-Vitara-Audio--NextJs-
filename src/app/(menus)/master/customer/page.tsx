@@ -4,6 +4,12 @@ import { routes } from "@/config/routes";
 import Link from "next/link";
 import { PiArrowLineUpBold, PiFunnel, PiPlusBold } from "react-icons/pi";
 import { Button, Input } from "rizzui";
+import CustomersTable from "./customer-table/table";
+import { metaObject } from "@/config/site.config";
+
+export const metadata = {
+  ...metaObject("Pelanggan"),
+};
 
 const pageHeader = {
   title: "Pelanggan",
@@ -36,7 +42,7 @@ export default function CustomerPage() {
         </div>
       </PageHeader>
 
-      <Card>
+      <Card className="mb-8">
         <h4 className="flex items-center font-medium mb-5">
           <PiFunnel className="me-1.5 h-[18px] w-[18px]" />
           Filter
@@ -51,7 +57,9 @@ export default function CustomerPage() {
         <Button className="float-right w-20">Cari</Button>
       </Card>
 
-      <table></table>
+      <Card className="px-0">
+        <CustomersTable />
+      </Card>
     </>
   );
 }
