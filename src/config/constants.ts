@@ -29,8 +29,8 @@ export const ROW_PER_PAGE_OPTIONS = [
 ];
 
 export const tableClass = `
-  min-w-full border-collapse [&_thead]:bg-gray-100 [&_th]:text-start [&_th]:text-gray-500 [&_th]:tracking-wider [&_th]:uppercase [&_th]:font-semibold 
-  [&_th]:text-xs [&_th]:p-3 [&_tbody_tr]:border-b [&_tbody_tr]:border-muted/70 hover:[&_tbody_tr]:bg-gray-50 [&_td]:py-4 [&_td]:px-3 
+  min-w-full border-collapse [&_thead]:bg-primary-lighter/10 [&_th]:text-start [&_th]:text-gray-900 [&_th]:tracking-wider [&_th]:uppercase [&_th]:font-semibold 
+  [&_th]:text-xs [&_th]:p-3 [&_tbody_tr]:border-b [&_tbody_tr]:border-muted/70 hover:[&_tbody_tr]:bg-gray-200/40 [&_td]:py-4 [&_td]:px-3 
   before:[&_.sticky-left]:pointer-events-none before:[&_.sticky-left]:absolute before:[&_.sticky-left]:bottom-0 before:[&_.sticky-left]:end-0 
   before:[&_.sticky-left]:top-0 before:[&_.sticky-left]:hidden before:[&_.sticky-left]:w-5 before:[&_.sticky-left]:shadow-[inset_10px_0_8px_-8px_rgba(0,0,0,0.2)] 
   first:before:[&_.sticky-left]:block dark:before:[&_.sticky-left]:shadow-[inset_10px_0_8px_-8px_rgba(130,136,155,0.1)] before:[&_.sticky-left]:transition-shadow 

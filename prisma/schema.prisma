@@ -12,7 +12,7 @@ datasource db {
 }
 
 model User {
-  id            Int        @id @default(autoincrement())
+  id            String     @id @default(cuid())
   name          String     @db.VarChar(50)
   username      String     @unique @db.VarChar(50)
   password      String
@@ -24,7 +24,7 @@ model User {
 }
 
 model Customer {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(cuid())
   code         String   @unique @db.VarChar(11)
   name         String   @db.VarChar(100)
   licensePlate String   @db.VarChar(20)
@@ -32,8 +32,8 @@ model Customer {
   address      String   @db.VarChar(100)
   createdAt    DateTime @default(now())
   User         User     @relation(fields: [createdBy], references: [id])
-  createdBy    Int
+  createdBy    String
   updatedAt    DateTime @updatedAt
 
-  @@index([name, licensePlate])
+  @@index([name, licensePlate, phoneNo])
 }
