@@ -29,7 +29,7 @@ export const menuItems = [
       },
       {
         name: "Pelanggan",
-        href: routes.master.customer
+        href: routes.master.customer.data
       },
     ]
   },

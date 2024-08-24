@@ -1,0 +1,187 @@
+"use client";
+
+import { columns } from "./columns";
+import cn from "@/utils/class-names";
+import { ROW_PER_PAGE_OPTIONS, tableClass } from "@/config/constants";
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ActionIcon, Input, Select, SelectOption, Text } from "rizzui";
+import {
+  PiCaretDoubleLeftBold,
+  PiCaretDoubleRightBold,
+  PiCaretDownFill,
+  PiCaretLeftBold,
+  PiCaretRightBold,
+  PiCaretUpFill,
+  PiMagnifyingGlassBold,
+} from "react-icons/pi";
+import Spinner from "@/components/ui/spinner";
+import Card from "@/components/ui/card";
+import { BasicTableProps } from "@/models/table.model";
+
+export default function CustomersTable({
+  data,
+  pageSize,
+  setPageSize,
+  pageIndex,
+  setPageIndex,
+  sorting,
+  setSorting,
+  globalFilter,
+  setGlobalFilter,
+  isLoading,
+  totalRowCount,
+}: BasicTableProps) {
+  const table = useReactTable({
+    data: data,
+    columns,
+    pageCount: Math.ceil(totalRowCount / pageSize),
+    state: {
+      pagination: { pageIndex, pageSize },
+      sorting,
+    },
+    onSortingChange: setSorting,
+    manualSorting: true,
+    manualPagination: true,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <Card className="px-0">
+      { isLoading ? (
+        <Spinner/>
+      ) : (
+        <>
+          <div className="flex items-center justify-between px-7">
+            <div className="flex items-center gap-4">
+              <Text className="font-medium">Baris Per Halaman</Text>
+              <Select
+                options={ROW_PER_PAGE_OPTIONS}
+                value={pageSize}
+                onChange={(s: SelectOption) => setPageSize(Number(s.value))}
+                className="w-[70px]"
+                dropdownClassName="font-medium [&_li]:text-sm"
+              />
+            </div>
+            <Input
+              type="search"
+              placeholder="Cari Pelanggan"
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              onClear={() => setGlobalFilter("")}
+              clearable={true}
+              prefix={<PiMagnifyingGlassBold className="size-4" />}
+            />
+          </div>
+
+          <table className={cn(tableClass, "my-7")}>
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const canSort = header.column.getCanSort();
+
+                    return (
+                      <th
+                        key={header.id}
+                        onClick={
+                          canSort
+                            ? header.column.getToggleSortingHandler()
+                            : undefined
+                        }
+                        className={canSort ? "cursor-pointer" : ""}
+                      >
+                        <div className="flex justify-between">
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+
+                          {/* render if canSort */}
+                          {canSort &&
+                            ({
+                              asc: <PiCaretUpFill size={14} />,
+                              desc: <PiCaretDownFill size={14} />,
+                            }[header.column.getIsSorted() as string] ??
+                              null)}
+                        </div>
+                      </th>
+                    );
+                  })}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {totalRowCount === 0 ? (
+                <tr>
+                  <td>Data tidak ditemukan...</td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          <div className="flex items-center justify-between px-7">
+            <Text className="font-medium">
+              Halaman {pageIndex + 1} dari {table.getPageCount() || 1}
+            </Text>
+            <div className="grid grid-cols-4 gap-2">
+              <ActionIcon
+                rounded="lg"
+                variant="outline"
+                aria-label="Ke halaman pertama"
+                onClick={() => setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
+              >
+                <PiCaretDoubleLeftBold className="size-4" />
+              </ActionIcon>
+              <ActionIcon
+                rounded="lg"
+                variant="outline"
+                aria-label="Ke halaman sebelumnya"
+                onClick={() => setPageIndex(pageIndex - 1)}
+                disabled={!table.getCanPreviousPage()}
+                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
+              >
+                <PiCaretLeftBold className="size-4" />
+              </ActionIcon>
+              <ActionIcon
+                rounded="lg"
+                variant="outline"
+                aria-label="Ke halaman selanjutnya"
+                onClick={() => setPageIndex(pageIndex + 1)}
+                disabled={!table.getCanNextPage()}
+                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
+              >
+                <PiCaretRightBold className="size-4" />
+              </ActionIcon>
+              <ActionIcon
+                rounded="lg"
+                variant="outline"
+                aria-label="Ke halaman terakhir"
+                onClick={() => setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
+              >
+                <PiCaretDoubleRightBold className="size-4" />
+              </ActionIcon>
+            </div>
+          </div>
+        </>
+      )}
+    </Card>
+  );
+}

@@ -129,8 +129,8 @@ export default {
         underline: 'url("/public/underline.svg")',
       },
       boxShadow: {
-        profilePic:
-          '0px 2px 4px -2px rgba(0, 0, 0, 0.10), 0px 4px 6px -1px rgba(0, 0, 0, 0.10)',
+        profilePic: '0px 2px 4px -2px rgba(0, 0, 0, 0.10), 0px 4px 6px -1px rgba(0, 0, 0, 0.10)',
+        'spread': '2px 2px 10px rgba(0, 0, 0, 0.03), 2px 4px 10px rgba(0, 0, 0, 0.04)',
       },
       gridTemplateColumns: {
         '18': 'repeat(18, minmax(0, 1fr))',

@@ -2,7 +2,11 @@ export const routes = {
   dashboard: '/',
   master: {
     supplier: '/master/supplier',
-    customer: '/master/customer',
+    customer: {
+      data: '/master/customer',
+      add: '/master/customer/add',
+      edit: (id: string) => `/master/customer/${id}/edit`,
+    },
   },
   inventory: {
     product: '/inventory/product',

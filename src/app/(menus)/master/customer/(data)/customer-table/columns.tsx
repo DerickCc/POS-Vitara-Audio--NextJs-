@@ -1,20 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
-// export const columns = [
-//   { title: "Kode", dataIndex: "code", key: "code", width: 120 },
-//   { title: "Nama", dataIndex: "name", key: "name", width: 200 },
-//   { title: "No. Plat", dataIndex: "licensePlate", key: "licensePlate", width: 120 },
-//   { title: "No. Telepon", dataIndex: "phoneNo", key: "phoneNo", width: 140 },
-//   { title: "Alamat", dataIndex: "address", key: "address", width: 200 },
-//   { title: "Alamat", dataIndex: "address", key: "address1", width: 200 },
-//   { title: "Alamat", dataIndex: "address", key: "address2", width: 200 },
-//   { title: "Alamat", dataIndex: "address", key: "address3", width: 200 },
-//   { title: "Alamat", dataIndex: "address", key: "address4", width: 200 },
-//   { title: "Alamat", dataIndex: "address", key: "address5", width: 200 },
-//   { title: "Alamat", dataIndex: "address", key: "address6", width: 200 },
-//   { title: "Alamat", dataIndex: "address", key: "address7", width: 200 },
-// ];
-
 type CustomerTableType = {
   id: number,
   code: string,

@@ -8,6 +8,7 @@ import { Button, Input, Loader, Password } from "rizzui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/utils/api";
 
 export default function LogInForm() {
   const router = useRouter();
@@ -23,27 +24,14 @@ export default function LogInForm() {
 
   async function login(data: LoginModel) {
     try {
-      const response = await fetch("api/user/check-credentials", {
+      const response = await apiFetch("/api/user/check-credentials", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+        body: data,
       });
 
-      const responseJson = await response.json();
-
-      if (!response.ok) {
-        console.log(responseJson);
-        throw new Error(responseJson.message);
-      }
-      else {
-        toast.success(responseJson.message, { duration: 6000});
-      }
-
+      toast.success(response.message, { duration: 6000});
       router.push(routes.dashboard);
     } catch (e) {
-      console.log("Error: " + e);
       toast.error(e + "", { duration: 5000});
     }
   }

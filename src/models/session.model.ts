@@ -1,7 +1,7 @@
 import { SessionOptions } from "iron-session";
 
 export class SessionData {
-  id: number;
+  id: string;
   name: string;
   username: string;
   role: string;

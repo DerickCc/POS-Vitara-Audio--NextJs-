@@ -35,5 +35,5 @@ model Customer {
   createdBy    String
   updatedAt    DateTime @updatedAt
 
-  @@index([name, licensePlate, phoneNo])
+  @@index([code, name, licensePlate, phoneNo, address])
 }
