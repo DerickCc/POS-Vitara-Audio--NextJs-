@@ -8,14 +8,14 @@ type DrawerTypes = {
   view: React.ReactNode;
   isOpen: boolean;
   placement?: DrawerPlacements;
-  customSize?: string;
+  customSize?: number;
 };
 
 const drawerAtom = atom<DrawerTypes>({
   isOpen: false,
   view: null,
   placement: 'right',
-  customSize: '320px',
+  customSize: 320,
 });
 
 export function useDrawer() {
@@ -29,7 +29,7 @@ export function useDrawer() {
   }: {
     view: React.ReactNode;
     placement: DrawerPlacements;
-    customSize?: string;
+    customSize?: number;
   }) => {
     setState({
       ...state,
