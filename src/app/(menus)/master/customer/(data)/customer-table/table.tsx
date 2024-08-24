@@ -57,7 +57,7 @@ export default function CustomersTable({
         <>
           <div className="flex items-center justify-between px-7">
             <div className="flex items-center gap-4">
-              <Text className="font-medium">Baris Per Halaman</Text>
+              <Text className="font-medium hidden sm:block">Baris Per Halaman</Text>
               <Select
                 options={ROW_PER_PAGE_OPTIONS}
                 value={pageSize}
@@ -74,6 +74,7 @@ export default function CustomersTable({
               onClear={() => setGlobalFilter("")}
               clearable={true}
               prefix={<PiMagnifyingGlassBold className="size-4" />}
+              className="w-[200px] sm:w-auto"
             />
           </div>
 

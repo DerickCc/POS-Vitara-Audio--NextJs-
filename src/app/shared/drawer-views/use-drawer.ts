@@ -15,7 +15,7 @@ const drawerAtom = atom<DrawerTypes>({
   isOpen: false,
   view: null,
   placement: 'right',
-  customSize: 320,
+  customSize: 200,
 });
 
 export function useDrawer() {

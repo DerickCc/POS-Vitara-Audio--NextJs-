@@ -10,14 +10,14 @@ import cn from '@/utils/class-names';
 interface Props {
   view: JSX.Element;
   placement?: DrawerPlacements;
-  customSize?: string;
+  customSize?: number;
   className?: string;
 }
 
 export default function HamburgerButton({
   view,
   placement = 'left',
-  customSize = '320px',
+  customSize = 200,
   className,
 }: Props) {
   const { openDrawer } = useDrawer();
