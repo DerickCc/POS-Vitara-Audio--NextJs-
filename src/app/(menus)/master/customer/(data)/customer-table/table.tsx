@@ -30,8 +30,6 @@ export default function CustomersTable({
   setPageIndex,
   sorting,
   setSorting,
-  globalFilter,
-  setGlobalFilter,
   isLoading,
   totalRowCount,
 }: BasicTableProps) {
@@ -66,7 +64,7 @@ export default function CustomersTable({
                 dropdownClassName="font-medium [&_li]:text-sm"
               />
             </div>
-            <Input
+            {/* <Input
               type="search"
               placeholder="Cari Pelanggan"
               value={globalFilter}
@@ -75,7 +73,7 @@ export default function CustomersTable({
               clearable={true}
               prefix={<PiMagnifyingGlassBold className="size-4" />}
               className="w-[200px] sm:w-auto"
-            />
+            /> */}
           </div>
 
           <table className={cn(tableClass, "my-7")}>

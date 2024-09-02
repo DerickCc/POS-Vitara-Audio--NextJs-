@@ -7,8 +7,8 @@ import { PiArrowLineUpBold, PiPlusBold } from "react-icons/pi";
 import { Button } from "rizzui";
 import CustomersTable from "./customer-table/table";
 import CustomerFilter, { CustomerTableFilters } from "./filter";
-import { useEffect, useState } from "react";
-import { SortingState } from "@tanstack/react-table";
+import { useCallback, useEffect, useState } from "react";
+import { OnChangeFn, SortingState } from "@tanstack/react-table";
 import toast from "react-hot-toast";
 import { apiFetch, toQueryString } from "@/utils/api";
 
@@ -30,16 +30,20 @@ export default function CustomerPage() {
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [localFilters, setLocalFilters] = useState<CustomerTableFilters>({
+    name: "",
+    licensePlate: "",
+    phoneNo: "",
+  });
   const [filters, setFilters] = useState<CustomerTableFilters>({
     name: "",
     licensePlate: "",
     phoneNo: "",
   });
-  const [globalFilter, setGlobalFilter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -65,11 +69,30 @@ export default function CustomerPage() {
     } finally {
       setIsLoading(false);
     }
+  }, [pageSize, pageIndex, sorting, filters]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageIndex(0);
+    setPageSize(newPageSize);
+  }
+
+  const handlePageIndexChange = (newPageIndex: number) => {
+    setPageIndex(newPageIndex);
+  }
+
+  const handleSortingChange: OnChangeFn<SortingState> = (newSorting) => {
+    setPageIndex(0);
+    setSorting(newSorting);
+  }
+
+  const handleSearch = () => {
+    setPageIndex(0);
+    setFilters(localFilters);
   }
 
   useEffect(() => {
     fetchData();
-  }, [pageIndex, pageSize, sorting]);
+  }, [fetchData]);
 
   return (
     <>
@@ -89,21 +112,19 @@ export default function CustomerPage() {
       </PageHeader>
 
       <CustomerFilter
-        filters={filters}
-        setFilters={setFilters}
-        handleSearch={() => fetchData()}
+        localFilters={localFilters}
+        setLocalFilters={setLocalFilters}
+        handleSearch={() => handleSearch()}
       />
 
       <CustomersTable
         data={customers}
         pageSize={pageSize}
-        setPageSize={setPageSize}
+        setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
-        setPageIndex={setPageIndex}
+        setPageIndex={handlePageIndexChange}
         sorting={sorting}
-        setSorting={setSorting}
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
+        setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
       />

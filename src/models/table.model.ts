@@ -8,8 +8,6 @@ export interface BasicTableProps {
   setPageIndex: (index: number) => void;
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
-  globalFilter: string;
-  setGlobalFilter: (filter: string) => void;
   isLoading: boolean;
   totalRowCount: number;
 }
