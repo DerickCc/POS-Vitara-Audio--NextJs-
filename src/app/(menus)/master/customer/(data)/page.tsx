@@ -98,7 +98,7 @@ export default function CustomerPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Button variant="outline" className="w-full sm:w-auto">
+          <Button variant="outline" className="border-2 border-gray-200 w-full sm:w-auto">
             <PiArrowLineUpBold className="me-1.5 h-[17px] w-[17px]" />
             Export
           </Button>

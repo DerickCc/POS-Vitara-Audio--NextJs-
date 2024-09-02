@@ -4,11 +4,12 @@ import { routes } from "@/config/routes";
 import { LoginModel, LoginSchema } from "@/models/login.model";
 import { useRouter } from "next/navigation";
 import { PiArrowRightBold } from "react-icons/pi";
-import { Button, Input, Loader, Password } from "rizzui";
+import { Button, Input, Password } from "rizzui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
+import Spinner from "@/components/ui/spinner";
 
 export default function LogInForm() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function LogInForm() {
     resolver: zodResolver(LoginSchema),
   });
 
-  async function login(data: LoginModel) {
+  const login = async (data: LoginModel) => {
     try {
       const response = await apiFetch("/api/user/check-credentials", {
         method: "POST",
@@ -68,7 +69,7 @@ export default function LogInForm() {
           disabled={isSubmitting}
         >
           {isSubmitting && (
-            <Loader variant="spinner" size="md" className="me-2" />
+            <Spinner className="me-1.5" />
           )}
           <span>Log in</span>
           <PiArrowRightBold className="ms-2"></PiArrowRightBold>

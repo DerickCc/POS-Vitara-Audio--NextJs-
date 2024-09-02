@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 export const LoginSchema = z.object({
-  username: z.string().min(1, { message: "Usernama harus diisi" }),
-  password: z.string().min(1, { message: "Password harus diisi" }),
+  username: z.string().nullable()
+    .refine(val => val !== null && val.trim().length > 0, { message: "Usernama harus diisi" }),
+  password: z.string().nullable()
+    .refine(val => val !== null && val.trim().length > 0, { message: "Password harus diisi" }),
 });
 
 export class LoginModel {
