@@ -1,5 +1,7 @@
 import { CustomerTableFilters } from "@/app/(menus)/master/customer/(data)/filter";
+import { CustomerModel } from "@/models/customer.model";
 import { db } from "@/utils/prisma";
+import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -47,6 +49,40 @@ export async function GET(request: Request) {
   } catch (e) {
     return NextResponse.json(
       { message: "Internal Server Error: " + e, result: null, recordsTotal: 0 },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  const data: CustomerModel = new CustomerModel(await request.json());
+  console.log(data)
+  const validatedData = data.validate();
+
+  // if validation failed
+  if (!validatedData.success) {
+    return NextResponse.json(
+      {
+        message: "Terdapat kesalahan pada data yang dikirim.",
+        error: validatedData.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
+
+  try {
+    // const customer = await db.customer.create({
+    //   data: {
+    //     name: data.name,
+    //     licensePlate: data.licensePlate,
+    //     phoneNo: data.phoneNo,
+    //     address: data.address,
+    //     User: 
+    //   }
+    // })
+  } catch (e) {
+    return NextResponse.json(
+      { message: "Internal Server Error: " + e },
       { status: 500 }
     );
   }

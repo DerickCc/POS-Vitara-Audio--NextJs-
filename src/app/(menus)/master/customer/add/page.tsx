@@ -5,8 +5,10 @@ import PageHeader from "@/components/ui/page-header";
 import Spinner from "@/components/ui/spinner";
 import { routes } from "@/config/routes";
 import { CustomerModel, CustomerSchema } from "@/models/customer.model";
+import { apiFetch } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FaSave } from "react-icons/fa";
@@ -30,6 +32,8 @@ const pageHeader = {
 };
 
 export default function AddCustomer() {
+  const router = useRouter();
+  
   const {
     register,
     handleSubmit,
@@ -41,7 +45,13 @@ export default function AddCustomer() {
 
   const save = async (data: CustomerModel) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await apiFetch("/api/customer", {
+        method: "POST",
+        body: data,
+      });
+
+      toast.success("Data pelanggan berhasil disimpan", { duration: 4000 });
+      router.push(routes.master.customer.data);
     } catch (e) {
       toast.error(e + "", { duration: 5000 });
     }
@@ -93,12 +103,12 @@ export default function AddCustomer() {
             </Link>
 
             <Button
-              className="bg-green-500 hover:bg-green-700 hover:text-gray-100 "
+              className="bg-green-500 hover:bg-green-700 hover:text-gray-100 disabled:bg-gray-400 disabled:text-gray-200"
               type="submit"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <Loader className="me-1.5" />
+                <Loader variant="spinner" className="me-1.5" />
               ) : (
                 <FaSave className="size-4 me-1.5"></FaSave>
               )}

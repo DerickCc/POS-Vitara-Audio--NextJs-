@@ -16,8 +16,8 @@ export const CustomerSchema = z.object({
 export class CustomerModel {
   name: string;
   licensePlate: string;
-  phoneNo: string | null;
-  address: string | null;
+  phoneNo: string;
+  address: string;
 
   constructor(data: any = {}) {
     this.name = data.name;

@@ -29,7 +29,7 @@ export default function LogInForm() {
         body: data,
       });
 
-      toast.success(response.message, { duration: 6000});
+      toast.success(response.message, { duration: 5000});
       router.push(routes.dashboard);
     } catch (e) {
       toast.error(e + "", { duration: 5000});
