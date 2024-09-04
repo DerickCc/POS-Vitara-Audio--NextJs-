@@ -1,50 +1,86 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import DeletePopover from "@/components/delete-popover";
+import { routes } from "@/config/routes";
+import { createColumnHelper } from "@tanstack/react-table";
+import Link from "next/link";
+import { LuPencil } from "react-icons/lu";
+import { ActionIcon, Tooltip } from "rizzui";
 
 type CustomerTableType = {
-  id: number,
-  code: string,
-  name: string,
-  licensePlate: string,
-  phoneNo: string,
-  address: string,
-}
+  id: string;
+  code: string;
+  name: string;
+  licensePlate: string;
+  phoneNo: string;
+  address: string;
+};
 
 const columnHelper = createColumnHelper<CustomerTableType>();
 
 export const columns = [
-  columnHelper.accessor('code', {
-    id: 'code',
+  columnHelper.display({
+    id: "actions",
+    size: 50,
+    header: () => <div className="flex items-center justify-center">Aksi</div>,
+    cell: ({ row }) => (
+      <>
+        <div className="flex items-center justify-center gap-3">
+          <Tooltip size="sm" content="Edit" color="invert">
+            <Link
+              href={routes.master.customer.edit(row.original.id)}
+              aria-label="ke halaman edit pelanggan"
+            >
+              <ActionIcon
+                as="span"
+                size="sm"
+                variant="outline"
+                className="text-yellow-600 hover:border-yellow-700 hover:text-yellow-700"
+              >
+                <LuPencil className="size-4" />
+              </ActionIcon>
+            </Link>
+          </Tooltip>
+          <DeletePopover
+            title="Hapus Pelanggan"
+            description={`Apakah Anda yakin ingin menghapus Pelanggan '${row.original.name}'?`}
+            onDelete={() => console.log(row)}
+          />
+        </div>
+      </>
+    ),
+  }),
+  columnHelper.accessor("code", {
+    id: "code",
     size: 120,
-    header: () => 'Kode',
+    header: () => "Kode",
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('name', {
-    id: 'name',
+  columnHelper.accessor("name", {
+    id: "name",
     size: 200,
-    header: () => 'Nama',
+    header: () => "Nama",
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('licensePlate', {
-    id: 'licensePlate',
+  columnHelper.accessor("licensePlate", {
+    id: "licensePlate",
     size: 120,
-    header: () => 'No. Plat',
+    header: () => "No. Plat",
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('phoneNo', {
-    id: 'phoneNo',
+  columnHelper.accessor("phoneNo", {
+    id: "phoneNo",
     size: 140,
-    header: () => 'No. Telepon',
+    header: () => "No. Telepon",
     cell: (info) => info.getValue(),
     enableSorting: false,
   }),
-  columnHelper.accessor('address', {
-    id: 'address',
+  columnHelper.accessor("address", {
+    id: "address",
     size: 200,
-    header: () => 'Alamat',
+    header: () => "Alamat",
     cell: (info) => info.getValue(),
     enableSorting: false,
   }),
-]
+];

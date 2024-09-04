@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const data: CustomerModel = new CustomerModel(await request.json());
-  console.log(data)
+
   const validatedData = data.validate();
 
   // if validation failed
@@ -71,15 +71,34 @@ export async function POST(request: Request) {
   }
 
   try {
-    // const customer = await db.customer.create({
-    //   data: {
-    //     name: data.name,
-    //     licensePlate: data.licensePlate,
-    //     phoneNo: data.phoneNo,
-    //     address: data.address,
-    //     User: 
-    //   }
-    // })
+    const userId = (await getSession()).id;
+
+    // retreive last customer code
+    const lastCustomer = await db.customer.findFirst({
+      orderBy: { createdAt: 'desc' },
+      select: { code: true}
+    });
+
+    let newCode = 'CUS00000001'; // default code
+
+    if (lastCustomer) {
+      const lastCodeNumber = parseInt(lastCustomer.code.replace('CUS', ''), 10);
+      newCode = 'CUS' + (lastCodeNumber + 1).toString().padStart(8, '0');
+    }
+
+    const customer = await db.customer.create({
+      data: {
+        code: newCode,
+        name: data.name,
+        licensePlate: data.licensePlate,
+        phoneNo: data.phoneNo,
+        address: data.address,
+        User: {
+          connect: { id: userId }
+        }
+      }
+    });
+    return NextResponse.json({ message: "Data Pelanggan Berhasil Disimpan" }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { message: "Internal Server Error: " + e },

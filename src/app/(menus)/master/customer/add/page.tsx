@@ -50,7 +50,7 @@ export default function AddCustomer() {
         body: data,
       });
 
-      toast.success("Data pelanggan berhasil disimpan", { duration: 4000 });
+      toast.success(response.message, { duration: 4000 });
       router.push(routes.master.customer.data);
     } catch (e) {
       toast.error(e + "", { duration: 5000 });
