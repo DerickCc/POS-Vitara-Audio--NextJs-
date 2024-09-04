@@ -7,7 +7,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen flex-grow">
+    <main className="flex min-h-screen flex-grow bg-gray-50/50">
       <Sidebar className="fixed hidden xl:block dark:bg-gray-50" />
       <div className="flex w-full flex-col xl:ms-[270px] xl:w-[calc(100%-270px)] 2xl:ms-72 2xl:w-[calc(100%-288px)]">
         <Header />

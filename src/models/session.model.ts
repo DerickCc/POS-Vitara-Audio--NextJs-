@@ -7,9 +7,9 @@ export class SessionData {
   role: string;
 
   constructor(data: any = {}) {
-    this.id = data.id || null;
-    this.name = data.name || null;
-    this.username = data.username || null;
+    this.id = data.id;
+    this.name = data.name;
+    this.username = data.username;
     this.role = data.role || 'Kasir';
   }
 }

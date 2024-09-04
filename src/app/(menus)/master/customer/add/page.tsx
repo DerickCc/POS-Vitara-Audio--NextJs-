@@ -8,9 +8,10 @@ import { CustomerModel, CustomerSchema } from "@/models/customer.model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { FaSave } from "react-icons/fa";
 import { PiArrowLeftBold } from "react-icons/pi";
-import { Button, Input, Textarea } from "rizzui";
+import { Button, Input, Loader, Textarea } from "rizzui";
 
 const pageHeader = {
   title: "Tambah Pelanggan",
@@ -39,7 +40,11 @@ export default function AddCustomer() {
   });
 
   const save = async (data: CustomerModel) => {
-    console.log(data);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    } catch (e) {
+      toast.error(e + "", { duration: 5000 });
+    }
   };
 
   return (
@@ -88,12 +93,12 @@ export default function AddCustomer() {
             </Link>
 
             <Button
-              className="bg-green-500 hover:bg-green-700"
+              className="bg-green-500 hover:bg-green-700 hover:text-gray-100 "
               type="submit"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <Spinner className="me-1.5" />
+                <Loader className="me-1.5" />
               ) : (
                 <FaSave className="size-4 me-1.5"></FaSave>
               )}
