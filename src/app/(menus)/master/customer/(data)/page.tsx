@@ -25,7 +25,7 @@ const pageHeader = {
   ],
 };
 
-export default function CustomerPage() {
+export default function CustomerDataPage() {
   const [customers, setCustomers] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);

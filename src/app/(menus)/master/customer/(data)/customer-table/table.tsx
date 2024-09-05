@@ -16,7 +16,6 @@ import {
   PiCaretLeftBold,
   PiCaretRightBold,
   PiCaretUpFill,
-  PiMagnifyingGlassBold,
 } from "react-icons/pi";
 import Spinner from "@/components/ui/spinner";
 import Card from "@/components/ui/card";
@@ -64,23 +63,13 @@ export default function CustomersTable({
                 dropdownClassName="font-medium [&_li]:text-sm"
               />
             </div>
-            {/* <Input
-              type="search"
-              placeholder="Cari Pelanggan"
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              onClear={() => setGlobalFilter("")}
-              clearable={true}
-              prefix={<PiMagnifyingGlassBold className="size-4" />}
-              className="w-[200px] sm:w-auto"
-            /> */}
           </div>
 
           <table className={cn(tableClass, "my-7")}>
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
+                  {headerGroup.headers.map((header, idx) => {
                     const canSort = header.column.getCanSort();
 
                     return (
@@ -93,7 +82,7 @@ export default function CustomersTable({
                         }
                         className={canSort ? "cursor-pointer" : ""}
                       >
-                        <div className="flex justify-between">
+                        <div className={idx === 0 ? "flex justify-center" : "flex justify-between"}>
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()

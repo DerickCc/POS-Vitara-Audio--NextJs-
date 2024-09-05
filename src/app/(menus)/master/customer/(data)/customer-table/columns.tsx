@@ -20,7 +20,7 @@ export const columns = [
   columnHelper.display({
     id: "actions",
     size: 50,
-    header: () => <div className="flex items-center justify-center">Aksi</div>,
+    header: () => "Aksi",
     cell: ({ row }) => (
       <>
         <div className="flex items-center justify-center gap-3">
@@ -33,7 +33,7 @@ export const columns = [
                 as="span"
                 size="sm"
                 variant="outline"
-                className="text-yellow-600 hover:border-yellow-700 hover:text-yellow-700"
+                className="text-yellow-500 hover:border-yellow-600 hover:text-yellow-600"
               >
                 <LuPencil className="size-4" />
               </ActionIcon>

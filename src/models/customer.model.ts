@@ -14,12 +14,14 @@ export const CustomerSchema = z.object({
 });
 
 export class CustomerModel {
+  id: string
   name: string;
   licensePlate: string;
   phoneNo: string;
   address: string;
 
   constructor(data: any = {}) {
+    this.id = data.id;
     this.name = data.name;
     this.licensePlate = data.licensePlate;
     this.phoneNo = data.phoneNo || null;

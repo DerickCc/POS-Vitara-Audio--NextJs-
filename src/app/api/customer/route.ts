@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     }, {} as any);
 
   try {
-    const result = await db.customer.findMany({
+    const customers = await db.customer.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy: {
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     const recordsTotal = await db.customer.count({ where });
 
     return NextResponse.json(
-      { message: 'Success', result, recordsTotal },
+      { message: 'Success', result: customers, recordsTotal },
       { status: 200 }
     )
   } catch (e) {
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
         }
       }
     });
-    return NextResponse.json({ message: "Data Pelanggan Berhasil Disimpan" }, { status: 200 });
+    return NextResponse.json({ message: "Data Pelanggan Berhasil Disimpan" }, { status: 201 });
   } catch (e) {
     return NextResponse.json(
       { message: "Internal Server Error: " + e },

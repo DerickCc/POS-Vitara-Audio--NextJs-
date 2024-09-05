@@ -20,7 +20,7 @@ export default function DeletePopover({
           size="sm"
           variant="outline"
           aria-label={"Delete Item"}
-          className="cursor-pointer text-red-600 hover:border-red-700 hover:text-red-700"
+          className="cursor-pointer text-red-500 hover:border-red-600 hover:text-red-600"
         >
           <FaRegTrashAlt className="h-4 w-4" />
         </ActionIcon>

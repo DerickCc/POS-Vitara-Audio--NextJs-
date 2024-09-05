@@ -5,32 +5,34 @@ import PageHeader from '@/components/ui/page-header';
 import { routes } from '@/config/routes';
 import { CustomerModel } from '@/models/customer.model';
 import { apiFetch } from '@/utils/api';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const pageHeader = {
-  title: 'Tambah Pelanggan',
+  title: 'Edit Pelanggan',
   breadcrumb: [
-    {
-      name: 'Master',
-    },
+    { name: 'Master' },
     {
       href: routes.master.customer.data,
       name: 'Pelanggan',
     },
     {
-      name: 'Tambah Pelanggan',
+      name: 'Edit Pelanggan',
     },
   ],
 };
 
-export default function AddCustomerPage() {
+export default function EditCustomerPage() {
   const router = useRouter();
+  const { id } = useParams();
+  const [customer, setCustomer] = useState<CustomerModel>(new CustomerModel());
 
   const save = async (data: CustomerModel) => {
     try {
-      const response = await apiFetch('/api/customer', {
-        method: 'POST',
+      const response = await apiFetch(`/api/customer/${id}`, {
+        method: 'PUT',
         body: data,
       });
 
@@ -41,11 +43,24 @@ export default function AddCustomerPage() {
     }
   };
 
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const response = await apiFetch(`/api/customer/${id}`, { method: 'GET' });
+        setCustomer(response.result);
+      } catch (e) {
+        toast.error(e + '', { duration: 5000 });
+      }
+    };
+
+    fetchCustomer();
+  }, [id]);
+
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
-      
-      <CustomerForm defaultValues={new CustomerModel()} onSubmit={save} />
+
+      <CustomerForm defaultValues={customer} onSubmit={save} />
     </>
   );
 }
