@@ -1,20 +1,19 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const CustomerSchema = z.object({
-  name: z.string().min(1, { message: "Nama harus diisi" }),
-  licensePlate: z.string().min(1, { message: "No. Plat harus diisi" }),
+  name: z.string().min(1, { message: 'Nama harus diisi' }),
+  licensePlate: z.string().min(1, { message: 'No. Plat harus diisi' }),
   phoneNo: z
     .string()
-    .optional()
-    .nullable()
+    .min(7, { message: 'No. Telepon Invalid' })
     .refine((val) => !val || /^\d+$/.test(val), {
-      message: "No. Telepon harus berupa angka",
+      message: 'No. Telepon harus berupa angka',
     }),
-  address: z.string().max(255, { message: "Alamat tidak boleh lebih dari 255 huruf" }).optional().nullable(),
+  address: z.string().max(255, { message: 'Alamat tidak boleh lebih dari 255 huruf' }).optional().nullable(),
 });
 
 export class CustomerModel {
-  id: string
+  id: string;
   name: string;
   licensePlate: string;
   phoneNo: string;
@@ -24,8 +23,8 @@ export class CustomerModel {
     this.id = data.id;
     this.name = data.name;
     this.licensePlate = data.licensePlate;
-    this.phoneNo = data.phoneNo || null;
-    this.address = data.address || null;
+    this.phoneNo = data.phoneNo;
+    this.address = data.address;
   }
 
   validate() {

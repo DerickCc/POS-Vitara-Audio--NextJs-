@@ -1,26 +1,27 @@
-"use client";
+'use client';
 
-import PageHeader from "@/components/ui/page-header";
-import { routes } from "@/config/routes";
-import Link from "next/link";
-import { PiArrowLineUpBold, PiPlusBold } from "react-icons/pi";
-import { Button } from "rizzui";
-import CustomersTable from "./customer-table/table";
-import CustomerFilter, { CustomerTableFilters } from "./filter";
-import { useCallback, useEffect, useState } from "react";
-import { OnChangeFn, SortingState } from "@tanstack/react-table";
-import toast from "react-hot-toast";
-import { apiFetch, toQueryString } from "@/utils/api";
+import PageHeader from '@/components/page-header';
+import { routes } from '@/config/routes';
+import Link from 'next/link';
+import { PiArrowLineUpBold, PiPlusBold } from 'react-icons/pi';
+import { Button } from 'rizzui';
+import CustomerFilter, { CustomerTableFilters } from './filter';
+import { useCallback, useEffect, useState } from 'react';
+import { OnChangeFn, SortingState } from '@tanstack/react-table';
+import toast from 'react-hot-toast';
+import { apiFetch, toQueryString } from '@/utils/api';
+import { columns } from './customer-table/columns';
+import BasicTable from '@/components/tables/basic-table';
 
 const pageHeader = {
-  title: "Pelanggan",
+  title: 'Pelanggan',
   breadcrumb: [
     {
-      name: "Master",
+      name: 'Master',
     },
     {
       href: routes.master.customer.data,
-      name: "Pelanggan",
+      name: 'Pelanggan',
     },
   ],
 };
@@ -31,14 +32,14 @@ export default function CustomerDataPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localFilters, setLocalFilters] = useState<CustomerTableFilters>({
-    name: "",
-    licensePlate: "",
-    phoneNo: "",
+    name: '',
+    licensePlate: '',
+    phoneNo: '',
   });
   const [filters, setFilters] = useState<CustomerTableFilters>({
-    name: "",
-    licensePlate: "",
-    phoneNo: "",
+    name: '',
+    licensePlate: '',
+    phoneNo: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
@@ -48,8 +49,7 @@ export default function CustomerDataPage() {
       setIsLoading(true);
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
-      const sortOrder =
-        sorting.length > 0 ? (sorting[0].desc ? "desc" : "asc") : null;
+      const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
       const res = await apiFetch(
         `/api/customer${toQueryString({
@@ -57,15 +57,15 @@ export default function CustomerDataPage() {
           pageIndex,
           sortColumn,
           sortOrder,
-          ...filters
+          ...filters,
         })}`,
-        { method: "GET" }
+        { method: 'GET' }
       );
 
       setCustomers(res.result);
       setTotalRowCount(res.recordsTotal);
     } catch (e) {
-      toast.error(e + "", { duration: 5000 });
+      toast.error(e + '', { duration: 5000 });
     } finally {
       setIsLoading(false);
     }
@@ -92,12 +92,12 @@ export default function CustomerDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/customer/${id}`, { method: "DELETE" });
-      
-      toast.success("Data Pelanggan Berhasil Dihapus", { duration: 5000 });
+      const response = await apiFetch(`/api/customer/${id}`, { method: 'DELETE' });
+
+      toast.success('Data Pelanggan Berhasil Dihapus', { duration: 5000 });
       fetchData();
     } catch (e) {
-      toast.error(e + "", { duration: 5000 });
+      toast.error(e + '', { duration: 5000 });
     }
   }
 
@@ -109,10 +109,6 @@ export default function CustomerDataPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Button variant="outline" className="border-2 border-gray-200 w-full sm:w-auto">
-            <PiArrowLineUpBold className="me-1.5 h-[17px] w-[17px]" />
-            Export
-          </Button>
           <Link href={routes.master.customer.add} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto">
               <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
@@ -128,8 +124,9 @@ export default function CustomerDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <CustomersTable
+      <BasicTable
         data={customers}
+        columns={columns}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}

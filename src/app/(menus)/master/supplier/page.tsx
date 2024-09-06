@@ -1,27 +1,23 @@
-import PageHeader from "@/components/ui/page-header"
-import { routes } from "@/config/routes"
+import PageHeader from '@/components/page-header';
+import { routes } from '@/config/routes';
 
 const pageHeader = {
-  title: "Supplier",
+  title: 'Supplier',
   breadcrumb: [
     {
-      name: "Master",
+      name: 'Master',
     },
     {
       href: routes.master.supplier,
-      name: "Supplier",
+      name: 'Supplier',
     },
-  ]
-}
+  ],
+};
 
 export default function SupplierPage() {
   return (
     <>
-      <PageHeader
-        title={pageHeader.title}
-        breadcrumb={pageHeader.breadcrumb}
-      >
-      </PageHeader>
+      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
     </>
-  )
+  );
 }

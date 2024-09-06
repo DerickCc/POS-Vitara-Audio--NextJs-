@@ -1,7 +1,8 @@
-import { OnChangeFn, SortingState } from "@tanstack/react-table";
+import { ColumnDef, OnChangeFn, SortingState } from "@tanstack/react-table";
 
-export interface BasicTableProps {
-  data: any[];
+export interface BasicTableProps<T> {
+  data: T[];
+  columns: (handleDelete: (id: string) => void) => any[];
   pageSize: number;
   setPageSize: (size: number) => void;
   pageIndex: number;

@@ -1,7 +1,7 @@
 'use client';
 
 import CustomerForm from '@/components/forms/master/customer/customer-form';
-import PageHeader from '@/components/ui/page-header';
+import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CustomerModel } from '@/models/customer.model';
 import { apiFetch } from '@/utils/api';

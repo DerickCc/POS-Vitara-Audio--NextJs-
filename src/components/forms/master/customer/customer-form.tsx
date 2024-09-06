@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { FaSave } from 'react-icons/fa';
 import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button, Input, Loader, Textarea } from 'rizzui';
-import Card from '../../../ui/card';
+import Card from '../../../card';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
@@ -19,7 +19,7 @@ export default function CustomerForm({ defaultValues, onSubmit }: CustomerFormPr
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset
+    reset,
   } = useForm<CustomerModel>({
     defaultValues: defaultValues,
     resolver: zodResolver(CustomerSchema),
@@ -40,7 +40,12 @@ export default function CustomerForm({ defaultValues, onSubmit }: CustomerFormPr
             error={errors.licensePlate?.message}
             {...register('licensePlate')}
           />
-          <Input label="No. Telepon" placeholder="No. Telepon" error={errors.phoneNo?.message} {...register('phoneNo')} />
+          <Input
+            label="No. Telepon"
+            placeholder="No. Telepon"
+            error={errors.phoneNo?.message}
+            {...register('phoneNo')}
+          />
           <Textarea
             label="Alamat"
             placeholder="Alamat"
@@ -63,7 +68,11 @@ export default function CustomerForm({ defaultValues, onSubmit }: CustomerFormPr
             type="submit"
             disabled={isSubmitting}
           >
-            {isSubmitting ? <Loader variant="spinner" className="me-1.5" /> : <FaSave className="size-4 me-1.5"></FaSave>}
+            {isSubmitting ? (
+              <Loader variant="spinner" className="me-1.5" />
+            ) : (
+              <FaSave className="size-4 me-1.5"></FaSave>
+            )}
             <span>Simpan</span>
           </Button>
         </div>

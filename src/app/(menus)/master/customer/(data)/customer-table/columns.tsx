@@ -5,7 +5,7 @@ import Link from "next/link";
 import { LuPencil } from "react-icons/lu";
 import { ActionIcon, Tooltip } from "rizzui";
 
-type CustomerTableType = {
+export type CustomerTableType = {
   id: string;
   code: string;
   name: string;
@@ -80,7 +80,7 @@ export const columns = (handleDelete: (id: string) => void) => [
     id: "address",
     size: 200,
     header: () => "Alamat",
-    cell: (info) => info.getValue(),
+    cell: (info) => info.getValue() || '-',
     enableSorting: false,
   }),
 ];

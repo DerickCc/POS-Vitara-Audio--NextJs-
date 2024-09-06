@@ -1,14 +1,10 @@
-"use client";
+'use client';
 
-import { columns } from "./columns";
-import cn from "@/utils/class-names";
-import { ROW_PER_PAGE_OPTIONS, tableClass } from "@/config/constants";
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { ActionIcon, Input, Select, SelectOption, Text } from "rizzui";
+
+import cn from '@/utils/class-names';
+import { ROW_PER_PAGE_OPTIONS, tableClass } from '@/config/constants';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { ActionIcon, Input, Select, SelectOption, Text } from 'rizzui';
 import {
   PiCaretDoubleLeftBold,
   PiCaretDoubleRightBold,
@@ -16,13 +12,15 @@ import {
   PiCaretLeftBold,
   PiCaretRightBold,
   PiCaretUpFill,
-} from "react-icons/pi";
-import Spinner from "@/components/ui/spinner";
-import Card from "@/components/ui/card";
-import { BasicTableProps } from "@/models/table.model";
+} from 'react-icons/pi';
+import Spinner from '@/components/spinner';
+import Card from '@/components/card';
+import { BasicTableProps } from '@/models/table.model';
+import { CustomerTableType } from '@/app/(menus)/master/customer/(data)/customer-table/columns';
 
 export default function CustomersTable({
   data,
+  columns,
   pageSize,
   setPageSize,
   pageIndex,
@@ -31,8 +29,8 @@ export default function CustomersTable({
   setSorting,
   isLoading,
   totalRowCount,
-  onDelete
-}: BasicTableProps) {
+  onDelete,
+}: BasicTableProps<CustomerTableType>) {
   const table = useReactTable({
     data: data,
     columns: columns(onDelete),
@@ -49,8 +47,8 @@ export default function CustomersTable({
 
   return (
     <Card className="px-0">
-      { isLoading ? (
-        <Spinner/>
+      {isLoading ? (
+        <Spinner />
       ) : (
         <>
           <div className="flex items-center justify-between px-7">
@@ -66,7 +64,7 @@ export default function CustomersTable({
             </div>
           </div>
 
-          <table className={cn(tableClass, "my-7")}>
+          <table className={cn(tableClass, 'my-7')}>
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
@@ -76,18 +74,11 @@ export default function CustomersTable({
                     return (
                       <th
                         key={header.id}
-                        onClick={
-                          canSort
-                            ? header.column.getToggleSortingHandler()
-                            : undefined
-                        }
-                        className={canSort ? "cursor-pointer" : ""}
+                        onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                        className={canSort ? 'cursor-pointer' : ''}
                       >
-                        <div className={idx === 0 ? "flex justify-center" : "flex justify-between"}>
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                        <div className={idx === 0 ? 'flex justify-center' : 'flex justify-between'}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
 
                           {/* render if canSort */}
                           {canSort &&
@@ -112,9 +103,7 @@ export default function CustomersTable({
                 table.getRowModel().rows.map((row) => (
                   <tr key={row.id}>
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                     ))}
                   </tr>
                 ))
