@@ -16,7 +16,7 @@ type CustomerTableType = {
 
 const columnHelper = createColumnHelper<CustomerTableType>();
 
-export const columns = [
+export const columns = (handleDelete: (id: string) => void) => [
   columnHelper.display({
     id: "actions",
     size: 50,
@@ -42,7 +42,7 @@ export const columns = [
           <DeletePopover
             title="Hapus Pelanggan"
             description={`Apakah Anda yakin ingin menghapus Pelanggan '${row.original.name}'?`}
-            onDelete={() => console.log(row)}
+            onDelete={() => handleDelete(row.original.id)}
           />
         </div>
       </>

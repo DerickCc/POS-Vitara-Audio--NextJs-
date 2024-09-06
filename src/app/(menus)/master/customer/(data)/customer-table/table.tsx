@@ -31,10 +31,11 @@ export default function CustomersTable({
   setSorting,
   isLoading,
   totalRowCount,
+  onDelete
 }: BasicTableProps) {
   const table = useReactTable({
     data: data,
-    columns,
+    columns: columns(onDelete),
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },

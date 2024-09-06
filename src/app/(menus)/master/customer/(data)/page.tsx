@@ -90,6 +90,17 @@ export default function CustomerDataPage() {
     setFilters(localFilters);
   }
 
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await apiFetch(`/api/customer/${id}`, { method: "DELETE" });
+      
+      toast.success("Data Pelanggan Berhasil Dihapus", { duration: 5000 });
+      fetchData();
+    } catch (e) {
+      toast.error(e + "", { duration: 5000 });
+    }
+  }
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -127,6 +138,7 @@ export default function CustomerDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
+        onDelete={handleDelete}
       />
     </>
   );
