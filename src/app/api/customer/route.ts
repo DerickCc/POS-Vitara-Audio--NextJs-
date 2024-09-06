@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         licensePlate: data.licensePlate,
         phoneNo: data.phoneNo,
         address: data.address,
-        User: {
+        CreatedBy: {
           connect: { id: userId }
         }
       }

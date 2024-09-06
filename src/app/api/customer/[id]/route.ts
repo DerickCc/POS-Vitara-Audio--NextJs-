@@ -1,5 +1,6 @@
 import { CustomerModel } from '@/models/customer.model';
 import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -25,9 +26,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const data: CustomerModel = new CustomerModel(await request.json());
   
   try {
+    const userId = (await getSession()).id;
+    
     const updatedCustomer = await db.customer.update({
       where: { id: id },
-      data: data,
+      data: {
+        ...data,
+        UpdatedBy: {
+          connect: { id: userId }
+        }
+      },
     });
     
     if (!updatedCustomer) {

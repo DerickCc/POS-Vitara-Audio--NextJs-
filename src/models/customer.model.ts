@@ -9,7 +9,7 @@ export const CustomerSchema = z.object({
     .refine((val) => !val || /^\d+$/.test(val), {
       message: 'No. Telepon harus berupa angka',
     }),
-  address: z.string().max(255, { message: 'Alamat tidak boleh lebih dari 255 huruf' }).optional().nullable(),
+  address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
 });
 
 export class CustomerModel {

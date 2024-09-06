@@ -12,28 +12,59 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String     @db.VarChar(50)
-  username      String     @unique @db.VarChar(50)
+  id            String    @id @default(cuid())
+  name          String    @db.VarChar(50)
+  username      String    @unique @db.VarChar(50)
   password      String
-  accountStatus Boolean    @default(true)
-  role          String     @db.VarChar(20)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  Customer      Customer[]
+  accountStatus Boolean   @default(true)
+  role          String    @db.VarChar(20)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+
+  CreatedCustomer Customer[]
+  UpdatedCustomer Customer[] @relation("UpdatedByUser")
+
+  CreatedSupplier Supplier[]
+  UpdatedSupplier Supplier[] @relation("UpdatedByUser")
 }
 
 model Customer {
-  id           String   @id @default(cuid())
-  code         String   @unique @db.VarChar(11)
-  name         String   @db.VarChar(100)
-  licensePlate String   @db.VarChar(20)
-  phoneNo      String   @db.VarChar(20)
-  address      String   @db.VarChar(100)
-  createdAt    DateTime @default(now())
-  User         User     @relation(fields: [createdBy], references: [id])
-  createdBy    String
-  updatedAt    DateTime @updatedAt
+  id           String  @id @default(cuid())
+  code         String  @unique @db.VarChar(11)
+  name         String  @db.VarChar(100)
+  licensePlate String  @db.VarChar(20)
+  phoneNo      String  @db.VarChar(20)
+  address      String? @db.VarChar(100)
+
+  CreatedBy User     @relation(fields: [createdBy], references: [id])
+  createdBy String
+  createdAt DateTime @default(now())
+
+  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id])
+  updatedBy String?
+  updatedAt DateTime? @updatedAt
 
   @@index([code, name, licensePlate, phoneNo, address])
+}
+
+model Supplier {
+  id               String  @id @default(cuid())
+  code             String  @unique @db.VarChar(11)
+  name             String  @db.VarChar(100)
+  pic              String  @db.VarChar(20)
+  phoneNo          String  @db.VarChar(20)
+  address          String? @db.VarChar(100)
+  remarks          String? @db.VarChar(150)
+  receivables      Int     @db.Integer()
+  receivablesLimit Int     @db.Integer()
+
+  CreatedBy User     @relation(fields: [createdBy], references: [id])
+  createdBy String
+  createdAt DateTime @default(now())
+
+  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id])
+  updatedBy String?
+  updatedAt DateTime? @updatedAt
+
+  @@index([code, name, pic, phoneNo, address])
 }
