@@ -1,10 +1,9 @@
 'use client';
 
-
 import cn from '@/utils/class-names';
 import { ROW_PER_PAGE_OPTIONS, tableClass } from '@/config/constants';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { ActionIcon, Input, Select, SelectOption, Text } from 'rizzui';
+import { ActionIcon, Select, SelectOption, Text } from 'rizzui';
 import {
   PiCaretDoubleLeftBold,
   PiCaretDoubleRightBold,

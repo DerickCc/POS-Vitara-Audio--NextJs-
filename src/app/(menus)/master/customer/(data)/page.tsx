@@ -3,7 +3,7 @@
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
-import { PiArrowLineUpBold, PiPlusBold } from 'react-icons/pi';
+import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import CustomerFilter, { CustomerTableFilters } from './filter';
 import { useCallback, useEffect, useState } from 'react';
@@ -51,7 +51,7 @@ export default function CustomerDataPage() {
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const res = await apiFetch(
+      const response = await apiFetch(
         `/api/customer${toQueryString({
           pageSize,
           pageIndex,
@@ -62,8 +62,8 @@ export default function CustomerDataPage() {
         { method: 'GET' }
       );
 
-      setCustomers(res.result);
-      setTotalRowCount(res.recordsTotal);
+      setCustomers(response.result);
+      setTotalRowCount(response.recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {

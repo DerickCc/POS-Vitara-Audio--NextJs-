@@ -1,0 +1,41 @@
+import { z } from "zod";
+
+export const SupplierSchema = z.object({
+  name: z.string().min(1, { message: 'Nama harus diisi' }),
+  pic: z.string().min(1, { message: 'PIC harus diisi' }),
+  phoneNo: z
+    .string()
+    .min(7, { message: 'No. Telepon Invalid' })
+    .refine((val) => !val || /^\d+$/.test(val), {
+      message: 'No. Telepon harus berupa angka',
+    }),
+  address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
+  remarks: z.string().max(150, { message: 'Keterangan tidak boleh lebih dari 150 huruf' }).optional().nullable(),
+  receivablesLimit: z.number()
+});
+
+export class SupplierModel {
+  id: string;
+  name: string;
+  pic: string;
+  phoneNo: string;
+  address: string;
+  remarks: string;
+  receivablesLimit: number;
+  receivables: number;
+
+  constructor(data: any = {}) {
+    this.id = data.id;
+    this.name = data.name;
+    this.pic = data.pic;
+    this.phoneNo = data.phoneNo;
+    this.address = data.address;
+    this.remarks = data.remarks;
+    this.receivablesLimit = data.receivablesLimit;
+    this.receivables = data.receivables || 0;
+  }
+
+  validate() {
+    return SupplierSchema.safeParse(this);
+  }
+}

@@ -1,7 +1,11 @@
 export const routes = {
   dashboard: '/',
   master: {
-    supplier: '/master/supplier',
+    supplier: {
+      data: '/master/supplier',
+      add: '/master/supplier/add',
+      edit: (id: string) => `/master/supplier/${id}/edit`,
+    },
     customer: {
       data: '/master/customer',
       add: '/master/customer/add',
@@ -9,7 +13,11 @@ export const routes = {
     },
   },
   inventory: {
-    product: '/inventory/product',
+    product: {
+      data: '/inventory/product',
+      add: '/inventory/product/add',
+      edit: (id: string) => `/inventory/product/${id}/edit`,
+    },
     purchaseReturn: '/inventory/purchase-return',
     salesReturn: '/inventory/sales-return',
   },
@@ -19,5 +27,5 @@ export const routes = {
   },
   settings: {
     user: '/settings/user',
-  }
+  },
 };

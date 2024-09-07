@@ -55,7 +55,7 @@ model Supplier {
   phoneNo          String  @db.VarChar(20)
   address          String? @db.VarChar(100)
   remarks          String? @db.VarChar(150)
-  receivables      Int     @db.Integer()
+  receivables      Int     @db.Integer() @default(0)
   receivablesLimit Int     @db.Integer()
 
   CreatedBy User     @relation(fields: [createdBy], references: [id])
