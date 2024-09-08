@@ -17,9 +17,8 @@ export async function GET(request: Request) {
     name: queryParams.get('name') ?? '',
     pic: queryParams.get('pic') ?? '',
     phoneNo: queryParams.get('phoneNo') ?? '',
-    receivablesOperator: ">=",
-    receivables: 0
-  }
+    receivables: Number(queryParams.get('receivables')) ?? 0
+  } as SupplierTableFilters
 
   const where = Object.entries(filters)
     .filter(([_, value]) => value)
@@ -75,8 +74,8 @@ export async function POST(request: Request) {
   try {
     const userId = (await getSession()).id;
 
-    // retreive last customer code
-    const lastSupplier = await db.customer.findFirst({
+    // retreive last supplier code
+    const lastSupplier = await db.supplier.findFirst({
       orderBy: { createdAt: 'desc' },
       select: { code: true}
     });

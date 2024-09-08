@@ -11,11 +11,12 @@ export const SupplierSchema = z.object({
     }),
   address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
   remarks: z.string().max(150, { message: 'Keterangan tidak boleh lebih dari 150 huruf' }).optional().nullable(),
-  receivablesLimit: z.number()
+  receivablesLimit: z.coerce.number().min(0, { message: "Limit Piutang harus berupa angka positif" }),
 });
 
 export class SupplierModel {
   id: string;
+  code: string;
   name: string;
   pic: string;
   phoneNo: string;
@@ -26,12 +27,13 @@ export class SupplierModel {
 
   constructor(data: any = {}) {
     this.id = data.id;
+    this.code = data.code;
     this.name = data.name;
     this.pic = data.pic;
     this.phoneNo = data.phoneNo;
     this.address = data.address;
     this.remarks = data.remarks;
-    this.receivablesLimit = data.receivablesLimit;
+    this.receivablesLimit = data.receivablesLimit || 0;
     this.receivables = data.receivables || 0;
   }
 

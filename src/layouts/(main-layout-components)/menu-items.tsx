@@ -25,7 +25,7 @@ export const menuItems = [
     dropdownItems: [
       {
         name: "Supplier",
-        href: routes.master.supplier
+        href: routes.master.supplier.data
       },
       {
         name: "Pelanggan",
@@ -40,7 +40,7 @@ export const menuItems = [
     dropdownItems: [
       {
         name: "Barang",
-        href: routes.inventory.product
+        href: routes.inventory.product.data
       },
       {
         name: "Retur Pembelian",

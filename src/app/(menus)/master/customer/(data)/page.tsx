@@ -86,8 +86,12 @@ export default function CustomerDataPage() {
   }
 
   const handleSearch = () => {
-    setPageIndex(0);
-    setFilters(localFilters);
+    if (pageIndex === 0 && localFilters === filters) {
+      fetchData();
+    } else {
+      setPageIndex(0);
+      setFilters(localFilters);
+    }
   }
 
   const handleDelete = async (id: string) => {

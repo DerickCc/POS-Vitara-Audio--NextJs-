@@ -10,7 +10,7 @@ export const pageLinks = [
   },
   {
     name: 'Supplier',
-    href: routes.master.supplier,
+    href: routes.master.supplier.data,
   },
   {
     name: 'Pelanggan',
@@ -18,7 +18,7 @@ export const pageLinks = [
   },
   {
     name: 'Barang',
-    href: routes.inventory.product,
+    href: routes.inventory.product.data,
   },
   {
     name: 'Retur Pembelian',

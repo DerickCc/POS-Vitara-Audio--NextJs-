@@ -14,6 +14,7 @@ export const CustomerSchema = z.object({
 
 export class CustomerModel {
   id: string;
+  code: string;
   name: string;
   licensePlate: string;
   phoneNo: string;
@@ -21,6 +22,7 @@ export class CustomerModel {
 
   constructor(data: any = {}) {
     this.id = data.id;
+    this.code = data.code;
     this.name = data.name;
     this.licensePlate = data.licensePlate;
     this.phoneNo = data.phoneNo;

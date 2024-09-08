@@ -19,7 +19,7 @@ const columnHelper = createColumnHelper<CustomerTableType>();
 export const columns = (handleDelete: (id: string) => void) => [
   columnHelper.display({
     id: "actions",
-    size: 50,
+    size: 100,
     header: () => "Aksi",
     cell: ({ row }) => (
       <>
@@ -50,7 +50,7 @@ export const columns = (handleDelete: (id: string) => void) => [
   }),
   columnHelper.accessor("code", {
     id: "code",
-    size: 120,
+    size: 130,
     header: () => "Kode",
     cell: (info) => info.getValue(),
     enableSorting: true,
@@ -71,14 +71,14 @@ export const columns = (handleDelete: (id: string) => void) => [
   }),
   columnHelper.accessor("phoneNo", {
     id: "phoneNo",
-    size: 140,
+    size: 160,
     header: () => "No. Telepon",
     cell: (info) => info.getValue(),
     enableSorting: false,
   }),
   columnHelper.accessor("address", {
     id: "address",
-    size: 200,
+    size: 250,
     header: () => "Alamat",
     cell: (info) => info.getValue() || '-',
     enableSorting: false,

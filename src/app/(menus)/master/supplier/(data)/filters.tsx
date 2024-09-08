@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import Card from "@/components/card"
-import { SetStateAction } from "jotai"
-import { ChangeEvent, ComponentType, Dispatch, FormEvent, useState } from "react"
-import { PiFunnel } from "react-icons/pi"
-import { Button, Input, NumberInput, Select } from "rizzui"
+import Card from "@/components/card";
+import { SetStateAction } from "jotai";
+import { ChangeEvent, ComponentType, Dispatch, FormEvent, useState } from "react";
+import { PiFunnel } from "react-icons/pi";
+import { Button, Input, NumberInput, Select } from "rizzui";
 
 export type SupplierTableFilters = {
-  name: string
-  pic: string
-  phoneNo: string
-  receivablesOperator: ">=" | "<="
-  receivables: number
-}
+  name: string;
+  pic: string;
+  phoneNo: string;
+  receivablesOperator: ">=" | "<=";
+  receivables: number;
+};
 
 const receivablesOperatorOptions = [
   { label: ">=", value: ">=" },
@@ -20,23 +20,28 @@ const receivablesOperatorOptions = [
 ];
 
 interface SupplierFiltersProps {
-  localFilters: SupplierTableFilters
-  setLocalFilters: Dispatch<SetStateAction<SupplierTableFilters>>
-  handleSearch: () => void
+  localFilters: SupplierTableFilters;
+  setLocalFilters: Dispatch<SetStateAction<SupplierTableFilters>>;
+  handleSearch: () => void;
 }
 
 export default function SupplierFilter({ localFilters, setLocalFilters, handleSearch }: SupplierFiltersProps) {
-  const [receivableOperator, setReceivableOperator] = useState(">=");
-  
   const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    handleSearch()
-  }
+    e.preventDefault();
+    handleSearch();
+  };
 
   const handleFilterChange = (field: keyof SupplierTableFilters) => (e: ChangeEvent<HTMLInputElement>) => {
     setLocalFilters((prevFilters) => ({
       ...prevFilters,
       [field]: e.target.value,
+    }));
+  };
+
+  const handleReceivablesOperatorChange = (e: any) => {
+    setLocalFilters((prevFilters) => ({
+      ...prevFilters,
+      receivablesOperator: e.value
     }))
   }
 
@@ -57,8 +62,24 @@ export default function SupplierFilter({ localFilters, setLocalFilters, handleSe
             label="No. Telepon"
             placeholder="Cari No. Telepon"
           />
-          <div>
 
+          <div className="grid sm:grid-cols-1">
+            <label className="block text-sm font-medium mb-2">Piutang</label>
+            <div className="flex">
+              <Select
+                value={localFilters.receivablesOperator}
+                onChange={(e) => handleReceivablesOperatorChange(e)}
+                className="w-24"
+                options={receivablesOperatorOptions}
+              />
+              <Input
+                type="number"
+                value={localFilters.receivables}
+                onChange={handleFilterChange("receivables")}
+                className="w-full ps-3"
+                placeholder="Cari Piutang"
+              />
+            </div>
           </div>
         </div>
 
@@ -67,5 +88,5 @@ export default function SupplierFilter({ localFilters, setLocalFilters, handleSe
         </Button>
       </form>
     </Card>
-  )
+  );
 }

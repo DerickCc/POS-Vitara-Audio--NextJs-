@@ -1,5 +1,6 @@
 import DeletePopover from "@/components/delete-popover"
 import { routes } from "@/config/routes"
+import { formatToCurrency } from "@/utils/helper-function"
 import { createColumnHelper } from "@tanstack/react-table"
 import Link from "next/link"
 import { LuPencil } from "react-icons/lu"
@@ -22,7 +23,7 @@ const columnHelper = createColumnHelper<SupplierTableType>()
 export const columns = (handleDelete: (id: string) => void) => [
   columnHelper.display({
     id: "actions",
-    size: 50,
+    size: 100,
     header: () => "Aksi",
     cell: ({ row }) => (
       <>
@@ -50,7 +51,7 @@ export const columns = (handleDelete: (id: string) => void) => [
   }),
   columnHelper.accessor("code", {
     id: "code",
-    size: 120,
+    size: 130,
     header: () => "Kode",
     cell: (info) => info.getValue(),
     enableSorting: true,
@@ -64,38 +65,42 @@ export const columns = (handleDelete: (id: string) => void) => [
   }),
   columnHelper.accessor("pic", {
     id: "pic",
-    size: 120,
+    size: 200,
     header: () => "PIC",
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
   columnHelper.accessor("phoneNo", {
     id: "phoneNo",
-    size: 140,
+    size: 160,
     header: () => "No. Telepon",
     cell: (info) => info.getValue(),
     enableSorting: false,
   }),
   columnHelper.accessor("receivables", {
     id: "receivables",
-    size: 200,
+    size: 160,
     header: () => "Piutang",
-    cell: (info) => {
-      const row = info.row.original;
-      return `${row.receivables} (Max: ${row.receivablesLimit})`
-    },
+    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    enableSorting: false,
+  }),
+  columnHelper.accessor("receivablesLimit", {
+    id: "receivablesLimit",
+    size: 160,
+    header: () => "Limit Piutang",
+    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: false,
   }),
   columnHelper.accessor("address", {
     id: "address",
-    size: 200,
+    size: 300,
     header: () => "Alamat",
     cell: (info) => info.getValue() || "-",
     enableSorting: false,
   }),
   columnHelper.accessor("remarks", {
     id: "remarks",
-    size: 200,
+    size: 300,
     header: () => "Keterangan",
     cell: (info) => info.getValue() || "-",
     enableSorting: false,

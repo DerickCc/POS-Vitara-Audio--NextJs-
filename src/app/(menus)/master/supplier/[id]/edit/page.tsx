@@ -1,3 +1,5 @@
+'use client';
+
 import SupplierForm from "@/components/forms/master/supplier/supplier-form";
 import PageHeader from "@/components/page-header";
 import { routes } from "@/config/routes";
@@ -25,6 +27,7 @@ export default function EditSupplierPage() {
   const router = useRouter();
   const { id } = useParams();
   const [supplier, setSupplier] = useState<SupplierModel>(new SupplierModel());
+  const [isLoading, setIsLoading] = useState(false);
 
   const save = async (data: SupplierModel) => {
     try {
@@ -43,10 +46,13 @@ export default function EditSupplierPage() {
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
+        setIsLoading(true);
         const response = await apiFetch(`/api/supplier/${id}`, { method: 'GET' });
         setSupplier(response.result);
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -57,7 +63,7 @@ export default function EditSupplierPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <SupplierForm defaultValues={supplier} onSubmit={save} />
+      <SupplierForm defaultValues={supplier} isLoading={isLoading} onSubmit={save} />
     </>
   );
 }

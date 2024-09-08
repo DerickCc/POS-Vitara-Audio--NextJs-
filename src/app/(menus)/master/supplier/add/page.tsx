@@ -35,7 +35,7 @@ export default function AddSupplierPage() {
       });
 
       toast.success(response.message, { duration: 4000 });
-      router.push(routes.master.customer.data);
+      router.push(routes.master.supplier.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }

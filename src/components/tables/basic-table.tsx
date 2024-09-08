@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import cn from '@/utils/class-names';
-import { ROW_PER_PAGE_OPTIONS, tableClass } from '@/config/constants';
-import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { ActionIcon, Select, SelectOption, Text } from 'rizzui';
+import cn from "@/utils/class-names";
+import { ROW_PER_PAGE_OPTIONS, tableClass } from "@/config/constants";
+import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ActionIcon, Select, SelectOption, Text } from "rizzui";
 import {
   PiCaretDoubleLeftBold,
   PiCaretDoubleRightBold,
@@ -11,11 +11,11 @@ import {
   PiCaretLeftBold,
   PiCaretRightBold,
   PiCaretUpFill,
-} from 'react-icons/pi';
-import Spinner from '@/components/spinner';
-import Card from '@/components/card';
-import { BasicTableProps } from '@/models/table.model';
-import { CustomerTableType } from '@/app/(menus)/master/customer/(data)/customer-table/columns';
+} from "react-icons/pi";
+import Spinner from "@/components/spinner";
+import Card from "@/components/card";
+import { BasicTableProps } from "@/models/table.model";
+import { CustomerTableType } from "@/app/(menus)/master/customer/(data)/customer-table/columns";
 
 export default function CustomersTable({
   data,
@@ -63,52 +63,62 @@ export default function CustomersTable({
             </div>
           </div>
 
-          <table className={cn(tableClass, 'my-7')}>
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header, idx) => {
-                    const canSort = header.column.getCanSort();
+          <div className="custom-scrollbar w-full max-w-full overflow-x-auto">
+            <table
+              className={cn(tableClass, "my-7")}
+              style={{
+                width: table.getTotalSize(),
+              }}
+            >
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header, idx) => {
+                      const canSort = header.column.getCanSort();
 
-                    return (
-                      <th
-                        key={header.id}
-                        onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                        className={canSort ? 'cursor-pointer' : ''}
-                      >
-                        <div className={idx === 0 ? 'flex justify-center' : 'flex justify-between'}>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                      return (
+                        <th
+                          key={header.id}
+                          onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                          className={canSort ? "cursor-pointer" : ""}
+                          style={{ width: header.getSize() }}
+                        >
+                          <div className={idx === 0 ? "flex justify-center" : "flex justify-between"}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
 
-                          {/* render if canSort */}
-                          {canSort &&
-                            ({
-                              asc: <PiCaretUpFill size={14} />,
-                              desc: <PiCaretDownFill size={14} />,
-                            }[header.column.getIsSorted() as string] ??
-                              null)}
-                        </div>
-                      </th>
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {totalRowCount === 0 ? (
-                <tr>
-                  <td>Data tidak ditemukan...</td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                    ))}
+                            {/* render if canSort */}
+                            {canSort &&
+                              ({
+                                asc: <PiCaretUpFill size={14} />,
+                                desc: <PiCaretDownFill size={14} />,
+                              }[header.column.getIsSorted() as string] ??
+                                null)}
+                          </div>
+                        </th>
+                      );
+                    })}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </thead>
+              <tbody>
+                {totalRowCount === 0 ? (
+                  <tr>
+                    <td colSpan={table.getAllColumns().length} className="!pl-9">
+                      Data tidak ditemukan...
+                    </td>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
           <div className="flex items-center justify-between px-7">
             <Text className="font-medium">

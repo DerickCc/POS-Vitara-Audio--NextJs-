@@ -28,6 +28,7 @@ export default function EditCustomerPage() {
   const router = useRouter();
   const { id } = useParams();
   const [customer, setCustomer] = useState<CustomerModel>(new CustomerModel());
+  const [isLoading, setIsLoading] = useState(false);
 
   const save = async (data: CustomerModel) => {
     try {
@@ -46,10 +47,13 @@ export default function EditCustomerPage() {
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
+        setIsLoading(true);
         const response = await apiFetch(`/api/customer/${id}`, { method: 'GET' });
         setCustomer(response.result);
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -60,7 +64,7 @@ export default function EditCustomerPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <CustomerForm defaultValues={customer} onSubmit={save} />
+      <CustomerForm defaultValues={customer} isLoading={isLoading} onSubmit={save} />
     </>
   );
 }
