@@ -36,11 +36,11 @@ model Customer {
   phoneNo      String  @db.VarChar(20)
   address      String? @db.VarChar(100)
 
-  CreatedBy User     @relation(fields: [createdBy], references: [id])
+  CreatedBy User     @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   createdBy String
   createdAt DateTime @default(now())
 
-  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id])
+  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   updatedBy String?
   updatedAt DateTime? @updatedAt
 
@@ -58,11 +58,11 @@ model Supplier {
   receivables      Int     @db.Integer() @default(0)
   receivablesLimit Int     @db.Integer()
 
-  CreatedBy User     @relation(fields: [createdBy], references: [id])
+  CreatedBy User     @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   createdBy String
   createdAt DateTime @default(now())
 
-  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id])
+  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   updatedBy String?
   updatedAt DateTime? @updatedAt
 

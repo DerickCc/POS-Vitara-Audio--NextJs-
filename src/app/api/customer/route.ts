@@ -10,25 +10,50 @@ export async function GET(request: Request) {
 
   const pageIndex = Number(queryParams.get('pageIndex')) ?? 0;
   const pageSize = Number(queryParams.get('pageSize')) ?? 10;
-  const sortOrder  = queryParams.get('sortOrder') ?? 'desc';
-  const sortColumn   = queryParams.get('sortColumn') ?? 'createdAt';
+  const sortOrder = queryParams.get('sortOrder') ?? 'desc';
+  const sortColumn = queryParams.get('sortColumn') ?? 'createdAt';
 
-  const filters: CustomerTableFilters = {
-    name: queryParams.get('name') ?? '',
-    licensePlate: queryParams.get('licensePlate') ?? '',
-    phoneNo: queryParams.get('phoneNo') ?? '',
+  const name = queryParams.get('name') ?? '';
+  const licensePlate = queryParams.get('licensePlate') ?? '';
+  const phoneNo = queryParams.get('phoneNo') ?? '';
+
+  const where: any = {};
+  if (name) { // full text search
+    const searchTerm = name.split(' ').filter(term => term);
+
+    if (searchTerm.length > 0) {
+      where["AND"] = searchTerm.map(term => ({
+        name: {
+          contains: term,
+          mode: 'insensitive',
+        },
+      }));
+    }
   }
 
-  const where = Object.entries(filters)
-    .filter(([_, value]) => value)
-    .reduce((acc, [key, value]) => {
-      acc[key] = {
-        contains: value,
-        mode: 'insensitive'
-      };
+  if (licensePlate) {
+    where["AND"] = [
+      ...(where["AND"] || []),
+      {
+        licensePlate: {
+          contains: licensePlate,
+          mode: 'insensitive',
+        }
+      }
+    ];
+  }
 
-      return acc
-    }, {} as any);
+  if (phoneNo) {
+    where["AND"] = [
+      ...(where["AND"] || []),
+      {
+        phoneNo: {
+          contains: phoneNo,
+          mode: 'insensitive',
+        }
+      }
+    ];
+  }
 
   try {
     const customers = await db.customer.findMany({
