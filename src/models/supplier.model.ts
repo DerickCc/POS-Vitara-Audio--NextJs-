@@ -11,7 +11,12 @@ export const SupplierSchema = z.object({
     }),
   address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
   remarks: z.string().max(150, { message: 'Keterangan tidak boleh lebih dari 150 huruf' }).optional().nullable(),
+  receivables: z.coerce.number().min(0, { message: "Piutang harus berupa angka positif" }),
   receivablesLimit: z.coerce.number().min(0, { message: "Limit Piutang harus berupa angka positif" }),
+})
+.refine((data) => data.receivables <= data.receivablesLimit, {
+  message: 'Piutang tidak boleh lebih besar dari Limit Piutang',
+  path: ['receivablesLimit'],
 });
 
 export class SupplierModel {

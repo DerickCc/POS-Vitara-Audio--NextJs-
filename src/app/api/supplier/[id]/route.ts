@@ -26,6 +26,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const data: SupplierModel = new SupplierModel(await request.json());
   
   try {
+    if (data.receivables > data.receivablesLimit) {
+      return NextResponse.json(
+        { message: "Piutang tidak boleh lebih besar dari Limit Piutang" },
+        { status: 400 }
+      );
+    }
+    
     const userId = (await getSession()).id;
     
     const updatedSupplier = await db.supplier.update({

@@ -13,23 +13,63 @@ export async function GET(request: Request) {
   const sortOrder  = queryParams.get('sortOrder') ?? 'desc';
   const sortColumn   = queryParams.get('sortColumn') ?? 'createdAt';
 
-  const filters: SupplierTableFilters = {
-    name: queryParams.get('name') ?? '',
-    pic: queryParams.get('pic') ?? '',
-    phoneNo: queryParams.get('phoneNo') ?? '',
-    receivables: Number(queryParams.get('receivables')) ?? 0
-  } as SupplierTableFilters
+  // filters
+  const name = queryParams.get('name') ?? '';
+  const pic =  queryParams.get('pic') ?? '';
+  const phoneNo =  queryParams.get('phoneNo') ?? '';
+  const receivablesOperator =  queryParams.get('receivablesOperator') ?? 'gte';
+  const receivables =  Number(queryParams.get('receivables')) ?? 0;
 
-  const where = Object.entries(filters)
-    .filter(([_, value]) => value)
-    .reduce((acc, [key, value]) => {
-      acc[key] = {
-        contains: value,
-        mode: 'insensitive'
-      };
+  const where: any = {};
+  if (name) { // full text search
+    const searchTerm = name.split(' ').filter(term => term);
 
-      return acc
-    }, {} as any);
+    if (searchTerm.length > 0) {
+      where['AND'] = searchTerm.map(term => ({
+        name: {
+          contains: term,
+          mode: 'insensitive',
+        },
+      }));
+    }
+  }
+
+  if (pic) { // full text search
+    const searchTerm = pic.split(' ').filter(term => term);
+
+    if (searchTerm.length > 0) {
+      where['AND'] = searchTerm.map(term => ({
+        pic: {
+          contains: term,
+          mode: 'insensitive',
+        },
+      }));
+    }
+  }
+
+  if (phoneNo) {
+    where['AND'] = [
+      ...(where['AND'] || []),
+      {
+        phoneNo: {
+          contains: phoneNo,
+          mode: 'insensitive',
+        }
+      }
+    ];
+  }
+
+  if (receivables > 0) {
+    where['AND'] = [
+      ...(where['AND'] || []),
+      {
+        receivables: {
+          [receivablesOperator]: receivables // gte: xxx or let: xxx
+        }
+      }
+    ]
+  }
+  // ----------------
 
   try {
     const suppliers = await db.supplier.findMany({
@@ -72,6 +112,13 @@ export async function POST(request: Request) {
   }
 
   try {
+    if (data.receivables > data.receivablesLimit) {
+      return NextResponse.json(
+        { message: "Piutang tidak boleh lebih besar dari Limit Piutang" },
+        { status: 400 }
+      );
+    }
+
     const userId = (await getSession()).id;
 
     // retreive last supplier code

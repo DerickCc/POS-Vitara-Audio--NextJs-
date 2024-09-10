@@ -35,14 +35,14 @@ export default function SupplierDataPage() {
     name: '',
     pic: '',
     phoneNo: '',
-    receivablesOperator: '>=',
+    receivablesOperator: 'gte',
     receivables: 0,
   });
   const [filters, setFilters] = useState<SupplierTableFilters>({
     name: '',
     pic: '',
     phoneNo: '',
-    receivablesOperator: '>=',
+    receivablesOperator: 'gte',
     receivables: 0,
   });
   const [isLoading, setIsLoading] = useState(false);

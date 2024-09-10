@@ -13,6 +13,7 @@ export async function GET(request: Request) {
   const sortOrder = queryParams.get('sortOrder') ?? 'desc';
   const sortColumn = queryParams.get('sortColumn') ?? 'createdAt';
 
+  // filters
   const name = queryParams.get('name') ?? '';
   const licensePlate = queryParams.get('licensePlate') ?? '';
   const phoneNo = queryParams.get('phoneNo') ?? '';
@@ -54,6 +55,7 @@ export async function GET(request: Request) {
       }
     ];
   }
+  // ----------------
 
   try {
     const customers = await db.customer.findMany({
