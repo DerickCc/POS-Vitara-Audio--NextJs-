@@ -82,14 +82,14 @@ export const columns = (handleDelete: (id: string) => void) => [
     size: 160,
     header: () => "Piutang",
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
-    enableSorting: false,
+    enableSorting: true,
   }),
   columnHelper.accessor("receivablesLimit", {
     id: "receivablesLimit",
     size: 160,
     header: () => "Limit Piutang",
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
-    enableSorting: false,
+    enableSorting: true,
   }),
   columnHelper.accessor("address", {
     id: "address",
