@@ -26,6 +26,9 @@ model User {
 
   CreatedSupplier Supplier[]
   UpdatedSupplier Supplier[] @relation("UpdatedByUser")
+
+  CreatedProduct Product[]
+  UpdatedProduct Product[] @relation("UpdatedByUser")
 }
 
 model Customer {
@@ -55,7 +58,7 @@ model Supplier {
   phoneNo          String  @db.VarChar(20)
   address          String? @db.VarChar(100)
   remarks          String? @db.VarChar(150)
-  receivables      Int     @db.Integer() @default(0)
+  receivables      Int     @default(0) @db.Integer()
   receivablesLimit Int     @db.Integer()
 
   CreatedBy User     @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
@@ -66,5 +69,27 @@ model Supplier {
   updatedBy String?
   updatedAt DateTime? @updatedAt
 
-  @@index([code, name, pic, phoneNo, address])
+  @@index([code, name, pic, phoneNo, address, receivables])
+}
+
+model Product {
+  id            String  @id @default(cuid())
+  code          String  @unique @db.VarChar(11)
+  name          String  @db.VarChar(100)
+  photo         String  @db.VarChar(100)
+  stock         Decimal @db.Decimal(10, 2)
+  uom           String  @db.VarChar(50)
+  purchasePrice Int     @db.Integer()
+  sellingPrice  Int     @db.Integer()
+  remarks       String? @db.VarChar(150)
+
+  CreatedBy User     @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  createdBy String
+  createdAt DateTime @default(now())
+
+  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  updatedBy String?
+  updatedAt DateTime? @updatedAt
+
+  @@index([code, name, stock, uom])
 }
