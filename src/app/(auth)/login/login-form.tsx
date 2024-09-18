@@ -62,7 +62,7 @@ export default function LogInForm() {
         />
 
         <Button
-          className="w-full"
+          className="w-full bg-black hover:bg-gray-700"
           type="submit"
           size="lg"
           disabled={isSubmitting}
