@@ -44,7 +44,7 @@ export default function CustomerDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const fetchData = useCallback(async () => {
+  const browseCustomer = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -52,7 +52,7 @@ export default function CustomerDataPage() {
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
       const response = await apiFetch(
-        `/api/customer${toQueryString({
+        `/api/customers${toQueryString({
           pageSize,
           pageIndex,
           sortColumn,
@@ -87,7 +87,7 @@ export default function CustomerDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      fetchData();
+      browseCustomer();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
@@ -96,18 +96,18 @@ export default function CustomerDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/customer/${id}`, { method: 'DELETE' });
+      const response = await apiFetch(`/api/customers/${id}`, { method: 'DELETE' });
 
       toast.success('Data Pelanggan Berhasil Dihapus', { duration: 5000 });
-      fetchData();
+      browseCustomer();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
   }
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    browseCustomer();
+  }, [browseCustomer]);
 
   return (
     <>

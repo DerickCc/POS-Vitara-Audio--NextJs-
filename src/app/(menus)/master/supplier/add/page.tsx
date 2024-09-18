@@ -27,9 +27,9 @@ const pageHeader = {
 export default function AddSupplierPage() {
   const router = useRouter();
 
-  const save = async (data: SupplierModel) => {
+  const createSupplier = async (data: SupplierModel) => {
     try {
-      const response = await apiFetch('/api/supplier', {
+      const response = await apiFetch('/api/suppliers', {
         method: 'POST',
         body: data,
       });
@@ -45,7 +45,7 @@ export default function AddSupplierPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <SupplierForm defaultValues={new SupplierModel()} onSubmit={save} />
+      <SupplierForm defaultValues={new SupplierModel()} onSubmit={createSupplier} />
     </>
   );
 }

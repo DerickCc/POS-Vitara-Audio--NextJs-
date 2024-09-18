@@ -30,9 +30,9 @@ export default function EditCustomerPage() {
   const [customer, setCustomer] = useState<CustomerModel>(new CustomerModel());
   const [isLoading, setIsLoading] = useState(false);
 
-  const save = async (data: CustomerModel) => {
+  const updateCustomer = async (data: CustomerModel) => {
     try {
-      const response = await apiFetch(`/api/customer/${id}`, {
+      const response = await apiFetch(`/api/customers/${id}`, {
         method: 'PUT',
         body: data,
       });
@@ -45,10 +45,10 @@ export default function EditCustomerPage() {
   };
 
   useEffect(() => {
-    const fetchCustomer = async () => {
+    const getCustomerById = async () => {
       try {
         setIsLoading(true);
-        const response = await apiFetch(`/api/customer/${id}`, { method: 'GET' });
+        const response = await apiFetch(`/api/customers/${id}`, { method: 'GET' });
         setCustomer(response.result);
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
@@ -57,14 +57,14 @@ export default function EditCustomerPage() {
       }
     };
 
-    fetchCustomer();
+    getCustomerById();
   }, [id]);
 
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <CustomerForm defaultValues={customer} isLoading={isLoading} onSubmit={save} />
+      <CustomerForm defaultValues={customer} isLoading={isLoading} onSubmit={updateCustomer} />
     </>
   );
 }

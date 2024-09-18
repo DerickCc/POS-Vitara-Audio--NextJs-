@@ -58,7 +58,7 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const customers = await db.customer.findMany({
+    const customers = await db.customers.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy: {
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       where,
     });
     
-    const recordsTotal = await db.customer.count({ where });
+    const recordsTotal = await db.customers.count({ where });
 
     return NextResponse.json(
       { message: 'Success', result: customers, recordsTotal },
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     const userId = (await getSession()).id;
 
     // retreive last customer code
-    const lastCustomer = await db.customer.findFirst({
+    const lastCustomer = await db.customers.findFirst({
       orderBy: { createdAt: 'desc' },
       select: { code: true}
     });
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
       newCode = 'CUS' + (lastCodeNumber + 1).toString().padStart(8, '0');
     }
 
-    const customer = await db.customer.create({
+    const customer = await db.customers.create({
       data: {
         code: newCode,
         name: data.name,

@@ -11,7 +11,7 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model User {
+model Users {
   id            String    @id @default(cuid())
   name          String    @db.VarChar(50)
   username      String    @unique @db.VarChar(50)
@@ -21,17 +21,17 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime? @updatedAt
 
-  CreatedCustomer Customer[]
-  UpdatedCustomer Customer[] @relation("UpdatedByUser")
+  CreatedCustomer Customers[]
+  UpdatedCustomer Customers[] @relation("UpdatedByUser")
 
-  CreatedSupplier Supplier[]
-  UpdatedSupplier Supplier[] @relation("UpdatedByUser")
+  CreatedSupplier Suppliers[]
+  UpdatedSupplier Suppliers[] @relation("UpdatedByUser")
 
-  CreatedProduct Product[]
-  UpdatedProduct Product[] @relation("UpdatedByUser")
+  CreatedProduct Products[]
+  UpdatedProduct Products[] @relation("UpdatedByUser")
 }
 
-model Customer {
+model Customers {
   id           String  @id @default(cuid())
   code         String  @unique @db.VarChar(11)
   name         String  @db.VarChar(100)
@@ -39,18 +39,18 @@ model Customer {
   phoneNo      String  @db.VarChar(20)
   address      String? @db.VarChar(100)
 
-  CreatedBy User     @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   createdBy String
   createdAt DateTime @default(now())
 
-  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   updatedBy String?
   updatedAt DateTime? @updatedAt
 
   @@index([code, name, licensePlate, phoneNo, address])
 }
 
-model Supplier {
+model Suppliers {
   id               String  @id @default(cuid())
   code             String  @unique @db.VarChar(11)
   name             String  @db.VarChar(100)
@@ -61,33 +61,34 @@ model Supplier {
   receivables      Int     @default(0) @db.Integer()
   receivablesLimit Int     @db.Integer()
 
-  CreatedBy User     @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   createdBy String
   createdAt DateTime @default(now())
 
-  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   updatedBy String?
   updatedAt DateTime? @updatedAt
 
   @@index([code, name, pic, phoneNo, address, receivables])
 }
 
-model Product {
+model Products {
   id            String  @id @default(cuid())
   code          String  @unique @db.VarChar(11)
   name          String  @db.VarChar(100)
   photo         String  @db.VarChar(100)
   stock         Decimal @db.Decimal(10, 2)
   uom           String  @db.VarChar(50)
+  costPrice     Int     @db.Integer()
   purchasePrice Int     @db.Integer()
   sellingPrice  Int     @db.Integer()
   remarks       String? @db.VarChar(150)
 
-  CreatedBy User     @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   createdBy String
   createdAt DateTime @default(now())
 
-  UpdatedBy User?     @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   updatedBy String?
   updatedAt DateTime? @updatedAt
 

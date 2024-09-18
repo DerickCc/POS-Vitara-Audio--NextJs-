@@ -7,7 +7,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const { id } = params;
 
   try {
-    const customer = await db.customer.findUnique({
+    const customer = await db.customers.findUnique({
       where: { id: id },
     });
 
@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     const userId = (await getSession()).id;
     
-    const updatedCustomer = await db.customer.update({
+    const updatedCustomer = await db.customers.update({
       where: { id: id },
       data: {
         ...data,
@@ -52,7 +52,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   const { id } = params;
   
   try {
-    const deletedCustomer = await db.customer.delete({
+    const deletedCustomer = await db.customers.delete({
       where: { id: id }
     });
 

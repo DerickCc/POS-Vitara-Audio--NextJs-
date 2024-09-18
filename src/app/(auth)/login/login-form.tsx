@@ -24,7 +24,7 @@ export default function LogInForm() {
 
   const login = async (data: LoginModel) => {
     try {
-      const response = await apiFetch("/api/user/check-credentials", {
+      const response = await apiFetch("/api/users/check-credentials", {
         method: "POST",
         body: data,
       });

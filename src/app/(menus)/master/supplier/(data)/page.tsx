@@ -48,7 +48,7 @@ export default function SupplierDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const fetchData = useCallback(async () => {
+  const browseSupplier = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -56,7 +56,7 @@ export default function SupplierDataPage() {
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
       const response = await apiFetch(
-        `/api/supplier${toQueryString({
+        `/api/suppliers${toQueryString({
           pageSize,
           pageIndex,
           sortColumn,
@@ -91,7 +91,7 @@ export default function SupplierDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      fetchData();
+      browseSupplier();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
@@ -100,18 +100,18 @@ export default function SupplierDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/supplier/${id}`, { method: 'DELETE' });
+      const response = await apiFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
 
       toast.success('Data Supplier Berhasil Dihapus.', { duration: 5000 });
-      fetchData();
+      browseSupplier();
     } catch (e) {
       toast.error(e + "", { duration: 5000});
     }
   }
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    browseSupplier();
+  }, [browseSupplier]);
 
   return (
     <>

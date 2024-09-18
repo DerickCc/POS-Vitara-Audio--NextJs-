@@ -72,7 +72,7 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const suppliers = await db.supplier.findMany({
+    const suppliers = await db.suppliers.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy: {
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
       where,
     });
     
-    const recordsTotal = await db.supplier.count({ where });
+    const recordsTotal = await db.suppliers.count({ where });
 
     return NextResponse.json(
       { message: 'Success', result: suppliers, recordsTotal },
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
     const userId = (await getSession()).id;
 
     // retreive last supplier code
-    const lastSupplier = await db.supplier.findFirst({
+    const lastSupplier = await db.suppliers.findFirst({
       orderBy: { createdAt: 'desc' },
       select: { code: true}
     });
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
       newCode = 'SUP' + (lastCodeNumber + 1).toString().padStart(8, '0');
     }
 
-    const supplier = await db.supplier.create({
+    const supplier = await db.suppliers.create({
       data: {
         code: newCode,
         name: data.name,

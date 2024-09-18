@@ -1,6 +1,6 @@
 "use client";
 
-import { getSession, destroySession } from "@/utils/sessionlib";
+import { destroySession } from "@/utils/sessionlib";
 import { useRouter } from "next/navigation";
 import { Button } from "rizzui";
 

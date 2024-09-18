@@ -1,14 +1,14 @@
 import { LoginModel } from "@/models/login.model";
 import { db } from "@/utils/prisma";
 import { saveSession } from "@/utils/sessionlib";
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const data: LoginModel = new LoginModel(await request.json());
-  // const hashPassword = await hash(data.password, 10);
+  const hashPassword = await hash(data.password, 10);
 
-  // await db.user.create({
+  // await db.users.create({
   //   data: {
   //     username: 'admin123',
   //     name: 'Derick',
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const user = await db.user.findUnique({
+    const user = await db.users.findUnique({
       where: { username: data.username },
     });
 

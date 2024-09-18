@@ -7,7 +7,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const { id } = params;
 
   try {
-    const supplier = await db.supplier.findUnique({
+    const supplier = await db.suppliers.findUnique({
       where: { id: id },
     });
 
@@ -35,7 +35,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     
     const userId = (await getSession()).id;
     
-    const updatedSupplier = await db.supplier.update({
+    const updatedSupplier = await db.suppliers.update({
       where: { id: id },
       data: {
         ...data,
@@ -59,7 +59,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   const { id } = params;
   
   try {
-    const deletedSupplier = await db.supplier.delete({
+    const deletedSupplier = await db.suppliers.delete({
       where: { id: id }
     });
 

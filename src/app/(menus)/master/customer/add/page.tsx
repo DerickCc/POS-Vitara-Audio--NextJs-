@@ -27,9 +27,9 @@ const pageHeader = {
 export default function AddCustomerPage() {
   const router = useRouter();
 
-  const save = async (data: CustomerModel) => {
+  const createCustomer = async (data: CustomerModel) => {
     try {
-      const response = await apiFetch('/api/customer', {
+      const response = await apiFetch('/api/customers', {
         method: 'POST',
         body: data,
       });
@@ -45,7 +45,7 @@ export default function AddCustomerPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <CustomerForm defaultValues={new CustomerModel()} onSubmit={save} />
+      <CustomerForm defaultValues={new CustomerModel()} onSubmit={createCustomer} />
     </>
   );
 }

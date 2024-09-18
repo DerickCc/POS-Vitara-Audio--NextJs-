@@ -29,9 +29,9 @@ export default function EditSupplierPage() {
   const [supplier, setSupplier] = useState<SupplierModel>(new SupplierModel());
   const [isLoading, setIsLoading] = useState(false);
 
-  const save = async (data: SupplierModel) => {
+  const updateSupplier = async (data: SupplierModel) => {
     try {
-      const response = await apiFetch(`/api/supplier/${id}`, {
+      const response = await apiFetch(`/api/suppliers/${id}`, {
         method: 'PUT',
         body: data,
       });
@@ -44,10 +44,10 @@ export default function EditSupplierPage() {
   };
 
   useEffect(() => {
-    const fetchSupplier = async () => {
+    const getSupplierById = async () => {
       try {
         setIsLoading(true);
-        const response = await apiFetch(`/api/supplier/${id}`, { method: 'GET' });
+        const response = await apiFetch(`/api/suppliers/${id}`, { method: 'GET' });
         setSupplier(response.result);
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
@@ -56,14 +56,14 @@ export default function EditSupplierPage() {
       }
     };
 
-    fetchSupplier();
+    getSupplierById();
   }, [id]);
 
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <SupplierForm defaultValues={supplier} isLoading={isLoading} onSubmit={save} />
+      <SupplierForm defaultValues={supplier} isLoading={isLoading} onSubmit={updateSupplier} />
     </>
   );
 }
