@@ -29,6 +29,9 @@ model Users {
 
   CreatedProduct Products[]
   UpdatedProduct Products[] @relation("UpdatedByUser")
+
+  CreatedPuchaseOrders PuchaseOrders[]
+  UpdatedPuchaseOrders PuchaseOrders[] @relation("UpdatedByUser")
 }
 
 model Customers {
@@ -57,9 +60,11 @@ model Suppliers {
   pic              String  @db.VarChar(20)
   phoneNo          String  @db.VarChar(20)
   address          String? @db.VarChar(100)
-  remarks          String? @db.VarChar(150)
+  remarks          String? @db.VarChar(250)
   receivables      Int     @default(0) @db.Integer()
-  receivablesLimit Int     @db.Integer()
+  receivablesLimit Int     @default(0) @db.Integer()
+
+  PuchaseOrders PuchaseOrders[]
 
   CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   createdBy String
@@ -73,16 +78,18 @@ model Suppliers {
 }
 
 model Products {
-  id            String  @id @default(cuid())
-  code          String  @unique @db.VarChar(11)
-  name          String  @db.VarChar(100)
-  photo         String  @db.VarChar(100)
-  stock         Decimal @db.Decimal(10, 2)
-  uom           String  @db.VarChar(50)
-  costPrice     Int     @db.Integer()
-  purchasePrice Int     @db.Integer()
-  sellingPrice  Int     @db.Integer()
-  remarks       String? @db.VarChar(150)
+  id               String  @id @default(cuid())
+  code             String  @unique @db.VarChar(11)
+  name             String  @db.VarChar(100)
+  photo            String? @db.VarChar(100)
+  stock            Decimal @db.Decimal(10, 2)
+  restockThreshold Decimal @db.Decimal(10, 2)
+  uom              String  @db.VarChar(50)
+  costPrice        Int     @db.Integer()
+  costPriceCode    String  @db.VarChar(50)
+  purchasePrice    Int     @db.Integer()
+  sellingPrice     Int     @db.Integer()
+  remarks          String? @db.VarChar(250)
 
   CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
   createdBy String
@@ -93,4 +100,25 @@ model Products {
   updatedAt DateTime? @updatedAt
 
   @@index([code, name, stock, uom])
+}
+
+model PuchaseOrders {
+  id           String   @id @default(cuid())
+  poCode       String   @unique @db.VarChar(11)
+  purchaseDate DateTime @default(now())
+  supplierId   String
+  remarks      String?  @db.VarChar(250)
+  totalItem    Int      @db.Integer()
+  totalPrice   Int      @db.Integer()
+  status       String   @db.VarChar(50)
+
+  Supplier Suppliers @relation(fields: [supplierId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  createdBy String
+  createdAt DateTime @default(now())
+
+  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  updatedBy String?
+  updatedAt DateTime? @updatedAt
 }
