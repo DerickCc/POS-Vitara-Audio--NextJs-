@@ -1,30 +1,30 @@
-import DeletePopover from "@/components/delete-popover"
-import { routes } from "@/config/routes"
-import { formatToCurrency } from "@/utils/helper-function"
-import { createColumnHelper } from "@tanstack/react-table"
-import Link from "next/link"
-import { LuPencil } from "react-icons/lu"
-import { ActionIcon, Tooltip } from "rizzui"
+import DeletePopover from '@/components/delete-popover';
+import { routes } from '@/config/routes';
+import { formatToCurrency } from '@/utils/helper-function';
+import { createColumnHelper } from '@tanstack/react-table';
+import Link from 'next/link';
+import { LuPencil } from 'react-icons/lu';
+import { ActionIcon, Tooltip } from 'rizzui';
 
 export type SupplierTableType = {
-  id: string
-  code: string
-  name: string
-  pic: string
-  phoneNo: string
-  receivablesLimit: number
-  receivables: number
-  address: string
-  remarks: string
-}
+  id: string;
+  code: string;
+  name: string;
+  pic: string;
+  phoneNo: string;
+  receivablesLimit: number;
+  receivables: number;
+  address: string;
+  remarks: string;
+};
 
-const columnHelper = createColumnHelper<SupplierTableType>()
+const columnHelper = createColumnHelper<SupplierTableType>();
 
 export const columns = (handleDelete: (id: string) => void) => [
   columnHelper.display({
-    id: "actions",
+    id: 'actions',
     size: 100,
-    header: () => "Aksi",
+    header: () => 'Aksi',
     cell: ({ row }) => (
       <>
         <div className="flex items-center justify-center gap-3">
@@ -49,60 +49,60 @@ export const columns = (handleDelete: (id: string) => void) => [
       </>
     ),
   }),
-  columnHelper.accessor("code", {
-    id: "code",
+  columnHelper.accessor('code', {
+    id: 'code',
     size: 130,
-    header: () => "Kode",
+    header: () => 'Kode',
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor("name", {
-    id: "name",
+  columnHelper.accessor('name', {
+    id: 'name',
     size: 200,
-    header: () => "Nama",
+    header: () => 'Nama',
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor("pic", {
-    id: "pic",
+  columnHelper.accessor('pic', {
+    id: 'pic',
     size: 200,
-    header: () => "PIC",
+    header: () => 'PIC',
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor("phoneNo", {
-    id: "phoneNo",
+  columnHelper.accessor('phoneNo', {
+    id: 'phoneNo',
     size: 160,
-    header: () => "No. Telepon",
+    header: () => 'No. Telepon',
     cell: (info) => info.getValue(),
     enableSorting: false,
   }),
-  columnHelper.accessor("receivables", {
-    id: "receivables",
+  columnHelper.accessor('receivables', {
+    id: 'receivables',
     size: 160,
-    header: () => "Piutang",
+    header: () => 'Piutang',
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: true,
   }),
-  columnHelper.accessor("receivablesLimit", {
-    id: "receivablesLimit",
+  columnHelper.accessor('receivablesLimit', {
+    id: 'receivablesLimit',
     size: 160,
-    header: () => "Limit Piutang",
+    header: () => 'Limit Piutang',
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: true,
   }),
-  columnHelper.accessor("address", {
-    id: "address",
+  columnHelper.accessor('address', {
+    id: 'address',
     size: 300,
-    header: () => "Alamat",
-    cell: (info) => info.getValue() || "-",
+    header: () => 'Alamat',
+    cell: (info) => info.getValue() || '-',
     enableSorting: false,
   }),
-  columnHelper.accessor("remarks", {
-    id: "remarks",
+  columnHelper.accessor('remarks', {
+    id: 'remarks',
     size: 300,
-    header: () => "Keterangan",
-    cell: (info) => info.getValue() || "-",
+    header: () => 'Keterangan',
+    cell: (info) => info.getValue() || '-',
     enableSorting: false,
   }),
-]
+];

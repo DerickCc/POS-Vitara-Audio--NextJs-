@@ -1,7 +1,7 @@
 "use client";
 
 import cn from "@/utils/class-names";
-import { ROW_PER_PAGE_OPTIONS, tableClass } from "@/config/constants";
+import { pageSizeOptions, tableClass } from "@/config/constants";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ActionIcon, Select, SelectOption, Text } from "rizzui";
 import {
@@ -54,7 +54,7 @@ export default function CustomersTable({
             <div className="flex items-center gap-4">
               <Text className="font-medium hidden sm:block">Baris Per Halaman</Text>
               <Select
-                options={ROW_PER_PAGE_OPTIONS}
+                options={pageSizeOptions}
                 value={pageSize}
                 onChange={(s: SelectOption) => setPageSize(Number(s.value))}
                 className="w-[70px]"

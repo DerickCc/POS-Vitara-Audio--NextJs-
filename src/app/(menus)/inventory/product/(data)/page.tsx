@@ -2,53 +2,51 @@
 
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
 import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
-import SupplierFilter, { SupplierTableFilters } from './filters';
+import ProductFilter, { ProductTableFilters } from './filter';
+import { useCallback, useEffect, useState } from 'react';
+import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
 import BasicTable from '@/components/tables/basic-table';
-import { columns } from './supplier-table/columns';
+import { columns } from './product-table/colomns';
 
 const pageHeader = {
-  title: 'Supplier',
+  title: 'Barang',
   breadcrumb: [
     {
-      name: 'Master',
+      name: 'Inventori',
     },
     {
-      href: routes.master.supplier.data,
-      name: 'Supplier',
+      href: routes.inventory.product.data,
+      name: 'Barang',
     },
   ],
 };
 
-export default function SupplierDataPage() {
-  const [suppliers, setSuppliers] = useState([]);
+export default function ProductDataPage() {
+  const [products, setProducts] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [localFilters, setLocalFilters] = useState<SupplierTableFilters>({
+  const [localFilters, setLocalFilters] = useState<ProductTableFilters>({
     name: '',
-    pic: '',
-    phoneNo: '',
-    receivablesOperator: 'gte',
-    receivables: 0,
+    stock: 0,
+    stockOperator: 'gte',
+    uom: '',
   });
-  const [filters, setFilters] = useState<SupplierTableFilters>({
+  const [filters, setFilters] = useState<ProductTableFilters>({
     name: '',
-    pic: '',
-    phoneNo: '',
-    receivablesOperator: 'gte',
-    receivables: 0,
+    stock: 0,
+    stockOperator: 'gte',
+    uom: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const browseSupplier = useCallback(async () => {
+  const browseProduct = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -56,7 +54,7 @@ export default function SupplierDataPage() {
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
       const response = await apiFetch(
-        `/api/suppliers${toQueryString({
+        `/api/products${toQueryString({
           pageSize,
           pageIndex,
           sortColumn,
@@ -66,7 +64,7 @@ export default function SupplierDataPage() {
         { method: 'GET' }
       );
 
-      setSuppliers(response.result);
+      setProducts(response.result);
       setTotalRowCount(response.recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -91,7 +89,7 @@ export default function SupplierDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      browseSupplier();
+      browseProduct();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
@@ -100,24 +98,24 @@ export default function SupplierDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
+      const response = await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
 
-      toast.success('Data Supplier Berhasil Dihapus.', { duration: 5000 });
-      browseSupplier();
+      toast.success('Data Barang Berhasil Dihapus.', { duration: 5000 });
+      browseProduct();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
   };
 
   useEffect(() => {
-    browseSupplier();
-  }, [browseSupplier]);
+    browseProduct();
+  }, [browseProduct]);
 
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.master.supplier.add} className="w-full sm:w-auto">
+          <Link href={routes.inventory.product.add} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto">
               <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
               Tambah
@@ -126,14 +124,14 @@ export default function SupplierDataPage() {
         </div>
       </PageHeader>
 
-      <SupplierFilter
+      <ProductFilter
         localFilters={localFilters}
         setLocalFilters={setLocalFilters}
         handleSearch={() => handleSearch()}
       />
 
       <BasicTable
-        data={suppliers}
+        data={products}
         columns={columns}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}

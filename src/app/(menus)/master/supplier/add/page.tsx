@@ -1,12 +1,12 @@
 'use client';
 
-import SupplierForm from "@/components/forms/master/supplier/supplier-form";
-import PageHeader from "@/components/page-header";
-import { routes } from "@/config/routes";
-import { SupplierModel } from "@/models/supplier.model";
-import { apiFetch } from "@/utils/api";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import SupplierForm from '@/components/forms/master/supplier/supplier-form';
+import PageHeader from '@/components/page-header';
+import { routes } from '@/config/routes';
+import { SupplierModel } from '@/models/supplier.model';
+import { apiFetch } from '@/utils/api';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 const pageHeader = {
   title: 'Tambah Supplier',

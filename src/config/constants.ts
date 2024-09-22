@@ -5,7 +5,7 @@ export const CURRENCY_OPTIONS = {
   fractions: 2,
 };
 
-export const ROW_PER_PAGE_OPTIONS = [
+export const pageSizeOptions = [
   {
     value: 5,
     label: '5',
@@ -26,6 +26,11 @@ export const ROW_PER_PAGE_OPTIONS = [
     value: 50,
     label: '50',
   },
+];
+
+export const filterOperatorOptions = [
+  { label: ">=", value: "gte" },
+  { label: "<=", value: "lte" },
 ];
 
 export const tableClass = `

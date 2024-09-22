@@ -1,4 +1,3 @@
-import { CustomerTableFilters } from "@/app/(menus)/master/customer/(data)/filter";
 import { CustomerModel } from "@/models/customer.model";
 import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";

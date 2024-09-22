@@ -26,6 +26,10 @@ export const routes = {
     salesOrder: '/transaction/sales-order',
   },
   settings: {
-    user: '/settings/user',
+    user: {
+      data: '/settings/user',
+      add: '/settings/user/add',
+      edit: (id: string) => `/settings/user/${id}/edit`
+    }
   },
 };

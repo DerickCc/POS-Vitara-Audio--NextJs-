@@ -3,9 +3,10 @@
 import Card from "@/components/card";
 import ThousandSeparatorInput from "@/components/inputs/thousand-separator-input";
 import { SetStateAction } from "jotai";
-import { ChangeEvent, Dispatch, FormEvent } from "react";
+import { Dispatch, FormEvent } from "react";
 import { PiFunnel } from "react-icons/pi";
 import { Button, Input, Select } from "rizzui";
+import { filterOperatorOptions } from "@/config/constants";
 
 export type SupplierTableFilters = {
   name: string;
@@ -14,11 +15,6 @@ export type SupplierTableFilters = {
   receivablesOperator: "gte" | "lte"; // greater than or equal | less than or equal
   receivables: number;
 };
-
-const receivablesOperatorOptions = [
-  { label: ">=", value: "gte" },
-  { label: "<=", value: "lte" },
-];
 
 interface SupplierFiltersProps {
   localFilters: SupplierTableFilters;
@@ -74,9 +70,9 @@ export default function SupplierFilter({ localFilters, setLocalFilters, handleSe
                 value={localFilters.receivablesOperator}
                 onChange={(value: string) => handleFilterChange("receivablesOperator")(value)}
                 className="w-24"
-                options={receivablesOperatorOptions}
+                options={filterOperatorOptions}
                 displayValue={(value) =>
-                  receivablesOperatorOptions.find((option) => option.value === value)?.label || ""
+                  filterOperatorOptions.find((option) => option.value === value)?.label || ""
                 }
                 getOptionValue={(option) => option.value}
               />

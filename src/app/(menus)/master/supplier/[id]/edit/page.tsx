@@ -1,13 +1,13 @@
 'use client';
 
-import SupplierForm from "@/components/forms/master/supplier/supplier-form";
-import PageHeader from "@/components/page-header";
-import { routes } from "@/config/routes";
-import { SupplierModel } from "@/models/supplier.model";
-import { apiFetch } from "@/utils/api";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import SupplierForm from '@/components/forms/master/supplier/supplier-form';
+import PageHeader from '@/components/page-header';
+import { routes } from '@/config/routes';
+import { SupplierModel } from '@/models/supplier.model';
+import { apiFetch } from '@/utils/api';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const pageHeader = {
   title: 'Edit Supplier',

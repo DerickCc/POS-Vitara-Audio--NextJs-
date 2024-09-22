@@ -1,4 +1,3 @@
-import { SupplierTableFilters } from "@/app/(menus)/master/supplier/(data)/filters";
 import { SupplierModel } from "@/models/supplier.model";
 import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";

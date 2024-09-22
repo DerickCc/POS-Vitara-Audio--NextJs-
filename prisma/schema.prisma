@@ -16,10 +16,10 @@ model Users {
   name          String    @db.VarChar(50)
   username      String    @unique @db.VarChar(50)
   password      String
-  accountStatus Boolean   @default(true)
+  accountStatus Boolean   @default(true) @map("account_status")
   role          String    @db.VarChar(20)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime? @updatedAt
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt @map("updated_at")
 
   CreatedCustomer Customers[]
   UpdatedCustomer Customers[] @relation("UpdatedByUser")
@@ -30,95 +30,131 @@ model Users {
   CreatedProduct Products[]
   UpdatedProduct Products[] @relation("UpdatedByUser")
 
-  CreatedPuchaseOrders PuchaseOrders[]
-  UpdatedPuchaseOrders PuchaseOrders[] @relation("UpdatedByUser")
+  CreatedPurchaseOrders PurchaseOrders[]
+  UpdatedPurchaseOrders PurchaseOrders[] @relation("UpdatedByUser")
+
+  CreatedSalesOrders SalesOrders[]
+  UpdatedSalesOrders SalesOrders[] @relation("UpdatedByUser")
+
+  @@index([name, accountStatus, role], map: "users_index")
 }
 
 model Customers {
-  id           String  @id @default(cuid())
-  code         String  @unique @db.VarChar(11)
-  name         String  @db.VarChar(100)
-  licensePlate String  @db.VarChar(20)
-  phoneNo      String  @db.VarChar(20)
-  address      String? @db.VarChar(100)
+  id           String    @id @default(cuid())
+  code         String    @unique @db.VarChar(20)
+  name         String    @db.VarChar(100)
+  licensePlate String    @map("license_plate") @db.VarChar(20)
+  phoneNo      String    @db.VarChar(20)
+  address      String?   @db.VarChar(100)
+  createdBy    String    @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedBy    String?   @map("updated_by")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
 
-  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  createdBy String
-  createdAt DateTime @default(now())
+  SalesOrders SalesOrders[]
 
-  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  updatedBy String?
-  updatedAt DateTime? @updatedAt
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  @@index([code, name, licensePlate, phoneNo, address])
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@index([code, name, licensePlate, phoneNo, address], map: "customers_index")
 }
 
 model Suppliers {
-  id               String  @id @default(cuid())
-  code             String  @unique @db.VarChar(11)
-  name             String  @db.VarChar(100)
-  pic              String  @db.VarChar(20)
-  phoneNo          String  @db.VarChar(20)
-  address          String? @db.VarChar(100)
-  remarks          String? @db.VarChar(250)
-  receivables      Int     @default(0) @db.Integer()
-  receivablesLimit Int     @default(0) @db.Integer()
+  id               String    @id @default(cuid())
+  code             String    @unique @db.VarChar(20)
+  name             String    @db.VarChar(100)
+  pic              String    @db.VarChar(20)
+  phoneNo          String    @db.VarChar(20)
+  address          String?   @db.VarChar(100)
+  remarks          String?   @db.VarChar(250)
+  receivables      Int       @default(0) @db.Integer()
+  receivablesLimit Int       @default(0) @db.Integer()
+  createdBy        String    @map("created_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedBy        String?   @map("updated_by")
+  updatedAt        DateTime? @updatedAt @map("updated_at")
 
-  PuchaseOrders PuchaseOrders[]
+  PuchaseOrders PurchaseOrders[]
 
-  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  createdBy String
-  createdAt DateTime @default(now())
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  updatedBy String?
-  updatedAt DateTime? @updatedAt
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  @@index([code, name, pic, phoneNo, address, receivables])
+  @@index([code, name, pic, phoneNo, address, receivables], map: "suppliers_index")
 }
 
 model Products {
-  id               String  @id @default(cuid())
-  code             String  @unique @db.VarChar(11)
-  name             String  @db.VarChar(100)
-  photo            String? @db.VarChar(100)
-  stock            Decimal @db.Decimal(10, 2)
-  restockThreshold Decimal @db.Decimal(10, 2)
-  uom              String  @db.VarChar(50)
-  costPrice        Int     @db.Integer()
-  costPriceCode    String  @db.VarChar(50)
-  purchasePrice    Int     @db.Integer()
-  sellingPrice     Int     @db.Integer()
-  remarks          String? @db.VarChar(250)
+  id               String    @id @default(cuid())
+  code             String    @unique @db.VarChar(20)
+  name             String    @db.VarChar(100)
+  photo            String?   @db.VarChar(100)
+  stock            Decimal   @db.Decimal(10, 2)
+  restockThreshold Decimal   @map("restock_threshold") @db.Decimal(10, 2)
+  uom              String    @db.VarChar(50)
+  costPrice        Int       @map("cost_price") @db.Integer()
+  costPriceCode    String    @map("cost_price_code") @db.VarChar(50)
+  purchasePrice    Int       @map("purchase_price") @db.Integer()
+  sellingPrice     Int       @map("selling_price") @db.Integer()
+  remarks          String?   @db.VarChar(250)
+  createdBy        String    @map("created_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedBy        String?   @map("updated_by")
+  updatedAt        DateTime? @updatedAt @map("updated_at")
 
-  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  createdBy String
-  createdAt DateTime @default(now())
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  updatedBy String?
-  updatedAt DateTime? @updatedAt
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  @@index([code, name, stock, uom])
+  @@index([code, name, stock, uom], map: "products_index")
 }
 
-model PuchaseOrders {
-  id           String   @id @default(cuid())
-  poCode       String   @unique @db.VarChar(11)
-  purchaseDate DateTime @default(now())
-  supplierId   String
-  remarks      String?  @db.VarChar(250)
-  totalItem    Int      @db.Integer()
-  totalPrice   Int      @db.Integer()
-  status       String   @db.VarChar(50)
+model PurchaseOrders {
+  id           String    @id @default(cuid())
+  poCode       String    @unique @map("po_code") @db.VarChar(20)
+  purchaseDate DateTime  @default(now()) @map("purchase_date")
+  supplierId   String    @map("supplier_id")
+  remarks      String?   @db.VarChar(250)
+  totalItem    Int       @map("total_item") @db.Integer()
+  totalPrice   Int       @map("total_price") @db.Integer()
+  status       String    @default("Dalam Proses") @db.VarChar(50)
+  createdBy    String    @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedBy    String?   @map("updated_by")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
 
   Supplier Suppliers @relation(fields: [supplierId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  CreatedBy Users    @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  createdBy String
-  createdAt DateTime @default(now())
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  UpdatedBy Users?    @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  updatedBy String?
-  updatedAt DateTime? @updatedAt
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@index([poCode, purchaseDate, supplierId, totalPrice, status], map: "purchase_orders_index")
+}
+
+model SalesOrders {
+  id            String    @id @default(cuid())
+  soCode        String    @unique @map("so_code") @db.VarChar(20)
+  salesDate     DateTime  @default(now()) @map("sales_date")
+  customerId    String    @map("customer_id")
+  paymentType   String    @map("payment_type") @db.VarChar(20)
+  paymentMethod String    @map("payment_method") @db.VarChar(20)
+  subTotal      Int       @map("sub_total") @db.Integer()
+  discount      Int       @default(0) @db.Integer()
+  grandTotal    Int       @map("grand_total") @db.Integer()
+  paidAmount    Int       @map("paid_amount") @db.Integer()
+  remarks       String?   @db.VarChar(250)
+  status        String    @default("Dalam Proses") @db.VarChar(50)
+  createdBy     String    @map("created_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedBy     String?   @map("updated_by")
+  updatedAt     DateTime? @updatedAt @map("updated_at")
+
+  Customer Customers @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@index([soCode, salesDate, customerId, paymentType, paymentMethod, grandTotal, status], map: "sales_orders_index")
 }
