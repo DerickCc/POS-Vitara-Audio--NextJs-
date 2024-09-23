@@ -38,6 +38,6 @@ export const pageLinks = [
   },
   {
     name: 'User',
-    href: routes.settings.user,
+    href: routes.settings.user.data,
   },
 ]
