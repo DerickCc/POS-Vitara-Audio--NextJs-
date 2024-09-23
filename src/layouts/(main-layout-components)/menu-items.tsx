@@ -74,7 +74,7 @@ export const menuItems = [
     dropdownItems: [
       {
         name: "User",
-        href: routes.settings.user
+        href: routes.settings.user.data
       },
     ]
   },
