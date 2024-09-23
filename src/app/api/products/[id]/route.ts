@@ -1,0 +1,70 @@
+import { ProductModel } from "@/models/product.model";
+import { db } from "@/utils/prisma";
+import { getSession } from "@/utils/sessionlib";
+import { NextResponse } from "next/server";
+
+// GetProductById
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
+
+  try {
+    const product = await db.products.findUnique({
+      where: { id: id },
+    });
+
+    if (!product) {
+      return NextResponse.json({ message: 'Barang tidak ditemukan' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Success', result: product }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
+  }
+}
+
+// UpdateProduct
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
+  const data: ProductModel = new ProductModel(await request.json());
+  
+  try {
+    const userId = (await getSession()).id;
+    
+    const updatedProduct = await db.products.update({
+      where: { id: id },
+      data: {
+        ...data,
+        UpdatedBy: {
+          connect: { id: userId }
+        }
+      },
+    });
+    
+    if (!updatedProduct) {
+      return NextResponse.json({ message: 'Data Barang Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Data Barang Berhasil Diupdate' }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
+  }
+}
+
+// DeleteProduct
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
+  
+  try {
+    const deletedProduct = await db.products.delete({
+      where: { id: id }
+    });
+
+    if (!deletedProduct) {
+      return NextResponse.json({ message: 'Data Barang Gagal Dihapus Karena Tidak Ditemukan' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Data Barang Berhasil Dihapus' }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
+  }
+}

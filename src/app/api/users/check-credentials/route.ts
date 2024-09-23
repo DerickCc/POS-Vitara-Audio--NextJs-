@@ -4,6 +4,7 @@ import { saveSession } from "@/utils/sessionlib";
 import { compare, hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 
+// CheckCredentials
 export async function POST(request: Request) {
   const data: LoginModel = new LoginModel(await request.json());
   const hashPassword = await hash(data.password, 10);

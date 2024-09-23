@@ -1,5 +1,6 @@
 import DeletePopover from '@/components/delete-popover';
 import { routes } from '@/config/routes';
+import { formatToCurrency } from '@/utils/helper-function';
 import { createColumnHelper } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
@@ -12,6 +13,7 @@ export type ProductTableType = {
   stock: number;
   uom: string;
   restockThreshold: number;
+  costPriceCode: string;
   purchasePrice: number;
   sellingPrice: number;
   remarks: string;
@@ -48,11 +50,60 @@ export const columns = (handleDelete: (id: string) => void) => [
       </>
     ),
   }),
+  columnHelper.accessor('photo', {
+    id: 'photo',
+    size: 200,
+    header: () => 'Foto',
+    cell: (info) => info.getValue(),
+    enableSorting: false,
+  }),
   columnHelper.accessor('name', {
     id: 'name',
     size: 200,
     header: () => 'Nama',
     cell: (info) => info.getValue(),
+    enableSorting: true,
+  }),
+  columnHelper.accessor('stock', {
+    id: 'stock',
+    size: 100,
+    header: () => 'Stok',
+    cell: (info) => info.getValue(),
+    enableSorting: true,
+  }),
+  columnHelper.accessor('uom', {
+    id: 'uom',
+    size: 150,
+    header: () => 'Satuan',
+    cell: (info) => info.getValue(),
+    enableSorting: true,
+  }),
+  columnHelper.accessor('restockThreshold', {
+    id: 'restockThreshold',
+    size: 100,
+    header: () => 'Batas Restok',
+    cell: (info) => info.getValue(),
+    enableSorting: true,
+  }),
+  columnHelper.accessor('costPriceCode', {
+    id: 'costPriceCode',
+    size: 160,
+    header: () => 'Harga Modal (Kode)',
+    cell: (info) => info.getValue(),
+    enableSorting: false,
+  }),
+  columnHelper.accessor('purchasePrice', {
+    id: 'purchasePrice',
+    size: 160,
+    header: () => 'Harga Beli',
+    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    enableSorting: true,
+  }),
+  columnHelper.accessor('sellingPrice', {
+    id: 'sellingPrice',
+    size: 160,
+    header: () => 'Harga Jual',
+    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('remarks', {

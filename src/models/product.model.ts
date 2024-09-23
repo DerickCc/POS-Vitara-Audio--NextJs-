@@ -1,0 +1,45 @@
+import { z } from "zod";
+
+export const ProductSchema = z.object({
+  name: z.string().min(1, { message: 'Nama harus diisi' }),
+  photo: z.string().optional().nullable(),
+  restockThreshold: z.coerce.number().min(0, { message: 'Ambang Batas Restok tidak boleh negatif' }),
+  uom: z.string().min(1, { message: 'Satuan harus diisi' }),
+  purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
+  sellingPrice: z.coerce.number().min(0, { message: 'Harga Jual Restok tidak boleh negatif' }),
+  remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
+});
+
+export class ProductModel {
+  id: string;
+  code: string;
+  name: string;
+  photo: string;
+  stock: string;
+  restockThreshold: number;
+  uom: string;
+  costPrice: number;
+  costPriceCode: string;
+  purchasePrice: number;
+  sellingPrice: number;
+  remarks: string;
+
+  constructor(data: any = {}) {
+    this.id = data.id;
+    this.code = data.code;
+    this.name = data.name;
+    this.photo = data.photo;
+    this.stock = data.stock || 0;
+    this.restockThreshold = data.restockThreshold || 0;
+    this.uom = data.uom;
+    this.costPrice = data.costPrice || 0;
+    this.costPriceCode = data.costPriceCode;
+    this.purchasePrice = data.purchasePrice || 0;
+    this.sellingPrice = data.sellingPrice || 0;
+    this.remarks = data.remarks;
+  }
+
+  validate() {
+    return ProductSchema.safeParse(this);
+  }
+}

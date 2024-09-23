@@ -3,6 +3,7 @@ import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
 
+// BrowseSupplier
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
@@ -94,6 +95,7 @@ export async function GET(request: Request) {
   }
 }
 
+// CreateSupplier
 export async function POST(request: Request) {
   const data: SupplierModel = new SupplierModel(await request.json());
 
@@ -147,6 +149,7 @@ export async function POST(request: Request) {
         }
       }
     });
+
     return NextResponse.json({ message: "Data Supplier Berhasil Disimpan" }, { status: 201 });
   } catch (e) {
     return NextResponse.json(

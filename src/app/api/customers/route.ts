@@ -3,6 +3,7 @@ import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
 
+// BrowseCustomer
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
@@ -80,6 +81,7 @@ export async function GET(request: Request) {
   }
 }
 
+// CreateCustomer
 export async function POST(request: Request) {
   const data: CustomerModel = new CustomerModel(await request.json());
 

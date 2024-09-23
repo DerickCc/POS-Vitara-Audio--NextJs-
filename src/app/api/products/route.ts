@@ -1,3 +1,9 @@
+import { ProductModel } from "@/models/product.model";
+import { db } from "@/utils/prisma";
+import { getSession } from "@/utils/sessionlib";
+import { NextResponse } from "next/server";
+
+// BrowseProduct
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
@@ -14,4 +20,124 @@ export async function GET(request: Request) {
   const uom =  queryParams.get('uom') ?? '';
 
   const where: any = {};
+  if (name) { // full text search
+    const searchTerm = name.split(' ').filter(term => term);
+
+    if (searchTerm.length > 0) {
+      where['AND'] = searchTerm.map(term => ({
+        name: {
+          contains: term,
+          mode: 'insensitive',
+        },
+      }));
+    }
+  }
+
+  if (stock > 0) {
+    where['AND'] = [
+      ...(where['AND'] || []),
+      {
+        stock: {
+          [stockOperator]: stock // gte: xx or lte: xx
+        }
+      }
+    ]
+  }
+
+  if (uom) {
+    where['AND'] = [
+      ...(where['AND'] || []),
+      {
+        uom: {
+          contains: uom,
+          mode: 'insensitive',
+        }
+      }
+    ]
+  }
+  // ----------------
+
+  try {
+    const products = await db.products.findMany({
+      skip: pageIndex * pageSize,
+      take: pageSize,
+      orderBy: {
+        [sortColumn]: sortOrder
+      },
+      where,
+    });
+
+    const recordsTotal = await db.products.count({where});
+
+    return NextResponse.json(
+      { message: 'Success', result: products, recordsTotal },
+      { status: 200}
+    )
+  } catch (e) {
+    return NextResponse.json(
+      { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },
+      { status: 500 }
+    );
+  }
+}
+
+// CreateProduct
+export async function POST(request: Request) {
+  const data: ProductModel = new ProductModel(await request.json());
+  
+  const validatedData = data.validate();
+
+  // if validation failed
+  if (!validatedData.success) {
+    return NextResponse.json(
+      {
+        message: 'Terdapat kesalahan pada data yang dikirim',
+        error: validatedData.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const userId = (await getSession()).id;
+
+    // retreive last product code
+    const lastProduct = await db.products.findFirst({
+      orderBy: { createdAt: 'desc' },
+      select: { code: true }
+    })
+
+    let newCode = 'PRD00000001'; // default code
+
+    if (lastProduct) {
+      const lastCodeNumber = parseInt(lastProduct.code.replace('PRD', ''), 10);
+      newCode = 'PRD' + (lastCodeNumber + 1).toString().padStart(8, '0');
+    }
+
+    const product = await db.products.create({
+      data: {
+        code: newCode,
+        name: data.name,
+        photo: data.photo,
+        restockThreshold: data.restockThreshold,
+        uom: data.uom,
+        purchasePrice: data.purchasePrice,
+        sellingPrice: data.sellingPrice,
+        remarks: data.remarks,
+        CreatedBy: {
+          connect: { id: userId}
+        }
+      }
+    });
+
+    return NextResponse.json(
+      { message: 'Data Barang Berhasil Disimpan' }, 
+      { status: 201 }
+    );
+  } catch (e) {
+    return NextResponse.json(
+      { message: "Internal Server Error: " + e },
+      { status: 500 }
+    );
+  }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import CustomerForm from '@/components/forms/master/customer/customer-form';
+import CustomerForm from '@/components/forms/master/customer-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CustomerModel } from '@/models/customer.model';

@@ -1,41 +1,41 @@
 'use client';
 
-import CustomerForm from '@/components/forms/master/customer-form';
+import ProductForm from '@/components/forms/inventory/product-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { CustomerModel } from '@/models/customer.model';
+import { ProductModel } from '@/models/product.model';
 import { apiFetch } from '@/utils/api';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 const pageHeader = {
-  title: 'Tambah Pelanggan',
+  title: 'Tambah Barang',
   breadcrumb: [
     {
-      name: 'Master',
+      name: 'Inventori',
     },
     {
-      href: routes.master.customer.data,
-      name: 'Pelanggan',
+      href: routes.inventory.product.data,
+      name: 'Barang',
     },
     {
-      name: 'Tambah Pelanggan',
+      name: 'Tambah Barang',
     },
   ],
 };
 
-export default function AddCustomerPage() {
+export default function AddProductPage() {
   const router = useRouter();
 
-  const createCustomer = async (data: CustomerModel) => {
+  const createProduct = async (data: ProductModel) => {
     try {
-      const response = await apiFetch('/api/customers', {
+      const response = await apiFetch('/api/products', {
         method: 'POST',
         body: data,
       });
 
       toast.success(response.message, { duration: 4000 });
-      router.push(routes.master.customer.data);
+      router.push(routes.inventory.product.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
@@ -45,7 +45,7 @@ export default function AddCustomerPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <CustomerForm defaultValues={new CustomerModel()} onSubmit={createCustomer} />
+      <ProductForm defaultValues={new ProductModel()} onSubmit={createProduct} />
     </>
   );
 }

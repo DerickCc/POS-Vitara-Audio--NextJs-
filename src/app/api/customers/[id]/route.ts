@@ -3,6 +3,7 @@ import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
+// GetCustomerById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
 
@@ -21,6 +22,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
+// UpdateCustomer
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
   const data: CustomerModel = new CustomerModel(await request.json());
@@ -39,7 +41,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     });
     
     if (!updatedCustomer) {
-      return NextResponse.json({ message: 'Data Pelanggan Gagal Diupdate' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Pelanggan Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
     }
 
     return NextResponse.json({ message: 'Data Pelanggan Berhasil Diupdate' }, { status: 200 });
@@ -48,6 +50,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
+// DeleteCustomer
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
   
@@ -57,7 +60,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     });
 
     if (!deletedCustomer) {
-      return NextResponse.json({ message: 'Data Pelanggan Gagal Dihapus' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Pelanggan Gagal Dihapus Karena Tidak Ditemukan' }, { status: 404 });
     }
 
     return NextResponse.json({ message: 'Data Pelanggan Berhasil Dihapus' }, { status: 200 });

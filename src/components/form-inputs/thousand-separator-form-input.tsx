@@ -8,7 +8,7 @@ type ThousandSeparatorFormInputProps = {
   label: string;
   fieldName: string;
   defaultValue: number;
-  readOnly: boolean;
+  readOnly?: boolean;
   error?: string;
 };
 
@@ -17,7 +17,7 @@ export default function ThousandSeparatorFormInput({
   label,
   fieldName,
   defaultValue,
-  readOnly,
+  readOnly = false,
   error,
 }: ThousandSeparatorFormInputProps) {
   const [displayValue, setDisplayValue] = useState("0");

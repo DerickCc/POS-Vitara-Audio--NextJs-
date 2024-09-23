@@ -1,6 +1,6 @@
 'use client';
 
-import SupplierForm from '@/components/forms/master/supplier/supplier-form';
+import SupplierForm from '@/components/forms/master/supplier-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { SupplierModel } from '@/models/supplier.model';

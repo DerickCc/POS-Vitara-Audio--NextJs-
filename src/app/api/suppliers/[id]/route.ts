@@ -3,6 +3,7 @@ import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
+// GetSupplierById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
 
@@ -21,6 +22,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
+// UpdateSupplier
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
   const data: SupplierModel = new SupplierModel(await request.json());
@@ -46,7 +48,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     });
     
     if (!updatedSupplier) {
-      return NextResponse.json({ message: 'Data Supplier Gagal Diupdate' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Supplier Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
     }
 
     return NextResponse.json({ message: 'Data Supplier Berhasil Diupdate' }, { status: 200 });
@@ -55,6 +57,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
+// DeleteSupplier
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
   
@@ -64,7 +67,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     });
 
     if (!deletedSupplier) {
-      return NextResponse.json({ message: 'Data Supplier Gagal Dihapus' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Supplier Gagal Dihapus Karena Tidak Ditemukan' }, { status: 404 });
     }
 
     return NextResponse.json({ message: 'Data Supplier Berhasil Dihapus' }, { status: 200 });
