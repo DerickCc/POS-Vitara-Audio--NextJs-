@@ -1,3 +1,5 @@
+'use client';
+
 import ProductForm from "@/components/forms/inventory/product-form";
 import PageHeader from "@/components/page-header";
 import { routes } from "@/config/routes";
