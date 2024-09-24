@@ -1,5 +1,5 @@
 import Card from '@/components/card';
-import ThousandSeparatorFormInput from '@/components/form-inputs/thousand-separator-form-input';
+import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
 import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
@@ -50,7 +50,7 @@ export default function SupplierForm({ defaultValues, isLoading = false, onSubmi
             />
 
             <div className="sm:col-span-3 grid sm:grid-cols-2 gap-6">
-              <ThousandSeparatorFormInput
+              <RupiahFormInput
                 setValue={setValue}
                 label="Piutang"
                 fieldName="receivablesLimit"
@@ -58,7 +58,7 @@ export default function SupplierForm({ defaultValues, isLoading = false, onSubmi
                 readOnly={true}
                 error={errors.receivables?.message}
               />
-              <ThousandSeparatorFormInput
+              <RupiahFormInput
                 setValue={setValue}
                 label="Limit Piutang"
                 fieldName="receivablesLimit"

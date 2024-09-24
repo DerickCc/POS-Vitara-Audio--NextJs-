@@ -1,7 +1,7 @@
 "use client";
 
 import Card from "@/components/card";
-import ThousandSeparatorInput from "@/components/inputs/thousand-separator-input";
+import RupiahInput from "@/components/inputs/rupiah-input";
 import { SetStateAction } from "jotai";
 import { Dispatch, FormEvent } from "react";
 import { PiFunnel } from "react-icons/pi";
@@ -76,7 +76,7 @@ export default function SupplierFilter({ localFilters, setLocalFilters, handleSe
                 }
                 getOptionValue={(option) => option.value}
               />
-              <ThousandSeparatorInput
+              <RupiahInput
                 defaultValue={localFilters.receivables}
                 onChange={(value) => handleFilterChange("receivables")(value)}
                 className="w-full ps-3"

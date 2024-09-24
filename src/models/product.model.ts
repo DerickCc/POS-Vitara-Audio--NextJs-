@@ -3,6 +3,7 @@ import { z } from "zod";
 export const ProductSchema = z.object({
   name: z.string().min(1, { message: 'Nama harus diisi' }),
   photo: z.string().optional().nullable(),
+  stock: z.coerce.number().min(0, { message: 'Stok tidak boleh negatif' }),
   restockThreshold: z.coerce.number().min(0, { message: 'Ambang Batas Restok tidak boleh negatif' }),
   uom: z.string().min(1, { message: 'Satuan harus diisi' }),
   purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
@@ -15,7 +16,7 @@ export class ProductModel {
   code: string;
   name: string;
   photo: string;
-  stock: string;
+  stock: number;
   restockThreshold: number;
   uom: string;
   costPrice: number;

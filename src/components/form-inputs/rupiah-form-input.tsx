@@ -1,24 +1,25 @@
 import { formatToCurrency, parseNumber } from "@/utils/helper-function";
 import { useEffect, useState } from "react";
+import { UseFormSetValue } from "react-hook-form";
 import { Input } from "rizzui";
 
-type ThousandSeparatorInputProps = {
+type RupiahFormInputProps = {
+  setValue: UseFormSetValue<any>; // Pass setValue from useForm
+  label: string;
+  fieldName: string;
   defaultValue: number;
-  onChange: (value: number) => void
-  label?: string;
   readOnly?: boolean;
   error?: string;
-  className?: string;
 };
 
-export default function ThousandSeparatorInput({
-  defaultValue,
-  onChange,
+export default function RupiahFormInput({
+  setValue,
   label,
-  readOnly,
+  fieldName,
+  defaultValue,
+  readOnly = false,
   error,
-  className,
-}: ThousandSeparatorInputProps) {
+}: RupiahFormInputProps) {
   const [displayValue, setDisplayValue] = useState("0");
 
   // Format the initial value
@@ -32,20 +33,20 @@ export default function ThousandSeparatorInput({
   const handleChange = (e: any) => {
     const numericValue = parseNumber(e.target.value);
     setDisplayValue(formatToCurrency(numericValue));
-    onChange(numericValue);
+
+    setValue(fieldName, numericValue, { shouldValidate: true }); // Manually update the form state
   };
 
   return (
     <Input
       type="text"
       value={displayValue}
-      onChange={handleChange}
       prefix="Rp "
       label={label}
       placeholder="xxx.xxx.xxx"
       error={error}
-      readOnly={readOnly ?? false}
-      className={className}
+      readOnly={readOnly}
+      onChange={handleChange}
       inputClassName={readOnly ? "bg-gray-100" : ""}
     />
   );

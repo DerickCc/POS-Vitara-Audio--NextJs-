@@ -1,13 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async redirects() {
+  async redirects() { // when accessing source, redirect to destination
     return [
       {
         source: '/master',
         destination: '/master/supplier',
         permanent: true,
       },
-      
+      {
+        source: '/inventory',
+        destination: '/inventory/product',
+        permanent: true,
+      },
     ]
   },
 }

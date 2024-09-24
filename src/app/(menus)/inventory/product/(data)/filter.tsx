@@ -1,4 +1,5 @@
 import Card from "@/components/card";
+import DecimalInput from "@/components/inputs/decimal-input";
 import { filterOperatorOptions } from "@/config/constants";
 import { SetStateAction } from "jotai";
 import { Dispatch, FormEvent } from "react";
@@ -57,11 +58,9 @@ export default function ProductFilter({ localFilters, setLocalFilters, handleSea
                 displayValue={(value) => filterOperatorOptions.find((option) => option.value === value)?.label || ""}
                 getOptionValue={(option) => option.value}
               />
-              <Input
-                type="number"
-                value={localFilters.stock}
-                onChange={(e) => handleFilterChange("stock")(e.target.value)}
-                placeholder="Cari Stok"
+              <DecimalInput
+                defaultValue={localFilters.stock}
+                onChange={(value) => handleFilterChange("stock")(value)}
                 className="w-full ps-3"
               />
             </div>
