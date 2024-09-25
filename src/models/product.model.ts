@@ -28,8 +28,8 @@ export class ProductModel {
   constructor(data: any = {}) {
     this.id = data.id;
     this.code = data.code;
-    this.name = data.name;
-    this.photo = data.photo;
+    this.name = data.name || '';
+    this.photo = data.photo || '';
     this.stock = data.stock || 0;
     this.restockThreshold = data.restockThreshold || 0;
     this.uom = data.uom;

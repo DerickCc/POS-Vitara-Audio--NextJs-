@@ -1,10 +1,12 @@
 import DeletePopover from '@/components/delete-popover';
 import { routes } from '@/config/routes';
-import { formatToCurrency } from '@/utils/helper-function';
+import { formatToCurrency, formatToDecimal } from '@/utils/helper-function';
 import { createColumnHelper } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip } from 'rizzui';
+import Image from 'next/image';
+import imgPlaceholder from '@public/image-placeholder.png';
 
 export type ProductTableType = {
   id: string;
@@ -54,7 +56,14 @@ export const columns = (handleDelete: (id: string) => void) => [
     id: 'photo',
     size: 200,
     header: () => 'Foto',
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <Image
+        src={info.getValue() ? `/product-photo/${info.getValue()}` : imgPlaceholder}
+        alt="Foto Barang"
+        width={150}
+        height={150}
+      />
+    ),
     enableSorting: false,
   }),
   columnHelper.accessor('name', {
@@ -68,7 +77,7 @@ export const columns = (handleDelete: (id: string) => void) => [
     id: 'stock',
     size: 100,
     header: () => 'Stok',
-    cell: (info) => info.getValue(),
+    cell: (info) => formatToDecimal(info.getValue()),
     enableSorting: true,
   }),
   columnHelper.accessor('uom', {
@@ -82,14 +91,14 @@ export const columns = (handleDelete: (id: string) => void) => [
     id: 'restockThreshold',
     size: 100,
     header: () => 'Batas Restok',
-    cell: (info) => info.getValue(),
+    cell: (info) => formatToDecimal(info.getValue()),
     enableSorting: true,
   }),
   columnHelper.accessor('costPriceCode', {
     id: 'costPriceCode',
     size: 160,
     header: () => 'Harga Modal (Kode)',
-    cell: (info) => info.getValue(),
+    cell: (info) => info.getValue() || '-',
     enableSorting: false,
   }),
   columnHelper.accessor('purchasePrice', {
@@ -113,4 +122,4 @@ export const columns = (handleDelete: (id: string) => void) => [
     cell: (info) => info.getValue() || '-',
     enableSorting: false,
   }),
-]
+];

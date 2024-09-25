@@ -16,12 +16,12 @@ import imgPlaceholder from '@public/image-placeholder.png';
 import toast from 'react-hot-toast';
 
 type ProductFormProps = {
-  defaultValues: ProductModel;
+  defaultValues?: ProductModel;
   isLoading?: boolean;
   onSubmit: (data: ProductModel) => Promise<void>;
 };
 
-export default function ProductForm({ defaultValues, isLoading = false, onSubmit }: ProductFormProps) {
+export default function ProductForm({ defaultValues = new ProductModel(), isLoading = false, onSubmit }: ProductFormProps) {
   const {
     register,
     setValue,
@@ -29,10 +29,10 @@ export default function ProductForm({ defaultValues, isLoading = false, onSubmit
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ProductModel>({
-    defaultValues: defaultValues,
+    defaultValues,
     resolver: zodResolver(ProductSchema),
   });
-  const [initValues, setInitValues] = useState(defaultValues);
+
   const [previewImg, setPreviewImg] = useState<string | null>(null);
   const [fileError, setFileError] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -42,7 +42,6 @@ export default function ProductForm({ defaultValues, isLoading = false, onSubmit
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.files);
     const file = e.target.files?.[0];
     const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
 
@@ -55,20 +54,13 @@ export default function ProductForm({ defaultValues, isLoading = false, onSubmit
       // create a preview URL for selected file
       const fileUrl = URL.createObjectURL(file);
       setPreviewImg(fileUrl);
-      setValue('photo', file.name);
+      setValue('photo', file.name.replaceAll(' ', '_'));
     }
-
-    console.log(defaultValues);
   };
 
   const onSubmitHandler = async (data: ProductModel) => {
-    console.log(data);
-    console.log(initValues);
-    console.log(fileInputRef?.current?.files);
-    if (data.photo && data.photo !== initValues.photo) {
-      console.log('masok1');
+    if (data.photo && data.photo !== defaultValues.photo) {
       if (fileInputRef?.current?.files) {
-        console.log('masok2');
         const formData = new FormData();
         formData.append('photo', fileInputRef?.current?.files[0]);
 
@@ -90,12 +82,12 @@ export default function ProductForm({ defaultValues, isLoading = false, onSubmit
       }
     }
 
-    // onSubmit(data)
+    await onSubmit(data)
   };
 
   useEffect(() => {
-    reset(defaultValues); // Update form values when defaultValues change
-    if (defaultValues.photo) setPreviewImg(`@public/product-photo/${defaultValues.photo}`);
+    if (defaultValues.id) reset(defaultValues); // Update form values when defaultValues change and if have id
+    if (defaultValues.photo) setPreviewImg(`/product-photo/${defaultValues.photo}`);
   }, [defaultValues, reset]);
 
   return (
@@ -118,7 +110,7 @@ export default function ProductForm({ defaultValues, isLoading = false, onSubmit
               <div className="flex justify-center align-center my-5">
                 <Image
                   id="previewImg"
-                  src={previewImg ? previewImg : imgPlaceholder}
+                  src={previewImg || imgPlaceholder}
                   alt="Foto Barang"
                   width={220}
                   height={220}
@@ -142,6 +134,7 @@ export default function ProductForm({ defaultValues, isLoading = false, onSubmit
               fieldName="stock"
               defaultValue={defaultValues.stock}
               error={errors.stock?.message}
+              readOnly={true}
             />
             <DecimalFormInput
               setValue={setValue}

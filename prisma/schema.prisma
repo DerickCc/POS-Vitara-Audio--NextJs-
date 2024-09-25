@@ -88,7 +88,7 @@ model Products {
   id               String    @id @default(cuid())
   code             String    @unique @db.VarChar(20)
   name             String    @db.VarChar(100)
-  photo            String?   @db.VarChar(100)
+  photo            String?   @db.VarChar(250)
   stock            Decimal   @default(0.00) @db.Decimal(10, 2)
   restockThreshold Decimal   @map("restock_threshold") @db.Decimal(10, 2)
   uom              String    @db.VarChar(50)

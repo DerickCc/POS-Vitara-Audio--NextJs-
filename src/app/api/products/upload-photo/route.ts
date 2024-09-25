@@ -1,58 +1,53 @@
 import path from 'path';
-import formidable from 'formidable';
 import fs from 'fs';
-import { NextRequest, NextResponse } from 'next/server';
-import { IncomingMessage } from 'http';
+import { writeFile } from "fs/promises";
+import { NextResponse } from 'next/server';
 
-// Disable body parsing for this route
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export async function POST(request: any) {
+  const uploadDir = path.join(process.cwd(), 'public', 'product-photo');
 
-const uploadDir = path.join(process.cwd(), 'public/product-photo');
+  // Check if the directory exists, create if doesnt
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
 
-export function POST(request: NextRequest) {
-  const form = formidable({ uploadDir, keepExtensions: true });
+  const formData = await request.formData();
+  const file = formData.get('photo');
+  console.log(file)
 
-  // Convert NextRequest to IncomingMessage
-  const incomingRequest = request as unknown as IncomingMessage;
-  
-  return new Promise((resolve, reject) => {
-    form.parse(incomingRequest, async (err, fields, files) => {
-      if (err) {
-        return reject(NextResponse.json(
-          { message: 'Error memproses file' }, 
-          { status: 500 }
-        ));
-      }
+  if (!file) {
+    return NextResponse.json(
+      { message: 'Tidak Ada File yang Diupload' }, 
+      { status: 400 }
+    );
+  }
 
-      // Check if the directory exists, create if doesnt
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+  // validate file type
+  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg'];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { message: 'Tipe file tidak didukung' }, 
+        { status: 400 }
+      );
+    }
 
-      const file = files.photo;
-      if (file && file.length > 0) {
-        const oldPath = file[0].filepath;
-        const newPath = path.join(uploadDir, file[0].originalFilename as string);
-        fs.renameSync(oldPath, newPath);
+  // Convert the file data to a Buffer
+  const buffer = Buffer.from(await file.arrayBuffer());
 
-        return resolve(
-          NextResponse.json(
-            { message: 'File Berhasil Diupload' }, 
-            { status: 200 }
-          )
-        );
-      } else {
-        return reject(
-          NextResponse.json(
-            { message: 'Tidak Ada File yang Diupload' }, 
-            { status: 400 }
-          )
-        );
-      }
-    })
-  })
+  // Replace spaces in the file name with underscores
+  const filename = file.name.replaceAll(" ", "_");
+
+  try {
+    await writeFile(path.join(uploadDir, filename), buffer);
+
+    return NextResponse.json(
+      { message: 'File Berhasil Diupload' }, 
+      { status: 200 }
+    );
+  } catch (e) {
+    return NextResponse.json(
+      { message: 'Error memproses file' }, 
+      { status: 500 }
+    )
+  }
 }

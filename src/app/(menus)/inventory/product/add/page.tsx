@@ -45,7 +45,7 @@ export default function AddProductPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <ProductForm defaultValues={new ProductModel()} onSubmit={createProduct} />
+      <ProductForm onSubmit={createProduct} />
     </>
   );
 }
