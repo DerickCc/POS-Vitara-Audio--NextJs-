@@ -45,7 +45,7 @@ export default function AddSupplierPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <SupplierForm defaultValues={new SupplierModel()} onSubmit={createSupplier} />
+      <SupplierForm onSubmit={createSupplier} />
     </>
   );
 }

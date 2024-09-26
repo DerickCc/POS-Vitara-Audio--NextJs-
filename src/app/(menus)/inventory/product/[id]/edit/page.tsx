@@ -27,7 +27,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams();
   const [product, setProduct] = useState<ProductModel>(new ProductModel());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const updateProduct = async (data: ProductModel) => {
     try {

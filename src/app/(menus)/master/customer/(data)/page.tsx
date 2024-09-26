@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import toast from 'react-hot-toast';
 import { apiFetch, toQueryString } from '@/utils/api';
-import { columns } from './customer-table/columns';
+import { columns } from './columns';
 import BasicTable from '@/components/tables/basic-table';
 
 const pageHeader = {
@@ -74,16 +74,16 @@ export default function CustomerDataPage() {
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
     setPageSize(newPageSize);
-  }
+  };
 
   const handlePageIndexChange = (newPageIndex: number) => {
     setPageIndex(newPageIndex);
-  }
+  };
 
   const handleSortingChange: OnChangeFn<SortingState> = (newSorting) => {
     setPageIndex(0);
     setSorting(newSorting);
-  }
+  };
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
@@ -92,7 +92,7 @@ export default function CustomerDataPage() {
       setPageIndex(0);
       setFilters(localFilters);
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -103,7 +103,7 @@ export default function CustomerDataPage() {
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
-  }
+  };
 
   useEffect(() => {
     browseCustomer();

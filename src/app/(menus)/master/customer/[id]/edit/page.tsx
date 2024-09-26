@@ -28,7 +28,7 @@ export default function EditCustomerPage() {
   const router = useRouter();
   const { id } = useParams();
   const [customer, setCustomer] = useState<CustomerModel>(new CustomerModel());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const updateCustomer = async (data: CustomerModel) => {
     try {

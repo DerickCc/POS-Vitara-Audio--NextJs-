@@ -1,54 +1,48 @@
 'use client';
 
-import PageHeader from '@/components/page-header';
-import { routes } from '@/config/routes';
-import { OnChangeFn, SortingState } from '@tanstack/react-table';
-import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
-import { PiPlusBold } from 'react-icons/pi';
-import { Button } from 'rizzui';
-import SupplierFilter, { SupplierTableFilters } from './filters';
-import { apiFetch, toQueryString } from '@/utils/api';
-import toast from 'react-hot-toast';
-import BasicTable from '@/components/tables/basic-table';
-import { columns } from './columns';
+import PageHeader from "@/components/page-header";
+import BasicTable from "@/components/tables/basic-table";
+import { routes } from "@/config/routes";
+import { apiFetch, toQueryString } from "@/utils/api";
+import { OnChangeFn, SortingState } from "@tanstack/react-table";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { PiPlusBold } from "react-icons/pi";
+import { Button } from "rizzui";
 
 const pageHeader = {
-  title: 'Supplier',
+  title: 'Pelanggan',
   breadcrumb: [
     {
       name: 'Master',
     },
     {
-      href: routes.master.supplier.data,
-      name: 'Supplier',
+      href: routes.settings.user.data,
+      name: 'Pelanggan',
     },
   ],
 };
 
-export default function SupplierDataPage() {
-  const [suppliers, setSuppliers] = useState([]);
+export default function UserDataPage() {
+  const [users, setUsers] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [localFilters, setLocalFilters] = useState<SupplierTableFilters>({
+  const [localFilters, setLocalFilters] = useState<UserTableFilters>({
     name: '',
-    pic: '',
+    licensePlate: '',
     phoneNo: '',
-    receivablesOperator: 'gte',
-    receivables: 0,
   });
-  const [filters, setFilters] = useState<SupplierTableFilters>({
+  const [filters, setFilters] = useState<UserTableFilters>({
     name: '',
-    pic: '',
+    licensePlate: '',
     phoneNo: '',
-    receivablesOperator: 'gte',
-    receivables: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const browseSupplier = useCallback(async () => {
+  const browseUser = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -56,7 +50,7 @@ export default function SupplierDataPage() {
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
       const response = await apiFetch(
-        `/api/suppliers${toQueryString({
+        `/api/users${toQueryString({
           pageSize,
           pageIndex,
           sortColumn,
@@ -66,7 +60,7 @@ export default function SupplierDataPage() {
         { method: 'GET' }
       );
 
-      setSuppliers(response.result);
+      setUsers(response.result);
       setTotalRowCount(response.recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -91,33 +85,33 @@ export default function SupplierDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      browseSupplier();
+      browseUser();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleChangeStatus = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
+      const response = await apiFetch(`/api/users/${id}/change-status`, { method: 'PUT' });
 
-      toast.success('Data Supplier Berhasil Dihapus.', { duration: 5000 });
-      browseSupplier();
+      toast.success('Status Akun Berhasil Dihapus', { duration: 5000 });
+      browseUser();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
   };
 
   useEffect(() => {
-    browseSupplier();
-  }, [browseSupplier]);
+    browseUser();
+  }, [browseUser]);
 
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.master.supplier.add} className="w-full sm:w-auto">
+          <Link href={routes.master.customer.add} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto">
               <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
               Tambah
@@ -126,14 +120,14 @@ export default function SupplierDataPage() {
         </div>
       </PageHeader>
 
-      <SupplierFilter
+      <UserFilter
         localFilters={localFilters}
         setLocalFilters={setLocalFilters}
         handleSearch={() => handleSearch()}
       />
 
       <BasicTable
-        data={suppliers}
+        data={users}
         columns={columns}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}

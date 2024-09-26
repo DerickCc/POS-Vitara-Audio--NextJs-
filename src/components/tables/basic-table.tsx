@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import cn from "@/utils/class-names";
-import { pageSizeOptions, tableClass } from "@/config/constants";
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { ActionIcon, Select, SelectOption, Text } from "rizzui";
+import cn from '@/utils/class-names';
+import { pageSizeOptions, tableClass } from '@/config/constants';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { ActionIcon, Select, SelectOption, Text } from 'rizzui';
 import {
   PiCaretDoubleLeftBold,
   PiCaretDoubleRightBold,
@@ -11,11 +11,11 @@ import {
   PiCaretLeftBold,
   PiCaretRightBold,
   PiCaretUpFill,
-} from "react-icons/pi";
-import Spinner from "@/components/spinner";
-import Card from "@/components/card";
-import { BasicTableProps } from "@/models/table.model";
-import { CustomerTableType } from "@/app/(menus)/master/customer/(data)/customer-table/columns";
+} from 'react-icons/pi';
+import Spinner from '@/components/spinner';
+import Card from '@/components/card';
+import { BasicTableProps } from '@/models/table.model';
+import { CustomerTableType } from '@/app/(menus)/master/customer/(data)/columns';
 
 export default function CustomersTable({
   data,
@@ -65,7 +65,7 @@ export default function CustomersTable({
 
           <div className="custom-scrollbar w-full max-w-full overflow-x-auto">
             <table
-              className={cn(tableClass, "my-7")}
+              className={cn(tableClass, 'my-7')}
               style={{
                 width: table.getTotalSize(),
               }}
@@ -80,10 +80,10 @@ export default function CustomersTable({
                         <th
                           key={header.id}
                           onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                          className={canSort ? "cursor-pointer" : ""}
+                          className={canSort ? 'cursor-pointer' : ''}
                           style={{ width: header.getSize() }}
                         >
-                          <div className={idx === 0 ? "flex justify-center" : "flex justify-between"}>
+                          <div className={idx === 0 ? 'flex justify-center' : 'flex justify-between'}>
                             {flexRender(header.column.columnDef.header, header.getContext())}
 
                             {/* render if canSort */}

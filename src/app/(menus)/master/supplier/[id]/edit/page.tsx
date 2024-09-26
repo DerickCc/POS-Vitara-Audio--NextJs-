@@ -27,7 +27,7 @@ export default function EditSupplierPage() {
   const router = useRouter();
   const { id } = useParams();
   const [supplier, setSupplier] = useState<SupplierModel>(new SupplierModel());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const updateSupplier = async (data: SupplierModel) => {
     try {

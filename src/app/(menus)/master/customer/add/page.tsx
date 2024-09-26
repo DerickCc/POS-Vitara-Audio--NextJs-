@@ -45,7 +45,7 @@ export default function AddCustomerPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <CustomerForm defaultValues={new CustomerModel()} onSubmit={createCustomer} />
+      <CustomerForm onSubmit={createCustomer} />
     </>
   );
 }

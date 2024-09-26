@@ -21,7 +21,11 @@ type ProductFormProps = {
   onSubmit: (data: ProductModel) => Promise<void>;
 };
 
-export default function ProductForm({ defaultValues = new ProductModel(), isLoading = false, onSubmit }: ProductFormProps) {
+export default function ProductForm({
+  defaultValues = new ProductModel(),
+  isLoading = false,
+  onSubmit,
+}: ProductFormProps) {
   const {
     register,
     setValue,
@@ -82,7 +86,7 @@ export default function ProductForm({ defaultValues = new ProductModel(), isLoad
       }
     }
 
-    await onSubmit(data)
+    await onSubmit(data);
   };
 
   useEffect(() => {

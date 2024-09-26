@@ -11,5 +11,5 @@ export interface BasicTableProps<T> {
   setSorting: OnChangeFn<SortingState>;
   isLoading: boolean;
   totalRowCount: number;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
 }

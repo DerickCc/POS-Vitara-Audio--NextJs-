@@ -11,24 +11,28 @@ import { useEffect } from 'react';
 import Spinner from '@/components/spinner';
 
 type CustomerFormProps = {
-  defaultValues: CustomerModel;
+  defaultValues?: CustomerModel;
   isLoading?: boolean;
   onSubmit: (data: CustomerModel) => Promise<void>;
 };
 
-export default function CustomerForm({ defaultValues, isLoading = false, onSubmit }: CustomerFormProps) {
+export default function CustomerForm({
+  defaultValues = new CustomerModel(),
+  isLoading = false,
+  onSubmit,
+}: CustomerFormProps) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CustomerModel>({
-    defaultValues: defaultValues,
+    defaultValues,
     resolver: zodResolver(CustomerSchema),
   });
 
   useEffect(() => {
-    reset(defaultValues); // Update form values when defaultValues change
+    if (defaultValues.id) reset(defaultValues); // Update form values when defaultValues change
   }, [defaultValues, reset]);
 
   return (

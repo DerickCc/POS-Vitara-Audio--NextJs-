@@ -11,7 +11,7 @@ import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
 import BasicTable from '@/components/tables/basic-table';
-import { columns } from './product-table/colomns';
+import { columns } from './colomns';
 
 const pageHeader = {
   title: 'Barang',

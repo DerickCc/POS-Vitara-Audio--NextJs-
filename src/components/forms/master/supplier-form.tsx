@@ -12,12 +12,16 @@ import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button, Input, Loader, Textarea } from 'rizzui';
 
 type SupplierFormProps = {
-  defaultValues: SupplierModel;
+  defaultValues?: SupplierModel;
   isLoading?: boolean;
   onSubmit: (data: SupplierModel) => Promise<void>;
 };
 
-export default function SupplierForm({ defaultValues, isLoading = false, onSubmit }: SupplierFormProps) {
+export default function SupplierForm({
+  defaultValues = new SupplierModel(),
+  isLoading = false,
+  onSubmit,
+}: SupplierFormProps) {
   const {
     register,
     setValue,
@@ -25,12 +29,12 @@ export default function SupplierForm({ defaultValues, isLoading = false, onSubmi
     formState: { errors, isSubmitting },
     reset,
   } = useForm<SupplierModel>({
-    defaultValues: defaultValues,
+    defaultValues,
     resolver: zodResolver(SupplierSchema),
   });
 
   useEffect(() => {
-    reset(defaultValues); // Update form values when defaultValues change
+    if (defaultValues.id) reset(defaultValues); // Update form values when defaultValues change
   }, [defaultValues, reset]);
 
   return (
