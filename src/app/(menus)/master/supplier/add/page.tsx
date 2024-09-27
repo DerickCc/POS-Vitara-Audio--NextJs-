@@ -15,7 +15,7 @@ const pageHeader = {
       name: 'Master',
     },
     {
-      href: routes.master.customer.data,
+      href: routes.master.supplier.data,
       name: 'Supplier',
     },
     {

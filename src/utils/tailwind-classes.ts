@@ -1,38 +1,3 @@
-export const CURRENCY_CODE = 'IDR';
-export const LOCALE = 'id';
-export const CURRENCY_OPTIONS = {
-  formation: 'id-ID',
-  fractions: 2,
-};
-
-export const pageSizeOptions = [
-  {
-    value: 5,
-    label: '5',
-  },
-  {
-    value: 10,
-    label: '10',
-  },
-  {
-    value: 15,
-    label: '15',
-  },
-  {
-    value: 25,
-    label: '25',
-  },
-  {
-    value: 50,
-    label: '50',
-  },
-];
-
-export const filterOperatorOptions = [
-  { label: ">=", value: "gte" },
-  { label: "<=", value: "lte" },
-];
-
 export const tableClass = `
   min-w-full border-collapse [&_thead]:bg-primary-lighter/10 [&_th]:text-start [&_th]:text-gray-900 [&_th]:tracking-wider [&_th]:uppercase [&_th]:font-semibold 
   [&_th]:text-xs [&_th]:p-3 [&_tbody_tr]:border-b [&_tbody_tr]:border-muted/70 hover:[&_tbody_tr]:bg-gray-200/40 [&_td]:py-4 [&_td]:px-3 
@@ -46,3 +11,14 @@ export const tableClass = `
   after:[&_.sticky-right]:duration-300 after:[&_.sticky-right]:-translate-x-full after:[&_.sticky-right]:content-[""] [&_th.sticky-left]:bg-gray-100 
   [&_td.sticky-left]:bg-white dark:[&_td.sticky-left]:bg-gray-50 [&_th.sticky-right]:bg-gray-100 [&_td.sticky-right]:bg-white dark:[&_td.sticky-right]:bg-gray-50
 `;
+
+export const baseBadgeClass = 'inline-flex items-center rounded-md py-1 px-3 font-medium'
+
+export const badgeColorClass = {
+  red: 'bg-red-100 text-red-700',
+  green: 'bg-green-100 text-green-700',
+  yellow: 'bg-yellow-100 text-yellow-700',
+  blue: 'bg-blue-100 text-blue-700',
+  purple: 'bg-purple-100 text-purple-700',
+  gray: 'bg-gray-100 text-gray-700',
+}

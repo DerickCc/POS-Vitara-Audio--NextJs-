@@ -1,17 +1,17 @@
 import { ActionIcon, Button, Popover, Title, Text } from "rizzui";
 import { FaRegTrashAlt } from "react-icons/fa";
 
-type DeletePopoverProps = {
+type ActionPopoverProps = {
   title: string;
   description: string;
-  onDelete: () => void;
+  onAction: () => void;
 };
 
-export default function DeletePopover({
+export default function ActionPopover({
   title,
   description,
-  onDelete,
-}: DeletePopoverProps) {
+  onAction,
+}: ActionPopoverProps) {
   return (
     <Popover placement="right">
       {/* the btn icon on UI */}
@@ -44,7 +44,7 @@ export default function DeletePopover({
                 size="sm"
                 color="danger"
                 className="me-1.5 h-7"
-                onClick={onDelete}
+                onClick={onAction}
               >
                 Iya
               </Button>

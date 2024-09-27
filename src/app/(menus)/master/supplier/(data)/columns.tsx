@@ -1,24 +1,13 @@
-import DeletePopover from '@/components/delete-popover';
+import ActionPopover from '@/components/action-popover';
 import { routes } from '@/config/routes';
+import { SupplierModel } from '@/models/supplier.model';
 import { formatToCurrency } from '@/utils/helper-function';
 import { createColumnHelper } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip } from 'rizzui';
 
-export type SupplierTableType = {
-  id: string;
-  code: string;
-  name: string;
-  pic: string;
-  phoneNo: string;
-  receivablesLimit: number;
-  receivables: number;
-  address: string;
-  remarks: string;
-};
-
-const columnHelper = createColumnHelper<SupplierTableType>();
+const columnHelper = createColumnHelper<SupplierModel>();
 
 export const columns = (handleDelete: (id: string) => void) => [
   columnHelper.display({
@@ -26,27 +15,25 @@ export const columns = (handleDelete: (id: string) => void) => [
     size: 100,
     header: () => 'Aksi',
     cell: ({ row }) => (
-      <>
-        <div className="flex items-center justify-center gap-3">
-          <Tooltip size="sm" content="Edit" color="invert">
-            <Link href={routes.master.supplier.edit(row.original.id)} aria-label="ke halaman edit pelanggan">
-              <ActionIcon
-                as="span"
-                size="sm"
-                variant="outline"
-                className="text-yellow-500 hover:border-yellow-600 hover:text-yellow-600"
-              >
-                <LuPencil className="size-4" />
-              </ActionIcon>
-            </Link>
-          </Tooltip>
-          <DeletePopover
-            title="Hapus Supplier"
-            description={`Apakah Anda yakin ingin menghapus Supplier '${row.original.name}'?`}
-            onDelete={() => handleDelete(row.original.id)}
-          />
-        </div>
-      </>
+      <div className="flex items-center justify-center gap-3">
+        <Tooltip size="sm" content="Edit" color="invert">
+          <Link href={routes.master.supplier.edit(row.original.id)} aria-label="ke halaman edit pelanggan">
+            <ActionIcon
+              as="span"
+              size="sm"
+              variant="outline"
+              className="text-yellow-500 hover:border-yellow-600 hover:text-yellow-600"
+            >
+              <LuPencil className="size-4" />
+            </ActionIcon>
+          </Link>
+        </Tooltip>
+        <ActionPopover
+          title="Hapus Supplier"
+          description={`Apakah Anda yakin ingin menghapus Supplier '${row.original.name}'?`}
+          onAction={() => handleDelete(row.original.id)}
+        />
+      </div>
     ),
   }),
   columnHelper.accessor('code', {

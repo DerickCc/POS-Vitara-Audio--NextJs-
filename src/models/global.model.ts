@@ -1,4 +1,5 @@
-import { ColumnDef, OnChangeFn, SortingState } from "@tanstack/react-table";
+import { OnChangeFn, SortingState } from "@tanstack/react-table";
+import { Dispatch, SetStateAction } from "react";
 
 export interface BasicTableProps<T> {
   data: T[];
@@ -12,4 +13,10 @@ export interface BasicTableProps<T> {
   isLoading: boolean;
   totalRowCount: number;
   onDelete?: (id: string) => void;
+}
+
+export interface FiltersProps<T> {
+  localFilters: T;
+  setLocalFilters: Dispatch<SetStateAction<T>>;
+  handleSearch: () => void;
 }

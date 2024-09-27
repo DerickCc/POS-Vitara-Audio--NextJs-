@@ -1,28 +1,27 @@
-"use client";
+'use client';
 
-import Card from "@/components/card";
-import RupiahInput from "@/components/inputs/rupiah-input";
-import { SetStateAction } from "jotai";
-import { Dispatch, FormEvent } from "react";
-import { PiFunnel } from "react-icons/pi";
-import { Button, Input, Select } from "rizzui";
-import { filterOperatorOptions } from "@/config/constants";
+import Card from '@/components/card';
+import RupiahInput from '@/components/inputs/rupiah-input';
+import { SetStateAction } from 'jotai';
+import { Dispatch, FormEvent } from 'react';
+import { PiFunnel } from 'react-icons/pi';
+import { Button, Input, Select } from 'rizzui';
+import { filterOperatorOptions } from '@/config/global-variables';
+import { FiltersProps } from '@/models/global.model';
 
 export type SupplierTableFilters = {
   name: string;
   pic: string;
   phoneNo: string;
-  receivablesOperator: "gte" | "lte"; // greater than or equal | less than or equal
+  receivablesOperator: 'gte' | 'lte'; // greater than or equal | less than or equal
   receivables: number;
 };
 
-interface SupplierFiltersProps {
-  localFilters: SupplierTableFilters;
-  setLocalFilters: Dispatch<SetStateAction<SupplierTableFilters>>;
-  handleSearch: () => void;
-}
-
-export default function SupplierFilter({ localFilters, setLocalFilters, handleSearch }: SupplierFiltersProps) {
+export default function SupplierFilter({
+  localFilters,
+  setLocalFilters,
+  handleSearch,
+}: FiltersProps<SupplierTableFilters>) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     handleSearch();
@@ -46,19 +45,19 @@ export default function SupplierFilter({ localFilters, setLocalFilters, handleSe
         <div className="grid sm:grid-cols-3 gap-6 mb-5">
           <Input
             value={localFilters.name}
-            onChange={(e) => handleFilterChange("name")(e.target.value)}
+            onChange={(e) => handleFilterChange('name')(e.target.value)}
             label="Nama"
             placeholder="Cari Nama"
           />
           <Input
             value={localFilters.pic}
-            onChange={(e) => handleFilterChange("pic")(e.target.value)}
+            onChange={(e) => handleFilterChange('pic')(e.target.value)}
             label="PIC"
             placeholder="Cari PIC"
           />
           <Input
             value={localFilters.phoneNo}
-            onChange={(e) => handleFilterChange("phoneNo")(e.target.value)}
+            onChange={(e) => handleFilterChange('phoneNo')(e.target.value)}
             label="No. Telepon"
             placeholder="Cari No. Telepon"
           />
@@ -68,17 +67,15 @@ export default function SupplierFilter({ localFilters, setLocalFilters, handleSe
             <div className="flex">
               <Select
                 value={localFilters.receivablesOperator}
-                onChange={(value: string) => handleFilterChange("receivablesOperator")(value)}
+                onChange={(value: string) => handleFilterChange('receivablesOperator')(value)}
                 className="w-24"
                 options={filterOperatorOptions}
-                displayValue={(value) =>
-                  filterOperatorOptions.find((option) => option.value === value)?.label || ""
-                }
+                displayValue={(value) => filterOperatorOptions.find((option) => option.value === value)?.label || ''}
                 getOptionValue={(option) => option.value}
               />
               <RupiahInput
                 defaultValue={localFilters.receivables}
-                onChange={(value) => handleFilterChange("receivables")(value)}
+                onChange={(value) => handleFilterChange('receivables')(value)}
                 className="w-full ps-3"
               />
             </div>

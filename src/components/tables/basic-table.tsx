@@ -1,7 +1,7 @@
 'use client';
 
 import cn from '@/utils/class-names';
-import { pageSizeOptions, tableClass } from '@/config/constants';
+import { pageSizeOptions } from '@/config/global-variables';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { ActionIcon, Select, SelectOption, Text } from 'rizzui';
 import {
@@ -14,10 +14,10 @@ import {
 } from 'react-icons/pi';
 import Spinner from '@/components/spinner';
 import Card from '@/components/card';
-import { BasicTableProps } from '@/models/table.model';
-import { CustomerTableType } from '@/app/(menus)/master/customer/(data)/columns';
+import { BasicTableProps } from '@/models/global.model';
+import { tableClass } from '@/utils/tailwind-classes';
 
-export default function CustomersTable({
+export default function BasicTable<T>({
   data,
   columns,
   pageSize,
@@ -29,7 +29,7 @@ export default function CustomersTable({
   isLoading,
   totalRowCount,
   onDelete,
-}: BasicTableProps<CustomerTableType>) {
+}: BasicTableProps<T>) {
   const table = useReactTable({
     data: data,
     columns: columns(onDelete),

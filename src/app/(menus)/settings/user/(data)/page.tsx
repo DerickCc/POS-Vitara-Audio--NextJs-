@@ -1,25 +1,28 @@
 'use client';
 
-import PageHeader from "@/components/page-header";
-import BasicTable from "@/components/tables/basic-table";
-import { routes } from "@/config/routes";
-import { apiFetch, toQueryString } from "@/utils/api";
-import { OnChangeFn, SortingState } from "@tanstack/react-table";
-import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { PiPlusBold } from "react-icons/pi";
-import { Button } from "rizzui";
+import PageHeader from '@/components/page-header';
+import BasicTable from '@/components/tables/basic-table';
+import { routes } from '@/config/routes';
+import { apiFetch, toQueryString } from '@/utils/api';
+import { OnChangeFn, SortingState } from '@tanstack/react-table';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { PiPlusBold } from 'react-icons/pi';
+import { Button } from 'rizzui';
+import UserFilter, { UserTableFilters } from './filters';
+import { columns } from './columns';
+import { UserModel } from '@/models/user.model';
 
 const pageHeader = {
-  title: 'Pelanggan',
+  title: 'User',
   breadcrumb: [
     {
-      name: 'Master',
+      name: 'Pengaturan',
     },
     {
       href: routes.settings.user.data,
-      name: 'Pelanggan',
+      name: 'User',
     },
   ],
 };
@@ -31,13 +34,13 @@ export default function UserDataPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localFilters, setLocalFilters] = useState<UserTableFilters>({
     name: '',
-    licensePlate: '',
-    phoneNo: '',
+    accountStatus: '',
+    role: '',
   });
   const [filters, setFilters] = useState<UserTableFilters>({
     name: '',
-    licensePlate: '',
-    phoneNo: '',
+    accountStatus: '',
+    role: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
@@ -111,7 +114,7 @@ export default function UserDataPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
         <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.master.customer.add} className="w-full sm:w-auto">
+          <Link href={routes.settings.user.add} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto">
               <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
               Tambah
@@ -120,13 +123,9 @@ export default function UserDataPage() {
         </div>
       </PageHeader>
 
-      <UserFilter
-        localFilters={localFilters}
-        setLocalFilters={setLocalFilters}
-        handleSearch={() => handleSearch()}
-      />
+      <UserFilter localFilters={localFilters} setLocalFilters={setLocalFilters} handleSearch={() => handleSearch()} />
 
-      <BasicTable
+      <BasicTable<UserModel>
         data={users}
         columns={columns}
         pageSize={pageSize}
@@ -137,7 +136,7 @@ export default function UserDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        onDelete={handleDelete}
+        onDelete={handleChangeStatus}
       />
     </>
   );

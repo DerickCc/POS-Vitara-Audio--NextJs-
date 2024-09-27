@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export class UserModel {
-  id: number;
+  id: string;
   name: string;
   username: string;
   password: string;
@@ -44,13 +44,13 @@ export const CreateUserSchema = z.object({
 });
 
 export class CreateUserModel {
-  id: number;
+  id: string;
   name: string;
   username: string;
   password: string;
   confirmPassword: string;
   accountStatus: boolean;
-  role: "Admin" | "Kasir";
+  role: "Admin" | "Kasir" | '';
 
   constructor(data: any = {}) {
     this.id = data.id || null;
@@ -89,7 +89,7 @@ export const UpdateUserSchema = z.object({
 });
 
 export class UpdateUserModel {
-  id: number;
+  id: string;
   name: string;
   username: string;
   oldPassword: string;
