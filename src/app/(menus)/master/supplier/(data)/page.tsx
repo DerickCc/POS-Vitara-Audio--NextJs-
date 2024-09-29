@@ -102,7 +102,7 @@ export default function SupplierDataPage() {
     try {
       const response = await apiFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
 
-      toast.success('Data Supplier Berhasil Dihapus.', { duration: 5000 });
+      toast.success(response.message, { duration: 5000 });
       browseSupplier();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });

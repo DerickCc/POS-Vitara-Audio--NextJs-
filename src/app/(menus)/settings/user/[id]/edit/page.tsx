@@ -1,8 +1,9 @@
 'use client';
 
+import UserForm from '@/components/forms/settings/user-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { UserModel } from '@/models/user.model';
+import { CreateUpdateUserModel, UpdateUserSchema, UserModel } from '@/models/user.model';
 import { apiFetch } from '@/utils/api';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -28,7 +29,7 @@ export default function EditUserPage() {
   const [user, setUser] = useState<UserModel>(new UserModel());
   const [isLoading, setIsLoading] = useState(true);
 
-  const updateUser = async (data: UserModel) => {
+  const updateUser = async (data: CreateUpdateUserModel) => {
     try {
       const response = await apiFetch(`/api/users/${id}`, {
         method: 'PUT',
@@ -62,7 +63,12 @@ export default function EditUserPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <UserForm defaultValues={user} isLoading={isLoading} onSubmit={updateUser} />
+      <UserForm
+        defaultValues={new CreateUpdateUserModel(user)}
+        schema={UpdateUserSchema}
+        isLoading={isLoading}
+        onSubmit={updateUser}
+      />
     </>
   );
 }

@@ -1,9 +1,17 @@
 import { OnChangeFn, SortingState } from "@tanstack/react-table";
 import { Dispatch, SetStateAction } from "react";
 
+export interface TableAction {
+  label: string;
+  title: string;
+  description: string;
+  color: 'red' | 'green' | 'yellow' | 'blue' | 'purple' | 'gray';
+  handler: (id: string) => void;
+}
+
 export interface BasicTableProps<T> {
   data: T[];
-  columns: (handleDelete: (id: string) => void) => any[];
+  columns: (actions: TableAction[]) => any[];
   pageSize: number;
   setPageSize: (size: number) => void;
   pageIndex: number;
@@ -12,7 +20,7 @@ export interface BasicTableProps<T> {
   setSorting: OnChangeFn<SortingState>;
   isLoading: boolean;
   totalRowCount: number;
-  onDelete?: (id: string) => void;
+  actions: TableAction[];
 }
 
 export interface FiltersProps<T> {

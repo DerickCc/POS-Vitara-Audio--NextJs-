@@ -40,7 +40,6 @@ export default function LogInForm() {
     <form onSubmit={handleSubmit(login)}>
       <div className="space-y-5">
         <Input
-          id="username"
           type="text"
           size="lg"
           label="Username"
@@ -51,7 +50,6 @@ export default function LogInForm() {
           {...register("username")}
         />
         <Password
-          id="password"
           size="lg"
           label="Password"
           className="pb-2 [&>label>span]:font-medium"

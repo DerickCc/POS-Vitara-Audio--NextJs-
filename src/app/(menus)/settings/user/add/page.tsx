@@ -1,6 +1,9 @@
+'use client';
+
+import UserForm from '@/components/forms/settings/user-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { UserModel } from '@/models/user.model';
+import { CreateUpdateUserModel, CreateUserSchema } from '@/models/user.model';
 import { apiFetch } from '@/utils/api';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -24,7 +27,7 @@ const pageHeader = {
 export default function AddUserPage() {
   const router = useRouter();
 
-  const createUser = async (data: UserModel) => {
+  const createUser = async (data: CreateUpdateUserModel) => {
     try {
       const response = await apiFetch('/api/users', {
         method: 'POST',
@@ -42,7 +45,7 @@ export default function AddUserPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <UserForm onSubmit={createUser} />
+      <UserForm schema={CreateUserSchema} onSubmit={createUser} />
     </>
   );
 }

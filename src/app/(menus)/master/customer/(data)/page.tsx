@@ -98,7 +98,7 @@ export default function CustomerDataPage() {
     try {
       const response = await apiFetch(`/api/customers/${id}`, { method: 'DELETE' });
 
-      toast.success('Data Pelanggan Berhasil Dihapus', { duration: 5000 });
+      toast.success(response.message, { duration: 5000 });
       browseCustomer();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });

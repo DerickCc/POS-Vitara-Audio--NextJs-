@@ -100,7 +100,7 @@ export default function ProductDataPage() {
     try {
       const response = await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
 
-      toast.success('Data Barang Berhasil Dihapus.', { duration: 5000 });
+      toast.success(response.message, { duration: 5000 });
       browseProduct();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });

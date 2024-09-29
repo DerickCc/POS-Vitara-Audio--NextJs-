@@ -1,4 +1,5 @@
 import Card from '@/components/card';
+import { accountStatusOptions, roleOptions } from '@/config/global-variables';
 import { FiltersProps } from '@/models/global.model';
 import { FormEvent } from 'react';
 import { PiFunnel } from 'react-icons/pi';
@@ -9,16 +10,6 @@ export type UserTableFilters = {
   accountStatus: string;
   role: 'Admin' | 'Kasir' | '';
 };
-
-const accountStatusOptions = [
-  { label: 'Aktif', value: 'true'},
-  { label: 'Nonaktif', value: 'false'},
-];
-
-const roleOptions = [
-  { label: 'Admin', value: 'Admin'},
-  { label: 'Kasir', value: 'Kasir'},
-];
 
 export default function UserFilter({ localFilters, setLocalFilters, handleSearch }: FiltersProps<UserTableFilters>) {
   const handleSubmit = (e: FormEvent) => {
@@ -51,8 +42,10 @@ export default function UserFilter({ localFilters, setLocalFilters, handleSearch
           <Select
             value={localFilters.accountStatus}
             onChange={(value: string) => handleFilterChange('accountStatus')(value)}
+            label="Status Akun"
+            placeholder="Pilih Status Akun"
             options={accountStatusOptions}
-            displayValue={(value) => accountStatusOptions.find((option) => option.value === value)?.label || ''}
+            displayValue={(value) => accountStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
             onClear={() => handleFilterChange('accountStatus')('')}
@@ -60,8 +53,10 @@ export default function UserFilter({ localFilters, setLocalFilters, handleSearch
           <Select
             value={localFilters.role}
             onChange={(value: string) => handleFilterChange('role')(value)}
+            label="Role"
+            placeholder="Pilih Role"
             options={roleOptions}
-            displayValue={(value) => roleOptions.find((option) => option.value === value)?.label || ''}
+            displayValue={(value) => roleOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
             onClear={() => handleFilterChange('role')('')}

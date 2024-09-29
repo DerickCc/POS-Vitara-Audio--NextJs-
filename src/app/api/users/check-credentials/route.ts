@@ -7,8 +7,8 @@ import { NextResponse } from "next/server";
 // CheckCredentials
 export async function POST(request: Request) {
   const data: LoginModel = new LoginModel(await request.json());
-  const hashPassword = await hash(data.password, 10);
-
+  
+  // const hashPassword = await hash(data.password, 10);
   // await db.users.create({
   //   data: {
   //     username: 'admin123',
@@ -45,10 +45,10 @@ export async function POST(request: Request) {
     }
 
     // compare plain input password with hashed db password
-    const passwordMatch = await compare(data.password, user.password);
+    const passwordMatched = await compare(data.password, user.password);
 
     // if password doesn't match
-    if (!passwordMatch) {
+    if (!passwordMatched) {
       return NextResponse.json(
         { message: "Password Anda salah." },
         { status: 401 }

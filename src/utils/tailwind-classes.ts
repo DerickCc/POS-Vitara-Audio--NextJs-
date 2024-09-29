@@ -22,3 +22,23 @@ export const badgeColorClass = {
   purple: 'bg-purple-100 text-purple-700',
   gray: 'bg-gray-100 text-gray-700',
 }
+
+export const actionIconColorClass = {
+  red: 'text-red-500 hover:border-red-600 hover:text-red-600',
+  green: 'text-green-500 hover:border-green-600 hover:text-green-600',
+  yellow: 'text-yellow-500 hover:border-yellow-600 hover:text-yellow-600',
+  blue: '',
+  purple: 'text-purple-500 hover:border-purple-600 hover:text-purple-600',
+  gray: 'text-gray-500 hover:border-gray-600 hover:text-gray-600',
+}
+
+export const baseButtonClass = 'hover:text-gray-100 disabled:bg-gray-400 disabled:text-gray-200';
+
+export const buttonColorClass = {
+  red: 'bg-red-500 hover:bg-red-700',
+  green: 'bg-green-500 hover:bg-green-700',
+  yellow: 'bg-yellow-500 hover:bg-yellow-600',
+  purple: 'bg-purple-500 hover:bg-purple-700',
+  blue: '',
+  gray: 'bg-gray-500 hover:bg-gray-700',
+}

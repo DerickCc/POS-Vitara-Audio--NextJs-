@@ -13,6 +13,7 @@ import { Button } from 'rizzui';
 import UserFilter, { UserTableFilters } from './filters';
 import { columns } from './columns';
 import { UserModel } from '@/models/user.model';
+import { TableAction } from '@/models/global.model';
 
 const pageHeader = {
   title: 'User',
@@ -99,12 +100,22 @@ export default function UserDataPage() {
     try {
       const response = await apiFetch(`/api/users/${id}/change-status`, { method: 'PUT' });
 
-      toast.success('Status Akun Berhasil Dihapus', { duration: 5000 });
+      toast.success(response.message, { duration: 5000 });
       browseUser();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
   };
+
+  const actions: TableAction[] = [
+    {
+      label: 'changeStatus',
+      title: 'Ubah Status Akun',
+      description: 'Apakah Anda yakin ingin mengubah status akun User?',
+      color: 'red',
+      handler: (id: string) => handleChangeStatus(id),
+    },
+  ];
 
   useEffect(() => {
     browseUser();
@@ -136,7 +147,7 @@ export default function UserDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        onDelete={handleChangeStatus}
+        actions={actions}
       />
     </>
   );

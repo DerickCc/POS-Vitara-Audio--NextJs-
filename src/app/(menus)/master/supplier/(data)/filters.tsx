@@ -70,7 +70,7 @@ export default function SupplierFilter({
                 onChange={(value: string) => handleFilterChange('receivablesOperator')(value)}
                 className="w-24"
                 options={filterOperatorOptions}
-                displayValue={(value) => filterOperatorOptions.find((option) => option.value === value)?.label || ''}
+                displayValue={(value) => filterOperatorOptions.find((option) => option.value === value)?.label ?? ''}
                 getOptionValue={(option) => option.value}
               />
               <RupiahInput

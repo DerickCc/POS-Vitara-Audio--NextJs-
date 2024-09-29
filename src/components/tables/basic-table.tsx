@@ -28,11 +28,11 @@ export default function BasicTable<T>({
   setSorting,
   isLoading,
   totalRowCount,
-  onDelete,
+  actions
 }: BasicTableProps<T>) {
   const table = useReactTable({
     data: data,
-    columns: columns(onDelete),
+    columns: columns(actions),
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },

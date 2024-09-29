@@ -9,10 +9,10 @@ export class UserModel {
   role: "Admin" | "Kasir";
 
   constructor(data: any = {}) {
-    this.id = data.id || null;
-    this.name = data.name || null;
-    this.username = data.username || null;
-    this.password = data.password || null;
+    this.id = data.id;
+    this.name = data.name;
+    this.username = data.username;
+    this.password = data.password;
     this.accountStatus = data.accountStatus ?? true;
     this.role = data.role || "Kasir";
   }
@@ -43,30 +43,6 @@ export const CreateUserSchema = z.object({
   path: ['confirmPassword'],
 });
 
-export class CreateUserModel {
-  id: string;
-  name: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
-  accountStatus: boolean;
-  role: "Admin" | "Kasir" | '';
-
-  constructor(data: any = {}) {
-    this.id = data.id || null;
-    this.name = data.name || null;
-    this.username = data.username || null;
-    this.password = data.password || null;
-    this.confirmPassword = data.confirmPassword || null;
-    this.accountStatus = data.accountStatus ?? true;
-    this.role = data.role || "Kasir";
-  }
-
-  validate() {
-    return CreateUserSchema.safeParse(this);
-  }
-} 
-
 export const UpdateUserSchema = z.object({
   name: z
     .string()
@@ -88,32 +64,40 @@ export const UpdateUserSchema = z.object({
   role: z.string(),
 });
 
-export class UpdateUserModel {
+export class CreateUpdateUserModel {
   id: string;
   name: string;
   username: string;
+  accountStatus: boolean;
+  role: "Admin" | "Kasir" | '';
+  // for create
+  password: string;
+  confirmPassword: string;
+  // for update
   oldPassword: string;
   newPassword: string;
-  accountStatus: boolean;
-  role: "Admin" | "Kasir";
 
   constructor(data: any = {}) {
-    this.id = data.id || null;
-    this.name = data.name || null;
-    this.username = data.username || null;
-    this.oldPassword = data.oldPassword || null;
-    this.newPassword = data.newPassword || null;
+    this.id = data.id;
+    this.name = data.name;
+    this.username = data.username;
     this.accountStatus = data.accountStatus ?? true;
     this.role = data.role || "Kasir";
+
+    this.password = data.password;
+    this.confirmPassword = data.confirmPassword;
+
+    this.oldPassword = data.oldPassword;
+    this.newPassword = data.newPassword;
   }
 
-  validate() {
+  validateCreateUser() {
+    return CreateUserSchema.safeParse(this);
+  }
+
+  validateUpdateUser() {
     return UpdateUserSchema.safeParse(this);
   }
 } 
-
-export const UpdateAccountStatusSchema = z.object({
-  accountStatus: z.boolean(),
-});
 
 

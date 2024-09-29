@@ -1,6 +1,7 @@
-import { UpdateUserModel } from "@/models/user.model";
-import { db } from "@/utils/prisma";
-import { NextResponse } from "next/server";
+import { CreateUpdateUserModel } from '@/models/user.model';
+import { db } from '@/utils/prisma';
+import { compare } from 'bcryptjs';
+import { NextResponse } from 'next/server';
 
 // GetUserById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -9,6 +10,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
   try {
     const user = await db.users.findUnique({
       where: { id: id },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        accountStatus: true,
+        role: true,
+      }
     });
 
     if (!user) {
@@ -24,8 +32,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
 // UpdateUser
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
-  const data: UpdateUserModel = new UpdateUserModel(await request.json());
-  
+  const data: CreateUpdateUserModel = new CreateUpdateUserModel(await request.json());
+
   try {
     const user = await db.users.findUnique({
       where: { id },
@@ -36,17 +44,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: 'User tidak ditemukan' }, { status: 404 });
     }
 
-    const currPassword = user.password;
-
-    if (currPassword !== data.oldPassword) {
-      return NextResponse.json(
-        { message: "Password Lama tidak sesuai" },
-        { status: 401 }
-      );
-    }
+    // compare plain input password with hashed db password
+    const passwordMatched = await compare(data.oldPassword, user.password);
     
+    if (!passwordMatched) {
+      return NextResponse.json({ message: 'Password Lama tidak sesuai' }, { status: 401 });
+    }
+
     const updatedUser = await db.users.update({
-      where: { id: id },
+      where: { id },
       data: {
         name: data.name,
         username: data.username,
@@ -54,7 +60,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         role: data.role,
       },
     });
-    
+
     if (!updatedUser) {
       return NextResponse.json({ message: 'Data User Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
     }
