@@ -1,6 +1,7 @@
 import ActionPopover from '@/components/action-popover';
 import { routes } from '@/config/routes';
 import { CustomerModel } from '@/models/customer.model';
+import { TableAction } from '@/models/global.model';
 import { createColumnHelper } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
@@ -8,7 +9,7 @@ import { ActionIcon, Tooltip } from 'rizzui';
 
 const columnHelper = createColumnHelper<CustomerModel>();
 
-export const columns = (handleDelete: (id: string) => void) => [
+export const columns = (actions: TableAction[]) => [
   columnHelper.display({
     id: 'actions',
     size: 100,
@@ -27,11 +28,16 @@ export const columns = (handleDelete: (id: string) => void) => [
             </ActionIcon>
           </Link>
         </Tooltip>
-        <ActionPopover
-          title="Hapus Pelanggan"
-          description={`Apakah Anda yakin ingin menghapus Pelanggan '${row.original.name}'?`}
-          onAction={() => handleDelete(row.original.id)}
-        />
+        {actions.map((action) => (
+          <ActionPopover
+            key={action.label}
+            label={action.label}
+            title={action.title}
+            description={action.description}
+            color={action.color}
+            handler={() => action.handler(row.original.id)}
+          />
+        ))}
       </div>
     ),
   }),

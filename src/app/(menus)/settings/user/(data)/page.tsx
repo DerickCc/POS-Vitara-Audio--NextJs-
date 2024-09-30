@@ -111,7 +111,7 @@ export default function UserDataPage() {
     {
       label: 'changeStatus',
       title: 'Ubah Status Akun',
-      description: 'Apakah Anda yakin ingin mengubah status akun User?',
+      description: 'Apakah Anda yakin ingin mengubah status akun User ini?',
       color: 'red',
       handler: (id: string) => handleChangeStatus(id),
     },

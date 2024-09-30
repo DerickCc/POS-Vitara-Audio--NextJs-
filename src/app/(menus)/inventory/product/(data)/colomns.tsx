@@ -8,10 +8,11 @@ import { ActionIcon, Tooltip } from 'rizzui';
 import Image from 'next/image';
 import imgPlaceholder from '@public/image-placeholder.png';
 import { ProductModel } from '@/models/product.model';
+import { TableAction } from '@/models/global.model';
 
 const columnHelper = createColumnHelper<ProductModel>();
 
-export const columns = (handleDelete: (id: string) => void) => [
+export const columns = (actions: TableAction[]) => [
   columnHelper.display({
     id: 'actions',
     size: 100,
@@ -30,11 +31,16 @@ export const columns = (handleDelete: (id: string) => void) => [
             </ActionIcon>
           </Link>
         </Tooltip>
-        <ActionPopover
-          title="Hapus Barang"
-          description={`Apakah Anda yakin ingin menghapus '${row.original.name}'?`}
-          onAction={() => handleDelete(row.original.id)}
-        />
+        {actions.map((action) => (
+          <ActionPopover
+            key={action.label}
+            label={action.label}
+            title={action.title}
+            description={action.description}
+            color={action.color}
+            handler={() => action.handler(row.original.id)}
+          />
+        ))}
       </div>
     ),
   }),

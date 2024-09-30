@@ -12,6 +12,8 @@ import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
 import BasicTable from '@/components/tables/basic-table';
 import { columns } from './columns';
+import { SupplierModel } from '@/models/supplier.model';
+import { TableAction } from '@/models/global.model';
 
 const pageHeader = {
   title: 'Supplier',
@@ -109,6 +111,16 @@ export default function SupplierDataPage() {
     }
   };
 
+  const actions: TableAction[] = [
+    {
+      label: 'delete',
+      title: 'Hapus Supplier',
+      description: 'Apakah Anda yakin ingin menghapus Supplier ini?',
+      color: 'red',
+      handler: (id: string) => handleDelete(id),
+    },
+  ];
+
   useEffect(() => {
     browseSupplier();
   }, [browseSupplier]);
@@ -132,7 +144,7 @@ export default function SupplierDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable
+      <BasicTable<SupplierModel>
         data={suppliers}
         columns={columns}
         pageSize={pageSize}
@@ -143,7 +155,7 @@ export default function SupplierDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        onDelete={handleDelete}
+        actions={actions}
       />
     </>
   );

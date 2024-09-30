@@ -12,6 +12,8 @@ import toast from 'react-hot-toast';
 import { apiFetch, toQueryString } from '@/utils/api';
 import { columns } from './columns';
 import BasicTable from '@/components/tables/basic-table';
+import { TableAction } from '@/models/global.model';
+import { CustomerModel } from '@/models/customer.model';
 
 const pageHeader = {
   title: 'Pelanggan',
@@ -105,6 +107,16 @@ export default function CustomerDataPage() {
     }
   };
 
+  const actions: TableAction[] = [
+    {
+      label: 'delete',
+      title: 'Hapus Pelanggan',
+      description: 'Apakah Anda yakin ingin menghapus Pelanggan ini?',
+      color: 'red',
+      handler: (id: string) => handleDelete(id),
+    }
+  ]
+
   useEffect(() => {
     browseCustomer();
   }, [browseCustomer]);
@@ -128,7 +140,7 @@ export default function CustomerDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable
+      <BasicTable<CustomerModel>
         data={customers}
         columns={columns}
         pageSize={pageSize}
@@ -139,7 +151,7 @@ export default function CustomerDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        onDelete={handleDelete}
+        actions={actions}
       />
     </>
   );

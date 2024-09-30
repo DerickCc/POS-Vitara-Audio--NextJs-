@@ -12,6 +12,8 @@ import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
 import BasicTable from '@/components/tables/basic-table';
 import { columns } from './colomns';
+import { TableAction } from '@/models/global.model';
+import { ProductModel } from '@/models/product.model';
 
 const pageHeader = {
   title: 'Barang',
@@ -107,6 +109,16 @@ export default function ProductDataPage() {
     }
   };
 
+  const actions: TableAction[] = [
+    {
+      label: 'delete',
+      title: 'Hapus Barang',
+      description: 'Apakah Anda yakin ingin menghapus Barang ini?',
+      color: 'red',
+      handler: (id: string) => handleDelete(id),
+    },
+  ];
+
   useEffect(() => {
     browseProduct();
   }, [browseProduct]);
@@ -130,7 +142,7 @@ export default function ProductDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable
+      <BasicTable<ProductModel>
         data={products}
         columns={columns}
         pageSize={pageSize}
@@ -141,7 +153,7 @@ export default function ProductDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        onDelete={handleDelete}
+        actions={actions}
       />
     </>
   );

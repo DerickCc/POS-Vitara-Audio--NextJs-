@@ -1,5 +1,6 @@
 import ActionPopover from '@/components/action-popover';
 import { routes } from '@/config/routes';
+import { TableAction } from '@/models/global.model';
 import { SupplierModel } from '@/models/supplier.model';
 import { formatToCurrency } from '@/utils/helper-function';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -9,7 +10,7 @@ import { ActionIcon, Tooltip } from 'rizzui';
 
 const columnHelper = createColumnHelper<SupplierModel>();
 
-export const columns = (handleDelete: (id: string) => void) => [
+export const columns = (actions: TableAction[]) => [
   columnHelper.display({
     id: 'actions',
     size: 100,
@@ -28,11 +29,16 @@ export const columns = (handleDelete: (id: string) => void) => [
             </ActionIcon>
           </Link>
         </Tooltip>
-        <ActionPopover
-          title="Hapus Supplier"
-          description={`Apakah Anda yakin ingin menghapus Supplier '${row.original.name}'?`}
-          onAction={() => handleDelete(row.original.id)}
-        />
+        {actions.map((action) => (
+          <ActionPopover
+            key={action.label}
+            label={action.label}
+            title={action.title}
+            description={action.description}
+            color={action.color}
+            handler={() => action.handler(row.original.id)}
+          />
+        ))}
       </div>
     ),
   }),
