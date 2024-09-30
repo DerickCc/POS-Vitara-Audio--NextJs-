@@ -1,23 +1,25 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const SupplierSchema = z.object({
-  name: z.string().min(1, { message: 'Nama harus diisi' }),
-  pic: z.string().min(1, { message: 'PIC harus diisi' }),
-  phoneNo: z
-    .string()
-    .min(7, { message: 'No. Telepon Invalid' })
-    .refine((val) => !val || /^\d+$/.test(val), {
-      message: 'No. Telepon harus berupa angka',
-    }),
-  address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
-  remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
-  receivables: z.coerce.number().min(0, { message: "Piutang tidak boleh negatif" }),
-  receivablesLimit: z.coerce.number().min(0, { message: "Limit Piutang tidak boleh negatif" }),
-})
-.refine((data) => data.receivables <= data.receivablesLimit, {
-  message: 'Piutang tidak boleh lebih besar dari Limit Piutang',
-  path: ['receivablesLimit'],
-});
+export const SupplierSchema = z
+  .object({
+    name: z.string().min(1, { message: 'Nama harus diisi' }),
+    pic: z.string().min(1, { message: 'PIC harus diisi' }),
+    phoneNo: z
+      .string()
+      .refine((val) => !val || /^\d+$/.test(val), {
+        message: 'No. Telepon harus berupa angka',
+      })
+      .optional()
+      .nullable(),
+    address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
+    remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
+    receivables: z.coerce.number().min(0, { message: 'Piutang tidak boleh negatif' }),
+    receivablesLimit: z.coerce.number().min(0, { message: 'Limit Piutang tidak boleh negatif' }),
+  })
+  .refine((data) => data.receivables <= data.receivablesLimit, {
+    message: 'Piutang tidak boleh lebih besar dari Limit Piutang',
+    path: ['receivablesLimit'],
+  });
 
 export class SupplierModel {
   id: string;

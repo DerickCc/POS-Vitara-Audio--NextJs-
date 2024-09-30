@@ -18,12 +18,28 @@ export const routes = {
       add: '/inventory/product/add',
       edit: (id: string) => `/inventory/product/${id}/edit`,
     },
-    purchaseReturn: '/inventory/purchase-return',
-    salesReturn: '/inventory/sales-return',
+    purchaseReturn: {
+      data: '/inventory/purchase-return',
+      add: '/inventory/purchase-return/add',
+      edit: (id: string) => `/inventory/purchase-return/${id}/edit`
+    },
+    salesReturn: {
+      data: '/inventory/sales-return',
+      add: '/inventory/sales-return/add',
+      edit: (id: string) => `/inventory/sales-return/${id}/edit`
+    },
   },
   transaction: {
-    purchaseOrder: '/transaction/purchase-order',
-    salesOrder: '/transaction/sales-order',
+    purchaseOrder: {
+      data: '/transaction/purchase-order',
+      add: '/transaction/purchase-order/add',
+      edit: (id: string) => `/transaction/purchase-order/${id}/edit`
+    },
+    salesOrder: {
+      data: '/transaction/sales-order',
+      add: '/transaction/sales-order/add',
+      edit: (id: string) => `/transaction/sales-order/${id}/edit`
+    },
   },
   settings: {
     user: {

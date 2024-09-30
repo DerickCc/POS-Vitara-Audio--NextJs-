@@ -126,7 +126,11 @@ export default function ProductForm({
               {fileError && <div className="text-center text-red">{fileError}</div>}
             </div>
             <Input
-              label="Nama"
+              label={
+                <span>
+                  Nama <span className="text-red-500">*</span>
+                </span>
+              }
               placeholder="Nama"
               className="sm:col-span-3"
               error={errors.name?.message}
@@ -147,7 +151,11 @@ export default function ProductForm({
               defaultValue={defaultValues.restockThreshold}
               error={errors.restockThreshold?.message}
             />
-            <Input label="Satuan" placeholder="Satuan" error={errors.uom?.message} {...register('uom')} />
+            <Input label={
+                <span>
+                  Satuan <span className="text-red-500">*</span>
+                </span>
+              } placeholder="Satuan" error={errors.uom?.message} {...register('uom')} />
             <div className="sm:col-span-3 grid sm:grid-cols-2 gap-6">
               <RupiahFormInput
                 setValue={setValue}

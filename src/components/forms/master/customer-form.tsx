@@ -42,9 +42,17 @@ export default function CustomerForm({
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid sm:grid-cols-3 gap-6 mb-7">
-            <Input label="Nama" placeholder="Nama" error={errors.name?.message} {...register('name')} />
+            <Input label={
+                <span>
+                  Nama <span className="text-red-500">*</span>
+                </span>
+              } placeholder="Nama" error={errors.name?.message} {...register('name')} />
             <Input
-              label="No. Plat"
+              label={
+                <span>
+                  No. Plat <span className="text-red-500">*</span>
+                </span>
+              }
               placeholder="No. Plat"
               error={errors.licensePlate?.message}
               {...register('licensePlate')}

@@ -44,8 +44,26 @@ export default function SupplierForm({
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid sm:grid-cols-3 gap-6 mb-7">
-            <Input label="Nama" placeholder="Nama" error={errors.name?.message} {...register('name')} />
-            <Input label="PIC" placeholder="PIC" error={errors.pic?.message} {...register('pic')} />
+            <Input
+              label={
+                <span>
+                  Nama <span className="text-red-500">*</span>
+                </span>
+              }
+              placeholder="Nama"
+              error={errors.name?.message}
+              {...register('name')}
+            />
+            <Input
+              label={
+                <span>
+                  PIC <span className="text-red-500">*</span>
+                </span>
+              }
+              placeholder="PIC"
+              error={errors.pic?.message}
+              {...register('pic')}
+            />
             <Input
               label="No. Telepon"
               placeholder="No. Telepon"

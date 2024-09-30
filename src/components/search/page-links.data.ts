@@ -22,19 +22,19 @@ export const pageLinks = [
   },
   {
     name: 'Retur Pembelian',
-    href: routes.inventory.purchaseReturn,
+    href: routes.inventory.purchaseReturn.data,
   },
   {
     name: 'Retur Penjualan',
-    href: routes.inventory.salesReturn,
+    href: routes.inventory.salesReturn.data,
   },
   {
     name: 'Transaksi Pembelian',
-    href: routes.transaction.purchaseOrder,
+    href: routes.transaction.purchaseOrder.data,
   },
   {
     name: 'Transaksi Penjualan',
-    href: routes.transaction.salesOrder,
+    href: routes.transaction.salesOrder.data,
   },
   {
     name: 'User',

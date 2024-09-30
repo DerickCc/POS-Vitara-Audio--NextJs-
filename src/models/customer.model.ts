@@ -5,10 +5,11 @@ export const CustomerSchema = z.object({
   licensePlate: z.string().min(1, { message: 'No. Plat harus diisi' }),
   phoneNo: z
     .string()
-    .min(7, { message: 'No. Telepon Invalid' })
     .refine((val) => !val || /^\d+$/.test(val), {
       message: 'No. Telepon harus berupa angka',
-    }),
+    })
+    .optional()
+    .nullable(),
   address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
 });
 

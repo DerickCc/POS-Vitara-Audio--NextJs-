@@ -50,9 +50,22 @@ export default function UserForm({
         ) : (
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid md:grid-cols-2 gap-6 mb-7">
-              <Input label="Nama" placeholder="Nama" error={errors.name?.message} {...register('name')} />
               <Input
-                label="Username"
+                label={
+                  <span>
+                    Nama <span className="text-red-500">*</span>
+                  </span>
+                }
+                placeholder="Nama"
+                error={errors.name?.message}
+                {...register('name')}
+              />
+              <Input
+                label={
+                  <span>
+                    Usernmae <span className="text-red-500">*</span>
+                  </span>
+                }
                 placeholder="Username"
                 error={errors.username?.message}
                 {...register('username')}
@@ -61,13 +74,21 @@ export default function UserForm({
                 // add
                 <>
                   <Password
-                    label="Password"
+                    label={
+                      <span>
+                        Password <span className="text-red-500">*</span>
+                      </span>
+                    }
                     placeholder="Password"
                     error={errors.password?.message}
                     {...register('password')}
                   />
                   <Password
-                    label="Konfirmasi Password"
+                    label={
+                      <span>
+                        Konfirmasi Password <span className="text-red-500">*</span>
+                      </span>
+                    }
                     placeholder="Konfirmasi Password"
                     error={errors.confirmPassword?.message}
                     {...register('confirmPassword')}
@@ -95,13 +116,21 @@ export default function UserForm({
                 // edit
                 <>
                   <Password
-                    label="Password Lama"
+                    label={
+                      <span>
+                        Password Lama <span className="text-red-500">*</span>
+                      </span>
+                    }
                     placeholder="Password Lama"
                     error={errors.oldPassword?.message}
                     {...register('oldPassword')}
                   />
                   <Password
-                    label="Password Baru"
+                    label={
+                      <span>
+                        Password Baru <span className="text-red-500">*</span>
+                      </span>
+                    }
                     placeholder="Password Baru"
                     error={errors.newPassword?.message}
                     {...register('newPassword')}
@@ -134,11 +163,7 @@ export default function UserForm({
                 </Button>
               </Link>
 
-              <Button
-                className={cn(baseButtonClass, buttonColorClass.green)}
-                type="submit"
-                disabled={isSubmitting}
-              >
+              <Button className={cn(baseButtonClass, buttonColorClass.green)} type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <Loader variant="spinner" className="me-1.5" />
                 ) : (
