@@ -7,6 +7,7 @@ export class PurchaseOrderModel {
   poCode: string;
   purchaseDate: string;
   supplierId: string;
+  supplierName: string;
   remarks: string;
   totalItem: number;
   totalPrice: number;
@@ -17,6 +18,7 @@ export class PurchaseOrderModel {
     this.poCode = data.poCode;
     this.purchaseDate = data.purchaseDate;
     this.supplierId = data.supplierId;
+    this.supplierName = data.supplierName;
     this.remarks = data.remarks;
     this.totalItem = data.totalItem;
     this.totalPrice = data.totalPrice;

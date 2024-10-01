@@ -30,8 +30,8 @@ export const pageSizeOptions = [
 ];
 
 export const filterOperatorOptions = [
-  { label: ">=", value: "gte" },
-  { label: "<=", value: "lte" },
+  { label: '>=', value: 'gte' },
+  { label: '<=', value: 'lte' },
 ];
 
 export const accountStatusOptions = [
@@ -42,4 +42,9 @@ export const accountStatusOptions = [
 export const roleOptions = [
   { label: 'Admin', value: 'Admin' },
   { label: 'Kasir', value: 'Kasir' },
+];
+
+export const poStatusOptions = [
+  { label: 'Dalam Proses', value: 'Dalam Proses' },
+  { label: 'Selesai', value: 'Selesai' },
 ];

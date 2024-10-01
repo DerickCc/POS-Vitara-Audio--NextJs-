@@ -2,8 +2,7 @@
 
 import Card from '@/components/card';
 import RupiahInput from '@/components/inputs/rupiah-input';
-import { SetStateAction } from 'jotai';
-import { Dispatch, FormEvent } from 'react';
+import { FormEvent } from 'react';
 import { PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
 import { filterOperatorOptions } from '@/config/global-variables';
