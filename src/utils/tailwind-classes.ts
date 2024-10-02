@@ -12,7 +12,18 @@ export const tableClass = `
   [&_td.sticky-left]:bg-white dark:[&_td.sticky-left]:bg-gray-50 [&_th.sticky-right]:bg-gray-100 [&_td.sticky-right]:bg-white dark:[&_td.sticky-right]:bg-gray-50
 `;
 
-export const baseBadgeClass = 'inline-flex items-center rounded-md py-1 px-3 font-medium'
+export const datepickerClass = `
+  [&.react-datepicker]:shadow-lg [&.react-datepicker]:border-gray-100 [&.react-datepicker]:rounded-md
+  [&.react-datepicker>div]:pt-5 [&.react-datepicker>div]:pb-3
+  [&.react-datepicker>button]:items-baseline [&.react-datepicker>button]:top-7
+  [&.react-datepicker>button]:border [&.react-datepicker>button]:border-solid [&.react-datepicker>button]:border-gray-300 [&.react-datepicker>button]:rounded-md
+  [&.react-datepicker>button]:h-[22px] [&.react-datepicker>button]:w-[22px]
+  [&.react-datepicker>button>span]:top-0
+  [&.react-datepicker>button>span]:before:border-t-[1.5px] [&.react-datepicker>button>span]:before:border-r-[1.5px] [&.react-datepicker>button>span]:before:border-gray-400
+  [&.react-datepicker>button>span]:before:h-[7px] [&.react-datepicker>button>span]:before:w-[7px]
+`;
+
+export const baseBadgeClass = 'inline-flex items-center rounded-md py-1 px-3 font-medium';
 
 export const badgeColorClass = {
   red: 'bg-red-100 text-red-700',
@@ -21,7 +32,7 @@ export const badgeColorClass = {
   blue: 'bg-blue-100 text-blue-700',
   purple: 'bg-purple-100 text-purple-700',
   gray: 'bg-gray-100 text-gray-700',
-}
+};
 
 export const actionIconColorClass = {
   red: 'text-red-500 hover:border-red-600 hover:text-red-600',
@@ -30,7 +41,7 @@ export const actionIconColorClass = {
   blue: '',
   purple: 'text-purple-500 hover:border-purple-600 hover:text-purple-600',
   gray: 'text-gray-500 hover:border-gray-600 hover:text-gray-600',
-}
+};
 
 export const baseButtonClass = 'hover:text-gray-100 disabled:bg-gray-400 disabled:text-gray-200';
 
@@ -41,4 +52,4 @@ export const buttonColorClass = {
   purple: 'bg-purple-500 hover:bg-purple-700',
   blue: '',
   gray: 'bg-gray-500 hover:bg-gray-700',
-}
+};
