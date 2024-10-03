@@ -21,7 +21,7 @@ export const datepickerClass = `
   [&.react-datepicker>button>span]:top-0
   [&.react-datepicker>button>span]:before:border-t-[1.5px] [&.react-datepicker>button>span]:before:border-r-[1.5px] [&.react-datepicker>button>span]:before:border-gray-400
   [&.react-datepicker>button>span]:before:h-[7px] [&.react-datepicker>button>span]:before:w-[7px]
-`;
+  `;
 
 export const baseBadgeClass = 'inline-flex items-center rounded-md py-1 px-3 font-medium';
 

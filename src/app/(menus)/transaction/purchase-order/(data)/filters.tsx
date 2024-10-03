@@ -4,7 +4,7 @@ import Card from '@/components/card';
 import { poStatusOptions } from '@/config/global-variables';
 import { FiltersProps } from '@/models/global.model';
 import { FormEvent, useState } from 'react';
-import { PiCalendarBlank, PiCaretDownBold, PiFunnel } from 'react-icons/pi';
+import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
 import ReactDatePicker from 'react-datepicker';
 import { datepickerClass } from '@/utils/tailwind-classes';
@@ -36,11 +36,8 @@ export default function PurchaseOrderFilter({
     }));
   };
 
-  const [dateRange, setDateRange] = useState([undefined,undefined]);
+  const [dateRange, setDateRange] = useState([undefined, undefined]);
   const [startDate, endDate] = dateRange;
-  const [isCalenderOpen, setIsCalenderOpen] = useState(false);
-  const handleCalenderOpen = () => setIsCalenderOpen(true);
-  const handleCalenderClose = () => setIsCalenderOpen(false);
 
   return (
     <Card className="mb-8">
@@ -50,16 +47,18 @@ export default function PurchaseOrderFilter({
       </h4>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid sm:grid-cols-3 gap-6 mb-5">
+        <div className="grid sm:grid-cols-10 gap-6 mb-5">
           <Input
             value={localFilters.poCode}
             onChange={(e) => handleFilterChange('poCode')(e.target.value)}
+            className="sm:col-span-3"
             label="Kode"
             placeholder="Cari Kode Transaksi"
           />
           <Select
             value={localFilters.supplierId}
             onChange={(value: string) => handleFilterChange('supplierId')(value)}
+            className="sm:col-span-3"
             label="Supplier"
             placeholder="Pilih Supplier"
             options={[]}
@@ -69,22 +68,17 @@ export default function PurchaseOrderFilter({
             clearable={true}
             onClear={() => handleFilterChange('supplierId')(0)}
           />
-          <div className="flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full">
+          <div className="sm:col-span-4 flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full">
             <ReactDatePicker
               customInput={
                 <Input
                   prefix={<PiCalendarBlank className="h-5 w-5 text-gray-500" />}
-                  suffix={
-                    <PiCaretDownBold
-                      className={cn('h-4 w-4 text-gray-500 transition', isCalenderOpen && 'rotate-180')}
-                    />
-                  }
                   label="Tanggal"
                   labelClassName="font-medium text-gray-700"
                   inputClassName="[&_input]:text-ellipsis"
                 />
               }
-              dateFormat="dd MMMM yyyy"
+              dateFormat="d MMMM yyyy"
               selectsRange={true}
               startDate={startDate}
               endDate={endDate}
@@ -94,11 +88,13 @@ export default function PurchaseOrderFilter({
               isClearable={true}
               placeholderText="Pilih Tanggal"
               calendarClassName={cn(datepickerClass, 'w-full')}
+              clearButtonClassName="mt-3 mr-2"
             />
           </div>
           <Select
             value={localFilters.status}
             onChange={(value: string) => handleFilterChange('status')(value)}
+            className="sm:col-span-3"
             label="Status"
             placeholder="Pilih Status"
             options={poStatusOptions}
@@ -107,7 +103,7 @@ export default function PurchaseOrderFilter({
             clearable={true}
             onClear={() => handleFilterChange('status')('')}
           />
-          <div className="sm:col-span-2 flex justify-end items-end">
+          <div className="sm:col-span-7 flex justify-end items-end">
             <Button className="w-20" type="submit">
               Cari
             </Button>
