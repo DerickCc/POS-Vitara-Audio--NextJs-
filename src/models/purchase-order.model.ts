@@ -8,6 +8,7 @@ export class PurchaseOrderModel {
   purchaseDate: string;
   supplierId: string;
   supplierName: string;
+  detail: any[];
   remarks: string;
   totalItem: number;
   totalPrice: number;
@@ -19,6 +20,7 @@ export class PurchaseOrderModel {
     this.purchaseDate = data.purchaseDate;
     this.supplierId = data.supplierId;
     this.supplierName = data.supplierName;
+    this.detail = data.detail || [];
     this.remarks = data.remarks;
     this.totalItem = data.totalItem;
     this.totalPrice = data.totalPrice;

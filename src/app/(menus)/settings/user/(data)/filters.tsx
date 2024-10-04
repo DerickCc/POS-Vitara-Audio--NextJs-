@@ -1,6 +1,6 @@
 import Card from '@/components/card';
 import { accountStatusOptions, roleOptions } from '@/config/global-variables';
-import { FiltersProps } from '@/models/global.model';
+import { FiltersProps, BasicSelectOptionsType } from '@/models/global.model';
 import { FormEvent } from 'react';
 import { PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
@@ -39,7 +39,7 @@ export default function UserFilter({ localFilters, setLocalFilters, handleSearch
             label="Nama"
             placeholder="Cari Nama"
           />
-          <Select
+          <Select<BasicSelectOptionsType>
             value={localFilters.accountStatus}
             onChange={(value: string) => handleFilterChange('accountStatus')(value)}
             label="Status Akun"
@@ -50,7 +50,7 @@ export default function UserFilter({ localFilters, setLocalFilters, handleSearch
             clearable={true}
             onClear={() => handleFilterChange('accountStatus')('')}
           />
-          <Select
+          <Select<BasicSelectOptionsType>
             value={localFilters.role}
             onChange={(value: string) => handleFilterChange('role')(value)}
             label="Role"

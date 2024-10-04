@@ -5,11 +5,17 @@ import { NextResponse } from "next/server";
 
 // GetProductById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized', result: null }, { status: 401 });
+  }
+
   const { id } = params;
 
   try {
     const product = await db.products.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!product) {
@@ -24,11 +30,17 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 // UpdateProduct
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = params;
   const data: ProductModel = new ProductModel(await request.json());
   
   try {
-    const userId = (await getSession()).id;
+    const userId = session.id;
     
     const updatedProduct = await db.products.update({
       where: { id: id },
@@ -52,6 +64,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 // DeleteProduct
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = params;
   
   try {

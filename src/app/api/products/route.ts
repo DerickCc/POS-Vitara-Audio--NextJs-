@@ -5,6 +5,12 @@ import { NextResponse } from "next/server";
 
 // BrowseProduct
 export async function GET(request: Request) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized', result: null, recordsTotal: 0 }, { status: 401 });
+  }
+
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
 
@@ -83,6 +89,12 @@ export async function GET(request: Request) {
 
 // CreateProduct
 export async function POST(request: Request) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const data: ProductModel = new ProductModel(await request.json());
   
   const validatedData = data.validate();
@@ -99,7 +111,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const userId = (await getSession()).id;
+    const userId = session.id;
 
     // retreive last product code
     const lastProduct = await db.products.findFirst({
@@ -116,16 +128,10 @@ export async function POST(request: Request) {
 
     const product = await db.products.create({
       data: {
+        ...data,
         code: newCode,
-        name: data.name,
-        photo: data.photo,
-        restockThreshold: data.restockThreshold,
-        uom: data.uom,
-        purchasePrice: data.purchasePrice,
-        sellingPrice: data.sellingPrice,
-        remarks: data.remarks,
         CreatedBy: {
-          connect: { id: userId}
+          connect: { id: userId }
         }
       }
     });

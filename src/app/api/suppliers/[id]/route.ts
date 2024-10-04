@@ -38,7 +38,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const userId = (await getSession()).id;
     
     const updatedSupplier = await db.suppliers.update({
-      where: { id: id },
+      where: { id },
       data: {
         ...data,
         UpdatedBy: {

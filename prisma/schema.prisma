@@ -111,7 +111,7 @@ model Products {
 
 model PurchaseOrders {
   id           String    @id @default(cuid())
-  poCode       String    @unique @map("po_code") @db.VarChar(20)
+  code         String    @unique @map("code") @db.VarChar(20)
   purchaseDate DateTime  @default(now()) @map("purchase_date")
   supplierId   String    @map("supplier_id")
   remarks      String?   @db.VarChar(250)
@@ -129,12 +129,12 @@ model PurchaseOrders {
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  @@index([poCode, purchaseDate, supplierId, totalPrice, status], map: "purchase_orders_index")
+  @@index([code, purchaseDate, supplierId, totalPrice, status], map: "purchase_orders_index")
 }
 
 model SalesOrders {
   id            String    @id @default(cuid())
-  soCode        String    @unique @map("so_code") @db.VarChar(20)
+  code          String    @unique @map("code") @db.VarChar(20)
   salesDate     DateTime  @default(now()) @map("sales_date")
   customerId    String    @map("customer_id")
   paymentType   String    @map("payment_type") @db.VarChar(20)
@@ -156,5 +156,5 @@ model SalesOrders {
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  @@index([soCode, salesDate, customerId, paymentType, paymentMethod, grandTotal, status], map: "sales_orders_index")
+  @@index([code, salesDate, customerId, paymentType, paymentMethod, grandTotal, status], map: "sales_orders_index")
 }

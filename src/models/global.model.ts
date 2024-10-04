@@ -1,5 +1,5 @@
-import { OnChangeFn, SortingState } from "@tanstack/react-table";
-import { Dispatch, SetStateAction } from "react";
+import { OnChangeFn, SortingState } from '@tanstack/react-table';
+import { Dispatch, SetStateAction } from 'react';
 
 export interface TableAction {
   label: string;
@@ -28,3 +28,10 @@ export interface FiltersProps<T> {
   setLocalFilters: Dispatch<SetStateAction<T>>;
   handleSearch: () => void;
 }
+
+export type BasicSelectOptionsType = {
+  value: any;
+  label: string;
+  disabled?: boolean;
+  [key: string]: any;
+};

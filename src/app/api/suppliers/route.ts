@@ -5,6 +5,12 @@ import { NextResponse } from "next/server";
 
 // BrowseSupplier
 export async function GET(request: Request) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized', result: null, recordsTotal: 0 }, { status: 401 });
+  }
+
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
 
@@ -97,6 +103,12 @@ export async function GET(request: Request) {
 
 // CreateSupplier
 export async function POST(request: Request) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const data: SupplierModel = new SupplierModel(await request.json());
 
   const validatedData = data.validate();
@@ -120,7 +132,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const userId = (await getSession()).id;
+    const userId = session.id;
 
     // retreive last supplier code
     const lastSupplier = await db.suppliers.findFirst({

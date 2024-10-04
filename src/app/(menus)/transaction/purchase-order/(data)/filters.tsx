@@ -2,7 +2,7 @@
 
 import Card from '@/components/card';
 import { poStatusOptions } from '@/config/global-variables';
-import { FiltersProps } from '@/models/global.model';
+import { FiltersProps, BasicSelectOptionsType } from '@/models/global.model';
 import { FormEvent, useState } from 'react';
 import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
@@ -10,6 +10,7 @@ import ReactDatePicker from 'react-datepicker';
 import { datepickerClass } from '@/utils/tailwind-classes';
 import 'react-datepicker/dist/react-datepicker.css';
 import cn from '@/utils/class-names';
+import { id } from 'date-fns/locale';
 
 export type PurchaseOrderFilters = {
   poCode: string;
@@ -36,7 +37,7 @@ export default function PurchaseOrderFilter({
     }));
   };
 
-  const [dateRange, setDateRange] = useState([undefined, undefined]);
+  const [dateRange, setDateRange] = useState<any>([null, null]);
   const [startDate, endDate] = dateRange;
 
   return (
@@ -78,12 +79,14 @@ export default function PurchaseOrderFilter({
                   inputClassName="[&_input]:text-ellipsis"
                 />
               }
+              locale={id}
               dateFormat="d MMMM yyyy"
               selectsRange={true}
               startDate={startDate}
               endDate={endDate}
               onChange={(update) => {
                 setDateRange(update);
+                console.log(update)
               }}
               isClearable={true}
               placeholderText="Pilih Tanggal"
@@ -91,7 +94,7 @@ export default function PurchaseOrderFilter({
               clearButtonClassName="mt-3 mr-2"
             />
           </div>
-          <Select
+          <Select<BasicSelectOptionsType>
             value={localFilters.status}
             onChange={(value: string) => handleFilterChange('status')(value)}
             className="sm:col-span-3"
