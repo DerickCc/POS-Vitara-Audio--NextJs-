@@ -64,7 +64,7 @@ model Suppliers {
   id               String    @id @default(cuid())
   code             String    @unique @db.VarChar(20)
   name             String    @db.VarChar(100)
-  pic              String    @db.VarChar(20)
+  pic              String    @db.VarChar(100)
   phoneNo          String?   @db.VarChar(20)
   address          String?   @db.VarChar(100)
   remarks          String?   @db.VarChar(250)

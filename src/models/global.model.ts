@@ -29,9 +29,8 @@ export interface FiltersProps<T> {
   handleSearch: () => void;
 }
 
-export type BasicSelectOptionsType = {
+export interface BasicSelectOptionsType {
   value: any;
   label: string;
   disabled?: boolean;
-  [key: string]: any;
 };

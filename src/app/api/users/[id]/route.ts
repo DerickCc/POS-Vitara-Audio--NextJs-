@@ -1,6 +1,6 @@
 import { CreateUpdateUserModel } from '@/models/user.model';
 import { db } from '@/utils/prisma';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
 // GetUserById
@@ -51,12 +51,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: 'Password Lama tidak sesuai' }, { status: 401 });
     }
 
+    const hashedPassword = await hash(data.newPassword, 10);
+
     const updatedUser = await db.users.update({
       where: { id },
       data: {
         name: data.name,
         username: data.username,
-        password: data.newPassword,
+        password: hashedPassword,
         role: data.role,
       },
     });

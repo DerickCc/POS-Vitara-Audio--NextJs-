@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BasicSelectOptionsType } from './global.model';
 
 export const SupplierSchema = z
   .object({
@@ -47,4 +48,10 @@ export class SupplierModel {
   validate() {
     return SupplierSchema.safeParse(this);
   }
+}
+
+export interface SearchSupplierModel extends BasicSelectOptionsType {
+  id: string;
+  code: string;
+  name: string;
 }

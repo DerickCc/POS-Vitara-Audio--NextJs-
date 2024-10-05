@@ -3,7 +3,7 @@ import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
 
 // UpdatePurchaseOrder
-export async function PUT({ params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
   if (!session) {

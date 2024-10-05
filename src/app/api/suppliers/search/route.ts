@@ -1,3 +1,4 @@
+import { SearchSupplierModel } from '@/models/supplier.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -36,9 +37,20 @@ export async function GET(request: Request) {
     const suppliers = await db.suppliers.findMany({
       orderBy: { name: 'asc' },
       where,
+      select: {
+        id: true,
+        code: true,
+        name: true,
+      },
     });
 
-    return NextResponse.json({ message: 'Success', result: suppliers }, { status: 200 });
+    const suppliersWithExtraData: SearchSupplierModel[] = suppliers.map(supplier => ({
+      ...supplier,
+      value: supplier.id,
+      label: supplier.name,
+    }));
+
+    return NextResponse.json({ message: 'Success', result: suppliersWithExtraData }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e, result: null }, { status: 500 });
   }

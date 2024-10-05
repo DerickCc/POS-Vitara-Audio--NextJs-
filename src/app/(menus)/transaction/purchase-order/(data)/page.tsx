@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
@@ -36,19 +36,21 @@ export default function PurchaseOrderDataPage() {
   const [localFilters, setLocalFilters] = useState<PurchaseOrderFilters>({
     poCode: '',
     supplierId: null,
-    startDate: '',
-    endDate: '',
+    startDate: null,
+    endDate: null,
     status: '',
   });
   const [filters, setFilters] = useState<PurchaseOrderFilters>({
     poCode: '',
     supplierId: null,
-    startDate: '',
-    endDate: '',
+    startDate: null,
+    endDate: null,
     status: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
+
+  const [supplierList, setSupplierList] = useState([]);
 
   const browsePo = useCallback(async () => {
     try {
@@ -56,6 +58,13 @@ export default function PurchaseOrderDataPage() {
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
+
+      if (filters.startDate && typeof filters.startDate === 'object') {
+        filters.startDate = filters.startDate.toISOString();
+      }
+      if (filters.endDate && typeof filters.endDate === 'object') {
+        filters.endDate = filters.endDate.toISOString();
+      }
 
       const response = await apiFetch(
         `/api/purchase-orders${toQueryString({
@@ -76,6 +85,15 @@ export default function PurchaseOrderDataPage() {
       setIsLoading(false);
     }
   }, [pageSize, pageIndex, sorting, filters]);
+
+  const searchSupplier = async (name: string = '') => {
+    try {
+      const response = await apiFetch(`/api/suppliers/search${toQueryString({ name })}`, { method: 'GET' });
+      setSupplierList(response.result);
+    } catch (e) {
+      toast.error(e + '', { duration: 5000 });
+    }
+  };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
@@ -125,13 +143,17 @@ export default function PurchaseOrderDataPage() {
     browsePo();
   }, [browsePo]);
 
+  useEffect(() => {
+    searchSupplier();
+  }, [])
+
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
-        <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.transaction.purchaseOrder.add} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
-              <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
+        <div className='flex items-center gap-3 mt-4 sm:mt-0'>
+          <Link href={routes.transaction.purchaseOrder.add} className='w-full sm:w-auto'>
+            <Button className='w-full sm:w-auto'>
+              <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>
           </Link>
@@ -139,6 +161,7 @@ export default function PurchaseOrderDataPage() {
       </PageHeader>
 
       <PurchaseOrderFilter
+        supplierList={supplierList}
         localFilters={localFilters}
         setLocalFilters={setLocalFilters}
         handleSearch={() => handleSearch()}
