@@ -41,8 +41,8 @@ export const columns = (actions: TableAction[]) => [
       </div>
     ),
   }),
-  columnHelper.accessor('poCode', {
-    id: 'poCode',
+  columnHelper.accessor('code', {
+    id: 'code',
     size: 130,
     header: () => 'Kode',
     cell: (info) => info.getValue(),
