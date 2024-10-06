@@ -29,8 +29,28 @@ export interface FiltersProps<T> {
   handleSearch: () => void;
 }
 
-export interface BasicSelectOptionsType {
+export interface BasicSelectOptions {
   value: any;
   label: string;
   disabled?: boolean;
-};
+}
+
+export interface BasicFormProps<T> {
+  defaultValues?: T;
+  isLoading?: boolean;
+  onSubmit: (data: T) => Promise<void>;
+}
+
+export interface PagingModel {
+  pageSize: number;
+  pageIndex: number;
+  sortColumn: string | null;
+  sortOrder: string | null;
+  filters: object;
+}
+
+export interface PaginatedApiResponse<T> {
+  message: string;
+  result: T[];
+  recordsTotal: number;
+}

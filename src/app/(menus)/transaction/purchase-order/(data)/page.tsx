@@ -14,6 +14,8 @@ import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import BasicTable from '@/components/tables/basic-table';
 import { columns } from './columns';
+import { searchSupplier } from '@/services/supplier-service';
+import { SearchSupplierModel } from '@/models/supplier.model';
 
 const pageHeader = {
   title: 'Pembelian',
@@ -50,7 +52,7 @@ export default function PurchaseOrderDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const [supplierList, setSupplierList] = useState([]);
+  const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
 
   const browsePo = useCallback(async () => {
     try {
@@ -86,15 +88,6 @@ export default function PurchaseOrderDataPage() {
     }
   }, [pageSize, pageIndex, sorting, filters]);
 
-  const searchSupplier = async (name: string = '') => {
-    try {
-      const response = await apiFetch(`/api/suppliers/search${toQueryString({ name })}`, { method: 'GET' });
-      setSupplierList(response.result);
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
     setPageSize(newPageSize);
@@ -120,7 +113,7 @@ export default function PurchaseOrderDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
+      const response = await apiFetch(`/api/purchase-orders/${id}`, { method: 'DELETE' });
 
       toast.success(response.message, { duration: 5000 });
       browsePo();
@@ -143,9 +136,17 @@ export default function PurchaseOrderDataPage() {
     browsePo();
   }, [browsePo]);
 
+  const fetchSupplierList = async () => {
+    try {
+      setSupplierList(await searchSupplier());
+    } catch (e) {
+      toast.error(e + '', { duration: 5000 });
+    }
+  };
+
   useEffect(() => {
-    searchSupplier();
-  }, [])
+    fetchSupplierList();
+  }, []);
 
   return (
     <>

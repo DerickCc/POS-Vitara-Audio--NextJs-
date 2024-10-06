@@ -14,18 +14,15 @@ import { Button, Input, Loader, Textarea } from 'rizzui';
 import Image from 'next/image';
 import imgPlaceholder from '@public/image-placeholder.png';
 import toast from 'react-hot-toast';
-
-type ProductFormProps = {
-  defaultValues?: ProductModel;
-  isLoading?: boolean;
-  onSubmit: (data: ProductModel) => Promise<void>;
-};
+import { BasicFormProps } from '@/models/global.model';
+import cn from '@/utils/class-names';
+import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
 
 export default function ProductForm({
   defaultValues = new ProductModel(),
   isLoading = false,
   onSubmit,
-}: ProductFormProps) {
+}: BasicFormProps<ProductModel>) {
   const {
     register,
     setValue,
@@ -63,6 +60,7 @@ export default function ProductForm({
   };
 
   const onSubmitHandler = async (data: ProductModel) => {
+    // if upload photo and is different from stored photo
     if (data.photo && data.photo !== defaultValues.photo) {
       if (fileInputRef?.current?.files) {
         const formData = new FormData();
@@ -100,90 +98,87 @@ export default function ProductForm({
         <Spinner />
       ) : (
         <form onSubmit={handleSubmit(onSubmitHandler)}>
-          <div className="grid sm:grid-cols-4 gap-6 mb-7">
-            <div className="sm:row-span-4">
-              <label className="font-medium">Foto Barang</label>
+          <div className='grid sm:grid-cols-4 gap-6 mb-7'>
+            <div className='sm:row-span-4'>
+              <label className='font-medium'>Foto Barang</label>
               <input
-                id="photo"
+                id='photo'
                 ref={fileInputRef}
-                type="file"
-                accept="image/png, image/jpeg, image/jpg, image/svg"
+                type='file'
+                accept='image/png, image/jpeg, image/jpg, image/svg'
                 onChange={handleFileChange}
                 hidden
               />
-              <div className="flex justify-center align-center my-5">
+              <div className='flex justify-center align-center my-5'>
                 <Image
-                  id="previewImg"
+                  id='previewImg'
                   src={previewImg || imgPlaceholder}
-                  alt="Foto Barang"
+                  alt='Foto Barang'
                   width={220}
                   height={220}
                   priority
                   onClick={handleImageClick}
-                  className="cursor-pointer rounded"
+                  className='cursor-pointer rounded'
                 />
               </div>
-              {fileError && <div className="text-center text-red">{fileError}</div>}
+              {fileError && <div className='text-center text-red'>{fileError}</div>}
             </div>
             <Input
-              label={
-                <span>
-                  Nama <span className="text-red-500">*</span>
-                </span>
-              }
-              placeholder="Nama"
-              className="sm:col-span-3"
+              label={<span className='required'>Nama</span>}
+              placeholder='Nama'
+              className='sm:col-span-3'
               error={errors.name?.message}
               {...register('name')}
             />
             <DecimalFormInput
               setValue={setValue}
-              label="Stok"
-              fieldName="stock"
+              label='Stok'
+              fieldName='stock'
               defaultValue={defaultValues.stock}
               error={errors.stock?.message}
               readOnly={true}
             />
             <DecimalFormInput
               setValue={setValue}
-              label="Ambang Batas Restok"
-              fieldName="restockThreshold"
+              label='Ambang Batas Restok'
+              fieldName='restockThreshold'
               defaultValue={defaultValues.restockThreshold}
               error={errors.restockThreshold?.message}
             />
-            <Input label={
-                <span>
-                  Satuan <span className="text-red-500">*</span>
-                </span>
-              } placeholder="Satuan" error={errors.uom?.message} {...register('uom')} />
-            <div className="sm:col-span-3 grid sm:grid-cols-2 gap-6">
+            <Input
+              label={<span className='required'>Satuan</span>}
+              placeholder='Satuan'
+              error={errors.uom?.message}
+              {...register('uom')}
+            />
+            <div className='sm:col-span-3 grid sm:grid-cols-2 gap-6'>
               <RupiahFormInput
                 setValue={setValue}
-                label="Harga Beli"
-                fieldName="purchasePrice"
+                label='Harga Beli'
+                fieldName='purchasePrice'
                 defaultValue={defaultValues.purchasePrice}
                 error={errors.purchasePrice?.message}
               />
               <RupiahFormInput
                 setValue={setValue}
-                label="Harga Jual"
-                fieldName="sellingPrice"
+                label='Harga Jual'
+                fieldName='sellingPrice'
                 defaultValue={defaultValues.sellingPrice}
                 error={errors.sellingPrice?.message}
               />
             </div>
-            <div className="sm:col-span-3 grid sm:grid-cols-2  gap-6">
+            <div className='sm:col-span-3 grid sm:grid-cols-2  gap-6'>
               <RupiahFormInput
                 setValue={setValue}
-                label="Harga Modal"
-                fieldName="costPrice"
+                label='Harga Modal'
+                fieldName='costPrice'
                 defaultValue={defaultValues.costPrice}
                 readOnly={true}
                 error={errors.costPrice?.message}
               />
               <Input
-                label="Harga Modal (Kode)"
-                placeholder="Kode Modal"
+                label='Harga Modal (Kode)'
+                placeholder='Kode Modal'
                 inputClassName={'bg-gray-100'}
                 readOnly={true}
                 error={errors.costPriceCode?.message}
@@ -192,31 +187,27 @@ export default function ProductForm({
             </div>
 
             <Textarea
-              label="Keterangan"
-              placeholder="Keterangan"
-              className="sm:col-span-4"
+              label='Keterangan'
+              placeholder='Keterangan'
+              className='sm:col-span-4'
               error={errors.remarks?.message}
               {...register('remarks')}
             />
           </div>
 
-          <div className="flex justify-between">
+          <div className='flex justify-between'>
             <Link href={routes.inventory.product.data}>
-              <Button variant="outline" className="border-2 border-gray-200">
-                <PiArrowLeftBold className="size-4 me-1.5"></PiArrowLeftBold>
+              <Button variant='outline' className='border-2 border-gray-200'>
+                <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
                 <span>Kembali</span>
               </Button>
             </Link>
 
-            <Button
-              className="bg-green-500 hover:bg-green-700 hover:text-gray-100 disabled:bg-gray-400 disabled:text-gray-200"
-              type="submit"
-              disabled={isSubmitting}
-            >
+            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
               {isSubmitting ? (
-                <Loader variant="spinner" className="me-1.5" />
+                <Loader variant='spinner' className='me-1.5' />
               ) : (
-                <FaSave className="size-4 me-1.5"></FaSave>
+                <FaSave className='size-4 me-1.5'></FaSave>
               )}
               <span>Simpan</span>
             </Button>

@@ -33,8 +33,17 @@ model Users {
   CreatedPurchaseOrders PurchaseOrders[]
   UpdatedPurchaseOrders PurchaseOrders[] @relation("UpdatedByUser")
 
+  CreatedPurchaseOrderDetails PurchaseOrderDetails[]
+  UpdatedPurchaseOrderDetails PurchaseOrderDetails[] @relation("UpdatedByUser")
+
   CreatedSalesOrders SalesOrders[]
   UpdatedSalesOrders SalesOrders[] @relation("UpdatedByUser")
+
+  CreatedSalesOrderProductDetails SalesOrderProductDetails[]
+  UpdatedSalesOrderProductDetails SalesOrderProductDetails[] @relation("UpdatedByUser")
+
+  CreatedSalesOrderServiceDetails SalesOrderServiceDetails[]
+  UpdatedSalesOrderServiceDetails SalesOrderServiceDetails[] @relation("UpdatedByUser")
 
   @@index([name, accountStatus, role], map: "users_index")
 }
@@ -102,6 +111,10 @@ model Products {
   updatedBy        String?   @map("updated_by")
   updatedAt        DateTime? @updatedAt @map("updated_at")
 
+  PurchaseOrderDetails PurchaseOrderDetails[]
+
+  SalesOrderProductDetails SalesOrderProductDetails[]
+
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
@@ -125,11 +138,34 @@ model PurchaseOrders {
 
   Supplier Suppliers @relation(fields: [supplierId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
+  PurchaseOrderDetails PurchaseOrderDetails[]
+
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   @@index([code, purchaseDate, supplierId, totalPrice, status], map: "purchase_orders_index")
+}
+
+model PurchaseOrderDetails {
+  id            String    @id @default(cuid())
+  poId          String    @map("po_id")
+  productId     String    @map("product_id")
+  purchasePrice Int       @map("purchase_price") @db.Integer()
+  quantity      Decimal   @db.Decimal(10, 2)
+  totalPrice    Int       @map("total_price") @db.Integer()
+  createdBy     String    @map("created_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedBy     String?   @map("updated_by")
+  updatedAt     DateTime? @updatedAt @map("updated_at")
+
+  PurchaseOrder PurchaseOrders @relation(fields: [poId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  Product Products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }
 
 model SalesOrders {
@@ -152,9 +188,55 @@ model SalesOrders {
 
   Customer Customers @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
+  SalesOrderProductDetails SalesOrderProductDetails[]
+
+  SalesOrderServiceDetails SalesOrderServiceDetails[]
+
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   @@index([code, salesDate, customerId, paymentType, paymentMethod, grandTotal, status], map: "sales_orders_index")
+}
+
+model SalesOrderProductDetails {
+  id              String    @id @default(cuid())
+  soId            String    @map("so_id")
+  productId       String    @map("product_id")
+  oriSellingPrice Int       @map("ori_selling_price") @db.Integer()
+  sellingPrice    Int       @map("selling_price") @db.Integer()
+  quantity        Decimal   @db.Decimal(10, 2)
+  totalPrice      Int       @map("total_price") @db.Integer()
+  profit          Int       @db.Integer()
+  createdBy       String    @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedBy       String?   @map("updated_by")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+
+  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  Product Products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model SalesOrderServiceDetails {
+  id           String    @id @default(cuid())
+  soId         String    @map("so_id")
+  serviceName  String    @map("service_name")
+  sellingPrice Int       @map("selling_price") @db.Integer()
+  quantity     Decimal   @db.Decimal(10, 2)
+  totalPrice   Int       @map("total_price") @db.Integer()
+  createdBy    String    @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedBy    String?   @map("updated_by")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
+
+  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }

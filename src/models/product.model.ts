@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BasicSelectOptions } from "./global.model";
 
 export const ProductSchema = z.object({
   name: z.string().min(1, { message: 'Nama harus diisi' }),
@@ -43,4 +44,12 @@ export class ProductModel {
   validate() {
     return ProductSchema.safeParse(this);
   }
+}
+
+export interface SearchProductModel extends BasicSelectOptions {
+  id: string;
+  code: string;
+  name: string;
+  purchasePrice: number;
+  uom: string;
 }

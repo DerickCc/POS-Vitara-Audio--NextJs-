@@ -14,6 +14,7 @@ import BasicTable from '@/components/tables/basic-table';
 import { columns } from './columns';
 import { SupplierModel } from '@/models/supplier.model';
 import { TableAction } from '@/models/global.model';
+import { browseSupplier, deleteSupplier } from '@/services/supplier-service';
 
 const pageHeader = {
   title: 'Supplier',
@@ -29,7 +30,7 @@ const pageHeader = {
 };
 
 export default function SupplierDataPage() {
-  const [suppliers, setSuppliers] = useState([]);
+  const [suppliers, setSuppliers] = useState<SupplierModel[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -50,23 +51,14 @@ export default function SupplierDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const browseSupplier = useCallback(async () => {
+  const fetchSuppliers = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await apiFetch(
-        `/api/suppliers${toQueryString({
-          pageSize,
-          pageIndex,
-          sortColumn,
-          sortOrder,
-          ...filters,
-        })}`,
-        { method: 'GET' }
-      );
+      const response = await browseSupplier({pageSize, pageIndex, sortColumn, sortOrder, filters});
 
       setSuppliers(response.result);
       setTotalRowCount(response.recordsTotal);
@@ -93,7 +85,7 @@ export default function SupplierDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      browseSupplier();
+      fetchSuppliers();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
@@ -102,10 +94,10 @@ export default function SupplierDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
+      const response = await deleteSupplier(id);
+      toast.success(response, { duration: 5000 });
 
-      toast.success(response.message, { duration: 5000 });
-      browseSupplier();
+      fetchSuppliers();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
@@ -122,8 +114,8 @@ export default function SupplierDataPage() {
   ];
 
   useEffect(() => {
-    browseSupplier();
-  }, [browseSupplier]);
+    fetchSuppliers();
+  }, [fetchSuppliers]);
 
   return (
     <>

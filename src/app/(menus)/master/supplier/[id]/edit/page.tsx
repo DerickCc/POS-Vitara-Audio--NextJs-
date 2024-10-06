@@ -4,7 +4,7 @@ import SupplierForm from '@/components/forms/master/supplier-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { SupplierModel } from '@/models/supplier.model';
-import { apiFetch } from '@/utils/api';
+import { getSupplierById, updateSupplier } from '@/services/supplier-service';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -25,18 +25,15 @@ const pageHeader = {
 
 export default function EditSupplierPage() {
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [supplier, setSupplier] = useState<SupplierModel>(new SupplierModel());
   const [isLoading, setIsLoading] = useState(true);
 
-  const updateSupplier = async (data: SupplierModel) => {
+  const update = async (payload: SupplierModel) => {
     try {
-      const response = await apiFetch(`/api/suppliers/${id}`, {
-        method: 'PUT',
-        body: data,
-      });
+      const message = await updateSupplier(id, payload);
+      toast.success(message, { duration: 4000 });
 
-      toast.success(response.message, { duration: 4000 });
       router.push(routes.master.supplier.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -44,11 +41,10 @@ export default function EditSupplierPage() {
   };
 
   useEffect(() => {
-    const getSupplierById = async () => {
+    const fetchSupplier = async () => {
       try {
         setIsLoading(true);
-        const response = await apiFetch(`/api/suppliers/${id}`, { method: 'GET' });
-        setSupplier(response.result);
+        setSupplier(await getSupplierById(id));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       } finally {
@@ -56,14 +52,14 @@ export default function EditSupplierPage() {
       }
     };
 
-    getSupplierById();
+    fetchSupplier();
   }, [id]);
 
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <SupplierForm defaultValues={supplier} isLoading={isLoading} onSubmit={updateSupplier} />
+      <SupplierForm defaultValues={supplier} isLoading={isLoading} onSubmit={update} />
     </>
   );
 }

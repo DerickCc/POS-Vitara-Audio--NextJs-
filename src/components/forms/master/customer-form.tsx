@@ -9,18 +9,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import Spinner from '@/components/spinner';
-
-type CustomerFormProps = {
-  defaultValues?: CustomerModel;
-  isLoading?: boolean;
-  onSubmit: (data: CustomerModel) => Promise<void>;
-};
+import { BasicFormProps } from '@/models/global.model';
+import cn from '@/utils/class-names';
+import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
 
 export default function CustomerForm({
   defaultValues = new CustomerModel(),
   isLoading = false,
   onSubmit,
-}: CustomerFormProps) {
+}: BasicFormProps<CustomerModel>) {
   const {
     register,
     handleSubmit,
@@ -41,54 +38,47 @@ export default function CustomerForm({
         <Spinner />
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid sm:grid-cols-3 gap-6 mb-7">
-            <Input label={
-                <span>
-                  Nama <span className="text-red-500">*</span>
-                </span>
-              } placeholder="Nama" error={errors.name?.message} {...register('name')} />
+          <div className='grid sm:grid-cols-3 gap-6 mb-7'>
             <Input
-              label={
-                <span>
-                  No. Plat <span className="text-red-500">*</span>
-                </span>
-              }
-              placeholder="No. Plat"
+              label={<span className='required'>Nama</span>}
+              placeholder='Nama'
+              error={errors.name?.message}
+              {...register('name')}
+            />
+            <Input
+              label={<span className='required'>No. Plat</span>}
+              placeholder='No. Plat'
               error={errors.licensePlate?.message}
               {...register('licensePlate')}
             />
             <Input
-              label="No. Telepon"
-              placeholder="No. Telepon"
+              label='No. Telepon'
+              placeholder='No. Telepon'
               error={errors.phoneNo?.message}
               {...register('phoneNo')}
             />
             <Textarea
-              label="Alamat"
-              placeholder="Alamat"
-              className="sm:col-span-3"
+              label='Alamat'
+              placeholder='Alamat'
+              className='sm:col-span-3'
               error={errors.address?.message}
               {...register('address')}
             />
           </div>
 
-          <div className="flex justify-between">
+          <div className='flex justify-between'>
             <Link href={routes.master.customer.data}>
-              <Button variant="outline" className="border-2 border-gray-200">
-                <PiArrowLeftBold className="size-4 me-1.5"></PiArrowLeftBold>
+              <Button variant='outline' className='border-2 border-gray-200'>
+                <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
                 <span>Kembali</span>
               </Button>
             </Link>
 
-            <Button
-              className="bg-green-500 hover:bg-green-700 hover:text-gray-100 disabled:bg-gray-400 disabled:text-gray-200"
-              type="submit"
-              disabled={isSubmitting}
-            >
+            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
               {isSubmitting ? (
-                <Loader variant="spinner" className="me-1.5" />
+                <Loader variant='spinner' className='me-1.5' />
               ) : (
-                <FaSave className="size-4 me-1.5"></FaSave>
+                <FaSave className='size-4 me-1.5'></FaSave>
               )}
               <span>Simpan</span>
             </Button>

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BasicSelectOptionsType } from './global.model';
+import { BasicSelectOptions } from './global.model';
 
 export const SupplierSchema = z
   .object({
@@ -50,7 +50,7 @@ export class SupplierModel {
   }
 }
 
-export interface SearchSupplierModel extends BasicSelectOptionsType {
+export interface SearchSupplierModel extends BasicSelectOptions {
   id: string;
   code: string;
   name: string;

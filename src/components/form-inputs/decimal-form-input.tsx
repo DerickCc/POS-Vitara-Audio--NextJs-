@@ -5,7 +5,7 @@ import { Input } from 'rizzui';
 
 type DecimalFormInputProps = {
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
-  label: string;
+  label?: string;
   fieldName: string;
   defaultValue: number;
   readOnly?: boolean;

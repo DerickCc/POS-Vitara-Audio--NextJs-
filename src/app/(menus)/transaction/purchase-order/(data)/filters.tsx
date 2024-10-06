@@ -2,8 +2,8 @@
 
 import Card from '@/components/card';
 import { poStatusOptions } from '@/config/global-variables';
-import { FiltersProps, BasicSelectOptionsType } from '@/models/global.model';
-import { FormEvent, useState } from 'react';
+import { FiltersProps } from '@/models/global.model';
+import { FormEvent } from 'react';
 import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
 import ReactDatePicker from 'react-datepicker';
@@ -11,7 +11,7 @@ import { datepickerClass } from '@/utils/tailwind-classes';
 import 'react-datepicker/dist/react-datepicker.css';
 import cn from '@/utils/class-names';
 import { id } from 'date-fns/locale';
-import { SupplierModel } from '@/models/supplier.model';
+import { SearchSupplierModel } from '@/models/supplier.model';
 
 export type PurchaseOrderFilters = {
   poCode: string;
@@ -59,17 +59,17 @@ export default function PurchaseOrderFilter({
             label='Kode'
             placeholder='Cari Kode Transaksi'
           />
-          <Select
+          <Select<SearchSupplierModel>
             value={localFilters.supplierId}
-            onChange={(value: string) => handleFilterChange('supplierId')(value)}
+            onChange={(id: string) => handleFilterChange('supplierId')(id)}
             className='sm:col-span-3'
             label='Supplier'
             placeholder='Pilih Supplier'
             options={supplierList}
-            displayValue={(value) => supplierList.find((option) => option.value === value)?.label ?? ''}
-            getOptionValue={(option) => option.value}
+            displayValue={(id: string) => supplierList.find((option) => option.id === id)?.name ?? ''}
+            getOptionValue={(option) => option.id}
             clearable={true}
-            onClear={() => handleFilterChange('supplierId')(0)}
+            onClear={() => handleFilterChange('supplierId')(null)}
           />
           <div className='sm:col-span-4 flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full'>
             <ReactDatePicker

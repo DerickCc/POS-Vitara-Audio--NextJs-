@@ -5,7 +5,7 @@ import { Input } from "rizzui";
 
 type RupiahFormInputProps = {
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
-  label: string;
+  label?: string;
   fieldName: string;
   defaultValue: number;
   readOnly?: boolean;
@@ -47,7 +47,7 @@ export default function RupiahFormInput({
       error={error}
       readOnly={readOnly}
       onChange={handleChange}
-      inputClassName={readOnly ? "bg-gray-100" : ""}
+      inputClassName={readOnly ? "bg-gray-100/70" : ""}
     />
   );
 }

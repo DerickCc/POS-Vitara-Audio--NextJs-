@@ -4,7 +4,7 @@ import SupplierForm from '@/components/forms/master/supplier-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { SupplierModel } from '@/models/supplier.model';
-import { apiFetch } from '@/utils/api';
+import { createSupplier } from '@/services/supplier-service';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
@@ -27,14 +27,11 @@ const pageHeader = {
 export default function AddSupplierPage() {
   const router = useRouter();
 
-  const createSupplier = async (data: SupplierModel) => {
+  const create = async (payload: SupplierModel) => {
     try {
-      const response = await apiFetch('/api/suppliers', {
-        method: 'POST',
-        body: data,
-      });
+      const message = await createSupplier(payload);
+      toast.success(message, { duration: 4000 });
 
-      toast.success(response.message, { duration: 4000 });
       router.push(routes.master.supplier.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -45,7 +42,7 @@ export default function AddSupplierPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <SupplierForm onSubmit={createSupplier} />
+      <SupplierForm onSubmit={create} />
     </>
   );
 }
