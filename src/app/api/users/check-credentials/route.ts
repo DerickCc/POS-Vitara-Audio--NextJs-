@@ -1,4 +1,4 @@
-import { LoginModel } from "@/models/login.model";
+import { LoginModel, LoginSchema } from "@/models/session.model";
 import { db } from "@/utils/prisma";
 import { saveSession } from "@/utils/sessionlib";
 import { compare, hash } from "bcryptjs";
@@ -19,8 +19,7 @@ export async function POST(request: Request) {
   //   }
   // })
 
-  const validatedData = data.validate();
-
+  const validatedData = LoginSchema.safeParse(data);
   // if validation failed
   if (!validatedData.success) {
     return NextResponse.json(

@@ -1,10 +1,16 @@
-import { CustomerModel } from '@/models/customer.model';
+import { CustomerModel, CustomerSchema } from '@/models/customer.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
 // GetCustomerById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+  
   const { id } = params;
 
   try {
@@ -24,8 +30,26 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 // UpdateCustomer
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = params;
   const data: CustomerModel = new CustomerModel(await request.json());
+
+  const validatedData = CustomerSchema.safeParse(data);
+  // if validation failed
+  if (!validatedData.success) {
+    return NextResponse.json(
+      {
+        message: "Terdapat kesalahan pada data yang dikirim.",
+        error: validatedData.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
   
   try {
     const userId = (await getSession()).id;

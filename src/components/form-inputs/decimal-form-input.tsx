@@ -5,6 +5,7 @@ import { Input } from 'rizzui';
 
 type DecimalFormInputProps = {
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
+  onChange?: (value: number) => void, // to process changes from other component
   label?: string;
   fieldName: string;
   defaultValue: number;
@@ -14,6 +15,7 @@ type DecimalFormInputProps = {
 
 export default function DecimalFormInput({
   setValue,
+  onChange = (value: number) => null,
   label,
   fieldName,
   defaultValue,
@@ -38,9 +40,12 @@ export default function DecimalFormInput({
       setDisplayValue(formatToDecimal(numericValue));
 
       setValue(fieldName, numericValue, { shouldValidate: true }); // Manually update the form state
+      onChange(numericValue);
+      return;
     } else {
       setDisplayValue(inputValue);
-    }
+    };
+    onChange(defaultValue)
   };
 
   return (

@@ -1,4 +1,4 @@
-import { ProductModel } from "@/models/product.model";
+import { ProductModel, ProductSchema } from "@/models/product.model";
 import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
@@ -38,6 +38,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   const { id } = params;
   const data: ProductModel = new ProductModel(await request.json());
+
+  const validatedData = ProductSchema.safeParse(data);
+  // if validation failed
+  if (!validatedData.success) {
+    return NextResponse.json(
+      {
+        message: "Terdapat kesalahan pada data yang dikirim.",
+        error: validatedData.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
   
   try {
     const userId = session.id;

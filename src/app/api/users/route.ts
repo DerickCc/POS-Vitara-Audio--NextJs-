@@ -1,4 +1,4 @@
-import { CreateUpdateUserModel } from '@/models/user.model';
+import { CreateUpdateUserModel, CreateUserSchema } from '@/models/user.model';
 import { db } from '@/utils/prisma';
 import { hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
@@ -81,8 +81,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const data: CreateUpdateUserModel = new CreateUpdateUserModel(await request.json());
 
-  const validatedData = data.validateCreateUser();
-
+  const validatedData = CreateUserSchema.safeParse(data);
   // if validation failed
   if (!validatedData.success) {
     return NextResponse.json(

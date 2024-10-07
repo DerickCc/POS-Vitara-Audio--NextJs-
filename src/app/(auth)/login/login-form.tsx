@@ -1,7 +1,7 @@
 "use client";
 
 import { routes } from "@/config/routes";
-import { LoginModel, LoginSchema } from "@/models/login.model";
+import { LoginModel, LoginSchema } from "@/models/session.model";
 import { useRouter } from "next/navigation";
 import { PiArrowRightBold } from "react-icons/pi";
 import { Button, Input, Loader, Password } from "rizzui";

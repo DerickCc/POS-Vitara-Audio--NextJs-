@@ -1,10 +1,11 @@
-import { formatToCurrency, parseNumber } from "@/utils/helper-function";
-import { useEffect, useState } from "react";
-import { UseFormSetValue } from "react-hook-form";
-import { Input } from "rizzui";
+import { formatToCurrency, parseNumber } from '@/utils/helper-function';
+import { useEffect, useState } from 'react';
+import { UseFormSetValue } from 'react-hook-form';
+import { Input } from 'rizzui';
 
 type RupiahFormInputProps = {
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
+  onChange?: (value: number) => void; // to process changes from other component
   label?: string;
   fieldName: string;
   defaultValue: number;
@@ -14,13 +15,14 @@ type RupiahFormInputProps = {
 
 export default function RupiahFormInput({
   setValue,
+  onChange = (value: number) => null,
   label,
   fieldName,
   defaultValue,
   readOnly = false,
   error,
 }: RupiahFormInputProps) {
-  const [displayValue, setDisplayValue] = useState("0");
+  const [displayValue, setDisplayValue] = useState('0');
 
   // Format the initial value
   useEffect(() => {
@@ -35,19 +37,20 @@ export default function RupiahFormInput({
     setDisplayValue(formatToCurrency(numericValue));
 
     setValue(fieldName, numericValue, { shouldValidate: true }); // Manually update the form state
+    onChange(numericValue);
   };
 
   return (
     <Input
-      type="text"
+      type='text'
       value={displayValue}
-      prefix="Rp "
+      prefix='Rp '
       label={label}
-      placeholder="xxx.xxx.xxx"
+      placeholder='xxx.xxx.xxx'
       error={error}
       readOnly={readOnly}
       onChange={handleChange}
-      inputClassName={readOnly ? "bg-gray-100/70" : ""}
+      inputClassName={readOnly ? 'bg-gray-100/70' : ''}
     />
   );
 }

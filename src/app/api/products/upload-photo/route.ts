@@ -2,8 +2,15 @@ import path from 'path';
 import fs from 'fs';
 import { writeFile } from "fs/promises";
 import { NextResponse } from 'next/server';
+import { getSession } from '@/utils/sessionlib';
 
 export async function POST(request: any) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+  
   const uploadDir = path.join(process.cwd(), 'public', 'product-photo');
 
   // Check if the directory exists, create if doesnt
@@ -13,7 +20,6 @@ export async function POST(request: any) {
 
   const formData = await request.formData();
   const file = formData.get('photo');
-  console.log(file)
 
   if (!file) {
     return NextResponse.json(

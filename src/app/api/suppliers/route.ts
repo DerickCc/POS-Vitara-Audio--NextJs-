@@ -1,4 +1,4 @@
-import { SupplierModel } from "@/models/supplier.model";
+import { SupplierModel, SupplierSchema } from "@/models/supplier.model";
 import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
@@ -111,8 +111,7 @@ export async function POST(request: Request) {
 
   const data: SupplierModel = new SupplierModel(await request.json());
 
-  const validatedData = data.validate();
-
+  const validatedData = SupplierSchema.safeParse(data);
   // if validation failed
   if (!validatedData.success) {
     return NextResponse.json(

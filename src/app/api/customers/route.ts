@@ -1,10 +1,16 @@
-import { CustomerModel } from "@/models/customer.model";
+import { CustomerModel, CustomerSchema } from "@/models/customer.model";
 import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
 
 // BrowseCustomer
 export async function GET(request: Request) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
 
@@ -83,10 +89,15 @@ export async function GET(request: Request) {
 
 // CreateCustomer
 export async function POST(request: Request) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const data: CustomerModel = new CustomerModel(await request.json());
 
-  const validatedData = data.validate();
-
+  const validatedData = CustomerSchema.safeParse(data);
   // if validation failed
   if (!validatedData.success) {
     return NextResponse.json(

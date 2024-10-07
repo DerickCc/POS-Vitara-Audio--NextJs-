@@ -40,10 +40,6 @@ export class ProductModel {
     this.sellingPrice = data.sellingPrice || 0;
     this.remarks = data.remarks;
   }
-
-  validate() {
-    return ProductSchema.safeParse(this);
-  }
 }
 
 export interface SearchProductModel extends BasicSelectOptions {

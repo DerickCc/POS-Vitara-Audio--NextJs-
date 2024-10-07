@@ -44,10 +44,6 @@ export class SupplierModel {
     this.receivablesLimit = data.receivablesLimit || 0;
     this.receivables = data.receivables || 0;
   }
-
-  validate() {
-    return SupplierSchema.safeParse(this);
-  }
 }
 
 export interface SearchSupplierModel extends BasicSelectOptions {

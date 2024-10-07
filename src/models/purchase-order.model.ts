@@ -3,7 +3,7 @@ import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema } from './purchase-
 
 export const PurchaseOrderSchema = z.object({
   purchaseDate: z.string(),
-  supplierId: z.string().min(1, { message: 'Supplier harus dipilih' }),
+  supplierId: z.string().min(1, { message: 'Mohon memilih Supplier' }),
   remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
   detail: PurchaseOrderDetailSchema,
   // totalItem and totalPrice will be processed from backend
@@ -25,16 +25,12 @@ export class PurchaseOrderModel {
     this.id = data.id;
     this.code = data.code;
     this.purchaseDate = data.purchaseDate;
-    this.supplierId = data.supplierId;
+    this.supplierId = data.supplierId || '';
     this.supplierName = data.supplierName;
     this.remarks = data.remarks;
     this.details = data.details || [new PurchaseOrderDetailModel()];
     this.totalItem = data.totalItem;
     this.totalPrice = data.totalPrice;
     this.status = data.status || 'Dalam Proses';
-  }
-
-  validate() {
-    return PurchaseOrderSchema.safeParse(this);
   }
 }

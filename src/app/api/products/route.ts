@@ -1,4 +1,4 @@
-import { ProductModel } from "@/models/product.model";
+import { ProductModel, ProductSchema } from "@/models/product.model";
 import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";
 import { NextResponse } from "next/server";
@@ -97,8 +97,7 @@ export async function POST(request: Request) {
 
   const data: ProductModel = new ProductModel(await request.json());
   
-  const validatedData = data.validate();
-
+  const validatedData = ProductSchema.safeParse(data);
   // if validation failed
   if (!validatedData.success) {
     return NextResponse.json(

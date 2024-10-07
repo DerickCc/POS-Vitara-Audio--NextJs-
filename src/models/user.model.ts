@@ -91,12 +91,4 @@ export class CreateUpdateUserModel {
     this.oldPassword = data.oldPassword;
     this.newPassword = data.newPassword;
   }
-
-  validateCreateUser() {
-    return CreateUserSchema.safeParse(this);
-  }
-
-  validateUpdateUser() {
-    return UpdateUserSchema.safeParse(this);
-  }
 }

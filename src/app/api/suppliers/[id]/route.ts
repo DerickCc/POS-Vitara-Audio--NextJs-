@@ -1,10 +1,16 @@
-import { SupplierModel } from '@/models/supplier.model';
+import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
 // GetSupplierById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = params;
 
   try {
@@ -24,8 +30,26 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 // UpdateSupplier
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = params;
   const data: SupplierModel = new SupplierModel(await request.json());
+  
+  const validatedData = SupplierSchema.safeParse(data);
+  // if validation failed
+  if (!validatedData.success) {
+    return NextResponse.json(
+      {
+        message: "Terdapat kesalahan pada data yang dikirim.",
+        error: validatedData.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
   
   try {
     if (data.receivables > data.receivablesLimit) {
@@ -59,6 +83,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 // DeleteSupplier
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = params;
   
   try {

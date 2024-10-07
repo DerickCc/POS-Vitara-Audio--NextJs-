@@ -29,8 +29,4 @@ export class CustomerModel {
     this.phoneNo = data.phoneNo;
     this.address = data.address;
   }
-
-  validate() {
-    return CustomerSchema.safeParse(this);
-  }
 }

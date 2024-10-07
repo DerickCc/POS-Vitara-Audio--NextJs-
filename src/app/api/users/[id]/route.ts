@@ -1,4 +1,4 @@
-import { CreateUpdateUserModel } from '@/models/user.model';
+import { CreateUpdateUserModel, UpdateUserSchema } from '@/models/user.model';
 import { db } from '@/utils/prisma';
 import { compare, hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
@@ -33,6 +33,18 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
   const data: CreateUpdateUserModel = new CreateUpdateUserModel(await request.json());
+
+  const validatedData = UpdateUserSchema.safeParse(data);
+  // if validation failed
+  if (!validatedData.success) {
+    return NextResponse.json(
+      {
+        message: 'Terdapat kesalahan pada data yang dikirim.',
+        error: validatedData.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
 
   try {
     const user = await db.users.findUnique({

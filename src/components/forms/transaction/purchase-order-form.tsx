@@ -9,7 +9,7 @@ import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
@@ -22,6 +22,7 @@ import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 import { SearchProductModel } from '@/models/product.model';
 import { searchProduct } from '@/services/product-service';
+import { debounce } from 'lodash';
 
 export default function PurchaseOrderForm({
   defaultValues = new PurchaseOrderModel(),
@@ -29,8 +30,10 @@ export default function PurchaseOrderForm({
   onSubmit,
 }: BasicFormProps<PurchaseOrderModel>) {
   const {
+    watch,
     register,
     setValue,
+    getValues,
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -39,6 +42,12 @@ export default function PurchaseOrderForm({
     defaultValues,
     resolver: zodResolver(PurchaseOrderSchema),
   });
+
+  const formValues = getValues();
+
+  useEffect(() => {
+    if (defaultValues.id) reset(defaultValues);
+  }, [defaultValues, reset]);
 
   const {
     fields: productFields,
@@ -49,37 +58,59 @@ export default function PurchaseOrderForm({
     name: 'details',
   });
 
-  useEffect(() => {
-    if (defaultValues.id) reset(defaultValues);
-  }, [defaultValues, reset]);
-
+  // supplier
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
 
-  useEffect(() => {
-    const fetchSupplierList = async () => {
+  const handleSupplierSearchChange = useCallback(
+    debounce(async (name: string) => {
+      if (!name || name.trim() === '') return;
+
       try {
-        setSupplierList(await searchSupplier());
+        setSupplierList(await searchSupplier(name));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }
-    };
+    }, 500),
+    []
+  );
 
-    fetchSupplierList();
-  }, []);
+  const handleSupplierChange = (supplierName: string) => {
+    setValue('supplierName', supplierName);
+  };
+  // ------------------------
 
+  // transaction detail
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
-  useEffect(() => {
-    const fetchProductList = async () => {
+  const handleProductSearchChange = useCallback(
+    debounce(async (name: string) => {
+      // only search if name is not empty
+      if (!name || name.trim() === '') return;
+
       try {
-        setProductList(await searchProduct());
+        setProductList(await searchProduct(name));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }
-    };
+    }, 500),
+    []
+  );
 
-    fetchProductList();
-  }, []);
+  const handleProductChange = (idx: number, product: SearchProductModel) => {
+    setValue(`details.${idx}`, {
+      ...formValues.details[idx],
+      productName: product.name,
+      purchasePrice: product.purchasePrice,
+      quantity: 0,
+      uom: product.uom,
+    });
+  };
+  // ------------------------
+
+  const updateTotalPrice = (idx: number) => {
+    const totalPrice = formValues.details[idx].purchasePrice * formValues.details[idx].quantity;
+    setValue(`details.${idx}.totalPrice`, totalPrice);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -110,18 +141,28 @@ export default function PurchaseOrderForm({
               <Controller
                 control={control}
                 name='supplierId'
-                render={({ field: { value, onChange } }) => (
-                  <Select<SearchSupplierModel>
-                    value={value}
-                    onChange={onChange}
-                    label={<span className='required'>Supplier</span>}
-                    placeholder='Pilih Supplier'
-                    options={supplierList}
-                    displayValue={(id: string) => supplierList.find((option) => option.id === id)?.name ?? ''}
-                    getOptionValue={(option) => option.id}
-                    error={errors.supplierId?.message}
-                  />
-                )}
+                render={({ field: { value, onChange }, fieldState: { error } }) => {
+                  const supplierName = watch('supplierName');
+                  return (
+                    <Select<SearchSupplierModel>
+                      value={value}
+                      onChange={(option: SearchSupplierModel) => {
+                        onChange(option.id);
+                        handleSupplierChange(option.name);
+                      }}
+                      label={<span className='required'>Supplier</span>}
+                      placeholder='Pilih Supplier'
+                      options={supplierList}
+                      displayValue={() => supplierName}
+                      getOptionValue={(option: SearchSupplierModel) => option}
+                      searchable={true}
+                      searchByKey='name'
+                      onSearchChange={(name: string) => handleSupplierSearchChange(name)}
+                      disableDefaultFilter={true}
+                      error={error?.message}
+                    />
+                  );
+                }}
               />
               <Textarea label='Keterangan' placeholder='Keterangan' className='sm:col-span-3' />
             </div>
@@ -151,91 +192,113 @@ export default function PurchaseOrderForm({
                   </tr>
                 </thead>
                 <tbody>
-                  {productFields.map((field, idx) => {
-                    console.log(field);
-                    return (
-                      <tr key={field.id}>
-                        <td className='table-cell text-center'>
-                          <ActionIcon
-                            size='sm'
-                            variant='outline'
-                            aria-label='delete'
-                            className={cn(actionIconColorClass.red, 'cursor-pointer')}
-                            onClick={() => removeProduct(idx)}
-                          >
-                            <FaRegTrashAlt className='h-4 w-4' />
-                          </ActionIcon>
-                        </td>
-                        <td>
-                          <Controller
-                            control={control}
-                            name={`details.${idx}.productId`}
-                            render={({ field: { value, onChange } }) => (
-                              <Select
-                                value={value}
-                                onChange={onChange}
-                                placeholder='Pilih Barang'
-                                options={productList}
-                                displayValue={(id: string) =>
-                                  productList.find((option) => option.id === id)?.name ?? ''
-                                }
-                                getOptionValue={(option) => option.id}
-                                error={errors.details ? errors?.details[idx]?.productId?.message : ''}
-                              />
-                            )}
-                          />
-                        </td>
-                        <td>
-                          <RupiahFormInput
-                            setValue={setValue}
-                            fieldName={`details.${idx}.purchasePrice`}
-                            defaultValue={field.purchasePrice}
-                            error={errors.details ? errors?.details[idx]?.purchasePrice?.message : ''}
-                          />
-                        </td>
-                        <td>
-                          <DecimalFormInput
-                            setValue={setValue}
-                            fieldName={`details.${idx}.quantity`}
-                            defaultValue={field.quantity}
-                            error={errors.details ? errors?.details[idx]?.quantity?.message : ''}
-                          />
-                        </td>
-                        <td>
-                          <Input
-                            placeholder='Satuan'
-                            error={errors.details ? errors?.details[idx]?.uom?.message : ''}
-                            inputClassName='bg-gray-100/70'
-                            readOnly
-                            {...register(`details.${idx}.uom`)}
-                          />
-                          {/* {field.uom} */}
-                        </td>
-                        <td>
-                          <RupiahFormInput
-                            setValue={setValue}
-                            fieldName={`details.${idx}.uom`}
-                            defaultValue={field.totalPrice}
-                            readOnly={true}
-                            error={errors.details ? errors?.details[idx]?.totalPrice?.message : ''}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {productFields.map((field, idx) => (
+                    <tr key={field.id}>
+                      <td className='table-cell text-center'>
+                        <ActionIcon
+                          size='sm'
+                          variant='outline'
+                          aria-label='delete'
+                          className={cn(actionIconColorClass.red, 'cursor-pointer')}
+                          onClick={() => removeProduct(idx)}
+                        >
+                          <FaRegTrashAlt className='h-4 w-4' />
+                        </ActionIcon>
+                      </td>
+                      <td>
+                        <Controller
+                          control={control}
+                          name={`details.${idx}.productId`}
+                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                            <Select<SearchProductModel>
+                              value={value}
+                              onChange={(option: SearchProductModel) => {
+                                onChange(option.id);
+                                handleProductChange(idx, option);
+                              }}
+                              placeholder='Pilih Barang'
+                              options={productList}
+                              displayValue={() => formValues.details[idx].productName}
+                              getOptionValue={(option: SearchProductModel) => option}
+                              searchable={true}
+                              searchByKey='name'
+                              onSearchChange={(name: string) => handleProductSearchChange(name)}
+                              disableDefaultFilter={true}
+                              error={error?.message}
+                              // error={errors.details ? errors.details[idx]?.purchasePrice?.message : ''}
+                            />
+                          )}
+                        />
+                      </td>
+                      <td>
+                        <Controller
+                          control={control}
+                          name={`details.${idx}.purchasePrice`}
+                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                            <RupiahFormInput
+                              setValue={setValue}
+                              onChange={() => updateTotalPrice(idx)}
+                              fieldName={`details.${idx}.purchasePrice`}
+                              defaultValue={value}
+                              error={error?.message}
+                            />
+                          )}
+                        />
+                      </td>
+                      <td>
+                        <Controller
+                          control={control}
+                          name={`details.${idx}.quantity`}
+                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                            <DecimalFormInput
+                              setValue={setValue}
+                              onChange={() => updateTotalPrice(idx)}
+                              fieldName={`details.${idx}.quantity`}
+                              defaultValue={value}
+                              error={error?.message}
+                            />
+                          )}
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          placeholder='Satuan'
+                          error={errors.details ? errors?.details[idx]?.uom?.message : ''}
+                          inputClassName='bg-gray-100/70'
+                          readOnly
+                          {...register(`details.${idx}.uom`)}
+                        />
+                      </td>
+                      <td>
+                        <Controller
+                          control={control}
+                          name={`details.${idx}.totalPrice`}
+                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                            <RupiahFormInput
+                              setValue={setValue}
+                              fieldName={`details.${idx}.totalPrice`}
+                              defaultValue={value}
+                              readOnly={true}
+                              error={error?.message}
+                            />
+                          )}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td className='table-cell text-center'>
+                      <ActionIcon
+                        size='sm'
+                        aria-label='add'
+                        className='cursor-pointer'
+                        onClick={() => appendProduct(new PurchaseOrderDetailModel())}
+                      >
+                        <PiPlusBold className='h-4 w-4' />
+                      </ActionIcon>
+                    </td>
+                  </tr>
                 </tbody>
-                <tr>
-                  <td className='table-cell text-center'>
-                    <ActionIcon
-                      size='sm'
-                      aria-label='add'
-                      className='cursor-pointer'
-                      onClick={() => appendProduct(new PurchaseOrderDetailModel())}
-                    >
-                      <PiPlusBold className='h-4 w-4' />
-                    </ActionIcon>
-                  </td>
-                </tr>
               </table>
             </div>
 

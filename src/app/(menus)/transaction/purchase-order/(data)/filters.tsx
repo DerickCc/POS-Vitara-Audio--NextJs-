@@ -68,6 +68,7 @@ export default function PurchaseOrderFilter({
             options={supplierList}
             displayValue={(id: string) => supplierList.find((option) => option.id === id)?.name ?? ''}
             getOptionValue={(option) => option.id}
+            searchable={true}
             clearable={true}
             onClear={() => handleFilterChange('supplierId')(null)}
           />
