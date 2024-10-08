@@ -16,13 +16,31 @@ export async function GET(request: Request, { params }: { params: { id: string }
   try {
     const po = await db.purchaseOrders.findUnique({
       where: { id },
+      include: {
+        PurchaseOrderDetails: {
+          select: {
+            id: true,
+            poId: true,
+            productId: true,
+            purchasePrice: true,
+            quantity: true,
+            totalPrice: true,
+          }
+        }
+      }
     });
 
     if (!po) {
       return NextResponse.json({ message: 'Transaksi Pembelian tidak ditemukan' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Success', result: po }, { status: 200 });
+    const formattedPurchaseOrder = {
+      ...po,
+      details: po.PurchaseOrderDetails,
+      PurchaseOrderDetails: undefined
+    }
+
+    return NextResponse.json({ message: 'Success', result: formattedPurchaseOrder }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
@@ -87,15 +105,15 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         { message: 'Transaksi Pembelian Gagal Dihapus Karena Tidak Ditemukan' },
         { status: 404 }
       );
-    } else if (po.status !== 'Sedang Berlangsung') {
+    } else if (po.status !== 'Dalam Proses') {
       return NextResponse.json(
-        { message: 'Hanya Dapat Menghapus Transaksi Pembelian yang Berstatus "Sedang Berlangsung"' },
+        { message: 'Hanya Dapat Menghapus Transaksi Pembelian yang Berstatus "Dalam Proses"' },
         { status: 403 } // 403 = Forbidden
       );
     }
 
     const deletedPo = await db.purchaseOrders.delete({
-      where: { id: id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Dihapus' }, { status: 200 });

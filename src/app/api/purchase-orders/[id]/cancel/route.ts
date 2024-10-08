@@ -1,6 +1,6 @@
-import { db } from "@/utils/prisma";
-import { getSession } from "@/utils/sessionlib";
-import { NextResponse } from "next/server";
+import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
+import { NextResponse } from 'next/server';
 
 // UpdatePurchaseOrder
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
@@ -24,9 +24,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         { message: 'Data Transaksi Pembelian Gagal Dibatalkan Karena Tidak Ditemukan' },
         { status: 404 }
       );
-    } else if (po.status !== 'Sedang Berlangsung') {
+    } else if (po.status !== 'Dalam Proses') {
       return NextResponse.json(
-        { message: 'Hanya Dapat Membatalkan Transaksi Pembelian yang Berstatus "Sedang Berlangsung"' },
+        { message: 'Hanya Dapat Membatalkan Transaksi Pembelian yang Berstatus "Dalam Proses"' },
         { status: 403 } // 403 = Forbidden
       );
     }

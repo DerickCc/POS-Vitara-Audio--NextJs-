@@ -1,4 +1,4 @@
-import { PurchaseOrderModel } from '@/models/purchase-order.model';
+import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -54,11 +54,21 @@ export async function GET(request: Request) {
         [sortColumn]: sortOrder,
       },
       where,
+      include: {
+        Supplier: {
+          select: { name: true },
+        },
+      },
     });
-
     const recordsTotal = await db.purchaseOrders.count({ where });
 
-    return NextResponse.json({ message: 'Success', result: purchaseOrders, recordsTotal }, { status: 200 });
+    const mappedPurchaseOrders = purchaseOrders.map((po) => ({
+      ...po,
+      supplierName: po.Supplier.name,
+      Supplier: undefined,
+    }));
+
+    return NextResponse.json({ message: 'Success', result: mappedPurchaseOrders, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },
@@ -77,18 +87,18 @@ export async function POST(request: Request) {
 
   const data: PurchaseOrderModel = new PurchaseOrderModel(await request.json());
 
-  // const validatedData = data.validate();
+  const validatedData = PurchaseOrderSchema.safeParse(data);
 
-  // // if validation failed
-  // if (!validatedData.success) {
-  //   return NextResponse.json(
-  //     {
-  //       message: 'Terdapat kesalahan pada data yang dikirim',
-  //       error: validatedData.error.flatten().fieldErrors,
-  //     },
-  //     { status: 400 }
-  //   );
-  // }
+  // if validation failed
+  if (!validatedData.success) {
+    return NextResponse.json(
+      {
+        message: 'Terdapat kesalahan pada data yang dikirim',
+        error: validatedData.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
 
   try {
     const userId = session.id;
@@ -106,24 +116,40 @@ export async function POST(request: Request) {
       newCode = 'PO' + (lastCodeNumber + 1).toString().padStart(8, '0');
     }
 
-    const po = await db.purchaseOrders.create({
-      data: {
-        code: newCode,
-        purchaseDate: data.purchaseDate,
-        Supplier: {
-          connect: { id: data.supplierId },
-        },
-        remarks: data.remarks,
-        totalItem: data.totalItem,
-        totalPrice: data.totalPrice,
-        status: data.status,
-        CreatedBy: {
-          connect: { id: userId },
-        },
-      },
-    });
+    const purchaseDate = new Date().toISOString();
+    const totalPrice = data.details.reduce((acc, d) => {
+      return acc + d.purchasePrice * d.quantity;
+    }, 0);
 
-    // save po detail
+    await db.$transaction(async (prisma) => {
+      const po = await prisma.purchaseOrders.create({
+        data: {
+          code: newCode,
+          purchaseDate: purchaseDate,
+          Supplier: {
+            connect: { id: data.supplierId },
+          },
+          remarks: data.remarks,
+          totalItem: data.details.length,
+          totalPrice: totalPrice,
+          status: 'Dalam Proses',
+          CreatedBy: {
+            connect: { id: userId },
+          },
+        },
+      });
+  
+      await prisma.purchaseOrderDetails.createMany({
+        data: data.details.map((d) => ({
+          poId: po.id,
+          productId: d.productId,
+          purchasePrice: d.purchasePrice,
+          quantity: d.quantity,
+          totalPrice: d.purchasePrice * d.quantity,
+          createdBy: userId,
+        })),
+      });
+    })
 
     return NextResponse.json({ message: 'Data Transaksi Pembelian Berhasil Disimpan' }, { status: 201 });
   } catch (e) {

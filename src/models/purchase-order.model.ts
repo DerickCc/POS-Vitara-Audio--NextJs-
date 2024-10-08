@@ -1,11 +1,20 @@
 import { z } from 'zod';
 import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema } from './purchase-order-detail.model';
+import { getCurrDate } from '@/utils/helper-function';
 
 export const PurchaseOrderSchema = z.object({
-  purchaseDate: z.string(),
   supplierId: z.string().min(1, { message: 'Mohon memilih Supplier' }),
   remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
-  detail: PurchaseOrderDetailSchema,
+  details: z.array(PurchaseOrderDetailSchema).refine(
+    (details) => {
+      const productIds = details.map((p) => p.productId);
+      return new Set(productIds).size === productIds.length;
+    },
+    {
+      message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+      path: ['details'],
+    }
+  ),
   // totalItem and totalPrice will be processed from backend
 });
 
@@ -24,7 +33,7 @@ export class PurchaseOrderModel {
   constructor(data: any = {}) {
     this.id = data.id;
     this.code = data.code;
-    this.purchaseDate = data.purchaseDate;
+    this.purchaseDate = data.purchaseDate || getCurrDate();
     this.supplierId = data.supplierId || '';
     this.supplierName = data.supplierName;
     this.remarks = data.remarks;

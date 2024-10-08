@@ -82,19 +82,12 @@ export default function PurchaseOrderForm({
   // transaction detail
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
-  const handleProductSearchChange = useCallback(
-    debounce(async (name: string) => {
-      // only search if name is not empty
-      if (!name || name.trim() === '') return;
+  const filterSelectedProductFromList = (list: SearchProductModel[]) => {
+    const selectedProductIds = formValues.details.map((v) => v.productId);
+    const filteredProductList = list.filter((item) => !selectedProductIds.includes(item.id));
 
-      try {
-        setProductList(await searchProduct(name));
-      } catch (e) {
-        toast.error(e + '', { duration: 5000 });
-      }
-    }, 500),
-    []
-  );
+    setProductList(filteredProductList);
+  };
 
   const handleProductChange = (idx: number, product: SearchProductModel) => {
     setValue(`details.${idx}`, {
@@ -104,13 +97,30 @@ export default function PurchaseOrderForm({
       quantity: 0,
       uom: product.uom,
     });
+
+    filterSelectedProductFromList(productList);
   };
-  // ------------------------
+
+  const handleProductSearchChange = useCallback(
+    debounce(async (name: string) => {
+      // only search if name is not empty
+      if (!name || name.trim() === '') return;
+
+      try {
+        const result = await searchProduct(name);
+        filterSelectedProductFromList(result);
+      } catch (e) {
+        toast.error(e + '', { duration: 5000 });
+      }
+    }, 500),
+    []
+  );
 
   const updateTotalPrice = (idx: number) => {
     const totalPrice = formValues.details[idx].purchasePrice * formValues.details[idx].quantity;
     setValue(`details.${idx}.totalPrice`, totalPrice);
   };
+  // ------------------------
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -164,7 +174,12 @@ export default function PurchaseOrderForm({
                   );
                 }}
               />
-              <Textarea label='Keterangan' placeholder='Keterangan' className='sm:col-span-3' />
+              <Textarea
+                label='Keterangan'
+                placeholder='Keterangan'
+                className='sm:col-span-3'
+                {...register('remarks')}
+              />
             </div>
           </>
         )}
@@ -194,47 +209,50 @@ export default function PurchaseOrderForm({
                 <tbody>
                   {productFields.map((field, idx) => (
                     <tr key={field.id}>
-                      <td className='table-cell text-center'>
+                      <td className='table-cell text-center align-top'>
                         <ActionIcon
                           size='sm'
                           variant='outline'
                           aria-label='delete'
-                          className={cn(actionIconColorClass.red, 'cursor-pointer')}
+                          className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
                           onClick={() => removeProduct(idx)}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
                         </ActionIcon>
                       </td>
-                      <td>
+                      <td className='table-cell align-top'>
                         <Controller
                           control={control}
                           name={`details.${idx}.productId`}
-                          render={({ field: { value, onChange }, fieldState: { error } }) => (
-                            <Select<SearchProductModel>
-                              value={value}
-                              onChange={(option: SearchProductModel) => {
-                                onChange(option.id);
-                                handleProductChange(idx, option);
-                              }}
-                              placeholder='Pilih Barang'
-                              options={productList}
-                              displayValue={() => formValues.details[idx].productName}
-                              getOptionValue={(option: SearchProductModel) => option}
-                              searchable={true}
-                              searchByKey='name'
-                              onSearchChange={(name: string) => handleProductSearchChange(name)}
-                              disableDefaultFilter={true}
-                              error={error?.message}
-                              // error={errors.details ? errors.details[idx]?.purchasePrice?.message : ''}
-                            />
-                          )}
+                          render={({ field: { value, onChange }, fieldState: { error } }) => {
+                            const productName = watch(`details.${idx}.productName`);
+                            return (
+                              <Select<SearchProductModel>
+                                value={value}
+                                onChange={(option: SearchProductModel) => {
+                                  onChange(option.id);
+                                  handleProductChange(idx, option);
+                                }}
+                                placeholder='Pilih Barang'
+                                options={productList}
+                                displayValue={() => productName}
+                                getOptionValue={(option: SearchProductModel) => option}
+                                searchable={true}
+                                searchByKey='name'
+                                onSearchChange={(name: string) => handleProductSearchChange(name)}
+                                disableDefaultFilter={true}
+                                error={error?.message}
+                                // error={errors.details ? errors.details[idx]?.purchasePrice?.message : ''}
+                              />
+                            );
+                          }}
                         />
                       </td>
-                      <td>
+                      <td className='table-cell align-top'>
                         <Controller
                           control={control}
                           name={`details.${idx}.purchasePrice`}
-                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                          render={({ field: { value }, fieldState: { error } }) => (
                             <RupiahFormInput
                               setValue={setValue}
                               onChange={() => updateTotalPrice(idx)}
@@ -245,11 +263,11 @@ export default function PurchaseOrderForm({
                           )}
                         />
                       </td>
-                      <td>
+                      <td className='table-cell align-top'>
                         <Controller
                           control={control}
                           name={`details.${idx}.quantity`}
-                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                          render={({ field: { value }, fieldState: { error } }) => (
                             <DecimalFormInput
                               setValue={setValue}
                               onChange={() => updateTotalPrice(idx)}
@@ -260,7 +278,7 @@ export default function PurchaseOrderForm({
                           )}
                         />
                       </td>
-                      <td>
+                      <td className='table-cell align-top'>
                         <Input
                           placeholder='Satuan'
                           error={errors.details ? errors?.details[idx]?.uom?.message : ''}
@@ -269,11 +287,11 @@ export default function PurchaseOrderForm({
                           {...register(`details.${idx}.uom`)}
                         />
                       </td>
-                      <td>
+                      <td className='table-cell align-top'>
                         <Controller
                           control={control}
                           name={`details.${idx}.totalPrice`}
-                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                          render={({ field: { value }, fieldState: { error } }) => (
                             <RupiahFormInput
                               setValue={setValue}
                               fieldName={`details.${idx}.totalPrice`}
