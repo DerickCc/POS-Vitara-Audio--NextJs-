@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema } from './purchase-order-detail.model';
+import { PurchaseOrderDetailModel, CreatePurchaseOrderDetailSchema, UpdatePurchaseOrderDetailSchema } from './purchase-order-detail.model';
 import { getCurrDate } from '@/utils/helper-function';
 
-export const PurchaseOrderSchema = z.object({
+export const CreatePurchaseOrderSchema = z.object({
   supplierId: z.string().min(1, { message: 'Mohon memilih Supplier' }),
   remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
-  details: z.array(PurchaseOrderDetailSchema).refine(
+  details: z.array(CreatePurchaseOrderDetailSchema).refine(
     (details) => {
       const productIds = details.map((p) => p.productId);
       return new Set(productIds).size === productIds.length;
@@ -15,7 +15,21 @@ export const PurchaseOrderSchema = z.object({
       path: ['details'],
     }
   ),
-  // totalItem and totalPrice will be processed from backend
+});
+
+export const UpdatePurchaseOrderSchema = z.object({
+  supplierId: z.string().min(1, { message: 'Mohon memilih Supplier' }),
+  remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
+  details: z.array(UpdatePurchaseOrderDetailSchema).refine(
+    (details) => {
+      const productIds = details.map((p) => p.productId);
+      return new Set(productIds).size === productIds.length;
+    },
+    {
+      message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+      path: ['details'],
+    }
+  ),
 });
 
 export class PurchaseOrderModel {
@@ -27,7 +41,7 @@ export class PurchaseOrderModel {
   remarks: string;
   details: PurchaseOrderDetailModel[]; // detail po
   totalItem: number;
-  totalPrice: number;
+  grandTotal: number;
   status: 'Dalam Proses' | 'Selesai' | 'Dibatalkan';
 
   constructor(data: any = {}) {
@@ -39,7 +53,7 @@ export class PurchaseOrderModel {
     this.remarks = data.remarks;
     this.details = data.details || [new PurchaseOrderDetailModel()];
     this.totalItem = data.totalItem;
-    this.totalPrice = data.totalPrice;
+    this.grandTotal = data.grandTotal;
     this.status = data.status || 'Dalam Proses';
   }
 }

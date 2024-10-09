@@ -1,4 +1,4 @@
-import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { PurchaseOrderModel, CreatePurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -85,20 +85,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const data: PurchaseOrderModel = new PurchaseOrderModel(await request.json());
-
-  const validatedData = PurchaseOrderSchema.safeParse(data);
+  const validationRes = CreatePurchaseOrderSchema.safeParse(await request.json());
 
   // if validation failed
-  if (!validatedData.success) {
+  if (!validationRes.success) {
     return NextResponse.json(
       {
         message: 'Terdapat kesalahan pada data yang dikirim',
-        error: validatedData.error.flatten().fieldErrors,
+        error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
+
+  const data = validationRes.data;
 
   try {
     const userId = session.id;
@@ -117,8 +117,8 @@ export async function POST(request: Request) {
     }
 
     const purchaseDate = new Date().toISOString();
-    const totalPrice = data.details.reduce((acc, d) => {
-      return acc + d.purchasePrice * d.quantity;
+    const grandTotal = data.details.reduce((acc, d) => {
+      return acc + (d.purchasePrice * d.quantity);
     }, 0);
 
     await db.$transaction(async (prisma) => {
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
           },
           remarks: data.remarks,
           totalItem: data.details.length,
-          totalPrice: totalPrice,
+          grandTotal: grandTotal,
           status: 'Dalam Proses',
           CreatedBy: {
             connect: { id: userId },

@@ -17,11 +17,9 @@ export class SessionData {
 export const LoginSchema = z.object({
   username: z
     .string()
-    .nullable()
     .refine((val) => val !== null && val.trim().length > 0, { message: 'Usernama harus diisi' }),
   password: z
     .string()
-    .nullable()
     .refine((val) => val !== null && val.trim().length > 0, { message: 'Password harus diisi' }),
 });
 
@@ -30,7 +28,7 @@ export class LoginModel {
   password: string;
 
   constructor(data: any = {}) {
-    this.username = data.username || null;
-    this.password = data.password || null;
+    this.username = data.username || '';
+    this.password = data.password || '';
   }
 }

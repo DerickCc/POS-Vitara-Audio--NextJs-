@@ -1,6 +1,7 @@
-import { PurchaseOrderModel } from '@/models/purchase-order.model';
+import { PurchaseOrderModel, UpdatePurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { connect } from 'http2';
 import { NextResponse } from 'next/server';
 
 // GetPurchaseOrderById
@@ -26,7 +27,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         },
         remarks: true,
         totalItem: true,
-        totalPrice: true,
+        grandTotal: true,
         status: true,
         createdBy: true,
         PurchaseOrderDetails: {
@@ -35,7 +36,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
             poId: true,
             productId: true,
             Product: {
-              select: { name: true },
+              select: { name: true, uom: true },
             },
             purchasePrice: true,
             quantity: true,
@@ -49,14 +50,22 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: 'Transaksi Pembelian tidak ditemukan' }, { status: 404 });
     }
 
-    console.log(po);
-    const formattedPurchaseOrder = {
+    const formattedPoDetail = po.PurchaseOrderDetails.map(d => ({
+      ...d,
+      productName: d.Product.name,
+      uom: d.Product.uom,
+      Product: undefined,
+    }));
+
+    const formattedPo = {
       ...po,
-      details: po.PurchaseOrderDetails,
+      supplierName: po.Supplier.name,
+      details: formattedPoDetail,
+      Supplier: undefined,
       PurchaseOrderDetails: undefined,
     };
 
-    return NextResponse.json({ message: 'Success', result: po }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: formattedPo }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
@@ -71,29 +80,64 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   const { id } = params;
-  const data: PurchaseOrderModel = new PurchaseOrderModel(await request.json());
 
+  const validationRes = UpdatePurchaseOrderSchema.safeParse(await request.json());
+
+  // if validation failed
+  if (!validationRes.success) {
+    return NextResponse.json(
+      {
+        message: 'Terdapat kesalahan pada data yang dikirim',
+        error: validationRes.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
+
+  const data = validationRes.data;
+  
   try {
     const userId = session.id;
 
-    const updatedPo = await db.purchaseOrders.update({
-      where: { id },
-      data: {
-        UpdatedBy: {
-          connect: { id: userId },
+    const grandTotal = data.details.reduce((acc, d) => {
+      return acc + (d.purchasePrice * d.quantity);
+    }, 0);
+
+    await db.$transaction(async (prisma) => {
+      const updatedPo = await prisma.purchaseOrders.update({
+        where: { id },
+        data: {
+          Supplier: {
+            connect: { id: data.supplierId },
+          },
+          remarks: data.remarks,
+          totalItem: data.details.length,
+          grandTotal: grandTotal,
+          UpdatedBy: {
+            connect: { id: userId },
+          },
         },
-      },
-    });
+      });
 
-    // update detail po
-    // update product stock
-
-    if (!updatedPo) {
-      return NextResponse.json(
-        { message: 'Transaksi Pembelian Gagal Diupdate Karena Tidak Ditemukan' },
-        { status: 404 }
-      );
-    }
+      const updateMany = data.details.map(d => {
+        return prisma.purchaseOrderDetails.update({
+          where: { id: d.id },
+          data: {
+            Product: {
+              connect: { id: d.productId}
+            },
+            purchasePrice: d.purchasePrice,
+            quantity: d.quantity,
+            totalPrice: d.purchasePrice * d.quantity,
+            UpdatedBy: {
+              connect: { id: userId },
+            },
+          }
+        })
+      })
+      
+      await Promise.all(updateMany);
+    })
 
     return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diupdate' }, { status: 200 });
   } catch (e) {

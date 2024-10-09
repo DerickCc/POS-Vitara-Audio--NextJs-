@@ -1,10 +1,17 @@
-import { CreateUpdateUserModel, UpdateUserSchema } from '@/models/user.model';
+import { UpdateUserSchema } from '@/models/user.model';
 import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
 import { compare, hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
 // GetUserById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+  
   const { id } = params;
 
   try {
@@ -31,20 +38,27 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 // UpdateUser
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
-  const data: CreateUpdateUserModel = new CreateUpdateUserModel(await request.json());
+  const session = await getSession();
 
-  const validatedData = UpdateUserSchema.safeParse(data);
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+  
+  const { id } = params;
+
+  const validationRes = UpdateUserSchema.safeParse(await request.json());
   // if validation failed
-  if (!validatedData.success) {
+  if (!validationRes.success) {
     return NextResponse.json(
       {
         message: 'Terdapat kesalahan pada data yang dikirim.',
-        error: validatedData.error.flatten().fieldErrors,
+        error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
+
+  const data = validationRes.data;
 
   try {
     const user = await db.users.findUnique({

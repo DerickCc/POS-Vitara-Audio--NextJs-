@@ -3,7 +3,7 @@
 import PurchaseOrderForm from "@/components/forms/transaction/purchase-order-form";
 import PageHeader from "@/components/page-header";
 import { routes } from "@/config/routes";
-import { PurchaseOrderModel } from "@/models/purchase-order.model";
+import { PurchaseOrderModel, UpdatePurchaseOrderSchema } from "@/models/purchase-order.model";
 import { getPoById, updatePo } from "@/services/purchase-order-service";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -34,7 +34,7 @@ export default function EditPurchaseOrderPage() {
       const message = await updatePo(id, payload);
       toast.success(message, { duration: 4000 });
 
-      router.push(routes.master.supplier.data);
+      router.push(routes.transaction.purchaseOrder.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
@@ -59,7 +59,7 @@ export default function EditPurchaseOrderPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <PurchaseOrderForm defaultValues={po} isLoading={isLoading} onSubmit={update} />
+      <PurchaseOrderForm defaultValues={po} schema={UpdatePurchaseOrderSchema} isLoading={isLoading} onSubmit={update} />
     </>
   );
 }

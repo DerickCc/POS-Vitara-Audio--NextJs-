@@ -2,10 +2,13 @@
   "name": "isomorphic-starter-template",
   "version": "6.8.0",
   "private": true,
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
   "scripts": {
     "clean": "rimraf -g \"{node_modules,.next,.cache}\"",
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build && prisma db seed",
     "start": "next start",
     "lint": "next lint"
   },
@@ -49,6 +52,7 @@
     "sharp": "^0.33.4",
     "simplebar-react": "^3.2.5",
     "tailwind-merge": "^2.3.0",
+    "ts-node": "^10.9.2",
     "uploadthing": "^6.10.3",
     "zod": "^3.23.8"
   },
@@ -58,7 +62,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/formidable": "^3.4.5",
     "@types/lodash": "^4.17.1",
-    "@types/node": "^20.12.11",
+    "@types/node": "^20.16.1",
     "@types/react": "^18.3.1",
     "@types/react-color": "^3.0.12",
     "@types/react-dom": "^18.3.0",

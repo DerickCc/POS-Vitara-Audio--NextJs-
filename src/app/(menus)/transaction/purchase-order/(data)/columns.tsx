@@ -6,7 +6,7 @@ import { ActionIcon, Tooltip } from "rizzui";
 import { LuPencil } from 'react-icons/lu';
 import ActionPopover from "@/components/action-popover";
 import { PurchaseOrderModel } from "@/models/purchase-order.model";
-import { formatToCurrency } from "@/utils/helper-function";
+import { formatToCurrency, isoStringToReadableDate } from "@/utils/helper-function";
 import cn from "@/utils/class-names";
 import { mapTrxStatusToColor } from "@/config/global-variables";
 import { badgeColorClass, baseBadgeClass } from "@/utils/tailwind-classes";
@@ -52,6 +52,13 @@ export const columns = (actions: TableAction[]) => [
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
+  columnHelper.accessor('purchaseDate', {
+    id: 'purchaseDate',
+    size: 150,
+    header: () => 'Tanggal Pembelian',
+    cell: (info) => isoStringToReadableDate(info.getValue()),
+    enableSorting: true,
+  }),
   columnHelper.accessor('supplierName', {
     id: 'supplierName',
     size: 150,
@@ -66,10 +73,10 @@ export const columns = (actions: TableAction[]) => [
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('totalPrice', {
-    id: 'totalPrice',
+  columnHelper.accessor('grandTotal', {
+    id: 'grandTotal',
     size: 130,
-    header: () => 'Total Harga',
+    header: () => 'Grand Total',
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: true,
   }),

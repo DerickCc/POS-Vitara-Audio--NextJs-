@@ -37,19 +37,20 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   const { id } = params;
-  const data: ProductModel = new ProductModel(await request.json());
 
-  const validatedData = ProductSchema.safeParse(data);
+  const validationRes = ProductSchema.safeParse(await request.json());
   // if validation failed
-  if (!validatedData.success) {
+  if (!validationRes.success) {
     return NextResponse.json(
       {
         message: "Terdapat kesalahan pada data yang dikirim.",
-        error: validatedData.error.flatten().fieldErrors,
+        error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
+
+  const data = validationRes.data;
   
   try {
     const userId = session.id;

@@ -109,19 +109,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const data: SupplierModel = new SupplierModel(await request.json());
-
-  const validatedData = SupplierSchema.safeParse(data);
+  const validationRes = SupplierSchema.safeParse(await request.json());
   // if validation failed
-  if (!validatedData.success) {
+  if (!validationRes.success) {
     return NextResponse.json(
       {
         message: "Terdapat kesalahan pada data yang dikirim.",
-        error: validatedData.error.flatten().fieldErrors,
+        error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
+
+  const data = validationRes.data;
 
   try {
     if (data.receivables > data.receivablesLimit) {

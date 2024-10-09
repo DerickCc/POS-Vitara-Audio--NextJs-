@@ -1,35 +1,30 @@
-import { LoginModel, LoginSchema } from "@/models/session.model";
+import { LoginSchema } from "@/models/session.model";
 import { db } from "@/utils/prisma";
-import { saveSession } from "@/utils/sessionlib";
-import { compare, hash } from "bcryptjs";
+import { getSession, saveSession } from "@/utils/sessionlib";
+import { compare } from "bcryptjs";
 import { NextResponse } from "next/server";
 
 // CheckCredentials
 export async function POST(request: Request) {
-  const data: LoginModel = new LoginModel(await request.json());
-  
-  const hashPassword = await hash(data.password, 10);
-  console.log(hashPassword)
-  // await db.users.create({
-  //   data: {
-  //     username: 'admin123',
-  //     name: 'Derick',
-  //     password: hashPassword,
-  //     role: 'Admin'
-  //   }
-  // })
+  const session = await getSession();
 
-  const validatedData = LoginSchema.safeParse(data);
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  const validationRes = LoginSchema.safeParse(await request.json());
   // if validation failed
-  if (!validatedData.success) {
+  if (!validationRes.success) {
     return NextResponse.json(
       {
         message: "Terdapat kesalahan pada data yang dikirim.",
-        error: validatedData.error.flatten().fieldErrors,
+        error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
+
+  const data = validationRes.data
 
   try {
     const user = await db.users.findUnique({

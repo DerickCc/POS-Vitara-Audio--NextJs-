@@ -1,10 +1,17 @@
-import { CreateUpdateUserModel, CreateUserSchema } from '@/models/user.model';
+import { CreateUserSchema } from '@/models/user.model';
 import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
 import { hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
 // BrowseUser
 export async function GET(request: Request) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+  
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
 
@@ -79,19 +86,25 @@ export async function GET(request: Request) {
 
 // CreateUser
 export async function POST(request: Request) {
-  const data: CreateUpdateUserModel = new CreateUpdateUserModel(await request.json());
+  const session = await getSession();
 
-  const validatedData = CreateUserSchema.safeParse(data);
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+  
+  const validationRes = CreateUserSchema.safeParse(await request.json());
   // if validation failed
-  if (!validatedData.success) {
+  if (!validationRes.success) {
     return NextResponse.json(
       {
         message: 'Terdapat kesalahan pada data yang dikirim.',
-        error: validatedData.error.flatten().fieldErrors,
+        error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
+
+  const data = validationRes.data;
 
   try {
     const hashedPassword = await hash(data.password, 10);

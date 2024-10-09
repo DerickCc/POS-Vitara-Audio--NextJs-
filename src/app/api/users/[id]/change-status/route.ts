@@ -1,8 +1,15 @@
 import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
 // ChangeUserStatus
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+  
   const { id } = params;
 
   try {

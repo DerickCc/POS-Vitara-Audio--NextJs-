@@ -37,40 +37,38 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   const { id } = params;
-  const data: SupplierModel = new SupplierModel(await request.json());
-  
-  const validatedData = SupplierSchema.safeParse(data);
+
+  const validationRes = SupplierSchema.safeParse(await request.json());
   // if validation failed
-  if (!validatedData.success) {
+  if (!validationRes.success) {
     return NextResponse.json(
       {
-        message: "Terdapat kesalahan pada data yang dikirim.",
-        error: validatedData.error.flatten().fieldErrors,
+        message: 'Terdapat kesalahan pada data yang dikirim.',
+        error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
-  
+
+  const data = validationRes.data;
+
   try {
     if (data.receivables > data.receivablesLimit) {
-      return NextResponse.json(
-        { message: "Piutang tidak boleh lebih besar dari Limit Piutang" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'Piutang tidak boleh lebih besar dari Limit Piutang' }, { status: 400 });
     }
-    
+
     const userId = (await getSession()).id;
-    
+
     const updatedSupplier = await db.suppliers.update({
       where: { id },
       data: {
         ...data,
         UpdatedBy: {
-          connect: { id: userId }
-        }
+          connect: { id: userId },
+        },
       },
     });
-    
+
     if (!updatedSupplier) {
       return NextResponse.json({ message: 'Data Supplier Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
     }
@@ -90,10 +88,10 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   }
 
   const { id } = params;
-  
+
   try {
     const deletedSupplier = await db.suppliers.delete({
-      where: { id: id }
+      where: { id: id },
     });
 
     if (!deletedSupplier) {

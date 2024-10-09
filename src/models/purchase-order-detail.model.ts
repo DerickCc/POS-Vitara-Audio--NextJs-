@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-export const PurchaseOrderDetailSchema = z.object({
+export const CreatePurchaseOrderDetailSchema = z.object({
+  productId: z.string().min(1, { message: 'Mohon memilih barang' }),
+  purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
+  quantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
+});
+
+export const UpdatePurchaseOrderDetailSchema = z.object({
+  id: z.string().min(1, { message: 'Id Detail PO tidak boleh kosong' }),
   productId: z.string().min(1, { message: 'Mohon memilih barang' }),
   purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
   quantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),

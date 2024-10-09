@@ -4,7 +4,7 @@ import Card from '@/components/card';
 import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
 import { BasicFormProps } from '@/models/global.model';
-import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,12 +23,19 @@ import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 import { SearchProductModel } from '@/models/product.model';
 import { searchProduct } from '@/services/product-service';
 import { debounce } from 'lodash';
+import { isoStringToReadableDate } from '@/utils/helper-function';
+import { z } from 'zod';
+
+interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
+  schema: z.ZodSchema<any>;
+}
 
 export default function PurchaseOrderForm({
   defaultValues = new PurchaseOrderModel(),
+  schema,
   isLoading = false,
   onSubmit,
-}: BasicFormProps<PurchaseOrderModel>) {
+}: PurchaseOrderFormProps) {
   const {
     watch,
     register,
@@ -40,13 +47,18 @@ export default function PurchaseOrderForm({
     reset,
   } = useForm<PurchaseOrderModel>({
     defaultValues,
-    resolver: zodResolver(PurchaseOrderSchema),
+    resolver: zodResolver(schema),
   });
 
-  const formValues = getValues();
+  const [formValues, setFormValues] = useState(getValues());
 
   useEffect(() => {
-    if (defaultValues.id) reset(defaultValues);
+    if (defaultValues.id) {
+      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate)
+      reset(defaultValues);
+
+      setFormValues(getValues()); 
+    } 
   }, [defaultValues, reset]);
 
   const {
@@ -83,6 +95,7 @@ export default function PurchaseOrderForm({
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
   const filterSelectedProductFromList = (list: SearchProductModel[]) => {
+    console.log(formValues)
     const selectedProductIds = formValues.details.map((v) => v.productId);
     const filteredProductList = list.filter((item) => !selectedProductIds.includes(item.id));
 
@@ -116,23 +129,32 @@ export default function PurchaseOrderForm({
     []
   );
 
-  const updateTotalPrice = (idx: number) => {
+  const updateProductTotalPrice = (idx: number) => {
     const totalPrice = formValues.details[idx].purchasePrice * formValues.details[idx].quantity;
     setValue(`details.${idx}.totalPrice`, totalPrice);
+
+    updateGrandTotal();
+  };
+
+  const updateGrandTotal = () => {
+    const grandTotal = formValues.details.reduce((acc, d) => {
+      return acc + d.purchasePrice * d.quantity;
+    }, 0);
+    setValue('grandTotal', grandTotal);
   };
   // ------------------------
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Card className='mb-7'>
+        <div className='flex items-center mb-5'>
+          <PiInfoBold className='size-5 mr-2' />
+          <h5 className='font-medium'>Info Pembelian</h5>
+        </div>
         {isLoading ? (
           <Spinner />
         ) : (
           <>
-            <div className='flex items-center mb-5'>
-              <PiInfoBold className='size-5 mr-2' />
-              <h5 className='font-medium'>Info Pembelian</h5>
-            </div>
             <div className='grid sm:grid-cols-3 gap-6'>
               <Input
                 label='Kode Transaksi Pembelian'
@@ -185,15 +207,15 @@ export default function PurchaseOrderForm({
         )}
       </Card>
       <Card className='px-0'>
+        <div className='flex items-center mb-5 px-7'>
+          <IoCartOutline className='size-6 mr-2' />
+          <h5 className='font-medium'>Detail Barang Pembelian</h5>
+        </div>
+
         {isLoading ? (
           <Spinner />
         ) : (
           <>
-            <div className='flex items-center mb-5 px-7'>
-              <IoCartOutline className='size-6 mr-2' />
-              <h5 className='font-medium'>Detail Barang Pembelian</h5>
-            </div>
-
             <div className='custom-scrollbar w-full max-w-full overflow-x-auto mb-7'>
               <table className={tableClass}>
                 <thead>
@@ -226,6 +248,14 @@ export default function PurchaseOrderForm({
                           name={`details.${idx}.productId`}
                           render={({ field: { value, onChange }, fieldState: { error } }) => {
                             const productName = watch(`details.${idx}.productName`);
+
+                            // const handleOnSelectProduct = (option: SearchProductModel) => {
+                            //   // const is
+                            //   // onChange(option.id);
+                            //   //     handleProductChange(idx, option);
+                            // };
+
+
                             return (
                               <Select<SearchProductModel>
                                 value={value}
@@ -255,7 +285,7 @@ export default function PurchaseOrderForm({
                           render={({ field: { value }, fieldState: { error } }) => (
                             <RupiahFormInput
                               setValue={setValue}
-                              onChange={() => updateTotalPrice(idx)}
+                              onChange={() => updateProductTotalPrice(idx)}
                               fieldName={`details.${idx}.purchasePrice`}
                               defaultValue={value}
                               error={error?.message}
@@ -270,7 +300,7 @@ export default function PurchaseOrderForm({
                           render={({ field: { value }, fieldState: { error } }) => (
                             <DecimalFormInput
                               setValue={setValue}
-                              onChange={() => updateTotalPrice(idx)}
+                              onChange={() => updateProductTotalPrice(idx)}
                               fieldName={`details.${idx}.quantity`}
                               defaultValue={value}
                               error={error?.message}
@@ -314,6 +344,23 @@ export default function PurchaseOrderForm({
                       >
                         <PiPlusBold className='h-4 w-4' />
                       </ActionIcon>
+                    </td>
+                    <td className='table-cell text-right' colSpan={4}>
+                      <span className='font-semibold'>GRAND TOTAL</span>
+                    </td>
+                    <td className='table-cell'>
+                      <Controller
+                        control={control}
+                        name='grandTotal'
+                        render={({ field: { value } }) => (
+                          <RupiahFormInput
+                            setValue={setValue}
+                            fieldName='grandTotal'
+                            defaultValue={value}
+                            readOnly={true}
+                          />
+                        )}
+                      />
                     </td>
                   </tr>
                 </tbody>
