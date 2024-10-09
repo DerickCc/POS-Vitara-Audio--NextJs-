@@ -16,31 +16,47 @@ export async function GET(request: Request, { params }: { params: { id: string }
   try {
     const po = await db.purchaseOrders.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        code: true,
+        purchaseDate: true,
+        supplierId: true,
+        Supplier: {
+          select: { name: true },
+        },
+        remarks: true,
+        totalItem: true,
+        totalPrice: true,
+        status: true,
+        createdBy: true,
         PurchaseOrderDetails: {
           select: {
             id: true,
             poId: true,
             productId: true,
+            Product: {
+              select: { name: true },
+            },
             purchasePrice: true,
             quantity: true,
             totalPrice: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (!po) {
       return NextResponse.json({ message: 'Transaksi Pembelian tidak ditemukan' }, { status: 404 });
     }
 
+    console.log(po);
     const formattedPurchaseOrder = {
       ...po,
       details: po.PurchaseOrderDetails,
-      PurchaseOrderDetails: undefined
-    }
+      PurchaseOrderDetails: undefined,
+    };
 
-    return NextResponse.json({ message: 'Success', result: formattedPurchaseOrder }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: po }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
