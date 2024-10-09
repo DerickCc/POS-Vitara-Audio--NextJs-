@@ -111,7 +111,7 @@ export default function ProductDataPage() {
 
   const actions: TableAction[] = [
     {
-      label: 'delete',
+      label: 'Hapus',
       title: 'Hapus Barang',
       description: 'Apakah Anda yakin ingin menghapus Barang ini?',
       color: 'red',

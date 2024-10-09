@@ -1,11 +1,13 @@
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { Dispatch, SetStateAction } from 'react';
 
+export type Colors = 'red' | 'green' | 'yellow' | 'blue' | 'purple' | 'gray';
+
 export interface TableAction {
   label: string;
   title: string;
   description: string;
-  color: 'red' | 'green' | 'yellow' | 'blue' | 'purple' | 'gray';
+  color: Colors;
   handler: (id: string) => void;
 }
 

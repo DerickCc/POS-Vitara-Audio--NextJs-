@@ -124,7 +124,7 @@ export default function PurchaseOrderDataPage() {
 
   const actions: TableAction[] = [
     {
-      label: 'delete',
+      label: 'Hapus',
       title: 'Hapus Transaksi Pembelian',
       description: 'Apakah Anda yakin ingin menghapus transaksi pembelian ini?',
       color: 'red',

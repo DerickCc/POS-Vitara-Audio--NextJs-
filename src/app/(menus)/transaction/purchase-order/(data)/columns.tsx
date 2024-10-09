@@ -1,11 +1,15 @@
 import { routes } from "@/config/routes";
-import { TableAction } from "@/models/global.model";
+import { Colors, TableAction } from "@/models/global.model";
 import { createColumnHelper } from "@tanstack/react-table";
 import Link from "next/link";
 import { ActionIcon, Tooltip } from "rizzui";
 import { LuPencil } from 'react-icons/lu';
 import ActionPopover from "@/components/action-popover";
 import { PurchaseOrderModel } from "@/models/purchase-order.model";
+import { formatToCurrency } from "@/utils/helper-function";
+import cn from "@/utils/class-names";
+import { mapTrxStatusToColor } from "@/config/global-variables";
+import { badgeColorClass, baseBadgeClass } from "@/utils/tailwind-classes";
 
 const columnHelper = createColumnHelper<PurchaseOrderModel>();
 
@@ -43,21 +47,21 @@ export const columns = (actions: TableAction[]) => [
   }),
   columnHelper.accessor('code', {
     id: 'code',
-    size: 130,
+    size: 100,
     header: () => 'Kode',
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
   columnHelper.accessor('supplierName', {
     id: 'supplierName',
-    size: 130,
+    size: 150,
     header: () => 'Supplier',
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
   columnHelper.accessor('totalItem', {
     id: 'totalItem',
-    size: 130,
+    size: 80,
     header: () => 'Total Item',
     cell: (info) => info.getValue(),
     enableSorting: true,
@@ -66,19 +70,25 @@ export const columns = (actions: TableAction[]) => [
     id: 'totalPrice',
     size: 130,
     header: () => 'Total Harga',
-    cell: (info) => info.getValue(),
+    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('status', {
     id: 'status',
-    size: 300,
+    size: 150,
     header: () => 'Status',
-    cell: (info) => info.getValue(),
+    cell: (info) => {
+      const status = info.getValue();
+      const color = mapTrxStatusToColor[status] as Colors;
+      return (
+        <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>
+      )
+    },
     enableSorting: true,
   }),
   columnHelper.accessor('remarks', {
     id: 'remarks',
-    size: 300,
+    size: 250,
     header: () => 'Keterangan',
     cell: (info) => info.getValue() || '-',
     enableSorting: false,

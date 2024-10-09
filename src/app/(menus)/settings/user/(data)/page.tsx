@@ -109,7 +109,7 @@ export default function UserDataPage() {
 
   const actions: TableAction[] = [
     {
-      label: 'changeStatus',
+      label: 'Ubah Status',
       title: 'Ubah Status Akun',
       description: 'Apakah Anda yakin ingin mengubah status akun User ini?',
       color: 'red',

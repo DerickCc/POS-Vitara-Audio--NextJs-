@@ -109,7 +109,7 @@ export default function CustomerDataPage() {
 
   const actions: TableAction[] = [
     {
-      label: 'delete',
+      label: 'Hapus',
       title: 'Hapus Pelanggan',
       description: 'Apakah Anda yakin ingin menghapus Pelanggan ini?',
       color: 'red',

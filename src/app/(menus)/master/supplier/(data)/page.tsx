@@ -105,7 +105,7 @@ export default function SupplierDataPage() {
 
   const actions: TableAction[] = [
     {
-      label: 'delete',
+      label: 'Hapus',
       title: 'Hapus Supplier',
       description: 'Apakah Anda yakin ingin menghapus Supplier ini?',
       color: 'red',
