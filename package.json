@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "rimraf -g \"{node_modules,.next,.cache}\"",
     "dev": "next dev",
-    "build": "prisma generate && next build && prisma db seed",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
