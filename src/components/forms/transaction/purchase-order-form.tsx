@@ -59,6 +59,7 @@ export default function PurchaseOrderForm({
 
       setFormValues(getValues()); 
     } 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues, reset]);
 
   const {
@@ -73,6 +74,7 @@ export default function PurchaseOrderForm({
   // supplier
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSupplierSearchChange = useCallback(
     debounce(async (name: string) => {
       if (!name || name.trim() === '') return;
@@ -114,6 +116,7 @@ export default function PurchaseOrderForm({
     filterSelectedProductFromList(productList);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProductSearchChange = useCallback(
     debounce(async (name: string) => {
       // only search if name is not empty

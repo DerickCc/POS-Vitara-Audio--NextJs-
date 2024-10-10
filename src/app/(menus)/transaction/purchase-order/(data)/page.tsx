@@ -7,7 +7,7 @@ import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import PurchaseOrderFilter, { PurchaseOrderFilters } from './filters';
 import { useCallback, useEffect, useState } from 'react';
-import { TableAction } from '@/models/global.model';
+import { TableAction, TableColumnWithModalProps } from '@/models/global.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
@@ -170,7 +170,7 @@ export default function PurchaseOrderDataPage() {
 
       <BasicTable<PurchaseOrderModel>
         data={purchaseOrders}
-        columns={columns}
+        columns={columns as any}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}

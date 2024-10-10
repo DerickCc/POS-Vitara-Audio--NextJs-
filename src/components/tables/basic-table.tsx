@@ -16,6 +16,7 @@ import Spinner from '@/components/spinner';
 import Card from '@/components/card';
 import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/utils/tailwind-classes';
+import { useState } from 'react';
 
 export default function BasicTable<T>({
   data,
@@ -28,11 +29,12 @@ export default function BasicTable<T>({
   setSorting,
   isLoading,
   totalRowCount,
-  actions
+  actions,
 }: BasicTableProps<T>) {
+  const [modalState, useModalState] = useState(false);
   const table = useReactTable({
     data: data,
-    columns: columns(actions),
+    columns: columns(modalState, useModalState, actions),
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },
@@ -45,25 +47,12 @@ export default function BasicTable<T>({
   });
 
   return (
-    <Card className="px-0">
+    <Card className='px-0'>
       {isLoading ? (
         <Spinner />
       ) : (
         <>
-          <div className="flex items-center justify-between px-7">
-            <div className="flex items-center gap-4">
-              <Text className="font-medium hidden sm:block">Baris Per Halaman</Text>
-              <Select
-                options={pageSizeOptions}
-                value={pageSize}
-                onChange={(s: SelectOption) => setPageSize(Number(s.value))}
-                className="w-[70px]"
-                dropdownClassName="font-medium [&_li]:text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="custom-scrollbar w-full max-w-full overflow-x-auto">
+          <div className='custom-scrollbar w-full max-w-full overflow-x-auto'>
             <table
               className={cn(tableClass, 'my-7')}
               style={{
@@ -103,15 +92,17 @@ export default function BasicTable<T>({
               <tbody>
                 {totalRowCount === 0 ? (
                   <tr>
-                    <td colSpan={table.getAllColumns().length} className="!pl-9">
+                    <td colSpan={table.getAllColumns().length} className='!pl-9'>
                       Data tidak ditemukan...
                     </td>
                   </tr>
                 ) : (
                   table.getRowModel().rows.map((row) => (
                     <tr key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                      {row.getVisibleCells().map((cell, idx) => (
+                        <td key={cell.id} className={cn(idx === 0 ? 'text-center' : '', 'table-cell')}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
                       ))}
                     </tr>
                   ))
@@ -120,51 +111,61 @@ export default function BasicTable<T>({
             </table>
           </div>
 
-          <div className="flex items-center justify-between px-7">
-            <Text className="font-medium">
+          <div className='flex items-center justify-between px-7'>
+            <Text className='font-medium'>
               Halaman {pageIndex + 1} dari {table.getPageCount() || 1}
             </Text>
-            <div className="grid grid-cols-4 gap-2">
-              <ActionIcon
-                rounded="lg"
-                variant="outline"
-                aria-label="Ke halaman pertama"
-                onClick={() => setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
-              >
-                <PiCaretDoubleLeftBold className="size-4" />
-              </ActionIcon>
-              <ActionIcon
-                rounded="lg"
-                variant="outline"
-                aria-label="Ke halaman sebelumnya"
-                onClick={() => setPageIndex(pageIndex - 1)}
-                disabled={!table.getCanPreviousPage()}
-                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
-              >
-                <PiCaretLeftBold className="size-4" />
-              </ActionIcon>
-              <ActionIcon
-                rounded="lg"
-                variant="outline"
-                aria-label="Ke halaman selanjutnya"
-                onClick={() => setPageIndex(pageIndex + 1)}
-                disabled={!table.getCanNextPage()}
-                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
-              >
-                <PiCaretRightBold className="size-4" />
-              </ActionIcon>
-              <ActionIcon
-                rounded="lg"
-                variant="outline"
-                aria-label="Ke halaman terakhir"
-                onClick={() => setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-                className="shadow-sm disabled:text-gray-400 disabled:shadow-none"
-              >
-                <PiCaretDoubleRightBold className="size-4" />
-              </ActionIcon>
+            <div className='flex items-center gap-4'>
+              <Text className='font-medium hidden sm:block'>Baris Per Halaman</Text>
+              <Select
+                options={pageSizeOptions}
+                value={pageSize}
+                onChange={(s: SelectOption) => setPageSize(Number(s.value))}
+                className='w-[70px]'
+                dropdownClassName='font-medium [&_li]:text-sm'
+              />
+              <div className='grid grid-cols-4 gap-2'>
+                <ActionIcon
+                  rounded='lg'
+                  variant='outline'
+                  aria-label='Ke halaman pertama'
+                  onClick={() => setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                  className='shadow-sm disabled:text-gray-400 disabled:shadow-none'
+                >
+                  <PiCaretDoubleLeftBold className='size-4' />
+                </ActionIcon>
+                <ActionIcon
+                  rounded='lg'
+                  variant='outline'
+                  aria-label='Ke halaman sebelumnya'
+                  onClick={() => setPageIndex(pageIndex - 1)}
+                  disabled={!table.getCanPreviousPage()}
+                  className='shadow-sm disabled:text-gray-400 disabled:shadow-none'
+                >
+                  <PiCaretLeftBold className='size-4' />
+                </ActionIcon>
+                <ActionIcon
+                  rounded='lg'
+                  variant='outline'
+                  aria-label='Ke halaman selanjutnya'
+                  onClick={() => setPageIndex(pageIndex + 1)}
+                  disabled={!table.getCanNextPage()}
+                  className='shadow-sm disabled:text-gray-400 disabled:shadow-none'
+                >
+                  <PiCaretRightBold className='size-4' />
+                </ActionIcon>
+                <ActionIcon
+                  rounded='lg'
+                  variant='outline'
+                  aria-label='Ke halaman terakhir'
+                  onClick={() => setPageIndex(table.getPageCount() - 1)}
+                  disabled={!table.getCanNextPage()}
+                  className='shadow-sm disabled:text-gray-400 disabled:shadow-none'
+                >
+                  <PiCaretDoubleRightBold className='size-4' />
+                </ActionIcon>
+              </div>
             </div>
           </div>
         </>

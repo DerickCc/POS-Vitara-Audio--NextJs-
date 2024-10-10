@@ -33,11 +33,13 @@ export const routes = {
     purchaseOrder: {
       data: '/transaction/purchase-order',
       add: '/transaction/purchase-order/add',
+      view: (id: string) => `/transaction/purchase-order/${id}/view`,
       edit: (id: string) => `/transaction/purchase-order/${id}/edit`
     },
     salesOrder: {
       data: '/transaction/sales-order',
       add: '/transaction/sales-order/add',
+      view: (id: string) => `/transaction/sales-order/${id}/view`,
       edit: (id: string) => `/transaction/sales-order/${id}/edit`
     },
   },

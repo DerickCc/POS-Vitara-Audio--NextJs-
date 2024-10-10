@@ -6,8 +6,8 @@ import cn from '@/utils/class-names';
 import { Colors } from '@/models/global.model';
 
 type ActionPopoverProps = {
-  label: string;
-  title: string;
+  label: string; // its action
+  title: string; // title to display
   description: string;
   color: Colors;
   handler: () => void;
