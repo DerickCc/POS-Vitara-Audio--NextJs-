@@ -159,7 +159,7 @@ model PurchaseOrderDetails {
   updatedBy     String?   @map("updated_by")
   updatedAt     DateTime? @updatedAt @map("updated_at")
 
-  PurchaseOrder PurchaseOrders @relation(fields: [poId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  PurchaseOrder PurchaseOrders @relation(fields: [poId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   Product Products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
@@ -213,7 +213,7 @@ model SalesOrderProductDetails {
   updatedBy       String?   @map("updated_by")
   updatedAt       DateTime? @updatedAt @map("updated_at")
 
-  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   Product Products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
@@ -234,7 +234,7 @@ model SalesOrderServiceDetails {
   updatedBy    String?   @map("updated_by")
   updatedAt    DateTime? @updatedAt @map("updated_at")
 
-  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 

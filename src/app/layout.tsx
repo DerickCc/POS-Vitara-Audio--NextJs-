@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { inter, lexendDeca } from "@/app/fonts";
 import GlobalDrawer from "@/app/shared/drawer-views/container";
-import GlobalModal from "@/app/shared/modal-views/container";
 import { cn } from "@/utils/class-names";
 import NextProgress from "@/components/next-progress";
 import { siteConfig } from "@/config/site.config";
@@ -36,7 +35,6 @@ export default async function RootLayout({
           {children}
           <Toaster position="top-right" />
           <GlobalDrawer />
-          <GlobalModal />
         </ThemeProvider>
       </body>
     </html>

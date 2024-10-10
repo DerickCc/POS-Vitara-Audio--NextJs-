@@ -72,9 +72,9 @@ export const updatePo = async (id: string, payload: PurchaseOrderModel): Promise
   }
 };
 
-export const cancelPo = async (id: string): Promise<string> => {
+export const finishPo = async (id: string): Promise<string> => {
   try {
-    const response = await apiFetch(`/api/purchase-orders/${id}/cancel`, {
+    const response = await apiFetch(`/api/purchase-orders/${id}/finish`, {
       method: 'PUT'
     });
     return response.message;

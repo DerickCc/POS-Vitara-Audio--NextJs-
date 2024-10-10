@@ -7,15 +7,16 @@ import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import PurchaseOrderFilter, { PurchaseOrderFilters } from './filters';
 import { useCallback, useEffect, useState } from 'react';
-import { TableAction, TableColumnWithModalProps } from '@/models/global.model';
+import { TableAction } from '@/models/global.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
-import BasicTable from '@/components/tables/basic-table';
 import { columns } from './columns';
 import { searchSupplier } from '@/services/supplier-service';
 import { SearchSupplierModel } from '@/models/supplier.model';
+import BasicTable from '@/components/tables/basic-table';
+import { browsePo, deletePo, finishPo } from '@/services/purchase-order-service';
 
 const pageHeader = {
   title: 'Pembelian',
@@ -31,7 +32,7 @@ const pageHeader = {
 };
 
 export default function PurchaseOrderDataPage() {
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderModel[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -54,7 +55,7 @@ export default function PurchaseOrderDataPage() {
 
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
 
-  const browsePo = useCallback(async () => {
+  const fetchPurchaseOrders = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -68,16 +69,7 @@ export default function PurchaseOrderDataPage() {
         filters.endDate = filters.endDate.toISOString();
       }
 
-      const response = await apiFetch(
-        `/api/purchase-orders${toQueryString({
-          pageSize,
-          pageIndex,
-          sortColumn,
-          sortOrder,
-          ...filters,
-        })}`,
-        { method: 'GET' }
-      );
+      const response = await browsePo({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
       setPurchaseOrders(response.result);
       setTotalRowCount(response.recordsTotal);
@@ -104,19 +96,30 @@ export default function PurchaseOrderDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      browsePo();
+      fetchPurchaseOrders();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
     }
   };
 
+  const handleFinish = async (id: string) => {
+    try {
+      const message = await finishPo(id);
+      toast.success(message, { duration: 5000 });
+
+      fetchPurchaseOrders();
+    } catch (e) {
+      toast.error(e + '', { duration: 5000 });
+    }
+  };
+
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/purchase-orders/${id}`, { method: 'DELETE' });
+      const message = await deletePo(id);
+      toast.success(message, { duration: 5000 });
 
-      toast.success(response.message, { duration: 5000 });
-      browsePo();
+      fetchPurchaseOrders();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
@@ -124,16 +127,25 @@ export default function PurchaseOrderDataPage() {
 
   const actions: TableAction[] = [
     {
+      label: 'Selesaikan',
+      title: 'Selesaikan Transaksi Pembelian',
+      description: 'Apakah Anda yakin ingin menyelesaikan transaksi pembelian ini?',
+      additionalText: 'Transaksi yang sudah diselesaikan tidak dapat diedit atau dihapus lagi.',
+      color: 'green',
+      handler: (id: string) => handleFinish(id),
+    },
+    {
       label: 'Hapus',
       title: 'Hapus Transaksi Pembelian',
       description: 'Apakah Anda yakin ingin menghapus transaksi pembelian ini?',
+      additionalText: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi.',
       color: 'red',
       handler: (id: string) => handleDelete(id),
     },
   ];
 
   useEffect(() => {
-    browsePo();
+    fetchPurchaseOrders();
   }, [browsePo]);
 
   const fetchSupplierList = async () => {
@@ -170,7 +182,7 @@ export default function PurchaseOrderDataPage() {
 
       <BasicTable<PurchaseOrderModel>
         data={purchaseOrders}
-        columns={columns as any}
+        columns={columns}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}

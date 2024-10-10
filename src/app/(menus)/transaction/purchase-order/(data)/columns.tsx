@@ -1,5 +1,5 @@
 import { routes } from '@/config/routes';
-import { Colors, TableAction } from '@/models/global.model';
+import { Colors, TableColumnProps } from '@/models/global.model';
 import { createColumnHelper } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuEye, LuMoreVertical, LuPencil } from 'react-icons/lu';
@@ -10,55 +10,58 @@ import { mapTrxStatusToColor } from '@/config/global-variables';
 import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
-import ConfirmationModal from '@/components/confirmation-modal';
+import { IoCheckmarkDoneSharp  } from "react-icons/io5";
 
 const columnHelper = createColumnHelper<PurchaseOrderModel>();
 
-export const columns = (modalState: boolean, setModalState: (state: boolean) => void, actions: TableAction[]) => [
+export const columns = ({ actions, openModal, ConfirmationModalComponent }: TableColumnProps) => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
     cell: ({ row }) => {
       return (
-        <Dropdown>
-          <Dropdown.Trigger>
-            <ActionIcon variant='outline' rounded='full' className='p-0'>
-              <LuMoreVertical className='size-5 text-primary' />
-            </ActionIcon>
-          </Dropdown.Trigger>
-          <Dropdown.Menu>
-            <Link href={routes.transaction.purchaseOrder.edit(row.original.id)}>
-              <Dropdown.Item>
-                <LuEye className='text-blue-500 size-4 cursor-pointer mr-2' /> Detail
-              </Dropdown.Item>
-            </Link>
-            <Link href={routes.transaction.purchaseOrder.edit(row.original.id)}>
-              <Dropdown.Item>
-                <LuPencil className='text-yellow-500 size-4 cursor-pointer mr-2' /> Edit
-              </Dropdown.Item>
-            </Link>
-            <Dropdown.Item onClick={() => alert('test')}>
-              <LuPencil className='text-yellow-500 size-4 cursor-pointer mr-2' /> Hapus
-            </Dropdown.Item>
-            {actions.map((action) => (
-              <>
-                <Dropdown.Item key={action.label} onClick={() => setModalState(true)}>
-                  {action.label === 'Hapus' && <FaRegTrashAlt className='text-red-500 size-4 cursor-pointer mr-2' />}
+        <>
+          <Dropdown>
+            <Dropdown.Trigger>
+              <ActionIcon variant='outline' rounded='full' className='p-0'>
+                <LuMoreVertical className='size-5 text-primary' />
+              </ActionIcon>
+            </Dropdown.Trigger>
+
+            <Dropdown.Menu>
+              <Link href={routes.transaction.purchaseOrder.view(row.original.id)}>
+                <Dropdown.Item>
+                  <LuEye className='text-blue-500 w-5 h-4 cursor-pointer mr-2' /> Detail
+                </Dropdown.Item>
+              </Link>
+              <Link href={routes.transaction.purchaseOrder.edit(row.original.id)}>
+                <Dropdown.Item>
+                  <LuPencil className='text-yellow-500 w-5 h-4 cursor-pointer mr-2' /> Edit
+                </Dropdown.Item>
+              </Link>
+              {actions.map((action) => (
+                <Dropdown.Item
+                  key={action.label}
+                  onClick={() => {
+                    openModal({
+                      title: action.title,
+                      description: action.description,
+                      additionalText: action.additionalText,
+                      handleConfirm: () => action.handler(row.original.id),
+                    });
+                  }}
+                >
+                  {action.label === 'Selesaikan' && <IoCheckmarkDoneSharp className='text-green-500 w-5 h-5 cursor-pointer mr-2' />}
+                  {action.label === 'Hapus' && <FaRegTrashAlt className='text-red-500 w-5 h-4 cursor-pointer mr-2' />}
                   {action.label}
                 </Dropdown.Item>
-                <ConfirmationModal
-                  isOpen={modalState}
-                  id={row.original.id}
-                  title={action.title}
-                  description={action.description}
-                  setModalState={setModalState}
-                  handleConfirm={action.handler}
-                />
-              </>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+
+          <ConfirmationModalComponent />
+        </>
       );
     },
   }),

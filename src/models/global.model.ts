@@ -1,6 +1,6 @@
+import { ModalOptions } from '@/hooks/use-confirmation-modal';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { Dispatch, SetStateAction } from 'react';
-import { ModalSize } from 'rizzui';
 
 export type Colors = 'red' | 'green' | 'yellow' | 'blue' | 'purple' | 'gray';
 
@@ -8,33 +8,20 @@ export interface TableAction {
   label: string;
   title: string;
   description: string;
+  additionalText?: string;
   color: Colors;
   handler: (id: string) => void;
 }
 
-export interface ModalProps {
-  isOpen: boolean;
-  size?: ModalSize;
-  id: string;
-  title: string;
-  description: string;
-  setModalState: (state: boolean) => void;
-  handleConfirm: (id: string) => void;
-}
-
 export interface TableColumnProps {
   actions: TableAction[];
-}
-
-export interface TableColumnWithModalProps extends TableColumnProps {
-  modalState: boolean;
-  setModalState: (state: boolean) => void;
+  openModal: (options: ModalOptions) => void;
+  ConfirmationModalComponent: React.FC;
 }
 
 export interface BasicTableProps<T> {
   data: T[];
-  // columns: (actions: TableAction[]) => any[];
-  columns: (modalState: boolean, setModalState: (state: boolean) => void, actions: TableAction[]) => any[];
+  columns: ({ actions, openModal, ConfirmationModalComponent }: TableColumnProps) => any[];
   pageSize: number;
   setPageSize: (size: number) => void;
   pageIndex: number;

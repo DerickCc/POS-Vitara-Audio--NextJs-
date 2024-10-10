@@ -50,16 +50,11 @@ export default function PurchaseOrderForm({
     resolver: zodResolver(schema),
   });
 
-  const [formValues, setFormValues] = useState(getValues());
-
   useEffect(() => {
     if (defaultValues.id) {
       defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate)
-      reset(defaultValues);
-
-      setFormValues(getValues()); 
+      reset(defaultValues); 
     } 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues, reset]);
 
   const {
@@ -74,7 +69,6 @@ export default function PurchaseOrderForm({
   // supplier
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSupplierSearchChange = useCallback(
     debounce(async (name: string) => {
       if (!name || name.trim() === '') return;
@@ -97,8 +91,7 @@ export default function PurchaseOrderForm({
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
   const filterSelectedProductFromList = (list: SearchProductModel[]) => {
-    console.log(formValues)
-    const selectedProductIds = formValues.details.map((v) => v.productId);
+    const selectedProductIds = getValues().details.map((v) => v.productId);
     const filteredProductList = list.filter((item) => !selectedProductIds.includes(item.id));
 
     setProductList(filteredProductList);
@@ -106,7 +99,7 @@ export default function PurchaseOrderForm({
 
   const handleProductChange = (idx: number, product: SearchProductModel) => {
     setValue(`details.${idx}`, {
-      ...formValues.details[idx],
+      ...getValues().details[idx],
       productName: product.name,
       purchasePrice: product.purchasePrice,
       quantity: 0,
@@ -116,7 +109,6 @@ export default function PurchaseOrderForm({
     filterSelectedProductFromList(productList);
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProductSearchChange = useCallback(
     debounce(async (name: string) => {
       // only search if name is not empty
@@ -133,14 +125,15 @@ export default function PurchaseOrderForm({
   );
 
   const updateProductTotalPrice = (idx: number) => {
-    const totalPrice = formValues.details[idx].purchasePrice * formValues.details[idx].quantity;
+    const detail = getValues().details[idx];
+    const totalPrice = detail.purchasePrice * detail.quantity;
     setValue(`details.${idx}.totalPrice`, totalPrice);
 
     updateGrandTotal();
   };
 
   const updateGrandTotal = () => {
-    const grandTotal = formValues.details.reduce((acc, d) => {
+    const grandTotal = getValues().details.reduce((acc, d) => {
       return acc + d.purchasePrice * d.quantity;
     }, 0);
     setValue('grandTotal', grandTotal);

@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { PurchaseOrderDetailModel, CreatePurchaseOrderDetailSchema, UpdatePurchaseOrderDetailSchema } from './purchase-order-detail.model';
+import {
+  PurchaseOrderDetailModel,
+  CreatePurchaseOrderDetailSchema,
+  UpdatePurchaseOrderDetailSchema,
+} from './purchase-order-detail.model';
 import { getCurrDate } from '@/utils/helper-function';
 
 export const CreatePurchaseOrderSchema = z.object({

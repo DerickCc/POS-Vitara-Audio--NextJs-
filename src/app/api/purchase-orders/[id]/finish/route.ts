@@ -2,7 +2,7 @@ import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
-// CancelPurchaseOrder
+// FinishPurchaseOrder
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
@@ -26,22 +26,22 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       );
     } else if (po.status !== 'Dalam Proses') {
       return NextResponse.json(
-        { message: 'Hanya Dapat Membatalkan Transaksi Pembelian yang Berstatus "Dalam Proses"' },
+        { message: 'Hanya Dapat Menyelesaikan Transaksi Pembelian yang Berstatus "Dalam Proses"' },
         { status: 403 } // 403 = Forbidden
       );
     }
 
-    const canceledPo = await db.purchaseOrders.update({
+    const finishedPo = await db.purchaseOrders.update({
       where: { id },
       data: {
-        status: 'Dibatalkan',
+        status: 'Selesai',
         UpdatedBy: {
           connect: { id: userId },
         },
       },
     });
 
-    return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Dibatalkan' }, { status: 200 });
+    return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diselesaikan' }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

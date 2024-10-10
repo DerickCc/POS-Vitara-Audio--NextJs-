@@ -16,7 +16,7 @@ import Spinner from '@/components/spinner';
 import Card from '@/components/card';
 import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/utils/tailwind-classes';
-import { useState } from 'react';
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 
 export default function BasicTable<T>({
   data,
@@ -31,10 +31,11 @@ export default function BasicTable<T>({
   totalRowCount,
   actions,
 }: BasicTableProps<T>) {
-  const [modalState, useModalState] = useState(false);
+  const { openModal, ConfirmationModalComponent } = useConfirmationModal();
+
   const table = useReactTable({
     data: data,
-    columns: columns(modalState, useModalState, actions),
+    columns: columns({ actions, openModal, ConfirmationModalComponent }),
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },
@@ -47,14 +48,14 @@ export default function BasicTable<T>({
   });
 
   return (
-    <Card className='px-0'>
+    <Card className='px-0 pt-0'>
       {isLoading ? (
-        <Spinner />
+        <Spinner className='pt-7' />
       ) : (
         <>
           <div className='custom-scrollbar w-full max-w-full overflow-x-auto'>
             <table
-              className={cn(tableClass, 'my-7')}
+              className={tableClass}
               style={{
                 width: table.getTotalSize(),
               }}
@@ -111,7 +112,7 @@ export default function BasicTable<T>({
             </table>
           </div>
 
-          <div className='flex items-center justify-between px-7'>
+          <div className='flex items-center justify-between px-7 mt-7'>
             <Text className='font-medium'>
               Halaman {pageIndex + 1} dari {table.getPageCount() || 1}
             </Text>

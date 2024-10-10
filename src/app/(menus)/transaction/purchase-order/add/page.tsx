@@ -3,8 +3,7 @@
 import PurchaseOrderForm from "@/components/forms/transaction/purchase-order-form";
 import PageHeader from "@/components/page-header";
 import { routes } from "@/config/routes";
-import { CreatePurchaseOrderDetailSchema } from "@/models/purchase-order-detail.model";
-import { PurchaseOrderModel } from "@/models/purchase-order.model";
+import { CreatePurchaseOrderSchema, PurchaseOrderModel } from "@/models/purchase-order.model";
 import { createPo } from "@/services/purchase-order-service";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -44,7 +43,7 @@ export default function AddPurchaseOrderPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <PurchaseOrderForm schema={CreatePurchaseOrderDetailSchema} onSubmit={create}/>
+      <PurchaseOrderForm schema={CreatePurchaseOrderSchema} onSubmit={create}/>
     </>
   )
 }
