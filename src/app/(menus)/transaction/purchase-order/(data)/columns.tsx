@@ -47,7 +47,6 @@ export const columns = ({ actions, openModal, ConfirmationModalComponent }: Tabl
                     openModal({
                       title: action.title,
                       description: action.description,
-                      additionalText: action.additionalText,
                       handleConfirm: () => action.handler(row.original.id),
                     });
                   }}

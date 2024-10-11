@@ -12,7 +12,6 @@ interface UseModalReturnType {
 export interface ModalOptions {
   title: string;
   description: string;
-  additionalText?: string;
   handleConfirm: () => void;
 }
 
@@ -35,7 +34,6 @@ export function useConfirmationModal(): UseModalReturnType {
       onClose={closeModal}
       title={modalOptions?.title ?? ''}
       description={modalOptions?.description ?? ''}
-      additionalText={modalOptions?.additionalText ?? ''}
       handleConfirm={() => {
         modalOptions?.handleConfirm();
         closeModal();

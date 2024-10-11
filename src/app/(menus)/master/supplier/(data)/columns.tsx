@@ -32,7 +32,7 @@ export const columns = ({ actions, openModal, ConfirmationModalComponent }: Tabl
             </Link>
           </Tooltip>
           {actions.map((action) => (
-            <Tooltip size='sm' content={action.title} color='invert'>
+            <Tooltip key={action.label} size='sm' content={action.title} color='invert'>
               <ActionIcon
                 size='sm'
                 variant='outline'

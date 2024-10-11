@@ -111,8 +111,7 @@ export default function CustomerDataPage() {
     {
       label: 'Hapus',
       title: 'Hapus Pelanggan',
-      description: 'Apakah Anda yakin ingin menghapus Pelanggan ini?',
-      additionalText: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi.',
+      description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
       color: 'red',
       handler: (id: string) => handleDelete(id),
     }
