@@ -1,6 +1,5 @@
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
-import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // FinishPurchaseOrder
@@ -23,34 +22,29 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       });
   
       if (!po) {
-        return NextResponse.json(
-          { message: 'Data Transaksi Pembelian Gagal Dibatalkan Karena Tidak Ditemukan' },
-          { status: 404 }
-        );
+        throw new Error('Data Transaksi Pembelian tidak ditemukan');
       } else if (po.status !== 'Dalam Proses') {
-        return NextResponse.json(
-          { message: 'Hanya Dapat Menyelesaikan Transaksi Pembelian yang Berstatus "Dalam Proses"' },
-          { status: 403 } // 403 = Forbidden
-        );
+        throw new Error('Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat diselesaikan');
       }
 
+      // update stock and costPrice of each product in details
       const updatePromises = po.PurchaseOrderDetails.map(async d => {
         const product = await prisma.products.findUnique({ where: { id: d.productId}});
       
         if (!product) {
-          throw new Error('Barang yang ingin di-update Tidak Ditemukan');
+          throw new Error('Barang yang ingin di-update tidak ditemukan');
         }
 
         const totalCost = product.stock.times(product.costPrice); // total cost before added with purchase product
-        const currStock = product.stock.plus(d.quantity); // stock after added with purchased product qty
+        const updatedStock = product.stock.plus(d.quantity); // stock after added with purchased product qty
 
-        const currCostPrice = totalCost.plus(d.totalPrice).div(currStock); // cost price calculated after purchase product
+        const updatedCostPrice = totalCost.plus(d.totalPrice).div(updatedStock); // cost price calculated after purchase product
 
         return prisma.products.update({
           where: { id: d.productId },
           data: { 
-            stock: currStock,
-            costPrice: currCostPrice,
+            stock: updatedStock,
+            costPrice: updatedCostPrice,
             UpdatedBy: {
               connect: { id: userId },
             },
@@ -72,9 +66,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       });
     })
 
-
     return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diselesaikan' }, { status: 200 });
-  } catch (e) {
+  } catch (e: any) {
+    if (e.message.includes('Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat diselesaikan')) {
+      return NextResponse.json({ message: e.message }, { status: 403 });
+    }
+    if (e.message.includes('tidak ditemukan')) {
+      return NextResponse.json({ message: e.message }, { status: 404 });
+    }
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

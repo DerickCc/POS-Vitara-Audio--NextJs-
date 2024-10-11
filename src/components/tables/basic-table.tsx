@@ -1,5 +1,4 @@
 'use client';
-
 import cn from '@/utils/class-names';
 import { pageSizeOptions } from '@/config/global-variables';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
@@ -17,6 +16,8 @@ import Card from '@/components/card';
 import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/utils/tailwind-classes';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
+import { useEffect, useState } from 'react';
+import { getSession } from '@/utils/sessionlib';
 
 export default function BasicTable<T>({
   data,
@@ -31,11 +32,21 @@ export default function BasicTable<T>({
   totalRowCount,
   actions,
 }: BasicTableProps<T>) {
+  const [role, setRole] = useState('');
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getSession();
+      setRole(session.role);
+    }
+
+    fetchSession();
+  }, [])
+
   const { openModal, ConfirmationModalComponent } = useConfirmationModal();
 
   const table = useReactTable({
     data: data,
-    columns: columns({ actions, openModal, ConfirmationModalComponent }),
+    columns: columns({ actions, openModal, ConfirmationModalComponent, role }),
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },

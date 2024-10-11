@@ -46,7 +46,7 @@ export class PurchaseOrderModel {
   details: PurchaseOrderDetailModel[]; // detail po
   totalItem: number;
   grandTotal: number;
-  status: 'Dalam Proses' | 'Selesai' | 'Dibatalkan';
+  status: 'Dalam Proses' | 'Selesai' | 'Batal';
 
   constructor(data: any = {}) {
     this.id = data.id;

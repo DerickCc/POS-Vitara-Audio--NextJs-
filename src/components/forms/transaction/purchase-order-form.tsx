@@ -16,7 +16,7 @@ import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui';
 import { IoCartOutline } from 'react-icons/io5';
-import { actionIconColorClass, baseButtonClass, buttonColorClass, tableClass } from '@/utils/tailwind-classes';
+import { actionIconColorClass, baseButtonClass, buttonColorClass, readOnlyClass, tableClass } from '@/utils/tailwind-classes';
 import { PurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
@@ -27,12 +27,14 @@ import { isoStringToReadableDate } from '@/utils/helper-function';
 import { z } from 'zod';
 
 interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
-  schema: z.ZodSchema<any>;
+  schema?: z.ZodSchema<any> | any;
+  isReadOnly?: boolean;
 }
 
 export default function PurchaseOrderForm({
   defaultValues = new PurchaseOrderModel(),
   schema,
+  isReadOnly = false,
   isLoading = false,
   onSubmit,
 }: PurchaseOrderFormProps) {
@@ -47,14 +49,14 @@ export default function PurchaseOrderForm({
     reset,
   } = useForm<PurchaseOrderModel>({
     defaultValues,
-    resolver: zodResolver(schema),
+    resolver: isReadOnly ? undefined : zodResolver(schema),
   });
 
   useEffect(() => {
     if (defaultValues.id) {
-      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate)
-      reset(defaultValues); 
-    } 
+      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
+      reset(defaultValues);
+    }
   }, [defaultValues, reset]);
 
   const {
@@ -155,14 +157,14 @@ export default function PurchaseOrderForm({
               <Input
                 label='Kode Transaksi Pembelian'
                 placeholder='Auto Generate'
-                inputClassName='bg-gray-100/70'
+                inputClassName={readOnlyClass}
                 readOnly
                 {...register('code')}
               />
               <Input
                 label='Tanggal Pembelian'
                 placeholder='Tanggal Pembelian'
-                inputClassName='bg-gray-100/70'
+                inputClassName={readOnlyClass}
                 readOnly
                 {...register('purchaseDate')}
               />
@@ -188,6 +190,7 @@ export default function PurchaseOrderForm({
                       onSearchChange={(name: string) => handleSupplierSearchChange(name)}
                       disableDefaultFilter={true}
                       error={error?.message}
+                      disabled={isReadOnly}
                     />
                   );
                 }}
@@ -196,6 +199,7 @@ export default function PurchaseOrderForm({
                 label='Keterangan'
                 placeholder='Keterangan'
                 className='sm:col-span-3'
+                disabled={isReadOnly}
                 {...register('remarks')}
               />
             </div>
@@ -245,13 +249,6 @@ export default function PurchaseOrderForm({
                           render={({ field: { value, onChange }, fieldState: { error } }) => {
                             const productName = watch(`details.${idx}.productName`);
 
-                            // const handleOnSelectProduct = (option: SearchProductModel) => {
-                            //   // const is
-                            //   // onChange(option.id);
-                            //   //     handleProductChange(idx, option);
-                            // };
-
-
                             return (
                               <Select<SearchProductModel>
                                 value={value}
@@ -268,6 +265,7 @@ export default function PurchaseOrderForm({
                                 onSearchChange={(name: string) => handleProductSearchChange(name)}
                                 disableDefaultFilter={true}
                                 error={error?.message}
+                                disabled={isReadOnly}
                                 // error={errors.details ? errors.details[idx]?.purchasePrice?.message : ''}
                               />
                             );
@@ -285,6 +283,7 @@ export default function PurchaseOrderForm({
                               fieldName={`details.${idx}.purchasePrice`}
                               defaultValue={value}
                               error={error?.message}
+                              readOnly={isReadOnly}
                             />
                           )}
                         />
@@ -300,6 +299,7 @@ export default function PurchaseOrderForm({
                               fieldName={`details.${idx}.quantity`}
                               defaultValue={value}
                               error={error?.message}
+                              readOnly={isReadOnly}
                             />
                           )}
                         />
@@ -332,14 +332,16 @@ export default function PurchaseOrderForm({
                   ))}
                   <tr>
                     <td className='table-cell text-center'>
-                      <ActionIcon
-                        size='sm'
-                        aria-label='add'
-                        className='cursor-pointer'
-                        onClick={() => appendProduct(new PurchaseOrderDetailModel())}
-                      >
-                        <PiPlusBold className='h-4 w-4' />
-                      </ActionIcon>
+                      {!isReadOnly && (
+                        <ActionIcon
+                          size='sm'
+                          aria-label='add'
+                          className='cursor-pointer'
+                          onClick={() => appendProduct(new PurchaseOrderDetailModel())}
+                        >
+                          <PiPlusBold className='h-4 w-4' />
+                        </ActionIcon>
+                      )}
                     </td>
                     <td className='table-cell text-right' colSpan={4}>
                       <span className='font-semibold'>GRAND TOTAL</span>
@@ -371,10 +373,16 @@ export default function PurchaseOrderForm({
                 </Button>
               </Link>
 
-              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
-                {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
-                <span>Simpan</span>
-              </Button>
+              {!isReadOnly && (
+                <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <Loader variant='spinner' className='me-1.5' />
+                  ) : (
+                    <FaSave className='size-4 me-1.5' />
+                  )}
+                  <span>Simpan</span>
+                </Button>
+              )}
             </div>
           </>
         )}

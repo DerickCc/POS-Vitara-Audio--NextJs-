@@ -3,14 +3,14 @@
 import PurchaseOrderForm from '@/components/forms/transaction/purchase-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { PurchaseOrderModel, UpdatePurchaseOrderSchema } from '@/models/purchase-order.model';
-import { getPoById, updatePo } from '@/services/purchase-order-service';
-import { useParams, useRouter } from 'next/navigation';
+import { PurchaseOrderModel } from '@/models/purchase-order.model';
+import { getPoById } from '@/services/purchase-order-service';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const pageHeader = {
-  title: 'Edit Pembelian',
+  title: 'Lihat Pembelian',
   breadcrumb: [
     { name: 'Transaksi Pembelian' },
     {
@@ -18,27 +18,15 @@ const pageHeader = {
       name: 'Pembelian',
     },
     {
-      name: 'Edit Pembelian',
+      name: 'Lihat Pembelian',
     },
   ],
 };
 
-export default function EditPurchaseOrderPage() {
-  const router = useRouter();
+export default function ViewPurchaseOrderPage() {
   const { id } = useParams<{ id: string }>();
   const [po, setPo] = useState<PurchaseOrderModel>(new PurchaseOrderModel());
   const [isLoading, setIsLoading] = useState(true);
-
-  const update = async (payload: PurchaseOrderModel) => {
-    try {
-      const message = await updatePo(id, payload);
-      toast.success(message, { duration: 4000 });
-
-      router.push(routes.transaction.purchaseOrder.data);
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
 
   useEffect(() => {
     const fetchPo = async () => {
@@ -61,9 +49,10 @@ export default function EditPurchaseOrderPage() {
 
       <PurchaseOrderForm
         defaultValues={po}
-        schema={UpdatePurchaseOrderSchema}
+        schema={undefined}
+        isReadOnly={true}
         isLoading={isLoading}
-        onSubmit={update}
+        onSubmit={async (payload: PurchaseOrderModel) => {}}
       />
     </>
   );

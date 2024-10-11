@@ -17,11 +17,12 @@ export interface TableColumnProps {
   actions: TableAction[];
   openModal: (options: ModalOptions) => void;
   ConfirmationModalComponent: React.FC;
+  role: string;
 }
 
 export interface BasicTableProps<T> {
   data: T[];
-  columns: ({ actions, openModal, ConfirmationModalComponent }: TableColumnProps) => any[];
+  columns: ({ actions, openModal, ConfirmationModalComponent, role }: TableColumnProps) => any[];
   pageSize: number;
   setPageSize: (size: number) => void;
   pageIndex: number;

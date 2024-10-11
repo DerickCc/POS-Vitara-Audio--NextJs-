@@ -5,7 +5,7 @@ export const CURRENCY_OPTIONS = {
   fractions: 2,
 };
 
-export const mapTrxStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Dibatalkan: 'red' };
+export const mapTrxStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Batal: 'red' };
 
 // select options
 export const pageSizeOptions = [

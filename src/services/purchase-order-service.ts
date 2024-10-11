@@ -24,7 +24,7 @@ export const browsePo = async ({
 
     return response;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -33,7 +33,7 @@ export const getPoById = async (id: string): Promise<PurchaseOrderModel> => {
     const response = await apiFetch(`/api/purchase-orders/${id}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 }
 
@@ -42,7 +42,7 @@ export const searchPo = async (name?: string): Promise<any[]> => {
     const response = await apiFetch(`/api/purchase-orders/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -55,7 +55,7 @@ export const createPo = async (payload: PurchaseOrderModel): Promise<string> => 
     });
     return response.message;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -68,7 +68,7 @@ export const updatePo = async (id: string, payload: PurchaseOrderModel): Promise
     });
     return response.message;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -79,7 +79,18 @@ export const finishPo = async (id: string): Promise<string> => {
     });
     return response.message;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
+  }
+};
+
+export const cancelPo = async (id: string): Promise<string> => {
+  try {
+    const response = await apiFetch(`/api/purchase-orders/${id}/cancel`, {
+      method: 'PUT'
+    });
+    return response.message;
+  } catch (e) {
+    throw (e + '');
   }
 };
 
@@ -89,6 +100,6 @@ export const deletePo = async (id: string): Promise<string> => {
     const response = await apiFetch(`/api/purchase-orders/${id}`, { method: 'DELETE' });
     return response.message;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };

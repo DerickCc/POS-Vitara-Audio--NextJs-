@@ -24,7 +24,7 @@ export const browseProduct = async ({
 
     return response;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -33,7 +33,7 @@ export const getProductById = async (id: string): Promise<ProductModel> => {
     const response = await apiFetch(`/api/products/${id}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 }
 
@@ -42,7 +42,7 @@ export const searchProduct = async (name?: string): Promise<SearchProductModel[]
     const response = await apiFetch(`/api/products/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -55,7 +55,7 @@ export const createProduct = async (payload: ProductModel): Promise<string> => {
     });
     return response.message;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -68,7 +68,7 @@ export const updateProduct = async (id: string, payload: ProductModel): Promise<
     });
     return response.message;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };
 
@@ -78,6 +78,6 @@ export const deleteProduct = async (id: string): Promise<string> => {
     const response = await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
     return response.message;
   } catch (e) {
-    throw new Error(e + '');
+    throw (e + '');
   }
 };

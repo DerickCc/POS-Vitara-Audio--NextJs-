@@ -16,7 +16,7 @@ import { columns } from './columns';
 import { searchSupplier } from '@/services/supplier-service';
 import { SearchSupplierModel } from '@/models/supplier.model';
 import BasicTable from '@/components/tables/basic-table';
-import { browsePo, deletePo, finishPo } from '@/services/purchase-order-service';
+import { browsePo, cancelPo, deletePo, finishPo } from '@/services/purchase-order-service';
 
 const pageHeader = {
   title: 'Pembelian',
@@ -125,9 +125,20 @@ export default function PurchaseOrderDataPage() {
     }
   };
 
+  const handleCancel = async (id: string) => {
+    try {
+      const message = await cancelPo(id);
+      toast.success(message, { duration: 5000 });
+
+      fetchPurchaseOrders();
+    } catch (e) {
+      toast.error(e + '', { duration: 5000 });
+    }
+  };
+
   const actions: TableAction[] = [
     {
-      label: 'Selesaikan',
+      label: 'Selesai',
       title: 'Selesaikan Transaksi Pembelian',
       description: 'Transaksi yang sudah diselesaikan tidak dapat diedit atau dihapus lagi. Apakah Anda yakin?',
       color: 'green',
@@ -139,6 +150,13 @@ export default function PurchaseOrderDataPage() {
       description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
       color: 'red',
       handler: (id: string) => handleDelete(id),
+    },
+    {
+      label: 'Batal',
+      title: 'Batalkan Transaksi Pembelian',
+      description: 'Stok barang akan dikurangi dengan stok dari detail transaksi pembelian ini. Apakah Anda yakin?',
+      color: 'red',
+      handler: (id: string) => handleCancel(id),
     },
   ];
 
