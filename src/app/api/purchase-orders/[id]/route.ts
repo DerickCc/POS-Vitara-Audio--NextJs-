@@ -119,7 +119,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         },
       });
 
-      const updateMany = data.details.map(d => {
+      const updatePromises = data.details.map(d => {
         return prisma.purchaseOrderDetails.update({
           where: { id: d.id },
           data: {
@@ -136,7 +136,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         })
       })
       
-      await Promise.all(updateMany);
+      await Promise.all(updatePromises);
     })
 
     return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diupdate' }, { status: 200 });

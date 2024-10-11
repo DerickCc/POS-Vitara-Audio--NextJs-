@@ -34,14 +34,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         );
       }
 
-      const updateMany = po.PurchaseOrderDetails.map(async d => {
+      const updatePromises = po.PurchaseOrderDetails.map(async d => {
         const product = await prisma.products.findUnique({ where: { id: d.productId}});
       
         if (!product) {
-          return NextResponse.json(
-            { message: 'Barang yang ingin di-update Tidak Ditemukan' },
-            { status: 404 }
-          );
+          throw new Error('Barang yang ingin di-update Tidak Ditemukan');
         }
 
         const totalCost = product.stock.times(product.costPrice); // total cost before added with purchase product
@@ -61,7 +58,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         })
       });
 
-      await Promise.all(updateMany);
+      await Promise.all(updatePromises);
 
       // set po status to 'Selesai'
       await prisma.purchaseOrders.update({
