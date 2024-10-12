@@ -1,4 +1,4 @@
-import { PurchaseOrderModel, CreatePurchaseOrderSchema } from '@/models/purchase-order.model';
+import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const validationRes = CreatePurchaseOrderSchema.safeParse(await request.json());
+  const validationRes = PurchaseOrderSchema.safeParse(await request.json());
 
   // if validation failed
   if (!validationRes.success) {
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
     const purchaseDate = new Date().toISOString();
     const grandTotal = data.details.reduce((acc, d) => {
-      return acc + (d.purchasePrice * d.quantity);
+      return acc + d.purchasePrice * d.quantity;
     }, 0);
 
     await db.$transaction(async (prisma) => {
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
           },
         },
       });
-  
+
       await prisma.purchaseOrderDetails.createMany({
         data: data.details.map((d) => ({
           poId: po.id,
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
           createdBy: userId,
         })),
       });
-    })
+    });
 
     return NextResponse.json({ message: 'Data Transaksi Pembelian Berhasil Disimpan' }, { status: 201 });
   } catch (e) {

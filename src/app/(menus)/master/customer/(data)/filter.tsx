@@ -1,6 +1,6 @@
 import Card from '@/components/card';
 import { FiltersProps } from '@/models/global.model';
-import { ChangeEvent, Dispatch, FormEvent, SetStateAction } from 'react';
+import { ChangeEvent, FormEvent } from 'react';
 import { PiFunnel } from 'react-icons/pi';
 import { Button, Input } from 'rizzui';
 

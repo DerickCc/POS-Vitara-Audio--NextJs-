@@ -3,7 +3,7 @@
 import Card from '@/components/card';
 import { poStatusOptions } from '@/config/global-variables';
 import { FiltersProps } from '@/models/global.model';
-import { FormEvent } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
 import ReactDatePicker from 'react-datepicker';
@@ -12,35 +12,49 @@ import 'react-datepicker/dist/react-datepicker.css';
 import cn from '@/utils/class-names';
 import { id } from 'date-fns/locale';
 import { SearchSupplierModel } from '@/models/supplier.model';
+import { searchSupplier } from '@/services/supplier-service';
+import toast from 'react-hot-toast';
+import { debounce } from 'lodash';
 
 export type PurchaseOrderFilters = {
-  poCode: string;
+  code: string;
   supplierId: string | null;
   startDate: any;
   endDate: any;
   status: string;
 };
 
-interface PurchaseOrderFiltersProps extends FiltersProps<PurchaseOrderFilters> {
-  supplierList: any[];
-}
-
 export default function PurchaseOrderFilter({
-  supplierList,
   localFilters,
   setLocalFilters,
   handleSearch,
-}: PurchaseOrderFiltersProps) {
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    handleSearch();
-  };
+}: FiltersProps<PurchaseOrderFilters>) {
+  const [selectedSupplier, setSelectedSupplier] = useState<string>('');
+  const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
+
+  const handleSupplierSearchChange = useCallback(
+    debounce(async (name: string) => {
+      if (!name || name.trim() === '') return;
+
+      try {
+        setSupplierList(await searchSupplier(name));
+      } catch (e) {
+        toast.error(e + '', { duration: 5000 });
+      }
+    }, 500),
+    []
+  );
 
   const handleFilterChange = (field: keyof PurchaseOrderFilters) => (value: string | number | Date | null) => {
     setLocalFilters((prevFilters) => ({
       ...prevFilters,
       [field]: value,
     }));
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    handleSearch();
   };
 
   return (
@@ -53,22 +67,28 @@ export default function PurchaseOrderFilter({
       <form onSubmit={handleSubmit}>
         <div className='grid sm:grid-cols-10 gap-6 mb-5'>
           <Input
-            value={localFilters.poCode}
-            onChange={(e) => handleFilterChange('poCode')(e.target.value)}
+            value={localFilters.code}
+            onChange={(e) => handleFilterChange('code')(e.target.value)}
             className='sm:col-span-3'
             label='Kode'
             placeholder='Cari Kode Transaksi'
           />
           <Select<SearchSupplierModel>
             value={localFilters.supplierId}
-            onChange={(id: string) => handleFilterChange('supplierId')(id)}
+            onChange={(option: SearchSupplierModel) => {
+              handleFilterChange('supplierId')(option.id)
+              setSelectedSupplier(option.name);
+            }}
             className='sm:col-span-3'
             label='Supplier'
             placeholder='Pilih Supplier'
             options={supplierList}
-            displayValue={(id: string) => supplierList.find((option) => option.id === id)?.name ?? ''}
-            getOptionValue={(option) => option.id}
+            displayValue={() => selectedSupplier}
+            getOptionValue={(option: SearchSupplierModel) => option}
             searchable={true}
+            searchByKey='name'
+            onSearchChange={(name: string) => handleSupplierSearchChange(name)}
+            disableDefaultFilter={true}
             clearable={true}
             onClear={() => handleFilterChange('supplierId')(null)}
           />

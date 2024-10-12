@@ -54,4 +54,4 @@ export const buttonColorClass = {
   gray: 'bg-gray-500 hover:bg-gray-700',
 };
 
-export const readOnlyClass = 'bg-gray-100/70'; 
+export const readOnlyClass = 'bg-gray-100/70';

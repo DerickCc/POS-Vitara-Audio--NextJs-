@@ -17,7 +17,7 @@ import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/utils/tailwind-classes';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { useEffect, useState } from 'react';
-import { getSession } from '@/utils/sessionlib';
+import { getRole } from '@/utils/sessionlib';
 
 export default function BasicTable<T>({
   data,
@@ -34,12 +34,11 @@ export default function BasicTable<T>({
 }: BasicTableProps<T>) {
   const [role, setRole] = useState('');
   useEffect(() => {
-    const fetchSession = async () => {
-      const session = await getSession();
-      setRole(session.role);
+    const fetchRole = async () => {
+      setRole(await getRole());
     }
 
-    fetchSession();
+    fetchRole();
   }, [])
 
   const { openModal, ConfirmationModalComponent } = useConfirmationModal();

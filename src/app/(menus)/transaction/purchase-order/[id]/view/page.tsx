@@ -49,7 +49,6 @@ export default function ViewPurchaseOrderPage() {
 
       <PurchaseOrderForm
         defaultValues={po}
-        schema={undefined}
         isReadOnly={true}
         isLoading={isLoading}
         onSubmit={async (payload: PurchaseOrderModel) => {}}

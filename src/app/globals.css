@@ -1335,13 +1335,10 @@ div[style='z-index: 1000001;'],
   @apply !w-4 !bg-gray-400;
 }
 
-.text-muted-foreground {
-  @apply text-gray-900;
-}
-
-.\!bg-muted\/70 {
-  @apply !bg-gray-100/70;
-}
+/*  */
+.rizzui-select-root button:disabled, .rizzui-textarea-root textarea:disabled {
+    @apply !text-gray-900 !bg-gray-100/70;
+  }
 
 .required::after {
   content: ' *';

@@ -3,7 +3,7 @@
 import PurchaseOrderForm from '@/components/forms/transaction/purchase-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { PurchaseOrderModel, UpdatePurchaseOrderSchema } from '@/models/purchase-order.model';
+import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { getPoById, updatePo } from '@/services/purchase-order-service';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -61,7 +61,6 @@ export default function EditPurchaseOrderPage() {
 
       <PurchaseOrderForm
         defaultValues={po}
-        schema={UpdatePurchaseOrderSchema}
         isLoading={isLoading}
         onSubmit={update}
       />

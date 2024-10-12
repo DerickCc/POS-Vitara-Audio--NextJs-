@@ -37,14 +37,14 @@ export default function PurchaseOrderDataPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localFilters, setLocalFilters] = useState<PurchaseOrderFilters>({
-    poCode: '',
+    code: '',
     supplierId: null,
     startDate: null,
     endDate: null,
     status: '',
   });
   const [filters, setFilters] = useState<PurchaseOrderFilters>({
-    poCode: '',
+    code: '',
     supplierId: null,
     startDate: null,
     endDate: null,
@@ -52,8 +52,6 @@ export default function PurchaseOrderDataPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
-
-  const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
 
   const fetchPurchaseOrders = useCallback(async () => {
     try {
@@ -162,19 +160,7 @@ export default function PurchaseOrderDataPage() {
 
   useEffect(() => {
     fetchPurchaseOrders();
-  }, [browsePo]);
-
-  const fetchSupplierList = async () => {
-    try {
-      setSupplierList(await searchSupplier());
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
-  useEffect(() => {
-    fetchSupplierList();
-  }, []);
+  }, [fetchPurchaseOrders]);
 
   return (
     <>
@@ -190,7 +176,6 @@ export default function PurchaseOrderDataPage() {
       </PageHeader>
 
       <PurchaseOrderFilter
-        supplierList={supplierList}
         localFilters={localFilters}
         setLocalFilters={setLocalFilters}
         handleSearch={() => handleSearch()}

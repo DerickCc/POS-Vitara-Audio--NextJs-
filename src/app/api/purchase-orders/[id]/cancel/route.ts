@@ -37,9 +37,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         const totalCost = product.stock.times(product.costPrice); // total cost before substracted with purchase product
         const updatedStock = product.stock.minus(d.quantity); // stock substracted added with purchased product qty
-        // check here
-        // trs pas update bisa create detail
-        const updatedCostPrice = totalCost.minus(d.totalPrice).div(updatedStock); // cost price calculated after purchase product
+        const updatedCostPrice = totalCost.minus(d.totalPrice).isZero() ? 0 : totalCost.minus(d.totalPrice).div(updatedStock); // cost price calculated after purchase product
 
         return prisma.products.update({
           where: { id: d.productId },

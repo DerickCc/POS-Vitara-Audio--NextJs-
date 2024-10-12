@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import SupplierFilter, { SupplierTableFilters } from './filters';
-import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
 import BasicTable from '@/components/tables/basic-table';
 import { columns } from './columns';

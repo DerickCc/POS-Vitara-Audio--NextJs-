@@ -4,7 +4,7 @@ import Card from '@/components/card';
 import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
 import { BasicFormProps } from '@/models/global.model';
-import { PurchaseOrderModel } from '@/models/purchase-order.model';
+import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +16,13 @@ import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui';
 import { IoCartOutline } from 'react-icons/io5';
-import { actionIconColorClass, baseButtonClass, buttonColorClass, readOnlyClass, tableClass } from '@/utils/tailwind-classes';
+import {
+  actionIconColorClass,
+  baseButtonClass,
+  buttonColorClass,
+  readOnlyClass,
+  tableClass,
+} from '@/utils/tailwind-classes';
 import { PurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
@@ -24,16 +30,13 @@ import { SearchProductModel } from '@/models/product.model';
 import { searchProduct } from '@/services/product-service';
 import { debounce } from 'lodash';
 import { isoStringToReadableDate } from '@/utils/helper-function';
-import { z } from 'zod';
 
 interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
-  schema?: z.ZodSchema<any> | any;
   isReadOnly?: boolean;
 }
 
 export default function PurchaseOrderForm({
   defaultValues = new PurchaseOrderModel(),
-  schema,
   isReadOnly = false,
   isLoading = false,
   onSubmit,
@@ -49,7 +52,7 @@ export default function PurchaseOrderForm({
     reset,
   } = useForm<PurchaseOrderModel>({
     defaultValues,
-    resolver: isReadOnly ? undefined : zodResolver(schema),
+    resolver: isReadOnly ? undefined : zodResolver(PurchaseOrderSchema),
   });
 
   useEffect(() => {
@@ -60,9 +63,9 @@ export default function PurchaseOrderForm({
   }, [defaultValues, reset]);
 
   const {
-    fields: productFields,
-    append: appendProduct,
-    remove: removeProduct,
+    fields: detailFields,
+    append: appendDetail,
+    remove: removeDetail,
   } = useFieldArray({
     control,
     name: 'details',
@@ -181,6 +184,7 @@ export default function PurchaseOrderForm({
                         handleSupplierChange(option.name);
                       }}
                       label={<span className='required'>Supplier</span>}
+                      labelClassName='text-gray-600'
                       placeholder='Pilih Supplier'
                       options={supplierList}
                       displayValue={() => supplierName}
@@ -199,6 +203,7 @@ export default function PurchaseOrderForm({
                 label='Keterangan'
                 placeholder='Keterangan'
                 className='sm:col-span-3'
+                labelClassName='text-gray-600'
                 disabled={isReadOnly}
                 {...register('remarks')}
               />
@@ -229,7 +234,7 @@ export default function PurchaseOrderForm({
                   </tr>
                 </thead>
                 <tbody>
-                  {productFields.map((field, idx) => (
+                  {detailFields.map((field, idx) => (
                     <tr key={field.id}>
                       <td className='table-cell text-center align-top'>
                         <ActionIcon
@@ -237,7 +242,7 @@ export default function PurchaseOrderForm({
                           variant='outline'
                           aria-label='delete'
                           className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
-                          onClick={() => removeProduct(idx)}
+                          onClick={() => removeDetail(idx)}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
                         </ActionIcon>
@@ -337,7 +342,7 @@ export default function PurchaseOrderForm({
                           size='sm'
                           aria-label='add'
                           className='cursor-pointer'
-                          onClick={() => appendProduct(new PurchaseOrderDetailModel())}
+                          onClick={() => appendDetail(new PurchaseOrderDetailModel())}
                         >
                           <PiPlusBold className='h-4 w-4' />
                         </ActionIcon>
