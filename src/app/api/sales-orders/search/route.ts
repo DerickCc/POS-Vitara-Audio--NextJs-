@@ -2,7 +2,7 @@ import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
-// SearchPurchaseOrder
+// SearcSalesOrder
 export async function GET(request: Request) {
   const session = await getSession();
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const purchaseOrders = await db.purchaseOrders.findMany({
+    const salesOrders = await db.salesOrders.findMany({
       orderBy: { code: 'desc' },
       where,
       select: {
@@ -37,13 +37,13 @@ export async function GET(request: Request) {
       },
     });
 
-    const purchaseOrdersWithExtraData: any[] = purchaseOrders.map((po) => ({
+    const salesOrdersWithExtraData: any[] = salesOrders.map((po) => ({
       ...po,
       value: po.id,
       label: po.code,
     }));
 
-    return NextResponse.json({ message: 'Success', result: purchaseOrdersWithExtraData }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: salesOrdersWithExtraData }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e, result: null }, { status: 500 });
   }

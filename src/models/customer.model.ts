@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BasicSelectOptions } from './global.model';
 
 export const CustomerSchema = z.object({
   name: z.string().min(1, { message: 'Nama harus diisi' }),
@@ -29,4 +30,10 @@ export class CustomerModel {
     this.phoneNo = data.phoneNo;
     this.address = data.address;
   }
+}
+
+export interface SearchCustomerModel extends BasicSelectOptions {
+  id: string;
+  code: string;
+  name: string;
 }

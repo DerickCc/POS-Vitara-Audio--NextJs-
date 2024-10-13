@@ -1,9 +1,9 @@
-import { SearchProductModel } from '@/models/product.model';
+import { SearchCustomerModel } from '@/models/customer.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
-// SearchProduct
+// SearchCustomner
 export async function GET(request: Request) {
   const session = await getSession();
 
@@ -17,43 +17,42 @@ export async function GET(request: Request) {
   // filters
   const name = queryParams.get('name') ?? '';
 
-  const where: any = {};
+  const where: any = { AND: [] };
   if (name) {
     // full text search
     const searchTerm = name.split(' ').filter((term) => term);
 
     if (searchTerm.length > 0) {
-      where['AND'] = searchTerm.map((term) => ({
-        name: {
-          contains: term,
-          mode: 'insensitive',
-        },
-      }));
+      searchTerm.forEach((term) => {
+        where.AND.push({
+          name: {
+            contains: term,
+            mode: 'insensitive',
+          },
+        });
+      });
     }
   }
   // ----------------
 
   try {
-    const products = await db.products.findMany({
+    const customers = await db.customers.findMany({
       orderBy: { name: 'asc' },
       where,
       select: {
         id: true,
         code: true,
         name: true,
-        purchasePrice: true,
-        sellingPrice: true,
-        uom: true,
       },
     });
 
-    const productsWithExtraData = products.map((product) => ({
-      ...product,
-      value: product.id,
-      label: product.name,
+    const customersWithExtraData: SearchCustomerModel[] = customers.map(customer => ({
+      ...customer,
+      value: customer.id,
+      label: customer.name,
     }));
 
-    return NextResponse.json({ message: 'Success', result: productsWithExtraData }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: customersWithExtraData }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e, result: null }, { status: 500 });
   }

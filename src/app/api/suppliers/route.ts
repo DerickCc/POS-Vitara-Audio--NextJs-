@@ -26,17 +26,19 @@ export async function GET(request: Request) {
   const receivablesOperator =  queryParams.get('receivablesOperator') ?? 'gte';
   const receivables =  Number(queryParams.get('receivables')) ?? 0;
 
-  const where: any = {};
+  const where: any = { AND: [] };
   if (name) { // full text search
     const searchTerm = name.split(' ').filter(term => term);
 
     if (searchTerm.length > 0) {
-      where['AND'] = searchTerm.map(term => ({
-        name: {
-          contains: term,
-          mode: 'insensitive',
-        },
-      }));
+      searchTerm.forEach((term) => {
+        where.AND.push({
+          name: {
+            contains: term,
+            mode: 'insensitive',
+          },
+        });
+      });
     }
   }
 
@@ -44,36 +46,32 @@ export async function GET(request: Request) {
     const searchTerm = pic.split(' ').filter(term => term);
 
     if (searchTerm.length > 0) {
-      where['AND'] = searchTerm.map(term => ({
-        pic: {
-          contains: term,
-          mode: 'insensitive',
-        },
-      }));
+      searchTerm.forEach((term) => {
+        where.AND.push({
+          pic: {
+            contains: term,
+            mode: 'insensitive',
+          },
+        });
+      });
     }
   }
 
   if (phoneNo) {
-    where['AND'] = [
-      ...(where['AND'] || []),
-      {
-        phoneNo: {
-          contains: phoneNo,
-          mode: 'insensitive',
-        }
-      }
-    ];
+    where.AND.push({
+      phoneNo: {
+        contains: phoneNo,
+        mode: 'insensitive',
+      },
+    });
   }
 
   if (receivables > 0) {
-    where['AND'] = [
-      ...(where['AND'] || []),
-      {
-        receivables: {
-          [receivablesOperator]: receivables // gte: xxx or let: xxx
-        }
+    where.AND.push({
+      receivables: {
+        [receivablesOperator]: receivables // gte: xxx or let: xxx
       }
-    ]
+    });
   }
   // ----------------
 

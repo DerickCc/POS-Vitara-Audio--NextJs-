@@ -1,3 +1,4 @@
+export const TIMEZONE = 'Asia/Jakarta';
 export const CURRENCY_CODE = 'IDR';
 export const LOCALE = 'id';
 export const CURRENCY_OPTIONS = {
@@ -6,6 +7,7 @@ export const CURRENCY_OPTIONS = {
 };
 
 export const mapTrxStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Batal: 'red' };
+export const mapSoStatusToColor = { 'Belum Lunas': 'blue', Lunas: 'green', Batal: 'red' };
 
 // select options
 export const pageSizeOptions = [
@@ -49,4 +51,11 @@ export const roleOptions = [
 export const poStatusOptions = [
   { label: 'Dalam Proses', value: 'Dalam Proses' },
   { label: 'Selesai', value: 'Selesai' },
+  { label: 'Batal', value: 'Batal' },
+];
+
+export const soStatusOptions = [
+  { label: 'Belum Lunas', value: 'Belum Lunas' },
+  { label: 'Lunas', value: 'Lunas' },
+  { label: 'Batal', value: 'Batal' },
 ];

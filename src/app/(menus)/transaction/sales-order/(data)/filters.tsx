@@ -1,7 +1,7 @@
 'use client';
 
 import Card from '@/components/card';
-import { poStatusOptions } from '@/config/global-variables';
+import { soStatusOptions } from '@/config/global-variables';
 import { FiltersProps } from '@/models/global.model';
 import { FormEvent, useCallback, useState } from 'react';
 import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
@@ -15,29 +15,31 @@ import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
 import toast from 'react-hot-toast';
 import { debounce } from 'lodash';
+import { searchCustomer } from '@/services/customer-service';
+import { SearchCustomerModel } from '@/models/customer.model';
 
-export type PurchaseOrderFilters = {
+export type SalesOrderFilters = {
   code: string;
-  supplierId: string | null;
+  customerId: string | null;
   startDate: any;
   endDate: any;
   status: string;
 };
 
-export default function PurchaseOrderFilter({
+export default function SalesOrderFilter({
   localFilters,
   setLocalFilters,
   handleSearch,
-}: FiltersProps<PurchaseOrderFilters>) {
-  const [selectedSupplier, setSelectedSupplier] = useState<string>('');
-  const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
+}: FiltersProps<SalesOrderFilters>) {
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('');
+  const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
 
-  const handleSupplierSearchChange = useCallback(
+  const handleCustomerSearchChange = useCallback(
     debounce(async (name: string) => {
       if (!name || name.trim() === '') return;
 
       try {
-        setSupplierList(await searchSupplier(name));
+        setCustomerList(await searchCustomer(name));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }
@@ -45,7 +47,7 @@ export default function PurchaseOrderFilter({
     []
   );
 
-  const handleFilterChange = (field: keyof PurchaseOrderFilters) => (value: string | number | Date | null) => {
+  const handleFilterChange = (field: keyof SalesOrderFilters) => (value: string | number | Date | null) => {
     setLocalFilters((prevFilters) => ({
       ...prevFilters,
       [field]: value,
@@ -70,27 +72,27 @@ export default function PurchaseOrderFilter({
             value={localFilters.code}
             onChange={(e) => handleFilterChange('code')(e.target.value)}
             className='sm:col-span-3'
-            label='Kode'
-            placeholder='Cari Kode Transaksi'
+            label='No. Invoice'
+            placeholder='Cari No. Invoice'
           />
-          <Select<SearchSupplierModel>
-            value={localFilters.supplierId}
+          <Select<SearchCustomerModel>
+            value={localFilters.customerId}
             onChange={(option: SearchSupplierModel) => {
-              handleFilterChange('supplierId')(option.id);
-              setSelectedSupplier(option.name);
+              handleFilterChange('customerId')(option.id);
+              setSelectedCustomer(option.name);
             }}
             className='sm:col-span-3'
-            label='Supplier'
-            placeholder='Pilih Supplier'
-            options={supplierList}
-            displayValue={() => selectedSupplier}
-            getOptionValue={(option: SearchSupplierModel) => option}
+            label='Pelanggan'
+            placeholder='Pilih Pelanggan'
+            options={customerList}
+            displayValue={() => selectedCustomer}
+            getOptionValue={(option: SearchCustomerModel) => option}
             searchable={true}
             searchByKey='name'
-            onSearchChange={(name: string) => handleSupplierSearchChange(name)}
+            onSearchChange={(name: string) => handleCustomerSearchChange(name)}
             disableDefaultFilter={true}
             clearable={true}
-            onClear={() => handleFilterChange('supplierId')(null)}
+            onClear={() => handleFilterChange('customerId')(null)}
           />
           <div className='sm:col-span-4 flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full'>
             <ReactDatePicker
@@ -126,8 +128,8 @@ export default function PurchaseOrderFilter({
             className='sm:col-span-3'
             label='Status'
             placeholder='Pilih Status'
-            options={poStatusOptions}
-            displayValue={(value) => poStatusOptions.find((option) => option.value === value)?.label ?? ''}
+            options={soStatusOptions}
+            displayValue={(value) => soStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
             onClear={() => handleFilterChange('status')('')}

@@ -17,18 +17,20 @@ export async function GET(request: Request) {
   // filters
   const name = queryParams.get('name') ?? '';
 
-  const where: any = {};
+  const where: any = { AND: [] };
   if (name) {
     // full text search
     const searchTerm = name.split(' ').filter((term) => term);
 
     if (searchTerm.length > 0) {
-      where['AND'] = searchTerm.map((term) => ({
-        name: {
-          contains: term,
-          mode: 'insensitive',
-        },
-      }));
+      searchTerm.forEach((term) => {
+        where.AND.push({
+          name: {
+            contains: term,
+            mode: 'insensitive',
+          },
+        });
+      });
     }
   }
   // ----------------

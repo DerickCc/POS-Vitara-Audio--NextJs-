@@ -1,21 +1,18 @@
 'use client';
 
 import Card from '@/components/card';
+import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
+import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
+import { SearchCustomerModel } from '@/models/customer.model';
 import { BasicFormProps } from '@/models/global.model';
-import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
-import { SearchSupplierModel } from '@/models/supplier.model';
-import { searchSupplier } from '@/services/supplier-service';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
-import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
-import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
-import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui';
-import { IoCartOutline } from 'react-icons/io5';
+import { SearchProductModel } from '@/models/product.model';
+import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
+import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
+import { searchCustomer } from '@/services/customer-service';
+import { searchProduct } from '@/services/product-service';
+import { isoStringToReadableDate } from '@/utils/helper-function';
 import {
   actionIconColorClass,
   baseButtonClass,
@@ -23,24 +20,27 @@ import {
   readOnlyClass,
   tableClass,
 } from '@/utils/tailwind-classes';
-import { PurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
-import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
-import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
-import { SearchProductModel } from '@/models/product.model';
-import { searchProduct } from '@/services/product-service';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { debounce } from 'lodash';
-import { isoStringToReadableDate } from '@/utils/helper-function';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
+import { IoCartOutline } from 'react-icons/io5';
+import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
+import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui';
 
-interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
+interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
 }
 
-export default function PurchaseOrderForm({
-  defaultValues = new PurchaseOrderModel(),
+export default function SalesOrderForm({
+  defaultValues = new SalesOrderModel(),
   isReadOnly = false,
   isLoading = false,
   onSubmit,
-}: PurchaseOrderFormProps) {
+}: SalesOrderFormProps) {
   const {
     watch,
     register,
@@ -50,36 +50,45 @@ export default function PurchaseOrderForm({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<PurchaseOrderModel>({
+  } = useForm<SalesOrderModel>({
     defaultValues,
-    resolver: isReadOnly ? undefined : zodResolver(PurchaseOrderSchema),
+    resolver: isReadOnly ? undefined : zodResolver(SalesOrderSchema),
   });
 
   useEffect(() => {
     if (defaultValues.id) {
-      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
+      defaultValues.salesDate = isoStringToReadableDate(defaultValues.salesDate);
       reset(defaultValues);
     }
   }, [defaultValues, reset]);
 
   const {
-    fields: detailFields,
-    append: appendDetail,
-    remove: removeDetail,
+    fields: productDetailFields,
+    append: appendProductDetail,
+    remove: removeProductDetail,
   } = useFieldArray({
     control,
-    name: 'details',
+    name: 'productDetails',
   });
 
-  // supplier
-  const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
+  const {
+    fields: serviceDetailFields,
+    append: appendServiceDetail,
+    remove: removeServiceDetail,
+  } = useFieldArray({
+    control,
+    name: 'serviceDetails',
+  });
 
-  const handleSupplierSearchChange = useCallback(
+  // customer
+  const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
+
+  const handleCustomerSearchChange = useCallback(
     debounce(async (name: string) => {
       if (!name || name.trim() === '') return;
 
       try {
-        setSupplierList(await searchSupplier(name));
+        setCustomerList(await searchCustomer(name));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }
@@ -87,17 +96,17 @@ export default function PurchaseOrderForm({
     []
   );
 
-  const handleSupplierChange = (supplierName: string) => {
-    setValue('supplierName', supplierName);
+  const handleCustomerChange = (customerName: string) => {
+    setValue('customerName', customerName);
   };
   // ------------------------
 
-  // transaction detail
+  // product detail
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
   const filterSelectedProductFromList = (list: SearchProductModel[], idx: number = -1) => {
-    const selectedProductIds = getValues().details.map((v) => v.productId);
+    const selectedProductIds = getValues().productDetails.map((v) => v.productId);
     const filteredProductList = list.filter((item) => !selectedProductIds.includes(item.id));
 
     // add back previously selected product
@@ -107,15 +116,15 @@ export default function PurchaseOrderForm({
   };
 
   const handleProductChange = (idx: number, product: SearchProductModel) => {
-    setValue(`details.${idx}`, {
-      ...getValues().details[idx],
+    setValue(`productDetails.${idx}`, {
+      ...getValues().productDetails[idx],
       productName: product.name,
-      purchasePrice: product.purchasePrice,
+      sellingPrice: product.sellingPrice,
       quantity: 0,
       uom: product.uom,
     });
 
-    filterSelectedProductFromList(productList);
+    filterSelectedProductFromList(productList, idx);
 
     // updated selected products
     const updatedSelectedProducts = [...selectedProducts];
@@ -139,18 +148,18 @@ export default function PurchaseOrderForm({
   );
 
   const updateProductTotalPrice = (idx: number) => {
-    const detail = getValues().details[idx];
-    const totalPrice = detail.purchasePrice * detail.quantity;
-    setValue(`details.${idx}.totalPrice`, totalPrice);
+    const detail = getValues().productDetails[idx];
+    const totalPrice = detail.sellingPrice * detail.quantity;
+    setValue(`productDetails.${idx}.totalPrice`, totalPrice);
 
     updateGrandTotal();
   };
 
   const updateGrandTotal = () => {
-    const grandTotal = getValues().details.reduce((acc, d) => {
-      return acc + d.purchasePrice * d.quantity;
-    }, 0);
-    setValue('grandTotal', grandTotal);
+    // const grandTotal = getValues().details.reduce((acc, d) => {
+    //   return acc + d.purchasePrice * d.quantity;
+    // }, 0);
+    setValue('grandTotal', 1);
   };
   // ------------------------
 
@@ -159,7 +168,7 @@ export default function PurchaseOrderForm({
       <Card className='mb-7'>
         <div className='flex items-center mb-5'>
           <PiInfoBold className='size-5 mr-2' />
-          <h5 className='font-medium'>Info Pembelian</h5>
+          <h5 className='font-medium'>Info Penjualan</h5>
         </div>
         {isLoading ? (
           <Spinner />
@@ -167,40 +176,40 @@ export default function PurchaseOrderForm({
           <>
             <div className='grid sm:grid-cols-3 gap-6'>
               <Input
-                label='Kode Transaksi Pembelian'
+                label='Kode Transaksi Penjualan'
                 placeholder='Auto Generate'
                 inputClassName={readOnlyClass}
                 readOnly
                 {...register('code')}
               />
               <Input
-                label='Tanggal Pembelian'
-                placeholder='Tanggal Pembelian'
+                label='Tanggal Penjualan'
+                placeholder='Tanggal Penjualan'
                 inputClassName={readOnlyClass}
                 readOnly
-                {...register('purchaseDate')}
+                {...register('salesDate')}
               />
               <Controller
                 control={control}
-                name='supplierId'
+                name='customerId'
                 render={({ field: { value, onChange }, fieldState: { error } }) => {
-                  const supplierName = watch('supplierName');
+                  const customerName = watch('customerName');
                   return (
-                    <Select<SearchSupplierModel>
+                    <Select<SearchCustomerModel>
                       value={value}
-                      onChange={(option: SearchSupplierModel) => {
+                      onChange={(option: SearchCustomerModel) => {
                         onChange(option.id);
-                        handleSupplierChange(option.name);
+                        handleCustomerChange(option.name);
                       }}
-                      label={<span className='required'>Supplier</span>}
+                      label={<span className='required'>Pelanggan</span>}
                       labelClassName='text-gray-600'
-                      placeholder='Pilih Supplier'
-                      options={supplierList}
-                      displayValue={() => supplierName}
-                      getOptionValue={(option: SearchSupplierModel) => option}
+                      placeholder='Pilih Pelanggan'
+                      options={customerList}
+                      displayValue={() => customerName}
+                      getOptionValue={(option: SearchCustomerModel) => option}
                       searchable={true}
                       searchByKey='name'
-                      onSearchChange={(name: string) => handleSupplierSearchChange(name)}
+                      onSearchChange={(name: string) => handleCustomerSearchChange(name)}
                       disableDefaultFilter={true}
                       error={error?.message}
                       disabled={isReadOnly}
@@ -221,10 +230,11 @@ export default function PurchaseOrderForm({
         )}
       </Card>
 
-      <Card className='px-0'>
+      {/* product details */}
+      <Card className='px-0 mb-7'>
         <div className='flex items-center mb-5 px-7'>
           <IoCartOutline className='size-6 mr-2' />
-          <h5 className='font-medium'>Detail Barang Pembelian</h5>
+          <h5 className='font-medium'>Detail Barang Penjualan</h5>
         </div>
 
         {isLoading ? (
@@ -235,16 +245,16 @@ export default function PurchaseOrderForm({
               <table className={tableClass}>
                 <thead>
                   <tr>
-                    <th className='w-[70px] flex justify-center'>Aksi</th>
+                    <th className='w-[70px] table-cell text-center align-middle'>Aksi</th>
                     <th className='w-[300px]'>Barang</th>
-                    <th className=''>Harga Beli</th>
+                    <th className=''>Harga Jual</th>
                     <th className='w-[100px]'>Qty</th>
                     <th className='w-[150px]'>Satuan</th>
                     <th className=''>Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {detailFields.map((field, idx) => (
+                  {productDetailFields.map((field, idx) => (
                     <tr key={field.id}>
                       <td className='table-cell text-center align-top'>
                         <ActionIcon
@@ -252,7 +262,7 @@ export default function PurchaseOrderForm({
                           variant='outline'
                           aria-label='delete'
                           className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
-                          onClick={() => removeDetail(idx)}
+                          onClick={() => removeProductDetail(idx)}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
                         </ActionIcon>
@@ -260,9 +270,9 @@ export default function PurchaseOrderForm({
                       <td className='table-cell align-top'>
                         <Controller
                           control={control}
-                          name={`details.${idx}.productId`}
+                          name={`productDetails.${idx}.productId`}
                           render={({ field: { value, onChange }, fieldState: { error } }) => {
-                            const productName = watch(`details.${idx}.productName`);
+                            const productName = watch(`productDetails.${idx}.productName`);
 
                             return (
                               <Select<SearchProductModel>
@@ -281,7 +291,6 @@ export default function PurchaseOrderForm({
                                 disableDefaultFilter={true}
                                 error={error?.message}
                                 disabled={isReadOnly}
-                                // error={errors.details ? errors.details[idx]?.purchasePrice?.message : ''}
                               />
                             );
                           }}
@@ -290,12 +299,12 @@ export default function PurchaseOrderForm({
                       <td className='table-cell align-top'>
                         <Controller
                           control={control}
-                          name={`details.${idx}.purchasePrice`}
+                          name={`productDetails.${idx}.sellingPrice`}
                           render={({ field: { value }, fieldState: { error } }) => (
                             <RupiahFormInput
                               setValue={setValue}
                               onChange={() => updateProductTotalPrice(idx)}
-                              fieldName={`details.${idx}.purchasePrice`}
+                              fieldName={`productDetails.${idx}.sellingPrice`}
                               defaultValue={value}
                               error={error?.message}
                               readOnly={isReadOnly}
@@ -306,14 +315,13 @@ export default function PurchaseOrderForm({
                       <td className='table-cell align-top'>
                         <Controller
                           control={control}
-                          name={`details.${idx}.quantity`}
-                          render={({ field: { value }, fieldState: { error } }) => (
+                          name={`productDetails.${idx}.quantity`}
+                          render={({ field: { value } }) => (
                             <DecimalFormInput
                               setValue={setValue}
                               onChange={() => updateProductTotalPrice(idx)}
-                              fieldName={`details.${idx}.quantity`}
+                              fieldName={`productDetails.${idx}.quantity`}
                               defaultValue={value}
-                              error={error?.message}
                               readOnly={isReadOnly}
                             />
                           )}
@@ -322,23 +330,21 @@ export default function PurchaseOrderForm({
                       <td className='table-cell align-top'>
                         <Input
                           placeholder='Satuan'
-                          error={errors.details ? errors?.details[idx]?.uom?.message : ''}
                           inputClassName='bg-gray-100/70'
                           readOnly
-                          {...register(`details.${idx}.uom`)}
+                          {...register(`productDetails.${idx}.uom`)}
                         />
                       </td>
                       <td className='table-cell align-top'>
                         <Controller
                           control={control}
-                          name={`details.${idx}.totalPrice`}
-                          render={({ field: { value }, fieldState: { error } }) => (
+                          name={`productDetails.${idx}.totalPrice`}
+                          render={({ field: { value } }) => (
                             <RupiahFormInput
                               setValue={setValue}
-                              fieldName={`details.${idx}.totalPrice`}
+                              fieldName={`productDetails.${idx}.totalPrice`}
                               defaultValue={value}
                               readOnly={true}
-                              error={error?.message}
                             />
                           )}
                         />
@@ -352,36 +358,62 @@ export default function PurchaseOrderForm({
                           size='sm'
                           aria-label='add'
                           className='cursor-pointer'
-                          onClick={() => appendDetail(new PurchaseOrderDetailModel())}
+                          onClick={() => appendProductDetail(new SalesOrderProductDetailModel())}
                         >
                           <PiPlusBold className='h-4 w-4' />
                         </ActionIcon>
                       )}
                     </td>
                     <td className='table-cell text-right' colSpan={4}>
-                      <span className='font-semibold'>GRAND TOTAL</span>
+                      <span className='font-semibold'>TOTAL</span>
                     </td>
                     <td className='table-cell'>
-                      <Controller
-                        control={control}
-                        name='grandTotal'
-                        render={({ field: { value } }) => (
-                          <RupiahFormInput
-                            setValue={setValue}
-                            fieldName='grandTotal'
-                            defaultValue={value}
-                            readOnly={true}
-                          />
-                        )}
-                      />
+                      <RupiahFormInput setValue={setValue} fieldName='grandTotal' defaultValue={1} readOnly={true} />
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
+          </>
+        )}
+      </Card>
 
-            <div className='flex justify-between px-7'>
-              <Link href={routes.transaction.purchaseOrder.data}>
+      {/* service details */}
+      <Card className='px-0'>
+        <div className='flex items-center mb-5 px-7'>
+          <IoCartOutline className='size-6 mr-2' />
+          <h5 className='font-medium'>Detail Jasa Penjualan</h5>
+        </div>
+
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <>
+            <div className='custom-scrollbar w-full max-w-full overflow-x-auto mb-7'>
+              <table className={tableClass}>
+                <thead>
+                  <tr>
+                    <th className='w-[70px] table-cell text-center align-middle'>Aksi</th>
+                    <th className='w-[300px]'>Barang</th>
+                    <th className=''>Harga Jual</th>
+                    <th className='w-[100px]'>Qty</th>
+                    <th className='w-[150px]'>Satuan</th>
+                    <th className=''>Total</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </Card>
+
+      {/* <div className='sm:col-span-4'>
+          <Card>
+            No. Invoice: ...
+            <hr />
+            <div className='flex justify-between'>
+              <Link href={routes.transaction.salesOrder.data}>
                 <Button variant='outline' className='border-2 border-gray-200'>
                   <PiArrowLeftBold className='size-4 me-1.5' />
                   <span>Kembali</span>
@@ -399,9 +431,8 @@ export default function PurchaseOrderForm({
                 </Button>
               )}
             </div>
-          </>
-        )}
-      </Card>
+          </Card>
+        </div> */}
     </form>
   );
 }

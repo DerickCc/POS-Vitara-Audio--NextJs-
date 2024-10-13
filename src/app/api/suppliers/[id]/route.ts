@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   try {
     const supplier = await db.suppliers.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!supplier) {
@@ -57,7 +57,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: 'Piutang tidak boleh lebih besar dari Limit Piutang' }, { status: 400 });
     }
 
-    const userId = (await getSession()).id;
+    const userId = session.id;
 
     const updatedSupplier = await db.suppliers.update({
       where: { id },
@@ -70,10 +70,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     });
 
     if (!updatedSupplier) {
-      return NextResponse.json({ message: 'Data Supplier Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Supplier tidak ditemukan' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Data Supplier Berhasil Diupdate' }, { status: 200 });
+    return NextResponse.json({ message: 'Data Supplier berhasil diupdate' }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
@@ -95,10 +95,10 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     });
 
     if (!deletedSupplier) {
-      return NextResponse.json({ message: 'Data Supplier Gagal Dihapus Karena Tidak Ditemukan' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Supplier tidak ditemukan' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Data Supplier Berhasil Dihapus' }, { status: 200 });
+    return NextResponse.json({ message: 'Data Supplier berhasil dihapus' }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

@@ -1,3 +1,5 @@
+import { TIMEZONE } from "@/config/global-variables";
+
 export const formatToCurrency = (numericValue: number): string => (
   new Intl.NumberFormat('id-ID').format(numericValue)
 );
@@ -29,7 +31,7 @@ export const parseDecimal = (value: string): number => {
  */
 export const getCurrDate = () => {
   const jakartaDate = new Date().toLocaleString('id-ID', {
-    timeZone: 'Asia/Jakarta',
+    timeZone: TIMEZONE,
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -45,7 +47,7 @@ export const getCurrDate = () => {
  */
 export const isoStringToReadableDate = (isoStirng: string) => {
   const date = new Date(isoStirng).toLocaleString('id-ID', {
-    timeZone: 'Asia/Jakarta',
+    timeZone: TIMEZONE,
     year: 'numeric',
     month: 'long',
     day: 'numeric',

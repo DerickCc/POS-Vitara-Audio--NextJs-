@@ -1,7 +1,6 @@
-import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
-import { connect } from 'http2';
 import { NextResponse } from 'next/server';
 
 // GetPurchaseOrderById
@@ -160,7 +159,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       await Promise.all(updatePromises);
     });
 
-    return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diupdate' }, { status: 200 });
+    return NextResponse.json({ message: 'Transaksi Pembelian berhasil diupdate' }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
@@ -183,12 +182,12 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     if (!po) {
       return NextResponse.json(
-        { message: 'Transaksi Pembelian Gagal Dihapus Karena Tidak Ditemukan' },
+        { message: 'Transaksi Pembelian tidak ditemukan' },
         { status: 404 }
       );
     } else if (po.status !== 'Dalam Proses') {
       return NextResponse.json(
-        { message: 'Hanya Dapat Menghapus Transaksi Pembelian yang Berstatus "Dalam Proses"' },
+        { message: 'Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat dihapus' },
         { status: 403 } // 403 = Forbidden
       );
     }
@@ -197,7 +196,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       where: { id },
     });
 
-    return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Dihapus' }, { status: 200 });
+    return NextResponse.json({ message: 'Transaksi Pembelian berhasil dihapus' }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

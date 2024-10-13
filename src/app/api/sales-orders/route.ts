@@ -1,9 +1,9 @@
-import { PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { SalesOrderSchema } from '@/models/sales-order';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
-// BrowsePurchaseOrders
+// BrowseSalesOrders
 export async function GET(request: Request) {
   const session = await getSession();
 
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
   // filters
   const code = queryParams.get('code') ?? '';
-  const supplierId = queryParams.get('supplierId') ?? 0;
+  const customerId = queryParams.get('customerId') ?? 0;
   const startDate = queryParams.get('startDate') ?? '';
   const endDate = queryParams.get('endDate') ?? '';
   const status = queryParams.get('status') ?? '';
@@ -36,15 +36,15 @@ export async function GET(request: Request) {
     });
   }
 
-  if (supplierId) {
-    where.AND.push({ supplierId });
+  if (customerId) {
+    where.AND.push({ customerId });
   }
 
   if (startDate) {
     const startOfDay = new Date(startDate);
 
     where.AND.push({
-      purchaseDate: {
+      salesDate: {
         gte: startOfDay,
       },
     });
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     const endOfDay = new Date(new Date(endDate).getTime() + durationToEndOfDay);
 
     where.AND.push({
-      purchaseDate: {
+      salesDate: {
         lte: endOfDay,
       },
     });
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const purchaseOrders = await db.purchaseOrders.findMany({
+    const salesOrders = await db.salesOrders.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy: {
@@ -79,20 +79,20 @@ export async function GET(request: Request) {
       },
       where,
       include: {
-        Supplier: {
+        Customer: {
           select: { name: true },
         },
       },
     });
-    const recordsTotal = await db.purchaseOrders.count({ where });
+    const recordsTotal = await db.salesOrders.count({ where });
 
-    const mappedPurchaseOrders = purchaseOrders.map((po) => ({
+    const mappedSalesOrders = salesOrders.map((po) => ({
       ...po,
-      supplierName: po.Supplier.name,
-      Supplier: undefined,
+      customerName: po.Customer.name,
+      Customer: undefined,
     }));
 
-    return NextResponse.json({ message: 'Success', result: mappedPurchaseOrders, recordsTotal }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: mappedSalesOrders, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },
@@ -101,7 +101,7 @@ export async function GET(request: Request) {
   }
 }
 
-// CreatePurchaseOrder
+// CreateSalesOrder
 export async function POST(request: Request) {
   const session = await getSession();
 
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const validationRes = PurchaseOrderSchema.safeParse(await request.json());
+  const validationRes = SalesOrderSchema.safeParse(await request.json());
 
   // if validation failed
   if (!validationRes.success) {
@@ -128,54 +128,54 @@ export async function POST(request: Request) {
     const userId = session.id;
 
     // retreive last po code
-    const lastPo = await db.purchaseOrders.findFirst({
+    const lastSo = await db.salesOrders.findFirst({
       orderBy: { createdAt: 'desc' },
       select: { code: true },
     });
 
-    let newCode = 'PO00000001'; // default code
+    let newCode = 'SO00000001'; // default code
 
-    if (lastPo) {
-      const lastCodeNumber = parseInt(lastPo.code.replace('PO', ''), 10);
+    if (lastSo) {
+      const lastCodeNumber = parseInt(lastSo.code.replace('PO', ''), 10);
       newCode = 'PO' + (lastCodeNumber + 1).toString().padStart(8, '0');
     }
 
-    const purchaseDate = new Date().toISOString();
-    const grandTotal = data.details.reduce((acc, d) => {
-      return acc + d.purchasePrice * d.quantity;
-    }, 0);
+    const salesDate = new Date().toISOString();
+    // const grandTotal = data.details.reduce((acc, d) => {
+    //   return acc + d.purchasePrice * d.quantity;
+    // }, 0);
 
-    await db.$transaction(async (prisma) => {
-      const po = await prisma.purchaseOrders.create({
-        data: {
-          code: newCode,
-          purchaseDate: purchaseDate,
-          Supplier: {
-            connect: { id: data.supplierId },
-          },
-          remarks: data.remarks,
-          totalItem: data.details.length,
-          grandTotal: grandTotal,
-          status: 'Dalam Proses',
-          CreatedBy: {
-            connect: { id: userId },
-          },
-        },
-      });
+    // await db.$transaction(async (prisma) => {
+    //   const po = await prisma.purchaseOrders.create({
+    //     data: {
+    //       code: newCode,
+    //       purchaseDate: purchaseDate,
+    //       Supplier: {
+    //         connect: { id: data.supplierId },
+    //       },
+    //       remarks: data.remarks,
+    //       totalItem: data.details.length,
+    //       grandTotal: grandTotal,
+    //       status: 'Dalam Proses',
+    //       CreatedBy: {
+    //         connect: { id: userId },
+    //       },
+    //     },
+    //   });
 
-      await prisma.purchaseOrderDetails.createMany({
-        data: data.details.map((d) => ({
-          poId: po.id,
-          productId: d.productId,
-          purchasePrice: d.purchasePrice,
-          quantity: d.quantity,
-          totalPrice: d.purchasePrice * d.quantity,
-          createdBy: userId,
-        })),
-      });
-    });
+    //   await prisma.purchaseOrderDetails.createMany({
+    //     data: data.details.map((d) => ({
+    //       poId: po.id,
+    //       productId: d.productId,
+    //       purchasePrice: d.purchasePrice,
+    //       quantity: d.quantity,
+    //       totalPrice: d.purchasePrice * d.quantity,
+    //       createdBy: userId,
+    //     })),
+    //   });
+    // });
 
-    return NextResponse.json({ message: 'Data Transaksi Pembelian berhasil disimpan' }, { status: 201 });
+    return NextResponse.json({ message: 'Data Transaksi Penjualan berhasil disimpan' }, { status: 201 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

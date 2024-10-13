@@ -3,11 +3,11 @@ import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema } from './purchase-
 import { getCurrDate } from '@/utils/helper-function';
 
 export const PurchaseOrderSchema = z.object({
-  supplierId: z.string().min(1, { message: 'Mohon memilih Supplier' }),
+  supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
   remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
   details: z.array(PurchaseOrderDetailSchema).refine(
     (details) => {
-      const productIds = details.map((p) => p.productId);
+      const productIds = details.map((d) => d.productId);
       return new Set(productIds).size === productIds.length;
     },
     {

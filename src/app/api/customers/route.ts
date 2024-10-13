@@ -1,7 +1,7 @@
-import { CustomerModel, CustomerSchema } from "@/models/customer.model";
-import { db } from "@/utils/prisma";
-import { getSession } from "@/utils/sessionlib";
-import { NextResponse } from "next/server";
+import { CustomerModel, CustomerSchema } from '@/models/customer.model';
+import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
+import { NextResponse } from 'next/server';
 
 // BrowseCustomer
 export async function GET(request: Request) {
@@ -24,42 +24,39 @@ export async function GET(request: Request) {
   const licensePlate = queryParams.get('licensePlate') ?? '';
   const phoneNo = queryParams.get('phoneNo') ?? '';
 
-  const where: any = {};
-  if (name) { // full text search
-    const searchTerm = name.split(' ').filter(term => term);
+  const where: any = { AND: [] };
+  if (name) {
+    // full text search
+    const searchTerm = name.split(' ').filter((term) => term);
 
     if (searchTerm.length > 0) {
-      where["AND"] = searchTerm.map(term => ({
-        name: {
-          contains: term,
-          mode: 'insensitive',
-        },
-      }));
+      searchTerm.forEach((term) => {
+        where.AND.push({
+          name: {
+            contains: term,
+            mode: 'insensitive',
+          },
+        });
+      });
     }
   }
 
   if (licensePlate) {
-    where["AND"] = [
-      ...(where["AND"] || []),
-      {
-        licensePlate: {
-          contains: licensePlate,
-          mode: 'insensitive',
-        }
-      }
-    ];
+    where.AND.push({
+      licensePlate: {
+        contains: licensePlate,
+        mode: 'insensitive',
+      },
+    });
   }
 
   if (phoneNo) {
-    where["AND"] = [
-      ...(where["AND"] || []),
-      {
-        phoneNo: {
-          contains: phoneNo,
-          mode: 'insensitive',
-        }
-      }
-    ];
+    where.AND.push({
+      phoneNo: {
+        contains: phoneNo,
+        mode: 'insensitive',
+      },
+    });
   }
   // ----------------
 
@@ -68,20 +65,17 @@ export async function GET(request: Request) {
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy: {
-        [sortColumn]: sortOrder
+        [sortColumn]: sortOrder,
       },
       where,
     });
-    
+
     const recordsTotal = await db.customers.count({ where });
 
-    return NextResponse.json(
-      { message: 'Success', result: customers, recordsTotal },
-      { status: 200 }
-    )
+    return NextResponse.json({ message: 'Success', result: customers, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
-      { message: "Internal Server Error: " + e, result: null, recordsTotal: 0 },
+      { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },
       { status: 500 }
     );
   }
@@ -100,7 +94,7 @@ export async function POST(request: Request) {
   if (!validationRes.success) {
     return NextResponse.json(
       {
-        message: "Terdapat kesalahan pada data yang dikirim.",
+        message: 'Terdapat kesalahan pada data yang dikirim.',
         error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
@@ -110,12 +104,12 @@ export async function POST(request: Request) {
   const data = validationRes.data;
 
   try {
-    const userId = (await getSession()).id;
+    const userId = session.id;
 
     // retreive last customer code
     const lastCustomer = await db.customers.findFirst({
       orderBy: { createdAt: 'desc' },
-      select: { code: true}
+      select: { code: true },
     });
 
     let newCode = 'CUS00000001'; // default code
@@ -133,15 +127,12 @@ export async function POST(request: Request) {
         phoneNo: data.phoneNo,
         address: data.address,
         CreatedBy: {
-          connect: { id: userId }
-        }
-      }
+          connect: { id: userId },
+        },
+      },
     });
-    return NextResponse.json({ message: "Data Pelanggan Berhasil Disimpan" }, { status: 201 });
+    return NextResponse.json({ message: 'Data Pelanggan Berhasil Disimpan' }, { status: 201 });
   } catch (e) {
-    return NextResponse.json(
-      { message: "Internal Server Error: " + e },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

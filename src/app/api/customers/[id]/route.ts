@@ -10,12 +10,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
-  
+
   const { id } = params;
 
   try {
     const customer = await db.customers.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!customer) {
@@ -43,7 +43,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   if (!validationRes.success) {
     return NextResponse.json(
       {
-        message: "Terdapat kesalahan pada data yang dikirim.",
+        message: 'Terdapat kesalahan pada data yang dikirim.',
         error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
@@ -51,25 +51,25 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   const data = validationRes.data;
-  
+
   try {
-    const userId = (await getSession()).id;
-    
+    const userId = session.id;
+
     const updatedCustomer = await db.customers.update({
-      where: { id: id },
+      where: { id },
       data: {
         ...data,
         UpdatedBy: {
-          connect: { id: userId }
-        }
+          connect: { id: userId },
+        },
       },
     });
-    
+
     if (!updatedCustomer) {
-      return NextResponse.json({ message: 'Data Pelanggan Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Pelanggan tidak ditemukan' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Data Pelanggan Berhasil Diupdate' }, { status: 200 });
+    return NextResponse.json({ message: 'Data Pelanggan berhasil diupdate' }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
@@ -78,17 +78,17 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 // DeleteCustomer
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const { id } = params;
-  
+
   try {
     const deletedCustomer = await db.customers.delete({
-      where: { id: id }
+      where: { id },
     });
 
     if (!deletedCustomer) {
-      return NextResponse.json({ message: 'Data Pelanggan Gagal Dihapus Karena Tidak Ditemukan' }, { status: 404 });
+      return NextResponse.json({ message: 'Data Pelanggan tidak ditemukan' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Data Pelanggan Berhasil Dihapus' }, { status: 200 });
+    return NextResponse.json({ message: 'Data Pelanggan berhasil dihapus' }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

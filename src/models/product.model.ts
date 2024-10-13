@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BasicSelectOptions } from "./global.model";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export const ProductSchema = z.object({
   name: z.string().min(1, { message: 'Nama harus diisi' }),
@@ -17,13 +18,13 @@ export class ProductModel {
   code: string;
   name: string;
   photo: string;
-  stock: number;
-  restockThreshold: number;
+  stock: Decimal;
+  restockThreshold: Decimal;
   uom: string;
-  costPrice: number;
+  costPrice: Decimal;
   costPriceCode: string;
-  purchasePrice: number;
-  sellingPrice: number;
+  purchasePrice: Decimal;
+  sellingPrice: Decimal;
   remarks: string;
 
   constructor(data: any = {}) {
@@ -47,5 +48,6 @@ export interface SearchProductModel extends BasicSelectOptions {
   code: string;
   name: string;
   purchasePrice: number;
+  sellingPrice: number;
   uom: string;
 }
