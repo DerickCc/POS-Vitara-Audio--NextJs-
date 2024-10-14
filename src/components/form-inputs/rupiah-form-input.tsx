@@ -1,3 +1,4 @@
+import cn from '@/utils/class-names';
 import { formatToCurrency, parseNumber } from '@/utils/helper-function';
 import { useEffect, useState } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
@@ -5,6 +6,8 @@ import { Input } from 'rizzui';
 
 type RupiahFormInputProps = {
   className?: string;
+  inputClassName?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
   onChange?: (value: number) => void; // to process changes from other component
   label?: string;
@@ -16,6 +19,8 @@ type RupiahFormInputProps = {
 
 export default function RupiahFormInput({
   className,
+  inputClassName,
+  size = 'md',
   setValue,
   onChange = (value: number) => null,
   label,
@@ -45,6 +50,7 @@ export default function RupiahFormInput({
   return (
     <Input
       type='text'
+      size={size}
       value={displayValue}
       prefix='Rp '
       label={label}
@@ -53,7 +59,7 @@ export default function RupiahFormInput({
       readOnly={readOnly}
       onChange={handleChange}
       className={className}
-      inputClassName={readOnly ? 'bg-gray-100/70' : ''}
+      inputClassName={cn(inputClassName, readOnly ? 'bg-gray-100/70' : '')}
     />
   );
 }

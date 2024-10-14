@@ -5,7 +5,7 @@ import { SalesOrderServiceDetailModel, SalesOrderServiceDetailSchema } from './s
 
 export const SalesOrderSchema = z.object({
   customerId: z.string().min(1, { message: 'Mohon memilih pelanggan' }),
-  remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
+  remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
   paymentType: z.string().min(1, { message: 'Mohon memilih tipe pembayaran' }),
   paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
   productDetails: z.array(SalesOrderProductDetailSchema).refine(
@@ -55,8 +55,8 @@ export class SalesOrderModel {
     this.customerId = data.customerId || '';
     this.customerName = data.customerName;
     this.remarks = data.remarks;
-    this.paymentType = data.paymentType;
-    this.paymentMethod = data.paymentMethod;
+    this.paymentType = data.paymentType || 'DP';
+    this.paymentMethod = data.paymentMethod || 'Non-tunai';
     this.subTotal = data.subTotal;
     this.discount = data.discount;
     this.grandTotal = data.grandTotal;

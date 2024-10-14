@@ -17,7 +17,8 @@ import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/utils/tailwind-classes';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { useEffect, useState } from 'react';
-import { getRole } from '@/utils/sessionlib';
+import { getCurrUser } from '@/utils/sessionlib';
+import { SessionData } from '@/models/session.model';
 
 export default function BasicTable<T>({
   data,
@@ -32,20 +33,20 @@ export default function BasicTable<T>({
   totalRowCount,
   actions,
 }: BasicTableProps<T>) {
-  const [role, setRole] = useState('');
+  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
   useEffect(() => {
-    const fetchRole = async () => {
-      setRole(await getRole());
+    const fetchCurrUser = async () => {
+      setCurrUser(await getCurrUser());
     }
 
-    fetchRole();
+    fetchCurrUser();
   }, [])
 
   const { openModal, ConfirmationModalComponent } = useConfirmationModal();
 
   const table = useReactTable({
     data: data,
-    columns: columns({ actions, openModal, ConfirmationModalComponent, role }),
+    columns: columns({ actions, openModal, ConfirmationModalComponent, role: currUser.role }),
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },

@@ -16,9 +16,14 @@ export const getSession = async () => {
   return session;
 };
 
-export const getRole = async () => {
+export const getCurrUser = async (): Promise<SessionData> => {
   const session = await getSession();
-  return session.role;
+  return {
+    id: session.id,
+    name: session.name,
+    username: session.username,
+    role: session.role,
+  } as SessionData;
 };
 
 export const saveSession = async (user: SessionData): Promise<void> => {

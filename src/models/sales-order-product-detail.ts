@@ -13,6 +13,7 @@ export class SalesOrderProductDetailModel {
   productId: string;
   productName: string; // for UI
   costPrice: number;
+  oriSellingPrice: number;
   sellingPrice: number;
   quantity: number;
   uom: string; // for UI
@@ -24,7 +25,8 @@ export class SalesOrderProductDetailModel {
     this.soId = data.soId || '';
     this.productId = data.productId || '';
     this.productName = data.productName || '';
-    this.costPrice = data.costPrice ;
+    this.costPrice = data.costPrice;
+    this.oriSellingPrice = data.oriSellingPrice;
     this.sellingPrice = data.sellingPrice || 0;
     this.quantity = data.quantity || 0;
     this.uom = data.uom;

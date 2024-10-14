@@ -4,7 +4,7 @@ import { getCurrDate } from '@/utils/helper-function';
 
 export const PurchaseOrderSchema = z.object({
   supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
-  remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
+  remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
   details: z.array(PurchaseOrderDetailSchema).refine(
     (details) => {
       const productIds = details.map((d) => d.productId);

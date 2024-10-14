@@ -1,35 +1,39 @@
-"use client";
+'use client';
 
-import Card from "@/components/card";
-import DecimalFormInput from "@/components/form-inputs/decimal-form-input";
-import RupiahFormInput from "@/components/form-inputs/rupiah-form-input";
-import Spinner from "@/components/spinner";
-import { routes } from "@/config/routes";
-import { SearchCustomerModel } from "@/models/customer.model";
-import { BasicFormProps } from "@/models/global.model";
-import { SearchProductModel } from "@/models/product.model";
-import { SalesOrderModel, SalesOrderSchema } from "@/models/sales-order";
-import { SalesOrderProductDetailModel } from "@/models/sales-order-product-detail";
-import { searchCustomer } from "@/services/customer-service";
-import { searchProduct } from "@/services/product-service";
-import { isoStringToReadableDate } from "@/utils/helper-function";
+import Card from '@/components/card';
+import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
+import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
+import RupiahInput from '@/components/inputs/rupiah-input';
+import Spinner from '@/components/spinner';
+import { routes } from '@/config/routes';
+import { SearchCustomerModel } from '@/models/customer.model';
+import { BasicFormProps } from '@/models/global.model';
+import { SearchProductModel } from '@/models/product.model';
+import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
+import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
+import { SalesOrderServiceDetailModel } from '@/models/sales-order-service-detail';
+import { SessionData } from '@/models/session.model';
+import { searchCustomer } from '@/services/customer-service';
+import { searchProduct } from '@/services/product-service';
+import { isoStringToReadableDate } from '@/utils/helper-function';
+import { getCurrUser } from '@/utils/sessionlib';
 import {
   actionIconColorClass,
   baseButtonClass,
   buttonColorClass,
   readOnlyClass,
   tableClass,
-} from "@/utils/tailwind-classes";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { debounce } from "lodash";
-import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import { FaRegTrashAlt, FaSave } from "react-icons/fa";
-import { IoCartOutline } from "react-icons/io5";
-import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from "react-icons/pi";
-import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from "rizzui";
+} from '@/utils/tailwind-classes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { debounce } from 'lodash';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
+import { IoCartOutline } from 'react-icons/io5';
+import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
+import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
 
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
@@ -68,7 +72,7 @@ export default function SalesOrderForm({
     remove: removeProductDetail,
   } = useFieldArray({
     control,
-    name: "productDetails",
+    name: 'productDetails',
   });
 
   const {
@@ -77,33 +81,44 @@ export default function SalesOrderForm({
     remove: removeServiceDetail,
   } = useFieldArray({
     control,
-    name: "serviceDetails",
+    name: 'serviceDetails',
   });
+
+  // cashier
+  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
+  useEffect(() => {
+    const fetchCurrUser = async () => {
+      setCurrUser(await getCurrUser());
+    };
+    fetchCurrUser();
+  }, []);
+  // ------------------------
 
   // customer
   const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
 
   const handleCustomerSearchChange = useCallback(
     debounce(async (name: string) => {
-      if (!name || name.trim() === "") return;
+      if (!name || name.trim() === '') return;
 
       try {
         setCustomerList(await searchCustomer(name));
       } catch (e) {
-        toast.error(e + "", { duration: 5000 });
+        toast.error(e + '', { duration: 5000 });
       }
     }, 500),
     []
   );
 
   const handleCustomerChange = (customerName: string) => {
-    setValue("customerName", customerName);
+    setValue('customerName', customerName);
   };
   // ------------------------
 
   // product detail
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
+  const [totalProductSoldAmount, setTotalProductSoldAmount] = useState(0);
 
   const filterSelectedProductFromList = (list: SearchProductModel[], idx: number = -1) => {
     const selectedProductIds = getValues().productDetails.map((v) => v.productId);
@@ -119,6 +134,7 @@ export default function SalesOrderForm({
     setValue(`productDetails.${idx}`, {
       ...getValues().productDetails[idx],
       productName: product.name,
+      oriSellingPrice: product.sellingPrice,
       sellingPrice: product.sellingPrice,
       quantity: 0,
       uom: product.uom,
@@ -135,31 +151,83 @@ export default function SalesOrderForm({
   const handleProductSearchChange = useCallback(
     debounce(async (name: string) => {
       // only search if name is not empty
-      if (!name || name.trim() === "") return;
+      if (!name || name.trim() === '') return;
 
       try {
         const result = await searchProduct(name);
         filterSelectedProductFromList(result);
       } catch (e) {
-        toast.error(e + "", { duration: 5000 });
+        toast.error(e + '', { duration: 5000 });
       }
     }, 500),
     []
   );
 
-  const updateProductTotalPrice = (idx: number) => {
-    const detail = getValues().productDetails[idx];
-    const totalPrice = detail.sellingPrice * detail.quantity;
-    setValue(`productDetails.${idx}.totalPrice`, totalPrice);
+  const updateProductTotalPrice = useCallback(
+    debounce((idx: number) => {
+      const detail = getValues().productDetails[idx];
+      const totalPrice = detail.sellingPrice * detail.quantity;
+      setValue(`productDetails.${idx}.totalPrice`, totalPrice);
 
-    updateGrandTotal();
+      updateTotalSoldAmount('productDetails', setTotalProductSoldAmount); // update total amount of all sold product
+      updateDiscount();
+      updateGrandTotal();
+    }, 300),
+    []
+  );
+  // ------------------------
+
+  // Service Details
+  const [totalServiceSoldAmount, setTotalServiceSoldAmount] = useState(0);
+
+  const updateServiceTotalPrice = useCallback(
+    debounce((idx: number) => {
+      const detail = getValues().serviceDetails[idx];
+      const totalPrice = detail.sellingPrice * detail.quantity;
+      setValue(`serviceDetails.${idx}.totalPrice`, totalPrice);
+
+      updateTotalSoldAmount('serviceDetails', setTotalServiceSoldAmount); // update total amount of all sold service
+      updateGrandTotal();
+    }, 500),
+    []
+  );
+  // ------------------------
+
+  // Payment and Prices
+  const updateTotalSoldAmount = (
+    detailsKey: 'productDetails' | 'serviceDetails',
+    setAmount: (amount: number) => void
+  ) => {
+    const totalSoldAmount = getValues()[detailsKey].reduce((acc, d) => acc + d.totalPrice, 0);
+    setAmount(totalSoldAmount);
+
+    // update sub total value
+    const totalOriProductSoldAmount = getValues().productDetails.reduce(
+      (acc, d) => acc + d.oriSellingPrice * d.quantity,
+      0
+    );
+    if (detailsKey === 'productDetails') {
+      setValue('subTotal', totalOriProductSoldAmount + totalServiceSoldAmount);
+    } else if (detailsKey === 'serviceDetails') {
+      setValue('subTotal', totalOriProductSoldAmount + totalSoldAmount);
+    }
   };
 
+  const updateDiscount = () => {
+    const totalDiscount = getValues().productDetails.reduce((acc, d) => {
+      const discount = (d.oriSellingPrice - d.sellingPrice) * d.quantity;
+      if (discount > 0) return acc + discount;
+      else return acc;
+    }, 0);
+
+    setValue('discount', totalDiscount);
+  };
+
+  const subTotal = watch('subTotal');
+  const discount = watch('discount');
+  
   const updateGrandTotal = () => {
-    // const grandTotal = getValues().details.reduce((acc, d) => {
-    //   return acc + d.purchasePrice * d.quantity;
-    // }, 0);
-    setValue("grandTotal", 1);
+    setValue('grandTotal', subTotal - discount);
   };
   // ------------------------
 
@@ -178,25 +246,25 @@ export default function SalesOrderForm({
               <>
                 <div className='grid sm:grid-cols-2 gap-6'>
                   <Input
-                    label='Kode Transaksi Penjualan'
-                    placeholder='Auto Generate'
+                    label='Kasir'
+                    placeholder='Kasir'
+                    value={currUser.name}
                     inputClassName={readOnlyClass}
                     readOnly
-                    {...register("code")}
                   />
                   <Input
                     label='Tanggal Penjualan'
                     placeholder='Tanggal Penjualan'
                     inputClassName={readOnlyClass}
                     readOnly
-                    {...register("salesDate")}
+                    {...register('salesDate')}
                   />
                   <div className='col-span-2'>
                     <Controller
                       control={control}
                       name='customerId'
                       render={({ field: { value, onChange }, fieldState: { error } }) => {
-                        const customerName = watch("customerName");
+                        const customerName = watch('customerName');
                         return (
                           <Select<SearchCustomerModel>
                             value={value}
@@ -224,10 +292,12 @@ export default function SalesOrderForm({
                   <Textarea
                     label='Keterangan'
                     placeholder='Keterangan'
+                    rows={9}
+                    maxLength={500}
                     className='sm:col-span-2'
                     labelClassName='text-gray-600'
                     disabled={isReadOnly}
-                    {...register("remarks")}
+                    {...register('remarks')}
                   />
                 </div>
               </>
@@ -236,31 +306,94 @@ export default function SalesOrderForm({
         </div>
         <div className='sm:col-span-5'>
           <Card className='mb-7'>
-            <h5>No. Invoice: SO00000001</h5>
+            <Text className='mb-3 text-lg font-medium'>No. Invoice: SO00000001</Text>
 
             <Controller
               control={control}
-              name={`grandTotal`}
+              name='grandTotal'
               render={({ field: { value } }) => (
-                <RupiahFormInput setValue={setValue} fieldName={`grandTotal`} defaultValue={value} readOnly={true} />
+                <RupiahFormInput
+                  className='mb-5 font-bold'
+                  inputClassName='text-xl'
+                  size='xl'
+                  setValue={setValue}
+                  fieldName={`grandTotal`}
+                  defaultValue={value}
+                  readOnly={true}
+                />
               )}
             />
-            <hr />
+            <hr className='mb-4' />
 
-            {/* <Controller
-              control={control}
-              name={`paymentType`}
-              render={({ field: { value } }) => (
-                
-              )}
-            /> */}
-
+            <div className='flex justify-between'>
+              <Controller
+                control={control}
+                name='paymentType'
+                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                  <RadioGroup value={value} setValue={onChange} className='mb-6'>
+                    <Text className='font-medium mb-2'>Tipe Pembayaran</Text>
+                    <div className='flex align-items gap-6'>
+                      <Radio
+                        name='paymentType'
+                        label='DP'
+                        value='DP'
+                        size='sm'
+                        onChange={onChange}
+                        checked={value === 'DP'}
+                        labelClassName='text-sm'
+                        error={error?.message}
+                      />
+                      <Radio
+                        name='paymentType'
+                        label='Lunas'
+                        value='Lunas'
+                        onChange={onChange}
+                        size='sm'
+                        labelClassName='text-sm'
+                        error={error?.message}
+                      />
+                    </div>
+                  </RadioGroup>
+                )}
+              />
+              <Controller
+                control={control}
+                name='paymentMethod'
+                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                  <RadioGroup value={value} setValue={onChange} className='mb-6'>
+                    <Text className='font-medium mb-2'>Metode Pembayaran</Text>
+                    <div className='flex align-items gap-6'>
+                      <Radio
+                        name='paymentMethod'
+                        label='Tunai'
+                        value='Tunai'
+                        onChange={onChange}
+                        size='sm'
+                        labelClassName='text-sm'
+                        error={error?.message}
+                      />
+                      <Radio
+                        name='paymentMethod'
+                        label='Non-tunai'
+                        value='Non-tunai'
+                        onChange={onChange}
+                        checked={value === 'Non-tunai'}
+                        size='sm'
+                        labelClassName='text-sm'
+                        error={error?.message}
+                      />
+                    </div>
+                  </RadioGroup>
+                )}
+              />
+            </div>
             <Controller
               control={control}
-              name={`subTotal`}
+              name='subTotal'
               render={({ field: { value } }) => (
                 <RupiahFormInput
                   label='Sub Total'
+                  className='mb-6'
                   setValue={setValue}
                   fieldName={`subTotal`}
                   defaultValue={value}
@@ -270,10 +403,11 @@ export default function SalesOrderForm({
             />
             <Controller
               control={control}
-              name={`discount`}
+              name='discount'
               render={({ field: { value } }) => (
                 <RupiahFormInput
                   label='Total Diskon'
+                  className='mb-6'
                   setValue={setValue}
                   fieldName={`discount`}
                   defaultValue={value}
@@ -283,7 +417,7 @@ export default function SalesOrderForm({
             />
             <Controller
               control={control}
-              name={`paidAmount`}
+              name='paidAmount'
               render={({ field: { value } }) => (
                 <RupiahFormInput
                   label='Jumlah yang Sudah Dibayar'
@@ -313,14 +447,14 @@ export default function SalesOrderForm({
               <table className={tableClass}>
                 <thead>
                   <tr>
-                    <th className='w-[70px]' style={{ textAlign: "center" }}>
+                    <th className='w-[70px]' style={{ textAlign: 'center' }}>
                       Aksi
                     </th>
-                    <th className='w-[300px]'>Barang</th>
-                    <th className=''>Harga Jual</th>
+                    <th>Barang</th>
+                    <th className='w-[260px]'>Harga Jual</th>
                     <th className='w-[100px]'>Qty</th>
                     <th className='w-[150px]'>Satuan</th>
-                    <th className=''>Total</th>
+                    <th className='w-[260px]'>Total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -331,7 +465,7 @@ export default function SalesOrderForm({
                           size='sm'
                           variant='outline'
                           aria-label='delete'
-                          className={cn(actionIconColorClass.red, "cursor-pointer mt-1")}
+                          className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
                           onClick={() => removeProductDetail(idx)}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
@@ -438,7 +572,7 @@ export default function SalesOrderForm({
                       <span className='font-semibold'>TOTAL</span>
                     </td>
                     <td className='table-cell'>
-                      <RupiahFormInput setValue={setValue} fieldName='grandTotal' defaultValue={1} readOnly={true} />
+                      <RupiahInput onChange={() => {}} defaultValue={totalProductSoldAmount} readOnly={true} />
                     </td>
                   </tr>
                 </tbody>
@@ -463,15 +597,106 @@ export default function SalesOrderForm({
               <table className={tableClass}>
                 <thead>
                   <tr>
-                    <th className='w-[70px] table-cell text-center align-middle'>Aksi</th>
-                    <th className='w-[300px]'>Barang</th>
-                    <th className=''>Harga Jual</th>
+                    <th className='w-[70px]' style={{ textAlign: 'center' }}>
+                      Aksi
+                    </th>
+                    <th>Jasa</th>
+                    <th className='w-[260px]'>Harga Jual</th>
                     <th className='w-[100px]'>Qty</th>
-                    <th className='w-[150px]'>Satuan</th>
-                    <th className=''>Total</th>
+                    <th className='w-[260px]'>Total</th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                  {serviceDetailFields.map((field, idx) => (
+                    <tr key={field.id}>
+                      <td className='table-cell text-center align-top'>
+                        <ActionIcon
+                          size='sm'
+                          variant='outline'
+                          aria-label='delete'
+                          className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
+                          onClick={() => removeServiceDetail(idx)}
+                        >
+                          <FaRegTrashAlt className='h-4 w-4' />
+                        </ActionIcon>
+                      </td>
+                      <td className='table-cell align-top'>
+                        <Controller
+                          control={control}
+                          name={`serviceDetails.${idx}.serviceName`}
+                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                            <Input placeholder='Nama Jasa' value={value} onChange={onChange} error={error?.message} />
+                          )}
+                        />
+                      </td>
+                      <td className='table-cell align-top'>
+                        <Controller
+                          control={control}
+                          name={`serviceDetails.${idx}.sellingPrice`}
+                          render={({ field: { value }, fieldState: { error } }) => (
+                            <RupiahFormInput
+                              setValue={setValue}
+                              onChange={() => updateServiceTotalPrice(idx)}
+                              fieldName={`serviceDetails.${idx}.sellingPrice`}
+                              defaultValue={value}
+                              error={error?.message}
+                              readOnly={isReadOnly}
+                            />
+                          )}
+                        />
+                      </td>
+                      <td className='table-cell align-top'>
+                        <Controller
+                          control={control}
+                          name={`serviceDetails.${idx}.quantity`}
+                          render={({ field: { value } }) => (
+                            <DecimalFormInput
+                              setValue={setValue}
+                              onChange={() => updateServiceTotalPrice(idx)}
+                              fieldName={`serviceDetails.${idx}.quantity`}
+                              defaultValue={value}
+                              readOnly={isReadOnly}
+                            />
+                          )}
+                        />
+                      </td>
+                      <td className='table-cell align-top'>
+                        <Controller
+                          control={control}
+                          name={`serviceDetails.${idx}.totalPrice`}
+                          render={({ field: { value } }) => (
+                            <RupiahFormInput
+                              setValue={setValue}
+                              fieldName={`serviceDetails.${idx}.totalPrice`}
+                              defaultValue={value}
+                              readOnly={true}
+                            />
+                          )}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td className='table-cell text-center'>
+                      {!isReadOnly && (
+                        <ActionIcon
+                          size='sm'
+                          aria-label='add'
+                          className='cursor-pointer'
+                          onClick={() => appendServiceDetail(new SalesOrderServiceDetailModel())}
+                        >
+                          <PiPlusBold className='h-4 w-4' />
+                        </ActionIcon>
+                      )}
+                    </td>
+                    <td className='table-cell text-right' colSpan={3}>
+                      <span className='font-semibold'>TOTAL</span>
+                    </td>
+                    <td className='table-cell'>
+                      <RupiahInput onChange={() => {}} defaultValue={totalServiceSoldAmount} readOnly={true} />
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </div>
           </>

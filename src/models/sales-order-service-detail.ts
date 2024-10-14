@@ -17,8 +17,8 @@ export class SalesOrderServiceDetailModel {
 
   constructor(data: any = {}) {
     this.id = data.id;
-    this.soId = data.soId;
-    this.serviceName = data.serviceName;
+    this.soId = data.soId || '';
+    this.serviceName = data.serviceName || '';
     this.sellingPrice = data.sellingPrice || 0;
     this.quantity = data.quantity || 0;
     this.totalPrice = data.totalPrice || 0;
