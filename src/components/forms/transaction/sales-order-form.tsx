@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import Card from '@/components/card';
-import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
-import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
-import Spinner from '@/components/spinner';
-import { routes } from '@/config/routes';
-import { SearchCustomerModel } from '@/models/customer.model';
-import { BasicFormProps } from '@/models/global.model';
-import { SearchProductModel } from '@/models/product.model';
-import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
-import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
-import { searchCustomer } from '@/services/customer-service';
-import { searchProduct } from '@/services/product-service';
-import { isoStringToReadableDate } from '@/utils/helper-function';
+import Card from "@/components/card";
+import DecimalFormInput from "@/components/form-inputs/decimal-form-input";
+import RupiahFormInput from "@/components/form-inputs/rupiah-form-input";
+import Spinner from "@/components/spinner";
+import { routes } from "@/config/routes";
+import { SearchCustomerModel } from "@/models/customer.model";
+import { BasicFormProps } from "@/models/global.model";
+import { SearchProductModel } from "@/models/product.model";
+import { SalesOrderModel, SalesOrderSchema } from "@/models/sales-order";
+import { SalesOrderProductDetailModel } from "@/models/sales-order-product-detail";
+import { searchCustomer } from "@/services/customer-service";
+import { searchProduct } from "@/services/product-service";
+import { isoStringToReadableDate } from "@/utils/helper-function";
 import {
   actionIconColorClass,
   baseButtonClass,
   buttonColorClass,
   readOnlyClass,
   tableClass,
-} from '@/utils/tailwind-classes';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { debounce } from 'lodash';
-import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
-import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
-import { IoCartOutline } from 'react-icons/io5';
-import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
-import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui';
+} from "@/utils/tailwind-classes";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { debounce } from "lodash";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { FaRegTrashAlt, FaSave } from "react-icons/fa";
+import { IoCartOutline } from "react-icons/io5";
+import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from "react-icons/pi";
+import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from "rizzui";
 
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
@@ -68,7 +68,7 @@ export default function SalesOrderForm({
     remove: removeProductDetail,
   } = useFieldArray({
     control,
-    name: 'productDetails',
+    name: "productDetails",
   });
 
   const {
@@ -77,7 +77,7 @@ export default function SalesOrderForm({
     remove: removeServiceDetail,
   } = useFieldArray({
     control,
-    name: 'serviceDetails',
+    name: "serviceDetails",
   });
 
   // customer
@@ -85,19 +85,19 @@ export default function SalesOrderForm({
 
   const handleCustomerSearchChange = useCallback(
     debounce(async (name: string) => {
-      if (!name || name.trim() === '') return;
+      if (!name || name.trim() === "") return;
 
       try {
         setCustomerList(await searchCustomer(name));
       } catch (e) {
-        toast.error(e + '', { duration: 5000 });
+        toast.error(e + "", { duration: 5000 });
       }
     }, 500),
     []
   );
 
   const handleCustomerChange = (customerName: string) => {
-    setValue('customerName', customerName);
+    setValue("customerName", customerName);
   };
   // ------------------------
 
@@ -135,13 +135,13 @@ export default function SalesOrderForm({
   const handleProductSearchChange = useCallback(
     debounce(async (name: string) => {
       // only search if name is not empty
-      if (!name || name.trim() === '') return;
+      if (!name || name.trim() === "") return;
 
       try {
         const result = await searchProduct(name);
         filterSelectedProductFromList(result);
       } catch (e) {
-        toast.error(e + '', { duration: 5000 });
+        toast.error(e + "", { duration: 5000 });
       }
     }, 500),
     []
@@ -159,76 +159,144 @@ export default function SalesOrderForm({
     // const grandTotal = getValues().details.reduce((acc, d) => {
     //   return acc + d.purchasePrice * d.quantity;
     // }, 0);
-    setValue('grandTotal', 1);
+    setValue("grandTotal", 1);
   };
   // ------------------------
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Card className='mb-7'>
-        <div className='flex items-center mb-5'>
-          <PiInfoBold className='size-5 mr-2' />
-          <h5 className='font-medium'>Info Penjualan</h5>
-        </div>
-        {isLoading ? (
-          <Spinner />
-        ) : (
-          <>
-            <div className='grid sm:grid-cols-3 gap-6'>
-              <Input
-                label='Kode Transaksi Penjualan'
-                placeholder='Auto Generate'
-                inputClassName={readOnlyClass}
-                readOnly
-                {...register('code')}
-              />
-              <Input
-                label='Tanggal Penjualan'
-                placeholder='Tanggal Penjualan'
-                inputClassName={readOnlyClass}
-                readOnly
-                {...register('salesDate')}
-              />
-              <Controller
-                control={control}
-                name='customerId'
-                render={({ field: { value, onChange }, fieldState: { error } }) => {
-                  const customerName = watch('customerName');
-                  return (
-                    <Select<SearchCustomerModel>
-                      value={value}
-                      onChange={(option: SearchCustomerModel) => {
-                        onChange(option.id);
-                        handleCustomerChange(option.name);
-                      }}
-                      label={<span className='required'>Pelanggan</span>}
-                      labelClassName='text-gray-600'
-                      placeholder='Pilih Pelanggan'
-                      options={customerList}
-                      displayValue={() => customerName}
-                      getOptionValue={(option: SearchCustomerModel) => option}
-                      searchable={true}
-                      searchByKey='name'
-                      onSearchChange={(name: string) => handleCustomerSearchChange(name)}
-                      disableDefaultFilter={true}
-                      error={error?.message}
-                      disabled={isReadOnly}
-                    />
-                  );
-                }}
-              />
-              <Textarea
-                label='Keterangan'
-                placeholder='Keterangan'
-                className='sm:col-span-3'
-                labelClassName='text-gray-600'
-                disabled={isReadOnly}
-                {...register('remarks')}
-              />
+      <div className='grid sm:grid-cols-12 gap-6'>
+        <div className='sm:col-span-7'>
+          <Card className='mb-7'>
+            <div className='flex items-center mb-5'>
+              <PiInfoBold className='size-5 mr-2' />
+              <h5 className='font-medium'>Info Penjualan</h5>
             </div>
-          </>
-        )}
-      </Card>
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <>
+                <div className='grid sm:grid-cols-2 gap-6'>
+                  <Input
+                    label='Kode Transaksi Penjualan'
+                    placeholder='Auto Generate'
+                    inputClassName={readOnlyClass}
+                    readOnly
+                    {...register("code")}
+                  />
+                  <Input
+                    label='Tanggal Penjualan'
+                    placeholder='Tanggal Penjualan'
+                    inputClassName={readOnlyClass}
+                    readOnly
+                    {...register("salesDate")}
+                  />
+                  <div className='col-span-2'>
+                    <Controller
+                      control={control}
+                      name='customerId'
+                      render={({ field: { value, onChange }, fieldState: { error } }) => {
+                        const customerName = watch("customerName");
+                        return (
+                          <Select<SearchCustomerModel>
+                            value={value}
+                            onChange={(option: SearchCustomerModel) => {
+                              onChange(option.id);
+                              handleCustomerChange(option.name);
+                            }}
+                            label={<span className='required'>Pelanggan</span>}
+                            labelClassName='text-gray-600'
+                            placeholder='Pilih Pelanggan'
+                            options={customerList}
+                            displayValue={() => customerName}
+                            getOptionValue={(option: SearchCustomerModel) => option}
+                            searchable={true}
+                            searchByKey='name'
+                            onSearchChange={(name: string) => handleCustomerSearchChange(name)}
+                            disableDefaultFilter={true}
+                            error={error?.message}
+                            disabled={isReadOnly}
+                          />
+                        );
+                      }}
+                    />
+                  </div>
+                  <Textarea
+                    label='Keterangan'
+                    placeholder='Keterangan'
+                    className='sm:col-span-2'
+                    labelClassName='text-gray-600'
+                    disabled={isReadOnly}
+                    {...register("remarks")}
+                  />
+                </div>
+              </>
+            )}
+          </Card>
+        </div>
+        <div className='sm:col-span-5'>
+          <Card className='mb-7'>
+            <h5>No. Invoice: SO00000001</h5>
+
+            <Controller
+              control={control}
+              name={`grandTotal`}
+              render={({ field: { value } }) => (
+                <RupiahFormInput setValue={setValue} fieldName={`grandTotal`} defaultValue={value} readOnly={true} />
+              )}
+            />
+            <hr />
+
+            {/* <Controller
+              control={control}
+              name={`paymentType`}
+              render={({ field: { value } }) => (
+                
+              )}
+            /> */}
+
+            <Controller
+              control={control}
+              name={`subTotal`}
+              render={({ field: { value } }) => (
+                <RupiahFormInput
+                  label='Sub Total'
+                  setValue={setValue}
+                  fieldName={`subTotal`}
+                  defaultValue={value}
+                  readOnly={true}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name={`discount`}
+              render={({ field: { value } }) => (
+                <RupiahFormInput
+                  label='Total Diskon'
+                  setValue={setValue}
+                  fieldName={`discount`}
+                  defaultValue={value}
+                  readOnly={true}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name={`paidAmount`}
+              render={({ field: { value } }) => (
+                <RupiahFormInput
+                  label='Jumlah yang Sudah Dibayar'
+                  setValue={setValue}
+                  fieldName={`paidAmount`}
+                  defaultValue={value}
+                  readOnly={true}
+                />
+              )}
+            />
+          </Card>
+        </div>
+      </div>
 
       {/* product details */}
       <Card className='px-0 mb-7'>
@@ -245,7 +313,9 @@ export default function SalesOrderForm({
               <table className={tableClass}>
                 <thead>
                   <tr>
-                    <th className='w-[70px] table-cell text-center align-middle'>Aksi</th>
+                    <th className='w-[70px]' style={{ textAlign: "center" }}>
+                      Aksi
+                    </th>
                     <th className='w-[300px]'>Barang</th>
                     <th className=''>Harga Jual</th>
                     <th className='w-[100px]'>Qty</th>
@@ -261,7 +331,7 @@ export default function SalesOrderForm({
                           size='sm'
                           variant='outline'
                           aria-label='delete'
-                          className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
+                          className={cn(actionIconColorClass.red, "cursor-pointer mt-1")}
                           onClick={() => removeProductDetail(idx)}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
@@ -379,7 +449,7 @@ export default function SalesOrderForm({
       </Card>
 
       {/* service details */}
-      <Card className='px-0'>
+      <Card className='px-0 mb-7'>
         <div className='flex items-center mb-5 px-7'>
           <IoCartOutline className='size-6 mr-2' />
           <h5 className='font-medium'>Detail Jasa Penjualan</h5>
@@ -408,31 +478,21 @@ export default function SalesOrderForm({
         )}
       </Card>
 
-      {/* <div className='sm:col-span-4'>
-          <Card>
-            No. Invoice: ...
-            <hr />
-            <div className='flex justify-between'>
-              <Link href={routes.transaction.salesOrder.data}>
-                <Button variant='outline' className='border-2 border-gray-200'>
-                  <PiArrowLeftBold className='size-4 me-1.5' />
-                  <span>Kembali</span>
-                </Button>
-              </Link>
+      <div className='flex justify-between'>
+        <Link href={routes.transaction.salesOrder.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5' />
+            <span>Kembali</span>
+          </Button>
+        </Link>
 
-              {!isReadOnly && (
-                <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <Loader variant='spinner' className='me-1.5' />
-                  ) : (
-                    <FaSave className='size-4 me-1.5' />
-                  )}
-                  <span>Simpan</span>
-                </Button>
-              )}
-            </div>
-          </Card>
-        </div> */}
+        {!isReadOnly && (
+          <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+            {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
+            <span>Simpan</span>
+          </Button>
+        )}
+      </div>
     </form>
   );
 }

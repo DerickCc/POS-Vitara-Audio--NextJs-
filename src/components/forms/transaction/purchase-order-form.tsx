@@ -235,7 +235,7 @@ export default function PurchaseOrderForm({
               <table className={tableClass}>
                 <thead>
                   <tr>
-                    <th className='w-[70px] flex justify-center'>Aksi</th>
+                    <th className='w-[70px]' style={{textAlign: 'center'}}>Aksi</th>
                     <th className='w-[300px]'>Barang</th>
                     <th className=''>Harga Beli</th>
                     <th className='w-[100px]'>Qty</th>

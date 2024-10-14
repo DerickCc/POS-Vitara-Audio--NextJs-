@@ -4,6 +4,7 @@ import { UseFormSetValue } from 'react-hook-form';
 import { Input } from 'rizzui';
 
 type RupiahFormInputProps = {
+  className?: string;
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
   onChange?: (value: number) => void; // to process changes from other component
   label?: string;
@@ -14,6 +15,7 @@ type RupiahFormInputProps = {
 };
 
 export default function RupiahFormInput({
+  className,
   setValue,
   onChange = (value: number) => null,
   label,
@@ -50,6 +52,7 @@ export default function RupiahFormInput({
       error={error}
       readOnly={readOnly}
       onChange={handleChange}
+      className={className}
       inputClassName={readOnly ? 'bg-gray-100/70' : ''}
     />
   );
