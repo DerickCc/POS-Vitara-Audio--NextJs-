@@ -29,7 +29,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
       // update stock and costPrice of each product in details
       const updatePromises = po.PurchaseOrderDetails.map(async d => {
-        const product = await prisma.products.findUnique({ where: { id: d.productId}});
+        const product = await prisma.products.findUnique({ where: { id: d.productId }});
       
         if (!product) {
           throw new Error('Barang yang ingin di-update tidak ditemukan');

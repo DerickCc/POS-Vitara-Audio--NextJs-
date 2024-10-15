@@ -206,9 +206,9 @@ export default function SalesOrderForm({
       // check if price is getting discount or marked up
       const priceAdjustment = d.sellingPrice - d.oriSellingPrice;
 
-      // if marked up, calculate subtotal with that markup price
+      // if positive (markup), calculate subtotal with that markup price
       if (priceAdjustment > 0) return acc + d.sellingPrice * d.quantity;
-      // if discount, calculate subtotal with that original price so that discount can be calculated
+      // if 0 or negative (discount), calculate subtotal with that original price so that discount can be calculated
       else return acc + d.oriSellingPrice * d.quantity;
     }, 0);
 
@@ -236,8 +236,22 @@ export default function SalesOrderForm({
   };
   // ------------------------
 
+  const onError = (errors: any) => {
+    console.log(errors);
+    console.log(errors?.serviceDetails?.refinement);
+    if (errors?.refinement) {
+      toast.error(errors.refinement.message);
+    }
+    if (errors?.serviceDetails?.refinement) {
+      toast.error(errors.serviceDetails.refinement.message);
+    }
+    if (errors?.productDetails?.refinement) {
+      toast.error(errors.productDetails.refinement.message);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit, onError)}>
       <div className='grid sm:grid-cols-12 gap-6'>
         <div className='sm:col-span-7'>
           <Card className='mb-7'>
@@ -427,13 +441,14 @@ export default function SalesOrderForm({
                 <Controller
                   control={control}
                   name='paidAmount'
-                  render={({ field: { value } }) => (
+                  render={({ field: { value }, fieldState: { error } }) => (
                     <RupiahFormInput
-                      label='Jumlah yang Sudah Dibayar'
+                      label={<span className='required'>Jumlah yang Sudah Dibayar</span>}
                       setValue={setValue}
                       fieldName={`paidAmount`}
                       defaultValue={value}
-                      readOnly={true}
+                      error={error?.message}
+                      readOnly={isReadOnly}
                     />
                   )}
                 />
@@ -531,12 +546,13 @@ export default function SalesOrderForm({
                         <Controller
                           control={control}
                           name={`productDetails.${idx}.quantity`}
-                          render={({ field: { value } }) => (
+                          render={({ field: { value }, fieldState: { error } }) => (
                             <DecimalFormInput
                               setValue={setValue}
                               onChange={() => updateProductTotalPrice(idx)}
                               fieldName={`productDetails.${idx}.quantity`}
                               defaultValue={value}
+                              error={error?.message}
                               readOnly={isReadOnly}
                             />
                           )}
@@ -660,12 +676,13 @@ export default function SalesOrderForm({
                         <Controller
                           control={control}
                           name={`serviceDetails.${idx}.quantity`}
-                          render={({ field: { value } }) => (
+                          render={({ field: { value }, fieldState: { error } }) => (
                             <DecimalFormInput
                               setValue={setValue}
                               onChange={() => updateServiceTotalPrice(idx)}
                               fieldName={`serviceDetails.${idx}.quantity`}
                               defaultValue={value}
+                              error={error?.message}
                               readOnly={isReadOnly}
                             />
                           )}

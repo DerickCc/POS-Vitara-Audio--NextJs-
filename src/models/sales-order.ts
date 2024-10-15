@@ -8,6 +8,7 @@ export const SalesOrderSchema = z.object({
   remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
   paymentType: z.string().min(1, { message: 'Mohon memilih tipe pembayaran' }),
   paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
+  paidAmount: z.coerce.number().min(1, { message: 'Harap mengisi jumlah yang sudah dibayar' }),
   productDetails: z.array(SalesOrderProductDetailSchema).refine(
     (details) => {
       const productIds = details.map((d) => d.productId);
@@ -15,7 +16,7 @@ export const SalesOrderSchema = z.object({
     },
     {
       message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
-      path: ['productDetails'],
+      path: ['refinement'],
     }
   ),
   serviceDetails: z.array(SalesOrderServiceDetailSchema).refine(
@@ -25,9 +26,13 @@ export const SalesOrderSchema = z.object({
     },
     {
       message: 'Mohon tidak meng-input jasa yang sama dalam 1 transaksi',
-      path: ['serviceDetails'],
+      path: ['refinement'],
     }
   ),
+})
+.refine((data) => data.productDetails.length > 0 || data.serviceDetails.length > 0, {
+  message: 'Harap pilih minimal 1 barang atau jasa untuk dijual',
+  path: ['refinement']
 });
 
 export class SalesOrderModel {
@@ -57,10 +62,10 @@ export class SalesOrderModel {
     this.remarks = data.remarks;
     this.paymentType = data.paymentType || 'DP';
     this.paymentMethod = data.paymentMethod || 'Non-tunai';
-    this.subTotal = data.subTotal;
-    this.discount = data.discount;
-    this.grandTotal = data.grandTotal;
-    this.paidAmount = data.paidAmount;
+    this.subTotal = data.subTotal || 0;
+    this.discount = data.discount || 0;
+    this.grandTotal = data.grandTotal || 0;
+    this.paidAmount = data.paidAmount || 0;
     this.productDetails = data.productDetails || [];
     this.serviceDetails = data.serviceDetails || [];
     this.status = data.status || 'Belum Lunas';

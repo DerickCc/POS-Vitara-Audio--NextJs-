@@ -1,6 +1,7 @@
 import { SalesOrderSchema } from '@/models/sales-order';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // BrowseSalesOrders
@@ -141,39 +142,133 @@ export async function POST(request: Request) {
     }
 
     const salesDate = new Date().toISOString();
-    // const grandTotal = data.details.reduce((acc, d) => {
-    //   return acc + d.purchasePrice * d.quantity;
-    // }, 0);
 
-    // await db.$transaction(async (prisma) => {
-    //   const po = await prisma.purchaseOrders.create({
-    //     data: {
-    //       code: newCode,
-    //       purchaseDate: purchaseDate,
-    //       Supplier: {
-    //         connect: { id: data.supplierId },
-    //       },
-    //       remarks: data.remarks,
-    //       totalItem: data.details.length,
-    //       grandTotal: grandTotal,
-    //       status: 'Dalam Proses',
-    //       CreatedBy: {
-    //         connect: { id: userId },
-    //       },
-    //     },
-    //   });
+    await db.$transaction(async (prisma) => {
+      let subTotal = new Decimal(0);
+      let discount = new Decimal(0);
 
-    //   await prisma.purchaseOrderDetails.createMany({
-    //     data: data.details.map((d) => ({
-    //       poId: po.id,
-    //       productId: d.productId,
-    //       purchasePrice: d.purchasePrice,
-    //       quantity: d.quantity,
-    //       totalPrice: d.purchasePrice * d.quantity,
-    //       createdBy: userId,
-    //     })),
-    //   });
-    // });
+      // calculate subTotal and discount
+      if (data.productDetails.length > 0) {
+        data.productDetails.forEach(async (d) => {
+          const product = await prisma.products.findUnique({
+            where: { id: d.productId },
+            select: { sellingPrice: true },
+          });
+
+          if (!product) {
+            throw new Error('Barang yang ingin di-update tidak ditemukan');
+          }
+
+          // calculate subTotal
+          // check if price is getting discount or marked up
+          const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
+
+          if (priceAdjustment?.greaterThan(0)) subTotal = subTotal.plus(d.sellingPrice * d.quantity);
+          else subTotal = subTotal.plus(product.sellingPrice.times(d.quantity));
+
+          // calculate discount
+          // priceAdjusment negative means discount
+          if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
+        });
+      }
+
+      // calculate subTotal
+      if (data.serviceDetails.length > 0) {
+        const subTotalService = data.serviceDetails.reduce(
+          (acc, d) => acc.plus(d.sellingPrice * d.quantity),
+          new Decimal(0)
+        );
+        subTotal = subTotal.plus(subTotalService);
+      }
+
+      const grandTotal = subTotal.minus(discount);
+      const status = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
+
+      const so = await prisma.salesOrders.create({
+        data: {
+          code: newCode,
+          salesDate,
+          Customer: {
+            connect: { id: data.customerId },
+          },
+          paymentType: data.paymentType,
+          paymentMethod: data.paymentMethod,
+          subTotal,
+          discount,
+          grandTotal,
+          paidAmount: data.paidAmount,
+          remarks: data.remarks,
+          status,
+          CreatedBy: {
+            connect: { id: userId },
+          },
+        },
+      });
+
+      const promises: any[] = [];
+      if (data.productDetails.length > 0) {
+        data.productDetails.forEach(async (d) => {
+          const product = await prisma.products.findUnique({ where: { id: d.productId } });
+
+          if (!product) {
+            throw new Error('Barang yang ingin di-update tidak ditemukan');
+          }
+
+          const profit = new Decimal(d.sellingPrice).minus(product.costPrice).times(d.quantity);
+
+          promises.push(
+            prisma.salesOrderProductDetails.create({
+              data: {
+                SalesOrder: {
+                  connect: { id: so.id },
+                },
+                Product: {
+                  connect: { id: d.productId },
+                },
+                costPrice: product.costPrice,
+                oriSellingPrice: product.sellingPrice,
+                sellingPrice: product.sellingPrice,
+                quantity: d.quantity,
+                totalPrice: d.sellingPrice * d.quantity,
+                profit,
+                CreatedBy: {
+                  connect: { id: userId },
+                },
+              },
+            })
+          );
+
+          const updatedStock = product.stock.minus(d.quantity); // stock after substracted with sales product qty
+
+          promises.push(
+            prisma.products.update({
+              where: { id: d.productId },
+              data: {
+                stock: updatedStock,
+                UpdatedBy: {
+                  connect: { id: userId },
+                },
+              },
+            })
+          );
+        });
+      }
+
+      await Promise.all(promises);
+
+      if (data.serviceDetails.length > 0) {
+        await prisma.salesOrderServiceDetails.createMany({
+          data: data.serviceDetails.map((d) => ({
+            soId: so.id,
+            serviceName: d.serviceName,
+            sellingPrice: d.sellingPrice,
+            quantity: d.quantity,
+            totalPrice: d.sellingPrice * d.quantity,
+            createdBy: userId,
+          })),
+        });
+      }
+    });
 
     return NextResponse.json({ message: 'Data Transaksi Penjualan berhasil disimpan' }, { status: 201 });
   } catch (e) {

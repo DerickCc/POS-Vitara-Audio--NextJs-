@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { BasicSelectOptions } from "./global.model";
-import { Decimal } from "@prisma/client/runtime/library";
 
 export const ProductSchema = z.object({
   name: z.string().min(1, { message: 'Nama harus diisi' }),

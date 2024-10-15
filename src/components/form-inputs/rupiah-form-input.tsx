@@ -3,6 +3,7 @@ import { formatToCurrency, parseNumber } from '@/utils/helper-function';
 import { useEffect, useState } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
 import { Input } from 'rizzui';
+import React__default from 'react';
 
 type RupiahFormInputProps = {
   className?: string;
@@ -10,7 +11,7 @@ type RupiahFormInputProps = {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
   onChange?: (value: number) => void; // to process changes from other component
-  label?: string;
+  label?: React__default.ReactNode;
   fieldName: string;
   defaultValue: number;
   readOnly?: boolean;
