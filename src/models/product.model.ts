@@ -18,13 +18,13 @@ export class ProductModel {
   code: string;
   name: string;
   photo: string;
-  stock: Decimal;
-  restockThreshold: Decimal;
+  stock: number;
+  restockThreshold: number;
   uom: string;
-  costPrice: Decimal;
+  costPrice: number;
   costPriceCode: string;
-  purchasePrice: Decimal;
-  sellingPrice: Decimal;
+  purchasePrice: number;
+  sellingPrice: number;
   remarks: string;
 
   constructor(data: any = {}) {

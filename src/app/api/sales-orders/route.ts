@@ -127,7 +127,7 @@ export async function POST(request: Request) {
   try {
     const userId = session.id;
 
-    // retreive last po code
+    // retreive last so code
     const lastSo = await db.salesOrders.findFirst({
       orderBy: { createdAt: 'desc' },
       select: { code: true },
@@ -136,8 +136,8 @@ export async function POST(request: Request) {
     let newCode = 'SO00000001'; // default code
 
     if (lastSo) {
-      const lastCodeNumber = parseInt(lastSo.code.replace('PO', ''), 10);
-      newCode = 'PO' + (lastCodeNumber + 1).toString().padStart(8, '0');
+      const lastCodeNumber = parseInt(lastSo.code.replace('SO', ''), 10);
+      newCode = 'SO' + (lastCodeNumber + 1).toString().padStart(8, '0');
     }
 
     const salesDate = new Date().toISOString();

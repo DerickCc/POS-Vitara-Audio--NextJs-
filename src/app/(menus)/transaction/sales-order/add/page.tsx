@@ -32,7 +32,7 @@ export default function AddSalesOrderPage() {
       const message = await createSo(payload);
       toast.success(message, { duration: 4000 });
 
-      router.push(routes.transaction.purchaseOrder.data);
+      router.push(routes.transaction.salesOrder.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }

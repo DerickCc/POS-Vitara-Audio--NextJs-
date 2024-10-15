@@ -8,8 +8,8 @@ export class SessionData {
 
   constructor(data: any = {}) {
     this.id = data.id;
-    this.name = data.name;
-    this.username = data.username;
+    this.name = data.name || '';
+    this.username = data.username || '';
     this.role = data.role || 'Kasir';
   }
 }

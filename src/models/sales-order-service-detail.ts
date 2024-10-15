@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const SalesOrderServiceDetailSchema = z.object({
   id: z.string().optional().nullable(),
-  serviceName: z.string().min(1, { message: 'Nama jasa harus diisi' }),
+  serviceName: z.string().min(1, { message: 'Mohon mengisi nama jasa' }),
   sellingPrice: z.coerce.number().min(0, { message: 'Harga jual tidak boleh negatif' }),
   quantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
 });

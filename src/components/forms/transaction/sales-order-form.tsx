@@ -202,10 +202,16 @@ export default function SalesOrderForm({
     setAmount(totalSoldAmount);
 
     // update sub total value
-    const totalOriProductSoldAmount = getValues().productDetails.reduce(
-      (acc, d) => acc + d.oriSellingPrice * d.quantity,
-      0
-    );
+    const totalOriProductSoldAmount = getValues().productDetails.reduce((acc, d) => {
+      // check if price is getting discount or marked up
+      const priceAdjustment = d.sellingPrice - d.oriSellingPrice;
+
+      // if marked up, calculate subtotal with that markup price
+      if (priceAdjustment > 0) return acc + d.sellingPrice * d.quantity;
+      // if discount, calculate subtotal with that original price so that discount can be calculated
+      else return acc + d.oriSellingPrice * d.quantity;
+    }, 0);
+
     if (detailsKey === 'productDetails') {
       setValue('subTotal', totalOriProductSoldAmount + totalServiceSoldAmount);
     } else if (detailsKey === 'serviceDetails') {
@@ -223,10 +229,9 @@ export default function SalesOrderForm({
     setValue('discount', totalDiscount);
   };
 
-  const subTotal = watch('subTotal');
-  const discount = watch('discount');
-  
   const updateGrandTotal = () => {
+    const subTotal = watch('subTotal');
+    const discount = watch('discount');
     setValue('grandTotal', subTotal - discount);
   };
   // ------------------------
@@ -306,128 +311,134 @@ export default function SalesOrderForm({
         </div>
         <div className='sm:col-span-5'>
           <Card className='mb-7'>
-            <Text className='mb-3 text-lg font-medium'>No. Invoice: SO00000001</Text>
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <>
+                <Text className='mb-3 text-lg font-medium'>No. Invoice: SO00000001</Text>
 
-            <Controller
-              control={control}
-              name='grandTotal'
-              render={({ field: { value } }) => (
-                <RupiahFormInput
-                  className='mb-5 font-bold'
-                  inputClassName='text-xl'
-                  size='xl'
-                  setValue={setValue}
-                  fieldName={`grandTotal`}
-                  defaultValue={value}
-                  readOnly={true}
+                <Controller
+                  control={control}
+                  name='grandTotal'
+                  render={({ field: { value } }) => (
+                    <RupiahFormInput
+                      className='mb-5 font-bold'
+                      inputClassName='text-xl'
+                      size='xl'
+                      setValue={setValue}
+                      fieldName={`grandTotal`}
+                      defaultValue={value}
+                      readOnly={true}
+                    />
+                  )}
                 />
-              )}
-            />
-            <hr className='mb-4' />
+                <hr className='mb-4' />
 
-            <div className='flex justify-between'>
-              <Controller
-                control={control}
-                name='paymentType'
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
-                  <RadioGroup value={value} setValue={onChange} className='mb-6'>
-                    <Text className='font-medium mb-2'>Tipe Pembayaran</Text>
-                    <div className='flex align-items gap-6'>
-                      <Radio
-                        name='paymentType'
-                        label='DP'
-                        value='DP'
-                        size='sm'
-                        onChange={onChange}
-                        checked={value === 'DP'}
-                        labelClassName='text-sm'
-                        error={error?.message}
-                      />
-                      <Radio
-                        name='paymentType'
-                        label='Lunas'
-                        value='Lunas'
-                        onChange={onChange}
-                        size='sm'
-                        labelClassName='text-sm'
-                        error={error?.message}
-                      />
-                    </div>
-                  </RadioGroup>
-                )}
-              />
-              <Controller
-                control={control}
-                name='paymentMethod'
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
-                  <RadioGroup value={value} setValue={onChange} className='mb-6'>
-                    <Text className='font-medium mb-2'>Metode Pembayaran</Text>
-                    <div className='flex align-items gap-6'>
-                      <Radio
-                        name='paymentMethod'
-                        label='Tunai'
-                        value='Tunai'
-                        onChange={onChange}
-                        size='sm'
-                        labelClassName='text-sm'
-                        error={error?.message}
-                      />
-                      <Radio
-                        name='paymentMethod'
-                        label='Non-tunai'
-                        value='Non-tunai'
-                        onChange={onChange}
-                        checked={value === 'Non-tunai'}
-                        size='sm'
-                        labelClassName='text-sm'
-                        error={error?.message}
-                      />
-                    </div>
-                  </RadioGroup>
-                )}
-              />
-            </div>
-            <Controller
-              control={control}
-              name='subTotal'
-              render={({ field: { value } }) => (
-                <RupiahFormInput
-                  label='Sub Total'
-                  className='mb-6'
-                  setValue={setValue}
-                  fieldName={`subTotal`}
-                  defaultValue={value}
-                  readOnly={true}
+                <div className='flex justify-between'>
+                  <Controller
+                    control={control}
+                    name='paymentType'
+                    render={({ field: { value, onChange }, fieldState: { error } }) => (
+                      <RadioGroup value={value} setValue={onChange} className='mb-6'>
+                        <Text className='font-medium mb-2'>Tipe Pembayaran</Text>
+                        <div className='flex align-items gap-6'>
+                          <Radio
+                            name='paymentType'
+                            label='DP'
+                            value='DP'
+                            size='sm'
+                            onChange={onChange}
+                            checked={value === 'DP'}
+                            labelClassName='text-sm'
+                            error={error?.message}
+                          />
+                          <Radio
+                            name='paymentType'
+                            label='Lunas'
+                            value='Lunas'
+                            onChange={onChange}
+                            size='sm'
+                            labelClassName='text-sm'
+                            error={error?.message}
+                          />
+                        </div>
+                      </RadioGroup>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name='paymentMethod'
+                    render={({ field: { value, onChange }, fieldState: { error } }) => (
+                      <RadioGroup value={value} setValue={onChange} className='mb-6'>
+                        <Text className='font-medium mb-2'>Metode Pembayaran</Text>
+                        <div className='flex align-items gap-6'>
+                          <Radio
+                            name='paymentMethod'
+                            label='Tunai'
+                            value='Tunai'
+                            onChange={onChange}
+                            size='sm'
+                            labelClassName='text-sm'
+                            error={error?.message}
+                          />
+                          <Radio
+                            name='paymentMethod'
+                            label='Non-tunai'
+                            value='Non-tunai'
+                            onChange={onChange}
+                            checked={value === 'Non-tunai'}
+                            size='sm'
+                            labelClassName='text-sm'
+                            error={error?.message}
+                          />
+                        </div>
+                      </RadioGroup>
+                    )}
+                  />
+                </div>
+                <Controller
+                  control={control}
+                  name='subTotal'
+                  render={({ field: { value } }) => (
+                    <RupiahFormInput
+                      label='Sub Total'
+                      className='mb-6'
+                      setValue={setValue}
+                      fieldName={`subTotal`}
+                      defaultValue={value}
+                      readOnly={true}
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              control={control}
-              name='discount'
-              render={({ field: { value } }) => (
-                <RupiahFormInput
-                  label='Total Diskon'
-                  className='mb-6'
-                  setValue={setValue}
-                  fieldName={`discount`}
-                  defaultValue={value}
-                  readOnly={true}
+                <Controller
+                  control={control}
+                  name='discount'
+                  render={({ field: { value } }) => (
+                    <RupiahFormInput
+                      label='Total Diskon'
+                      className='mb-6'
+                      setValue={setValue}
+                      fieldName={`discount`}
+                      defaultValue={value}
+                      readOnly={true}
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              control={control}
-              name='paidAmount'
-              render={({ field: { value } }) => (
-                <RupiahFormInput
-                  label='Jumlah yang Sudah Dibayar'
-                  setValue={setValue}
-                  fieldName={`paidAmount`}
-                  defaultValue={value}
-                  readOnly={true}
+                <Controller
+                  control={control}
+                  name='paidAmount'
+                  render={({ field: { value } }) => (
+                    <RupiahFormInput
+                      label='Jumlah yang Sudah Dibayar'
+                      setValue={setValue}
+                      fieldName={`paidAmount`}
+                      defaultValue={value}
+                      readOnly={true}
+                    />
+                  )}
                 />
-              )}
-            />
+              </>
+            )}
           </Card>
         </div>
       </div>
