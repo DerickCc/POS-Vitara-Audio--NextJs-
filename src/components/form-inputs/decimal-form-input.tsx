@@ -5,7 +5,8 @@ import { Input } from 'rizzui';
 
 type DecimalFormInputProps = {
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
-  onChange?: (value: number) => void, // to process changes from other component
+  limit?: number;
+  onChange?: (value: number) => void; // to process changes from other component
   label?: string;
   fieldName: string;
   defaultValue: number;
@@ -15,6 +16,7 @@ type DecimalFormInputProps = {
 
 export default function DecimalFormInput({
   setValue,
+  limit = 0,
   onChange = (value: number) => null,
   label,
   fieldName,
@@ -37,23 +39,26 @@ export default function DecimalFormInput({
 
     if (inputValue.slice(-1) !== ',') {
       const numericValue = parseDecimal(inputValue);
-      setDisplayValue(formatToDecimal(numericValue));
+
+      // if have limit and is over the limit
+      if (limit !== 0 && numericValue > limit) setDisplayValue(formatToDecimal(limit));
+      else setDisplayValue(formatToDecimal(numericValue));
 
       setValue(fieldName, numericValue, { shouldValidate: true }); // Manually update the form state
       onChange(numericValue);
       return;
     } else {
       setDisplayValue(inputValue);
-    };
-    onChange(defaultValue)
+    }
+    onChange(defaultValue);
   };
 
   return (
     <Input
-      type="text"
+      type='text'
       value={displayValue}
       label={label}
-      placeholder="xxx,xx"
+      placeholder='xxx,xx'
       error={error}
       readOnly={readOnly}
       onChange={handleChange}

@@ -83,6 +83,9 @@ export async function GET(request: Request) {
         Customer: {
           select: { name: true },
         },
+        CreatedBy: {
+          select: { name: true },
+        }
       },
     });
     const recordsTotal = await db.salesOrders.count({ where });
@@ -90,7 +93,9 @@ export async function GET(request: Request) {
     const mappedSalesOrders = salesOrders.map((po) => ({
       ...po,
       customerName: po.Customer.name,
+      cashier: po.CreatedBy.name,
       Customer: undefined,
+      CreatedBy: undefined,
     }));
 
     return NextResponse.json({ message: 'Success', result: mappedSalesOrders, recordsTotal }, { status: 200 });
@@ -124,6 +129,7 @@ export async function POST(request: Request) {
   }
 
   const data = validationRes.data;
+  console.log(data);
 
   try {
     const userId = session.id;
@@ -149,7 +155,7 @@ export async function POST(request: Request) {
 
       // calculate subTotal and discount
       if (data.productDetails.length > 0) {
-        data.productDetails.forEach(async (d) => {
+        for (const d of data.productDetails) {
           const product = await prisma.products.findUnique({
             where: { id: d.productId },
             select: { sellingPrice: true },
@@ -169,7 +175,7 @@ export async function POST(request: Request) {
           // calculate discount
           // priceAdjusment negative means discount
           if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
-        });
+        }
       }
 
       // calculate subTotal
@@ -207,7 +213,7 @@ export async function POST(request: Request) {
 
       const promises: any[] = [];
       if (data.productDetails.length > 0) {
-        data.productDetails.forEach(async (d) => {
+        for (const d of data.productDetails) {
           const product = await prisma.products.findUnique({ where: { id: d.productId } });
 
           if (!product) {
@@ -215,7 +221,7 @@ export async function POST(request: Request) {
           }
 
           const profit = new Decimal(d.sellingPrice).minus(product.costPrice).times(d.quantity);
-
+          console.log(profit);
           promises.push(
             prisma.salesOrderProductDetails.create({
               data: {
@@ -227,7 +233,7 @@ export async function POST(request: Request) {
                 },
                 costPrice: product.costPrice,
                 oriSellingPrice: product.sellingPrice,
-                sellingPrice: product.sellingPrice,
+                sellingPrice: d.sellingPrice,
                 quantity: d.quantity,
                 totalPrice: d.sellingPrice * d.quantity,
                 profit,
@@ -251,7 +257,7 @@ export async function POST(request: Request) {
               },
             })
           );
-        });
+        }
       }
 
       await Promise.all(promises);

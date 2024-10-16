@@ -50,6 +50,7 @@ export default function SalesOrderForm({
     register,
     setValue,
     getValues,
+    trigger,
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -58,13 +59,6 @@ export default function SalesOrderForm({
     defaultValues,
     resolver: isReadOnly ? undefined : zodResolver(SalesOrderSchema),
   });
-
-  useEffect(() => {
-    if (defaultValues.id) {
-      defaultValues.salesDate = isoStringToReadableDate(defaultValues.salesDate);
-      reset(defaultValues);
-    }
-  }, [defaultValues, reset]);
 
   const {
     fields: productDetailFields,
@@ -138,6 +132,7 @@ export default function SalesOrderForm({
       sellingPrice: product.sellingPrice,
       quantity: 0,
       uom: product.uom,
+      stock: product.stock,
     });
 
     filterSelectedProductFromList(productList, idx);
@@ -162,6 +157,18 @@ export default function SalesOrderForm({
     }, 500),
     []
   );
+
+  const handleProductQtyChange = (idx: number, qty: number) => {
+    const product = getValues().productDetails[idx];
+    if (qty <= product.stock) updateProductTotalPrice(idx);
+    else {
+      toast.error(`Stok ${product.productName} tidak mencukupi. Tersisa: ${product.stock} ${product.uom}`, {
+        duration: 5000,
+      });
+      setValue(`productDetails.${idx}.quantity`, product.stock);
+      updateProductTotalPrice(idx);
+    }
+  };
 
   const updateProductTotalPrice = useCallback(
     debounce((idx: number) => {
@@ -193,7 +200,29 @@ export default function SalesOrderForm({
   );
   // ------------------------
 
-  // Payment and Prices
+  // Invoice, Payment, and Prices
+  const [noInvoice, setNoInvoice] = useState('');
+
+  const handlePaymentTypeChange = () => {
+    const formValues = getValues();
+
+    if (formValues.paymentType === 'DP') {
+      setValue('paidAmount', 0);
+    } else if (formValues.paymentType === 'Lunas') {
+      setValue('paidAmount', formValues.grandTotal);
+    }
+  };
+
+  const handlePaidAmountChange = (paidAmount: number) => {
+    const grandTotal = getValues().grandTotal;
+
+    if (paidAmount > grandTotal) {
+      setValue('paidAmount', grandTotal);
+      setValue('paymentType', 'Lunas');
+      trigger('paidAmount');
+    }
+  };
+
   const updateTotalSoldAmount = (
     detailsKey: 'productDetails' | 'serviceDetails',
     setAmount: (amount: number) => void
@@ -230,15 +259,16 @@ export default function SalesOrderForm({
   };
 
   const updateGrandTotal = () => {
-    const subTotal = watch('subTotal');
-    const discount = watch('discount');
-    setValue('grandTotal', subTotal - discount);
+    const formValues = getValues();
+    const grandTotal = formValues.subTotal - formValues.discount;
+
+    setValue('grandTotal', grandTotal);
+
+    if (formValues.paymentType === 'Lunas') setValue('paidAmount', grandTotal);
   };
   // ------------------------
 
   const onError = (errors: any) => {
-    console.log(errors);
-    console.log(errors?.serviceDetails?.refinement);
     if (errors?.refinement) {
       toast.error(errors.refinement.message);
     }
@@ -249,6 +279,19 @@ export default function SalesOrderForm({
       toast.error(errors.productDetails.refinement.message);
     }
   };
+
+  useEffect(() => {
+    if (defaultValues.id) {
+      defaultValues.salesDate = isoStringToReadableDate(defaultValues.salesDate);
+      setNoInvoice(defaultValues.code);
+
+      setTotalProductSoldAmount(defaultValues.productDetails.reduce((acc, d) => acc + d.totalPrice, 0));
+
+      setTotalServiceSoldAmount(defaultValues.serviceDetails.reduce((acc, d) => acc + d.totalPrice, 0));
+
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -329,7 +372,7 @@ export default function SalesOrderForm({
               <Spinner />
             ) : (
               <>
-                <Text className='mb-3 text-lg font-medium'>No. Invoice: SO00000001</Text>
+                <Text className='mb-3 text-lg font-medium'>No. Invoice: {noInvoice}</Text>
 
                 <Controller
                   control={control}
@@ -360,20 +403,29 @@ export default function SalesOrderForm({
                             name='paymentType'
                             label='DP'
                             value='DP'
+                            onChange={() => {
+                              onChange('DP');
+                              handlePaymentTypeChange();
+                            }}
                             size='sm'
-                            onChange={onChange}
                             checked={value === 'DP'}
                             labelClassName='text-sm'
                             error={error?.message}
+                            disabled={isReadOnly}
                           />
                           <Radio
                             name='paymentType'
                             label='Lunas'
                             value='Lunas'
-                            onChange={onChange}
+                            onChange={() => {
+                              onChange('Lunas');
+                              handlePaymentTypeChange();
+                            }}
                             size='sm'
+                            checked={value === 'Lunas'}
                             labelClassName='text-sm'
                             error={error?.message}
+                            disabled={isReadOnly}
                           />
                         </div>
                       </RadioGroup>
@@ -391,9 +443,11 @@ export default function SalesOrderForm({
                             label='Tunai'
                             value='Tunai'
                             onChange={onChange}
+                            checked={value === 'Tunai'}
                             size='sm'
                             labelClassName='text-sm'
                             error={error?.message}
+                            disabled={isReadOnly}
                           />
                           <Radio
                             name='paymentMethod'
@@ -404,6 +458,7 @@ export default function SalesOrderForm({
                             size='sm'
                             labelClassName='text-sm'
                             error={error?.message}
+                            disabled={isReadOnly}
                           />
                         </div>
                       </RadioGroup>
@@ -441,16 +496,21 @@ export default function SalesOrderForm({
                 <Controller
                   control={control}
                   name='paidAmount'
-                  render={({ field: { value }, fieldState: { error } }) => (
-                    <RupiahFormInput
-                      label={<span className='required'>Jumlah yang Sudah Dibayar</span>}
-                      setValue={setValue}
-                      fieldName={`paidAmount`}
-                      defaultValue={value}
-                      error={error?.message}
-                      readOnly={isReadOnly}
-                    />
-                  )}
+                  render={({ field: { value }, fieldState: { error } }) => {
+                    const grandTotal = watch('grandTotal');
+
+                    return (
+                      <RupiahFormInput
+                        label={<span className='required'>Jumlah yang Sudah Dibayar</span>}
+                        setValue={setValue}
+                        onChange={handlePaidAmountChange}
+                        fieldName={`paidAmount`}
+                        defaultValue={value}
+                        error={error?.message}
+                        readOnly={isReadOnly || value === grandTotal || grandTotal === 0}
+                      />
+                    );
+                  }}
                 />
               </>
             )}
@@ -546,16 +606,20 @@ export default function SalesOrderForm({
                         <Controller
                           control={control}
                           name={`productDetails.${idx}.quantity`}
-                          render={({ field: { value }, fieldState: { error } }) => (
-                            <DecimalFormInput
-                              setValue={setValue}
-                              onChange={() => updateProductTotalPrice(idx)}
-                              fieldName={`productDetails.${idx}.quantity`}
-                              defaultValue={value}
-                              error={error?.message}
-                              readOnly={isReadOnly}
-                            />
-                          )}
+                          render={({ field: { value }, fieldState: { error } }) => {
+                            const stock = watch(`productDetails.${idx}.stock`);
+                            return (
+                              <DecimalFormInput
+                                setValue={setValue}
+                                limit={stock}
+                                onChange={(qty: number) => handleProductQtyChange(idx, qty)}
+                                fieldName={`productDetails.${idx}.quantity`}
+                                defaultValue={value}
+                                error={error?.message}
+                                readOnly={isReadOnly}
+                              />
+                            );
+                          }}
                         />
                       </td>
                       <td className='table-cell align-top'>

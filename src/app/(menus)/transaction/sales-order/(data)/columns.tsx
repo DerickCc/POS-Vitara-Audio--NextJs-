@@ -95,7 +95,7 @@ export const columns = ({ actions, openModal, ConfirmationModalComponent, role }
   }),
   columnHelper.accessor('customerName', {
     id: 'customerName',
-    size: 180,
+    size: 200,
     header: () => 'Pelanggan',
     cell: (info) => info.getValue(),
     enableSorting: true,
@@ -148,7 +148,7 @@ export const columns = ({ actions, openModal, ConfirmationModalComponent, role }
   }),
   columnHelper.accessor('remarks', {
     id: 'remarks',
-    size: 250,
+    size: 350,
     header: () => 'Keterangan',
     cell: (info) => info.getValue() || '-',
     enableSorting: false,

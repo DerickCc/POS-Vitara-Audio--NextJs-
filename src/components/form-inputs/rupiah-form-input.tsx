@@ -37,7 +37,7 @@ export default function RupiahFormInput({
     if (defaultValue !== undefined) {
       setDisplayValue(formatToCurrency(defaultValue));
     }
-  }, [defaultValue]);
+  }, [defaultValue, displayValue]);
 
   // Update form value and display value when user inputs
   const handleChange = (e: any) => {

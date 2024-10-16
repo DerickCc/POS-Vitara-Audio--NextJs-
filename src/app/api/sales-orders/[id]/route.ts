@@ -24,24 +24,40 @@ export async function GET(request: Request, { params }: { params: { id: string }
         Customer: {
           select: { name: true },
         },
+        paymentType: true,
+        paymentMethod: true,
+        subTotal: true,
+        discount: true,
+        grandTotal: true,
+        paidAmount: true,
+        status: true,
         remarks: true,
-        // totalItem: true,
-        // grandTotal: true,
-        // status: true,
-        // createdBy: true,
-        // PurchaseOrderDetails: {
-        //   select: {
-        //     id: true,
-        //     poId: true,
-        //     productId: true,
-        //     Product: {
-        //       select: { name: true, uom: true },
-        //     },
-        //     purchasePrice: true,
-        //     quantity: true,
-        //     totalPrice: true,
-        //   },
-        // },
+        SalesOrderProductDetails: {
+          select: {
+            id: true,
+            soId: true,
+            productId: true,
+            Product: {
+              select: { name: true, uom: true },
+            },
+            sellingPrice: true,
+            quantity: true,
+            totalPrice: true,
+          },
+        },
+        SalesOrderServiceDetails: {
+          select: {
+            id: true,
+            soId: true,
+            serviceName: true,
+            sellingPrice: true,
+            quantity: true,
+            totalPrice: true,
+          },
+        },
+        CreatedBy: {
+          select: { name: true },
+        },
       },
     });
 
@@ -49,22 +65,42 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: 'Transaksi Penjualan tidak ditemukan' }, { status: 404 });
     }
 
-    // const formattedPoDetail = so.PurchaseOrderDetails.map((d) => ({
-    //   ...d,
-    //   productName: d.Product.name,
-    //   uom: d.Product.uom,
-    //   Product: undefined,
-    // }));
+    const formattedSoProductDetail = so.SalesOrderProductDetails.map((d) => ({
+      ...d,
+      productName: d.Product.name,
+      sellingPrice: Number(d.sellingPrice),
+      quantity: Number(d.quantity),
+      totalPrice: Number(d.totalPrice),
+      uom: d.Product.uom,
+      Product: undefined,
+    }));
 
-    // const formattedPo = {
-    //   ...po,
-    //   supplierName: po.Supplier.name,
-    //   details: formattedPoDetail,
-    //   Supplier: undefined,
-    //   PurchaseOrderDetails: undefined,
-    // };
+    const formattedSoServiceDetail = so.SalesOrderServiceDetails.map((d) => ({
+      ...d,
+      sellingPrice: Number(d.sellingPrice),
+      quantity: Number(d.quantity),
+      totalPrice: Number(d.totalPrice),
+    }));
 
-    return NextResponse.json({ message: 'Success', result: '' }, { status: 200 });
+    const cashier = so.CreatedBy.name;
+
+    const formattedSo = {
+      ...so,
+      subTotal: Number(so.subTotal),
+      discount: Number(so.discount),
+      grandTotal: Number(so.grandTotal),
+      paidAmount: Number(so.paidAmount),
+      customerName: so.Customer.name,
+      productDetails: formattedSoProductDetail,
+      serviceDetails: formattedSoServiceDetail,
+      cashier,
+      Customer: undefined,
+      SalesOrderProductDetails: undefined,
+      SalesOrderServiceDetails: undefined,
+      CreatedBy: undefined,
+    }
+
+    return NextResponse.json({ message: 'Success', result: formattedSo }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

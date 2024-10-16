@@ -17,6 +17,7 @@ export class SalesOrderProductDetailModel {
   sellingPrice: number;
   quantity: number;
   uom: string; // for UI
+  stock: number; // for UI
   totalPrice: number;
   profit: number;
 
@@ -30,6 +31,7 @@ export class SalesOrderProductDetailModel {
     this.sellingPrice = data.sellingPrice || 0;
     this.quantity = data.quantity || 0;
     this.uom = data.uom;
+    this.stock = data.stock || 0;
     this.totalPrice = data.totalPrice || 0;
     this.profit = data.profit || 0;
   }

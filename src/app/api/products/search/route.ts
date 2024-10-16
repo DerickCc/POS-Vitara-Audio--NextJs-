@@ -44,6 +44,7 @@ export async function GET(request: Request) {
         purchasePrice: true,
         sellingPrice: true,
         uom: true,
+        stock: true,
       },
     });
 
