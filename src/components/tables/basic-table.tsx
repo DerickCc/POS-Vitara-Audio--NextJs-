@@ -15,7 +15,6 @@ import Spinner from '@/components/spinner';
 import Card from '@/components/card';
 import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/utils/tailwind-classes';
-import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { useEffect, useState } from 'react';
 import { getCurrUser } from '@/utils/sessionlib';
 import { SessionData } from '@/models/session.model';
@@ -31,22 +30,19 @@ export default function BasicTable<T>({
   setSorting,
   isLoading,
   totalRowCount,
-  actions,
+  actionHandlers,
 }: BasicTableProps<T>) {
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
   useEffect(() => {
     const fetchCurrUser = async () => {
       setCurrUser(await getCurrUser());
-    }
-
+    };
     fetchCurrUser();
-  }, [])
-
-  const { openModal, ConfirmationModalComponent } = useConfirmationModal();
+  }, []);
 
   const table = useReactTable({
     data: data,
-    columns: columns({ actions, openModal, ConfirmationModalComponent, role: currUser.role }),
+    columns: columns({actionHandlers, role: currUser.role}),
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },

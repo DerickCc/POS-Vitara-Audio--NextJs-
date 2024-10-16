@@ -2,7 +2,7 @@ import cn from '@/utils/class-names';
 import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
 import { Button, Modal } from 'rizzui';
 
-interface ModalProps {
+interface ConfirmationModalProps {
   isOpen: boolean;
   title: string;
   description: string;
@@ -16,7 +16,7 @@ export default function ConfirmationModal({
   description,
   onClose,
   handleConfirm,
-}: ModalProps) {
+}: ConfirmationModalProps) {
   if (!isOpen) return null;
 
   return (

@@ -1,82 +1,91 @@
-import { routes } from '@/config/routes';
-import { Colors, TableColumnProps } from '@/models/global.model';
+'use client';
+import { Colors } from '@/models/global.model';
 import { createColumnHelper } from '@tanstack/react-table';
-import Link from 'next/link';
-import { LuEye, LuMoreVertical, LuCircleSlash } from 'react-icons/lu';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
 import { mapSoStatusToColor } from '@/config/global-variables';
 import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
-import { FaRegTrashAlt } from 'react-icons/fa';
-import { ActionIcon, Dropdown } from 'rizzui';
-import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import { SalesOrderModel } from '@/models/sales-order';
+import { ActionIcon, Dropdown } from 'rizzui';
+import { routes } from '@/config/routes';
+import Link from 'next/link';
+import { LuEye, LuMoreVertical, LuCircleSlash } from 'react-icons/lu';
+import { Row } from '@tanstack/react-table';
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
+import { FaRegMoneyBillAlt } from 'react-icons/fa';
+import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
+
+function SalesOrderActionColumn({
+  row,
+  actionHandlers,
+  role,
+}: {
+  row: Row<SalesOrderModel>;
+  actionHandlers: any;
+  role: string;
+}) {
+  const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+  const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
+
+  return (
+    <>
+      <Dropdown>
+        <Dropdown.Trigger>
+          <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
+            <LuMoreVertical className='size-5 text-primary' />
+          </ActionIcon>
+        </Dropdown.Trigger>
+
+        <Dropdown.Menu style={{ fontSize: 15 }}>
+          {/* detail */}
+          <Link href={routes.transaction.salesOrder.view(row.original.id)}>
+            <Dropdown.Item>
+              <LuEye className='text-blue-500 w-5 h-5 cursor-pointer mr-3' /> Detail
+            </Dropdown.Item>
+          </Link>
+
+          {/* pay */}
+          <Dropdown.Item
+            onClick={() => {
+              openPaymentModal(() => actionHandlers.payment);
+            }}
+          >
+            <FaRegMoneyBillAlt className='text-green-500 w-5 h-5 cursor-pointer mr-3' /> Bayar
+          </Dropdown.Item>
+
+          {/* cancel */}
+          {role === 'Admin' && (
+            <Dropdown.Item
+              onClick={() => {
+                openConfirmationModal({
+                  title: 'Batalkan Transaksi Penjualan',
+                  description:
+                    'Stok barang akan ditambah dengan stok dari detail transaksi penjualan ini. Apakah Anda yakin?',
+                  handleConfirm: () => actionHandlers.cancel(row.original.id),
+                });
+              }}
+            >
+              <LuCircleSlash className='text-red-500 w-5 h-5 cursor-pointer mr-3' /> Batal
+            </Dropdown.Item>
+          )}
+        </Dropdown.Menu>
+      </Dropdown>
+
+      <ConfirmationModalComponent />
+      <SalesOrderPaymentModalComponent />
+    </>
+  );
+}
 
 const columnHelper = createColumnHelper<SalesOrderModel>();
 
-export const columns = ({ actions, openModal, ConfirmationModalComponent, role }: TableColumnProps) => [
+export const columns = ({ actionHandlers, role }: { actionHandlers: any; role: string }) => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
     cell: ({ row }) => {
-      return (
-        <>
-          <Dropdown>
-            <Dropdown.Trigger>
-              <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
-                <LuMoreVertical className='size-5 text-primary' />
-              </ActionIcon>
-            </Dropdown.Trigger>
-
-            <Dropdown.Menu style={{ fontSize: 15 }}>
-              <Link href={routes.transaction.salesOrder.view(row.original.id)}>
-                <Dropdown.Item>
-                  <LuEye className='text-blue-500 w-5 h-5 cursor-pointer mr-3' /> Detail
-                </Dropdown.Item>
-              </Link>
-              {actions
-                .filter((action) => {
-                  // Filter logic:
-                  // Hide 'Selesai' and 'Hapus' if status is not 'Dalam Proses'
-
-                  // Hide 'Batal' if the role is not 'Admin' or status is not 'Selesai'
-                  if (action.label === 'Batal' && role !== 'Admin') {
-                    return false;
-                  }
-                  return true;
-                })
-                .map((action) => {
-                  return (
-                    <Dropdown.Item
-                      key={action.label}
-                      onClick={() => {
-                        openModal({
-                          title: action.title,
-                          description: action.description,
-                          handleConfirm: () => action.handler(row.original.id),
-                        });
-                      }}
-                    >
-                      {action.label === 'Selesai' && (
-                        <IoCheckmarkDoneSharp className='text-green-500 w-5 h-5 cursor-pointer mr-3' />
-                      )}
-                      {action.label === 'Hapus' && (
-                        <FaRegTrashAlt className='text-red-500 w-5 h-4 cursor-pointer mr-3' />
-                      )}
-                      {action.label === 'Batal' && (
-                        <LuCircleSlash className='text-red-500 w-5 h-5 cursor-pointer mr-3' />
-                      )}
-                      {action.label}
-                    </Dropdown.Item>
-                  );
-                })}
-            </Dropdown.Menu>
-          </Dropdown>
-
-          <ConfirmationModalComponent />
-        </>
-      );
+      return <SalesOrderActionColumn row={row} actionHandlers={actionHandlers} role={role} />;
     },
   }),
   columnHelper.accessor('code', {

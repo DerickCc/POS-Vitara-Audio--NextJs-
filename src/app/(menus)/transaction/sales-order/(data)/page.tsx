@@ -98,6 +98,17 @@ export default function SalesOrderDataPage() {
     }
   };
 
+  const handlePayment = async (id: string) => {
+    try {
+      // const message = await cancelSo(id);
+      toast.success('tes', { duration: 5000 });
+
+      fetchSalesOrders();
+    } catch (e) {
+      toast.error(e + '', { duration: 5000 });
+    }
+  };
+
   const handleCancel = async (id: string) => {
     try {
       const message = await cancelSo(id);
@@ -109,16 +120,11 @@ export default function SalesOrderDataPage() {
     }
   };
 
-  const actions: TableAction[] = [
-    {
-      label: 'Batal',
-      title: 'Batalkan Transaksi Pembelian',
-      description: 'Stok barang akan dikurangi dengan stok dari detail transaksi pembelian ini. Apakah Anda yakin?',
-      color: 'red',
-      handler: (id: string) => handleCancel(id),
-    },
-  ];
-
+  const actionHandlers: any = {
+    payment: (id: string) => handlePayment(id),
+    cancel: (id: string) => handleCancel(id),
+  };
+  
   useEffect(() => {
     fetchSalesOrders();
   }, [fetchSalesOrders]);
@@ -153,7 +159,7 @@ export default function SalesOrderDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actions={actions}
+        actionHandlers={actionHandlers}
       />
     </>
   );

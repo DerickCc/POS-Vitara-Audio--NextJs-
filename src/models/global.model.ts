@@ -1,4 +1,3 @@
-import { ModalOptions } from '@/hooks/use-confirmation-modal';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -13,16 +12,23 @@ export interface TableAction {
   handler: (id: string) => void;
 }
 
-export interface TableColumnProps {
+export interface TableColumnsProps {
   actions: TableAction[];
-  openModal: (options: ModalOptions) => void;
-  ConfirmationModalComponent: React.FC;
-  role: string;
+  // openModal: (options: ModalOptions) => void;
+  // ConfirmationModalComponent: React.FC;
+  // role: string;
 }
+
+// export interface ActionColumnProps {
+//   openModal: (options: ModalOptions) => void;
+//   ConfirmationModalComponent: React.FC;
+//   role: string;
+// }
 
 export interface BasicTableProps<T> {
   data: T[];
-  columns: ({ actions, openModal, ConfirmationModalComponent, role }: TableColumnProps) => any[];
+  // columns: ({ actions, openModal, ConfirmationModalComponent, role }: TableColumnsProps) => any[];
+  columns: ({actionHandlers, role}: { actionHandlers: any, role: string}) => any[];
   pageSize: number;
   setPageSize: (size: number) => void;
   pageIndex: number;
@@ -31,7 +37,7 @@ export interface BasicTableProps<T> {
   setSorting: OnChangeFn<SortingState>;
   isLoading: boolean;
   totalRowCount: number;
-  actions: TableAction[];
+  actionHandlers: any;
 }
 
 export interface FiltersProps<T> {

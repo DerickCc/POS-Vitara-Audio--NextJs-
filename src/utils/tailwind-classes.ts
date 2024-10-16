@@ -40,7 +40,7 @@ export const actionIconColorClass = {
   yellow: 'text-yellow-500 hover:border-yellow-600 hover:text-yellow-600',
   blue: '',
   purple: 'text-purple-500 hover:border-purple-600 hover:text-purple-600',
-  gray: 'text-gray-500 hover:border-gray-600 hover:text-gray-600',
+  gray: 'text-gray-500',
 };
 
 export const baseButtonClass = 'hover:text-gray-100 disabled:bg-gray-400 disabled:text-gray-200';

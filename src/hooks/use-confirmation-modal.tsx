@@ -1,25 +1,25 @@
 'use client';
 import { useState, useCallback } from 'react';
-import ConfirmationModal from '@/components/confirmation-modal';
+import ConfirmationModal from '@/components/modals/confirmation-modal';
 
-interface UseModalReturnType {
+interface UseConfirmationModalReturnType {
   isOpen: boolean;
-  openModal: (options: ModalOptions) => void;
+  openConfirmationModal: (options: ConfirmationModalOptions) => void;
   closeModal: () => void;
   ConfirmationModalComponent: React.FC;
 }
 
-export interface ModalOptions {
+interface ConfirmationModalOptions {
   title: string;
   description: string;
   handleConfirm: () => void;
 }
 
-export function useConfirmationModal(): UseModalReturnType {
+export function useConfirmationModal(): UseConfirmationModalReturnType {
   const [isOpen, setIsOpen] = useState(false);
-  const [modalOptions, setModalOptions] = useState<ModalOptions | null>(null);
+  const [modalOptions, setModalOptions] = useState<ConfirmationModalOptions | null>(null);
 
-  const openModal = useCallback((options: ModalOptions) => {
+  const openConfirmationModal = useCallback((options: ConfirmationModalOptions) => {
     setModalOptions(options);
     setIsOpen(true);
   }, []);
@@ -43,7 +43,7 @@ export function useConfirmationModal(): UseModalReturnType {
 
   return {
     isOpen,
-    openModal,
+    openConfirmationModal,
     closeModal,
     ConfirmationModalComponent,
   };

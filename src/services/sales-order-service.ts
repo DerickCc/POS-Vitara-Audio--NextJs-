@@ -28,6 +28,15 @@ export const browseSo = async ({
   }
 };
 
+export const getNewSoCode = async (): Promise<string> => {
+  try {
+    const response = await apiFetch(`/api/sales-orders/new-so-code`, { method: 'GET' });
+    return response.result;
+  } catch (e) {
+    throw (e + '');
+  }
+}
+
 export const getSoById = async (id: string): Promise<SalesOrderModel> => {
   try {
     const response = await apiFetch(`/api/sales-orders/${id}`, { method: 'GET' });

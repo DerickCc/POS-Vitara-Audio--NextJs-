@@ -129,7 +129,6 @@ export async function POST(request: Request) {
   }
 
   const data = validationRes.data;
-  console.log(data);
 
   try {
     const userId = session.id;
@@ -221,7 +220,7 @@ export async function POST(request: Request) {
           }
 
           const profit = new Decimal(d.sellingPrice).minus(product.costPrice).times(d.quantity);
-          console.log(profit);
+
           promises.push(
             prisma.salesOrderProductDetails.create({
               data: {
