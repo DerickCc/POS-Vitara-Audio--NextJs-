@@ -7,6 +7,7 @@ export const SalesOrderSchema = z.object({
   customerId: z.string().min(1, { message: 'Mohon memilih pelanggan' }),
   remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
   paymentType: z.string().min(1, { message: 'Mohon memilih tipe pembayaran' }),
+  // paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
   // paidAmount: z.coerce.number().min(1, { message: 'Harap mengisi jumlah yang sudah dibayar' }),
   grandTotal: z.coerce.number().min(0, { message: 'Grand Total tidak boleh bernilai negatif' }),
   productDetails: z.array(SalesOrderProductDetailSchema).refine(
@@ -47,7 +48,7 @@ export class SalesOrderModel {
   customerName: string; // for UI
   remarks: string;
   paymentType: 'DP' | 'Lunas';
-  // paymentMethod: 'Tunai' | 'Non-tunai';
+  paymentMethod: 'Tunai' | 'Non-tunai'; // for UI
   subTotal: number;
   discount: number;
   grandTotal: number;
@@ -65,7 +66,7 @@ export class SalesOrderModel {
     this.customerName = data.customerName;
     this.remarks = data.remarks;
     this.paymentType = data.paymentType || 'DP';
-    // this.paymentMethod = data.paymentMethod || 'Non-tunai';
+    this.paymentMethod = data.paymentMethod || 'Non-tunai';
     this.subTotal = data.subTotal || 0;
     this.discount = data.discount || 0;
     this.grandTotal = data.grandTotal || 0;

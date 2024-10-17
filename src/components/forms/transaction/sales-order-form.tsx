@@ -307,78 +307,378 @@ export default function SalesOrderForm({
       <ConfirmationModalComponent />
 
       <form onSubmit={handleSubmit(submitConfirmation, onError)}>
-        <div className='grid sm:grid-cols-12 gap-6'>
-          <div className='sm:col-span-7'>
-            <Card className='mb-7'>
-              <div className='flex items-center mb-5'>
-                <PiInfoBold className='size-5 mr-2' />
-                <h5 className='font-medium'>Info Penjualan</h5>
-              </div>
-              {isLoading ? (
-                <Spinner />
-              ) : (
-                <>
-                  <div className='grid sm:grid-cols-2 gap-6'>
-                    <Input
-                      label='Kasir'
-                      placeholder='Kasir'
-                      value={currUser.name}
-                      inputClassName={readOnlyClass}
-                      readOnly
-                    />
-                    <Input
-                      label='Tanggal Penjualan'
-                      placeholder='Tanggal Penjualan'
-                      inputClassName={readOnlyClass}
-                      readOnly
-                      {...register('salesDate')}
-                    />
-                    <div className='col-span-2'>
-                      <Controller
-                        control={control}
-                        name='customerId'
-                        render={({ field: { value, onChange }, fieldState: { error } }) => {
-                          const customerName = watch('customerName');
-                          return (
-                            <Select<SearchCustomerModel>
-                              value={value}
-                              onChange={(option: SearchCustomerModel) => {
-                                onChange(option.id);
-                                handleCustomerChange(option.name);
-                              }}
-                              label={<span className='required'>Pelanggan</span>}
-                              labelClassName='text-gray-600'
-                              placeholder='Pilih Pelanggan'
-                              options={customerList}
-                              displayValue={() => customerName}
-                              getOptionValue={(option: SearchCustomerModel) => option}
-                              searchable={true}
-                              searchByKey='name'
-                              onSearchChange={(name: string) => handleCustomerSearchChange(name)}
-                              disableDefaultFilter={true}
-                              error={error?.message}
-                              disabled={isReadOnly}
-                            />
-                          );
-                        }}
-                      />
-                    </div>
-                    <Textarea
-                      label='Keterangan'
-                      placeholder='Keterangan'
-                      rows={9}
-                      maxLength={500}
-                      className='sm:col-span-2'
-                      labelClassName='text-gray-600'
-                      disabled={isReadOnly}
-                      {...register('remarks')}
-                    />
-                  </div>
-                </>
-              )}
-            </Card>
+        <Card className='mb-7'>
+          <div className='flex items-center mb-5'>
+            <PiInfoBold className='size-5 mr-2' />
+            <h5 className='font-medium'>Info Penjualan</h5>
           </div>
-          <div className='sm:col-span-5'>
+          {isLoading ? (
+            <Spinner />
+          ) : (
+            <>
+              <div className='grid sm:grid-cols-3 gap-6'>
+                <Input
+                  label='Kasir'
+                  placeholder='Kasir'
+                  value={currUser.name}
+                  inputClassName={readOnlyClass}
+                  readOnly
+                />
+                <Input
+                  label='Tanggal Penjualan'
+                  placeholder='Tanggal Penjualan'
+                  inputClassName={readOnlyClass}
+                  readOnly
+                  {...register('salesDate')}
+                />
+                <Controller
+                  control={control}
+                  name='customerId'
+                  render={({ field: { value, onChange }, fieldState: { error } }) => {
+                    const customerName = watch('customerName');
+                    return (
+                      <Select<SearchCustomerModel>
+                        value={value}
+                        onChange={(option: SearchCustomerModel) => {
+                          onChange(option.id);
+                          handleCustomerChange(option.name);
+                        }}
+                        label={<span className='required'>Pelanggan</span>}
+                        labelClassName='text-gray-600'
+                        placeholder='Pilih Pelanggan'
+                        options={customerList}
+                        displayValue={() => customerName}
+                        getOptionValue={(option: SearchCustomerModel) => option}
+                        searchable={true}
+                        searchByKey='name'
+                        onSearchChange={(name: string) => handleCustomerSearchChange(name)}
+                        disableDefaultFilter={true}
+                        error={error?.message}
+                        disabled={isReadOnly}
+                      />
+                    );
+                  }}
+                />
+                <Textarea
+                  label='Keterangan'
+                  placeholder='Keterangan'
+                  maxLength={500}
+                  className='sm:col-span-3'
+                  labelClassName='text-gray-600'
+                  disabled={isReadOnly}
+                  {...register('remarks')}
+                />
+              </div>
+            </>
+          )}
+        </Card>
+
+        <div className='grid sm:grid-cols-11 gap-6'>
+          <div className='sm:col-span-8'>
+            {/* product details */}
+            {!(isReadOnly && productDetailFields.length === 0) && (
+              <Card className='px-0 mb-7'>
+                <div className='flex items-center mb-5 px-7'>
+                  <IoCartOutline className='size-6 mr-2' />
+                  <h5 className='font-medium'>Detail Barang Penjualan</h5>
+                </div>
+
+                {isLoading ? (
+                  <Spinner />
+                ) : (
+                  <>
+                    <div className='custom-scrollbar w-full max-w-full overflow-x-auto mb-7'>
+                      <table className={tableClass}>
+                        <thead>
+                          <tr>
+                            <th className='w-[70px]' style={{ textAlign: 'center' }}>
+                              Aksi
+                            </th>
+                            <th>Barang</th>
+                            <th className='w-[220px]'>Harga Jual</th>
+                            <th className='w-[120px]'>Qty</th>
+                            <th className='w-[150px]'>Satuan</th>
+                            <th className='w-[230px]'>Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {productDetailFields.map((field, idx) => (
+                            <tr key={field.id}>
+                              <td className='table-cell text-center align-top'>
+                                <ActionIcon
+                                  size='sm'
+                                  variant='outline'
+                                  aria-label='delete'
+                                  className={cn(
+                                    isReadOnly
+                                      ? actionIconColorClass.gray
+                                      : `${actionIconColorClass.red} cursor-pointer`,
+                                    'mt-1'
+                                  )}
+                                  disabled={isReadOnly}
+                                  onClick={() => removeProductDetail(idx)}
+                                >
+                                  <FaRegTrashAlt className='h-4 w-4' />
+                                </ActionIcon>
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`productDetails.${idx}.productId`}
+                                  render={({ field: { value, onChange }, fieldState: { error } }) => {
+                                    const productName = watch(`productDetails.${idx}.productName`);
+                                    return (
+                                      <Select<SearchProductModel>
+                                        value={value}
+                                        onChange={(option: SearchProductModel) => {
+                                          onChange(option.id);
+                                          handleProductChange(idx, option);
+                                        }}
+                                        placeholder='Pilih Barang'
+                                        options={productList}
+                                        displayValue={() => productName}
+                                        getOptionValue={(option: SearchProductModel) => option}
+                                        searchable={true}
+                                        searchByKey='name'
+                                        onSearchChange={(name: string) => handleProductSearchChange(name)}
+                                        disableDefaultFilter={true}
+                                        error={error?.message}
+                                        disabled={isReadOnly}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`productDetails.${idx}.sellingPrice`}
+                                  render={({ field: { value }, fieldState: { error } }) => {
+                                    const productId = watch(`productDetails.${idx}.productId`);
+                                    return (
+                                      <RupiahFormInput
+                                        setValue={setValue}
+                                        onChange={() => updateProductTotalPrice(idx)}
+                                        fieldName={`productDetails.${idx}.sellingPrice`}
+                                        defaultValue={value}
+                                        error={error?.message}
+                                        readOnly={isReadOnly || !productId}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`productDetails.${idx}.quantity`}
+                                  render={({ field: { value }, fieldState: { error } }) => {
+                                    const stock = watch(`productDetails.${idx}.stock`);
+                                    const productId = watch(`productDetails.${idx}.productId`);
+                                    return (
+                                      <DecimalFormInput
+                                        setValue={setValue}
+                                        limit={stock}
+                                        onChange={(qty: number) => handleProductQtyChange(idx, qty)}
+                                        fieldName={`productDetails.${idx}.quantity`}
+                                        defaultValue={value}
+                                        error={error?.message}
+                                        readOnly={isReadOnly || !productId}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Input
+                                  placeholder='Satuan'
+                                  inputClassName='bg-gray-100/70'
+                                  readOnly
+                                  {...register(`productDetails.${idx}.uom`)}
+                                />
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`productDetails.${idx}.totalPrice`}
+                                  render={({ field: { value } }) => (
+                                    <RupiahFormInput
+                                      setValue={setValue}
+                                      fieldName={`productDetails.${idx}.totalPrice`}
+                                      defaultValue={value}
+                                      readOnly={true}
+                                    />
+                                  )}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td className='table-cell text-center'>
+                              {!isReadOnly && (
+                                <ActionIcon
+                                  size='sm'
+                                  aria-label='add'
+                                  className='cursor-pointer'
+                                  onClick={() => appendProductDetail(new SalesOrderProductDetailModel())}
+                                >
+                                  <PiPlusBold className='h-4 w-4' />
+                                </ActionIcon>
+                              )}
+                            </td>
+                            <td className='table-cell text-right' colSpan={4}>
+                              <span className='font-semibold'>TOTAL</span>
+                            </td>
+                            <td className='table-cell'>
+                              <RupiahInput onChange={() => {}} defaultValue={totalProductSoldAmount} readOnly={true} />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+              </Card>
+            )}
+
+            {/* service details */}
+            {!(isReadOnly && serviceDetailFields.length === 0) && (
+              <Card className='px-0 mb-7'>
+                <div className='flex items-center mb-5 px-7'>
+                  <IoCartOutline className='size-6 mr-2' />
+                  <h5 className='font-medium'>Detail Jasa Penjualan</h5>
+                </div>
+
+                {isLoading ? (
+                  <Spinner />
+                ) : (
+                  <>
+                    <div className='custom-scrollbar w-full max-w-full overflow-x-auto mb-7'>
+                      <table className={tableClass}>
+                        <thead>
+                          <tr>
+                            <th className='w-[70px]' style={{ textAlign: 'center' }}>
+                              Aksi
+                            </th>
+                            <th>Jasa</th>
+                            <th className='w-[220px]'>Harga Jual</th>
+                            <th className='w-[120px]'>Qty</th>
+                            <th className='w-[230px]'>Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {serviceDetailFields.map((field, idx) => (
+                            <tr key={field.id}>
+                              <td className='table-cell text-center align-top'>
+                                <ActionIcon
+                                  size='sm'
+                                  variant='outline'
+                                  aria-label='delete'
+                                  className={cn(
+                                    isReadOnly
+                                      ? actionIconColorClass.gray
+                                      : `${actionIconColorClass.red} cursor-pointer`,
+                                    'mt-1'
+                                  )}
+                                  disabled={isReadOnly}
+                                  onClick={() => removeServiceDetail(idx)}
+                                >
+                                  <FaRegTrashAlt className='h-4 w-4' />
+                                </ActionIcon>
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`serviceDetails.${idx}.serviceName`}
+                                  render={({ field: { value, onChange }, fieldState: { error } }) => (
+                                    <Input
+                                      placeholder='Nama Jasa'
+                                      value={value}
+                                      onChange={onChange}
+                                      error={error?.message}
+                                      inputClassName={cn(isReadOnly ? readOnlyClass : '')}
+                                      readOnly={isReadOnly}
+                                    />
+                                  )}
+                                />
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`serviceDetails.${idx}.sellingPrice`}
+                                  render={({ field: { value }, fieldState: { error } }) => (
+                                    <RupiahFormInput
+                                      setValue={setValue}
+                                      onChange={() => updateServiceTotalPrice(idx)}
+                                      fieldName={`serviceDetails.${idx}.sellingPrice`}
+                                      defaultValue={value}
+                                      error={error?.message}
+                                      readOnly={isReadOnly}
+                                    />
+                                  )}
+                                />
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`serviceDetails.${idx}.quantity`}
+                                  render={({ field: { value }, fieldState: { error } }) => (
+                                    <DecimalFormInput
+                                      setValue={setValue}
+                                      onChange={() => updateServiceTotalPrice(idx)}
+                                      fieldName={`serviceDetails.${idx}.quantity`}
+                                      defaultValue={value}
+                                      error={error?.message}
+                                      readOnly={isReadOnly}
+                                    />
+                                  )}
+                                />
+                              </td>
+                              <td className='table-cell align-top'>
+                                <Controller
+                                  control={control}
+                                  name={`serviceDetails.${idx}.totalPrice`}
+                                  render={({ field: { value } }) => (
+                                    <RupiahFormInput
+                                      setValue={setValue}
+                                      fieldName={`serviceDetails.${idx}.totalPrice`}
+                                      defaultValue={value}
+                                      readOnly={true}
+                                    />
+                                  )}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td className='table-cell text-center'>
+                              {!isReadOnly && (
+                                <ActionIcon
+                                  size='sm'
+                                  aria-label='add'
+                                  className='cursor-pointer'
+                                  onClick={() => appendServiceDetail(new SalesOrderServiceDetailModel())}
+                                >
+                                  <PiPlusBold className='h-4 w-4' />
+                                </ActionIcon>
+                              )}
+                            </td>
+                            <td className='table-cell text-right' colSpan={3}>
+                              <span className='font-semibold'>TOTAL</span>
+                            </td>
+                            <td className='table-cell'>
+                              <RupiahInput onChange={() => {}} defaultValue={totalServiceSoldAmount} readOnly={true} />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+              </Card>
+            )}
+          </div>
+          <div className='sm:col-span-3'>
             <Card className='mb-7'>
               {isLoading ? (
                 <Spinner />
@@ -443,7 +743,8 @@ export default function SalesOrderForm({
                         </RadioGroup>
                       )}
                     />
-                    {/* <Controller
+                    {}
+                    <Controller
                       control={control}
                       name='paymentMethod'
                       render={({ field: { value, onChange }, fieldState: { error } }) => (
@@ -475,7 +776,7 @@ export default function SalesOrderForm({
                           </div>
                         </RadioGroup>
                       )}
-                    /> */}
+                    />
                   </div>
                   <Controller
                     control={control}
@@ -526,10 +827,10 @@ export default function SalesOrderForm({
                   <Controller
                     control={control}
                     name='paidAmount'
-                    render={({ field: { value }, fieldState: { error } }) => {
+                    render={({ field: { value } }) => {
                       return (
                         <RupiahFormInput
-                          label={<span className='required'>Jumlah yang Sudah Dibayar</span>}
+                          label='Jumlah yang Sudah Dibayar'
                           setValue={setValue}
                           fieldName={`paidAmount`}
                           defaultValue={value}
@@ -543,305 +844,6 @@ export default function SalesOrderForm({
             </Card>
           </div>
         </div>
-
-        {/* product details */}
-        {!(isReadOnly && productDetailFields.length === 0) && (
-          <Card className='px-0 mb-7'>
-            <div className='flex items-center mb-5 px-7'>
-              <IoCartOutline className='size-6 mr-2' />
-              <h5 className='font-medium'>Detail Barang Penjualan</h5>
-            </div>
-
-            {isLoading ? (
-              <Spinner />
-            ) : (
-              <>
-                <div className='custom-scrollbar w-full max-w-full overflow-x-auto mb-7'>
-                  <table className={tableClass}>
-                    <thead>
-                      <tr>
-                        <th className='w-[70px]' style={{ textAlign: 'center' }}>
-                          Aksi
-                        </th>
-                        <th>Barang</th>
-                        <th className='w-[260px]'>Harga Jual</th>
-                        <th className='w-[100px]'>Qty</th>
-                        <th className='w-[150px]'>Satuan</th>
-                        <th className='w-[260px]'>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {productDetailFields.map((field, idx) => (
-                        <tr key={field.id}>
-                          <td className='table-cell text-center align-top'>
-                            <ActionIcon
-                              size='sm'
-                              variant='outline'
-                              aria-label='delete'
-                              className={cn(
-                                isReadOnly ? actionIconColorClass.gray : `${actionIconColorClass.red} cursor-pointer`,
-                                'mt-1'
-                              )}
-                              disabled={isReadOnly}
-                              onClick={() => removeProductDetail(idx)}
-                            >
-                              <FaRegTrashAlt className='h-4 w-4' />
-                            </ActionIcon>
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`productDetails.${idx}.productId`}
-                              render={({ field: { value, onChange }, fieldState: { error } }) => {
-                                const productName = watch(`productDetails.${idx}.productName`);
-                                return (
-                                  <Select<SearchProductModel>
-                                    value={value}
-                                    onChange={(option: SearchProductModel) => {
-                                      onChange(option.id);
-                                      handleProductChange(idx, option);
-                                    }}
-                                    placeholder='Pilih Barang'
-                                    options={productList}
-                                    displayValue={() => productName}
-                                    getOptionValue={(option: SearchProductModel) => option}
-                                    searchable={true}
-                                    searchByKey='name'
-                                    onSearchChange={(name: string) => handleProductSearchChange(name)}
-                                    disableDefaultFilter={true}
-                                    error={error?.message}
-                                    disabled={isReadOnly}
-                                  />
-                                );
-                              }}
-                            />
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`productDetails.${idx}.sellingPrice`}
-                              render={({ field: { value }, fieldState: { error } }) => {
-                                const productId = watch(`productDetails.${idx}.productId`);
-                                return (
-                                  <RupiahFormInput
-                                    setValue={setValue}
-                                    onChange={() => updateProductTotalPrice(idx)}
-                                    fieldName={`productDetails.${idx}.sellingPrice`}
-                                    defaultValue={value}
-                                    error={error?.message}
-                                    readOnly={isReadOnly || !productId}
-                                  />
-                                );
-                              }}
-                            />
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`productDetails.${idx}.quantity`}
-                              render={({ field: { value }, fieldState: { error } }) => {
-                                const stock = watch(`productDetails.${idx}.stock`);
-                                const productId = watch(`productDetails.${idx}.productId`);
-                                return (
-                                  <DecimalFormInput
-                                    setValue={setValue}
-                                    limit={stock}
-                                    onChange={(qty: number) => handleProductQtyChange(idx, qty)}
-                                    fieldName={`productDetails.${idx}.quantity`}
-                                    defaultValue={value}
-                                    error={error?.message}
-                                    readOnly={isReadOnly || !productId}
-                                  />
-                                );
-                              }}
-                            />
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Input
-                              placeholder='Satuan'
-                              inputClassName='bg-gray-100/70'
-                              readOnly
-                              {...register(`productDetails.${idx}.uom`)}
-                            />
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`productDetails.${idx}.totalPrice`}
-                              render={({ field: { value } }) => (
-                                <RupiahFormInput
-                                  setValue={setValue}
-                                  fieldName={`productDetails.${idx}.totalPrice`}
-                                  defaultValue={value}
-                                  readOnly={true}
-                                />
-                              )}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                      <tr>
-                        <td className='table-cell text-center'>
-                          {!isReadOnly && (
-                            <ActionIcon
-                              size='sm'
-                              aria-label='add'
-                              className='cursor-pointer'
-                              onClick={() => appendProductDetail(new SalesOrderProductDetailModel())}
-                            >
-                              <PiPlusBold className='h-4 w-4' />
-                            </ActionIcon>
-                          )}
-                        </td>
-                        <td className='table-cell text-right' colSpan={4}>
-                          <span className='font-semibold'>TOTAL</span>
-                        </td>
-                        <td className='table-cell'>
-                          <RupiahInput onChange={() => {}} defaultValue={totalProductSoldAmount} readOnly={true} />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </Card>
-        )}
-
-        {/* service details */}
-        {!(isReadOnly && serviceDetailFields.length === 0) && (
-          <Card className='px-0 mb-7'>
-            <div className='flex items-center mb-5 px-7'>
-              <IoCartOutline className='size-6 mr-2' />
-              <h5 className='font-medium'>Detail Jasa Penjualan</h5>
-            </div>
-
-            {isLoading ? (
-              <Spinner />
-            ) : (
-              <>
-                <div className='custom-scrollbar w-full max-w-full overflow-x-auto mb-7'>
-                  <table className={tableClass}>
-                    <thead>
-                      <tr>
-                        <th className='w-[70px]' style={{ textAlign: 'center' }}>
-                          Aksi
-                        </th>
-                        <th>Jasa</th>
-                        <th className='w-[260px]'>Harga Jual</th>
-                        <th className='w-[100px]'>Qty</th>
-                        <th className='w-[260px]'>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {serviceDetailFields.map((field, idx) => (
-                        <tr key={field.id}>
-                          <td className='table-cell text-center align-top'>
-                            <ActionIcon
-                              size='sm'
-                              variant='outline'
-                              aria-label='delete'
-                              className={cn(
-                                isReadOnly ? actionIconColorClass.gray : `${actionIconColorClass.red} cursor-pointer`,
-                                'mt-1'
-                              )}
-                              disabled={isReadOnly}
-                              onClick={() => removeServiceDetail(idx)}
-                            >
-                              <FaRegTrashAlt className='h-4 w-4' />
-                            </ActionIcon>
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`serviceDetails.${idx}.serviceName`}
-                              render={({ field: { value, onChange }, fieldState: { error } }) => (
-                                <Input
-                                  placeholder='Nama Jasa'
-                                  value={value}
-                                  onChange={onChange}
-                                  error={error?.message}
-                                  inputClassName={cn(isReadOnly ? readOnlyClass : '')}
-                                  readOnly={isReadOnly}
-                                />
-                              )}
-                            />
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`serviceDetails.${idx}.sellingPrice`}
-                              render={({ field: { value }, fieldState: { error } }) => (
-                                <RupiahFormInput
-                                  setValue={setValue}
-                                  onChange={() => updateServiceTotalPrice(idx)}
-                                  fieldName={`serviceDetails.${idx}.sellingPrice`}
-                                  defaultValue={value}
-                                  error={error?.message}
-                                  readOnly={isReadOnly}
-                                />
-                              )}
-                            />
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`serviceDetails.${idx}.quantity`}
-                              render={({ field: { value }, fieldState: { error } }) => (
-                                <DecimalFormInput
-                                  setValue={setValue}
-                                  onChange={() => updateServiceTotalPrice(idx)}
-                                  fieldName={`serviceDetails.${idx}.quantity`}
-                                  defaultValue={value}
-                                  error={error?.message}
-                                  readOnly={isReadOnly}
-                                />
-                              )}
-                            />
-                          </td>
-                          <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`serviceDetails.${idx}.totalPrice`}
-                              render={({ field: { value } }) => (
-                                <RupiahFormInput
-                                  setValue={setValue}
-                                  fieldName={`serviceDetails.${idx}.totalPrice`}
-                                  defaultValue={value}
-                                  readOnly={true}
-                                />
-                              )}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                      <tr>
-                        <td className='table-cell text-center'>
-                          {!isReadOnly && (
-                            <ActionIcon
-                              size='sm'
-                              aria-label='add'
-                              className='cursor-pointer'
-                              onClick={() => appendServiceDetail(new SalesOrderServiceDetailModel())}
-                            >
-                              <PiPlusBold className='h-4 w-4' />
-                            </ActionIcon>
-                          )}
-                        </td>
-                        <td className='table-cell text-right' colSpan={3}>
-                          <span className='font-semibold'>TOTAL</span>
-                        </td>
-                        <td className='table-cell'>
-                          <RupiahInput onChange={() => {}} defaultValue={totalServiceSoldAmount} readOnly={true} />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </Card>
-        )}
 
         <div className='flex justify-between'>
           <Link href={routes.transaction.salesOrder.data}>
