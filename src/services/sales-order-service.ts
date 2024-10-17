@@ -81,16 +81,16 @@ export const updateSo = async (id: string, payload: SalesOrderModel): Promise<st
   }
 };
 
-// export const finishSo = async (id: string): Promise<string> => {
-//   try {
-//     const response = await apiFetch(`/api/sales-orders/${id}/finish`, {
-//       method: 'PUT'
-//     });
-//     return response.message;
-//   } catch (e) {
-//     throw (e + '');
-//   }
-// };
+export const updateSoPayment = async (id: string): Promise<string> => {
+  try {
+    const response = await apiFetch(`/api/sales-orders/${id}/payment`, {
+      method: 'PUT'
+    });
+    return response.message;
+  } catch (e) {
+    throw (e + '');
+  }
+};
 
 export const cancelSo = async (id: string): Promise<string> => {
   try {

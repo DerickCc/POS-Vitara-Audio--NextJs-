@@ -83,20 +83,29 @@ export async function GET(request: Request) {
         Customer: {
           select: { name: true },
         },
+        PaymentHistories: {
+          select: { amount: true },
+        },
         CreatedBy: {
           select: { name: true },
-        }
+        },
       },
     });
     const recordsTotal = await db.salesOrders.count({ where });
 
-    const mappedSalesOrders = salesOrders.map((po) => ({
-      ...po,
-      customerName: po.Customer.name,
-      cashier: po.CreatedBy.name,
-      Customer: undefined,
-      CreatedBy: undefined,
-    }));
+    const mappedSalesOrders = salesOrders.map((so) => {
+      const paidAmount = so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+
+      return {
+        ...so,
+        customerName: so.Customer.name,
+        paidAmount,
+        cashier: so.CreatedBy.name,
+        Customer: undefined,
+        PaymentHistories: undefined,
+        CreatedBy: undefined,
+      }
+    });
 
     return NextResponse.json({ message: 'Success', result: mappedSalesOrders, recordsTotal }, { status: 200 });
   } catch (e) {
@@ -168,7 +177,9 @@ export async function POST(request: Request) {
           // check if price is getting discount or marked up
           const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
 
+          // if marked up, calculate subtotal with the marked up selling price
           if (priceAdjustment?.greaterThan(0)) subTotal = subTotal.plus(d.sellingPrice * d.quantity);
+          // if discount, calculate subtotal with the ori selling price
           else subTotal = subTotal.plus(product.sellingPrice.times(d.quantity));
 
           // calculate discount
@@ -187,8 +198,10 @@ export async function POST(request: Request) {
       }
 
       const grandTotal = subTotal.minus(discount);
-      // const status = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
 
+      const status = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
+
+      // create so
       const so = await prisma.salesOrders.create({
         data: {
           code: newCode,
@@ -201,7 +214,7 @@ export async function POST(request: Request) {
           discount,
           grandTotal,
           remarks: data.remarks,
-          status: 'Belum Lunas',
+          status,
           CreatedBy: {
             connect: { id: userId },
           },
@@ -219,6 +232,7 @@ export async function POST(request: Request) {
 
           const profit = new Decimal(d.sellingPrice).minus(product.costPrice).times(d.quantity);
 
+          // create soProductDetail
           promises.push(
             prisma.salesOrderProductDetails.create({
               data: {
@@ -243,6 +257,7 @@ export async function POST(request: Request) {
 
           const updatedStock = product.stock.minus(d.quantity); // stock after substracted with sales product qty
 
+          // update product stock
           promises.push(
             prisma.products.update({
               where: { id: d.productId },
@@ -259,6 +274,7 @@ export async function POST(request: Request) {
 
       await Promise.all(promises);
 
+      // create soServiceDetail
       if (data.serviceDetails.length > 0) {
         await prisma.salesOrderServiceDetails.createMany({
           data: data.serviceDetails.map((d) => ({
@@ -271,6 +287,20 @@ export async function POST(request: Request) {
           })),
         });
       }
+
+      // create payment history
+      await prisma.paymentHistories.create({
+        data: {
+          SalesOrder: {
+            connect: { id: so.id },
+          },
+          paymentMethod: data.paymentMethod,
+          amount: data.paidAmount,
+          CreatedBy: {
+            connect: { id: userId },
+          },
+        }
+      })
     });
 
     return NextResponse.json({ message: 'Data Transaksi Penjualan berhasil disimpan' }, { status: 201 });
