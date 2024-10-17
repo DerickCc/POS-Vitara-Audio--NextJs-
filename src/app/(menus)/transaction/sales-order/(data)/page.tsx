@@ -1,7 +1,6 @@
 'use client';
 
 import { routes } from '@/config/routes';
-import { TableAction } from '@/models/global.model';
 import { SalesOrderModel } from '@/models/sales-order';
 import { browseSo, cancelSo } from '@/services/sales-order-service';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';

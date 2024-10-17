@@ -1,6 +1,6 @@
-import { SalesOrderSchema } from '@/models/sales-order';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // GetSalesOrderById
@@ -25,11 +25,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
           select: { name: true },
         },
         paymentType: true,
-        paymentMethod: true,
+        PaymentHistories: {
+          select: { amount: true },
+        },
         subTotal: true,
         discount: true,
         grandTotal: true,
-        paidAmount: true,
         status: true,
         remarks: true,
         SalesOrderProductDetails: {
@@ -84,12 +85,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const cashier = so.CreatedBy.name;
 
+    const paidAmount = so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+
     const formattedSo = {
       ...so,
       subTotal: Number(so.subTotal),
       discount: Number(so.discount),
       grandTotal: Number(so.grandTotal),
-      paidAmount: Number(so.paidAmount),
+      paidAmount,
       customerName: so.Customer.name,
       productDetails: formattedSoProductDetail,
       serviceDetails: formattedSoServiceDetail,

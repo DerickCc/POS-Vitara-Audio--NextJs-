@@ -7,7 +7,7 @@ import { ProductModel, ProductSchema } from '@/models/product.model';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { FaSave } from 'react-icons/fa';
 import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button, Input, Loader, Textarea } from 'rizzui';
@@ -24,6 +24,7 @@ export default function ProductForm({
   onSubmit,
 }: BasicFormProps<ProductModel>) {
   const {
+    control,
     register,
     setValue,
     handleSubmit,
@@ -130,20 +131,32 @@ export default function ProductForm({
               error={errors.name?.message}
               {...register('name')}
             />
-            <DecimalFormInput
-              setValue={setValue}
-              label='Stok'
-              fieldName='stock'
-              defaultValue={defaultValues.stock}
-              error={errors.stock?.message}
-              readOnly={true}
+            <Controller
+              control={control}
+              name='stock'
+              render={({ field: { value }, fieldState: { error } }) => (
+                <DecimalFormInput
+                  setValue={setValue}
+                  label='Stok'
+                  fieldName='stock'
+                  defaultValue={value}
+                  error={error?.message}
+                  readOnly={true}
+                />
+              )}
             />
-            <DecimalFormInput
-              setValue={setValue}
-              label='Ambang Batas Restok'
-              fieldName='restockThreshold'
-              defaultValue={defaultValues.restockThreshold}
-              error={errors.restockThreshold?.message}
+            <Controller
+              control={control}
+              name='restockThreshold'
+              render={({ field: { value }, fieldState: { error } }) => (
+                <DecimalFormInput
+                  setValue={setValue}
+                  label='Ambang Batas Restok'
+                  fieldName='restockThreshold'
+                  defaultValue={value}
+                  error={error?.message}
+                />
+              )}
             />
             <Input
               label={<span className='required'>Satuan</span>}
@@ -152,29 +165,47 @@ export default function ProductForm({
               {...register('uom')}
             />
             <div className='sm:col-span-3 grid sm:grid-cols-2 gap-6'>
-              <RupiahFormInput
-                setValue={setValue}
-                label='Harga Beli'
-                fieldName='purchasePrice'
-                defaultValue={defaultValues.purchasePrice}
-                error={errors.purchasePrice?.message}
+              <Controller
+                control={control}
+                name='purchasePrice'
+                render={({ field: { value }, fieldState: { error } }) => (
+                  <RupiahFormInput
+                    setValue={setValue}
+                    label='Harga Beli'
+                    fieldName='purchasePrice'
+                    defaultValue={value}
+                    error={error?.message}
+                  />
+                )}
               />
-              <RupiahFormInput
-                setValue={setValue}
-                label='Harga Jual'
-                fieldName='sellingPrice'
-                defaultValue={defaultValues.sellingPrice}
-                error={errors.sellingPrice?.message}
+              <Controller
+                control={control}
+                name='sellingPrice'
+                render={({ field: { value }, fieldState: { error } }) => (
+                  <RupiahFormInput
+                    setValue={setValue}
+                    label='Harga Jual'
+                    fieldName='sellingPrice'
+                    defaultValue={value}
+                    error={error?.message}
+                  />
+                )}
               />
             </div>
             <div className='sm:col-span-3 grid sm:grid-cols-2  gap-6'>
-              <RupiahFormInput
-                setValue={setValue}
-                label='Harga Modal'
-                fieldName='costPrice'
-                defaultValue={defaultValues.costPrice}
-                readOnly={true}
-                error={errors.costPrice?.message}
+              <Controller
+                control={control}
+                name='costPrice'
+                render={({ field: { value }, fieldState: { error } }) => (
+                  <RupiahFormInput
+                    setValue={setValue}
+                    label='Harga Modal'
+                    fieldName='costPrice'
+                    defaultValue={value}
+                    readOnly={true}
+                    error={error?.message}
+                  />
+                )}
               />
               <Input
                 label='Harga Modal (Kode)'

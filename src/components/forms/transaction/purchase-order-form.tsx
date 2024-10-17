@@ -71,9 +71,12 @@ export default function PurchaseOrderForm({
     name: 'details',
   });
 
-  // supplier
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
+  const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
+  //supplier
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSupplierSearchChange = useCallback(
     debounce(async (name: string) => {
       if (!name || name.trim() === '') return;
@@ -93,9 +96,6 @@ export default function PurchaseOrderForm({
   // ------------------------
 
   // transaction detail
-  const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
-  const [productList, setProductList] = useState<SearchProductModel[]>([]);
-
   const filterSelectedProductFromList = (list: SearchProductModel[], idx: number = -1) => {
     const selectedProductIds = getValues().details.map((v) => v.productId);
     const filteredProductList = list.filter((item) => !selectedProductIds.includes(item.id));
@@ -123,6 +123,7 @@ export default function PurchaseOrderForm({
     setSelectedProducts(updatedSelectedProducts);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProductSearchChange = useCallback(
     debounce(async (name: string) => {
       // only search if name is not empty
@@ -154,8 +155,14 @@ export default function PurchaseOrderForm({
   };
   // ------------------------
 
+  const onError = (errors: any) => {
+    if (errors?.details?.refinement) {
+      toast.error(errors.details.refinement.message);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit, onError)}>
       <Card className='mb-7'>
         <div className='flex items-center mb-5'>
           <PiInfoBold className='size-5 mr-2' />
@@ -235,7 +242,9 @@ export default function PurchaseOrderForm({
               <table className={tableClass}>
                 <thead>
                   <tr>
-                    <th className='w-[70px]' style={{textAlign: 'center'}}>Aksi</th>
+                    <th className='w-[70px]' style={{ textAlign: 'center' }}>
+                      Aksi
+                    </th>
                     <th className='w-[300px]'>Barang</th>
                     <th className=''>Harga Beli</th>
                     <th className='w-[100px]'>Qty</th>

@@ -14,6 +14,30 @@ async function main() {
       role: 'Admin',
     },
   });
+
+  const customer = await prisma.customers.create({
+    data: {
+      code: 'CUS00000001',
+      name: 'Agusto - Innova Zenix',
+      licensePlate: 'BK 888 AA',
+      phoneNo: '082112121212',
+      address: 'Jalan Sumatra No 88, Medan',
+      CreatedBy: { connect: { id: user.id }}
+    },
+  });
+
+  const supplier = await prisma.suppliers.create({
+    data: {
+      code: 'SUP00000001',
+      name: 'PT. ABC Indonesia',
+      pic: 'John Doe',
+      phoneNo: '081234567890',
+      address: 'Jakarta, Indonesia',
+      remarks: 'Supplier of best audio products',
+      receivablesLimit: 10000000,
+      CreatedBy: { connect: { id: user.id }}
+    },
+  });
 }
 
 main()

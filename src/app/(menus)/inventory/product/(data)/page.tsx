@@ -109,15 +109,9 @@ export default function ProductDataPage() {
     }
   };
 
-  const actions: TableAction[] = [
-    {
-      label: 'Hapus',
-      title: 'Hapus Barang',
-      description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
-      color: 'red',
-      handler: (id: string) => handleDelete(id),
-    },
-  ];
+  const actionHandlers: any = {
+    delete: (id: string) => handleDelete(id),
+  };
 
   useEffect(() => {
     browseProduct();
@@ -126,10 +120,10 @@ export default function ProductDataPage() {
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
-        <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.inventory.product.add} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
-              <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
+        <div className='flex items-center gap-3 mt-4 sm:mt-0'>
+          <Link href={routes.inventory.product.add} className='w-full sm:w-auto'>
+            <Button className='w-full sm:w-auto'>
+              <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>
           </Link>
@@ -153,7 +147,7 @@ export default function ProductDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actions={actions}
+        actionHandlers={actionHandlers}
       />
     </>
   );

@@ -187,7 +187,7 @@ export async function POST(request: Request) {
       }
 
       const grandTotal = subTotal.minus(discount);
-      const status = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
+      // const status = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
 
       const so = await prisma.salesOrders.create({
         data: {
@@ -197,13 +197,11 @@ export async function POST(request: Request) {
             connect: { id: data.customerId },
           },
           paymentType: data.paymentType,
-          paymentMethod: data.paymentMethod,
           subTotal,
           discount,
           grandTotal,
-          paidAmount: data.paidAmount,
           remarks: data.remarks,
-          status,
+          status: 'Belum Lunas',
           CreatedBy: {
             connect: { id: userId },
           },

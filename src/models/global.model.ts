@@ -13,10 +13,8 @@ export interface TableAction {
 }
 
 export interface TableColumnsProps {
-  actions: TableAction[];
-  // openModal: (options: ModalOptions) => void;
-  // ConfirmationModalComponent: React.FC;
-  // role: string;
+  actionHandlers: any;
+  role: string;
 }
 
 // export interface ActionColumnProps {
@@ -28,7 +26,7 @@ export interface TableColumnsProps {
 export interface BasicTableProps<T> {
   data: T[];
   // columns: ({ actions, openModal, ConfirmationModalComponent, role }: TableColumnsProps) => any[];
-  columns: ({actionHandlers, role}: { actionHandlers: any, role: string}) => any[];
+  columns: ({ actionHandlers, role }: TableColumnsProps) => any[];
   pageSize: number;
   setPageSize: (size: number) => void;
   pageIndex: number;

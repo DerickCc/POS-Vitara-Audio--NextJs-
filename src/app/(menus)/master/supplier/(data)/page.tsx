@@ -57,7 +57,7 @@ export default function SupplierDataPage() {
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await browseSupplier({pageSize, pageIndex, sortColumn, sortOrder, filters});
+      const response = await browseSupplier({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
       setSuppliers(response.result);
       setTotalRowCount(response.recordsTotal);
@@ -102,15 +102,9 @@ export default function SupplierDataPage() {
     }
   };
 
-  const actions: TableAction[] = [
-    {
-      label: 'Hapus',
-      title: 'Hapus Supplier',
-      description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
-      color: 'red',
-      handler: (id: string) => handleDelete(id),
-    },
-  ];
+  const actionHandlers = {
+    delete: (id: string) => handleDelete(id),
+  };
 
   useEffect(() => {
     fetchSuppliers();
@@ -119,10 +113,10 @@ export default function SupplierDataPage() {
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
-        <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.master.supplier.add} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
-              <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
+        <div className='flex items-center gap-3 mt-4 sm:mt-0'>
+          <Link href={routes.master.supplier.add} className='w-full sm:w-auto'>
+            <Button className='w-full sm:w-auto'>
+              <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>
           </Link>
@@ -146,7 +140,7 @@ export default function SupplierDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actions={actions}
+        actionHandlers={actionHandlers}
       />
     </>
   );

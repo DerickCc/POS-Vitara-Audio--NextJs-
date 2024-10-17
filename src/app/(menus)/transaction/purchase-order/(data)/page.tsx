@@ -155,6 +155,12 @@ export default function PurchaseOrderDataPage() {
     },
   ];
 
+  const actionHandlers: any = {
+    finish: (id: string) => handleFinish(id),
+    delete: (id: string) => handleDelete(id),
+    cancel: (id: string) => handleCancel(id),
+  };
+
   useEffect(() => {
     fetchPurchaseOrders();
   }, [fetchPurchaseOrders]);
@@ -189,7 +195,7 @@ export default function PurchaseOrderDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actions={actions}
+        actionHandlers={actionHandlers}
       />
     </>
   );

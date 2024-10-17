@@ -45,6 +45,8 @@ model Users {
   CreatedSalesOrderServiceDetails SalesOrderServiceDetails[]
   UpdatedSalesOrderServiceDetails SalesOrderServiceDetails[] @relation("UpdatedByUser")
 
+  CreatedPaymentHistories PaymentHistories[]
+
   @@index([name, accountStatus, role], map: "users_index")
 }
 
@@ -169,22 +171,20 @@ model PurchaseOrderDetails {
 }
 
 model SalesOrders {
-  id            String    @id @default(cuid())
-  code          String    @unique @map("code") @db.VarChar(20)
-  salesDate     DateTime  @default(now()) @map("sales_date")
-  customerId    String    @map("customer_id")
-  paymentType   String    @map("payment_type") @db.VarChar(20)
-  paymentMethod String    @map("payment_method") @db.VarChar(20)
-  subTotal      Decimal   @map("sub_total") @db.Decimal(10, 2)
-  discount      Decimal   @default(0) @db.Decimal(10, 2)
-  grandTotal    Decimal   @map("grand_total") @db.Decimal(10, 2)
-  paidAmount    Decimal   @map("paid_amount") @db.Decimal(10, 2)
-  remarks       String?   @db.VarChar(500)
-  status        String    @default("Belum Lunas") @db.VarChar(50)
-  createdBy     String    @map("created_by")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedBy     String?   @map("updated_by")
-  updatedAt     DateTime? @updatedAt @map("updated_at")
+  id          String    @id @default(cuid())
+  code        String    @unique @map("code") @db.VarChar(20)
+  salesDate   DateTime  @default(now()) @map("sales_date")
+  customerId  String    @map("customer_id")
+  paymentType String    @map("payment_type") @db.VarChar(20)
+  subTotal    Decimal   @map("sub_total") @db.Decimal(10, 2)
+  discount    Decimal   @default(0) @db.Decimal(10, 2)
+  grandTotal  Decimal   @map("grand_total") @db.Decimal(10, 2)
+  remarks     String?   @db.VarChar(500)
+  status      String    @default("Belum Lunas") @db.VarChar(50)
+  createdBy   String    @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedBy   String?   @map("updated_by")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
 
   Customer Customers @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
@@ -192,11 +192,13 @@ model SalesOrders {
 
   SalesOrderServiceDetails SalesOrderServiceDetails[]
 
+  PaymentHistories PaymentHistories[]
+
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  @@index([code, salesDate, customerId, paymentType, paymentMethod, grandTotal, status], map: "sales_orders_index")
+  @@index([code, salesDate, customerId, paymentType, grandTotal, status], map: "sales_orders_index")
 }
 
 model SalesOrderProductDetails {
@@ -240,4 +242,18 @@ model SalesOrderServiceDetails {
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model PaymentHistories {
+  id            String   @id @default(cuid())
+  soId          String   @map("so_id")
+  paymentDate   DateTime @default(now()) @map("payment_date")
+  paymentMethod String   @map("payment_method") @db.VarChar(20)
+  amount        Decimal  @db.Decimal(10, 2)
+  createdBy     String   @map("created_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }

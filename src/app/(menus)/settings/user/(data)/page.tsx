@@ -117,6 +117,10 @@ export default function UserDataPage() {
     },
   ];
 
+  const actionHandlers = {
+    changeStatus: (id: string) => handleChangeStatus(id),
+  };
+
   useEffect(() => {
     browseUser();
   }, [browseUser]);
@@ -124,10 +128,10 @@ export default function UserDataPage() {
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
-        <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.settings.user.add} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
-              <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
+        <div className='flex items-center gap-3 mt-4 sm:mt-0'>
+          <Link href={routes.settings.user.add} className='w-full sm:w-auto'>
+            <Button className='w-full sm:w-auto'>
+              <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>
           </Link>
@@ -147,7 +151,7 @@ export default function UserDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actions={actions}
+        actionHandlers={actionHandlers}
       />
     </>
   );

@@ -88,7 +88,7 @@ export default function SalesOrderForm({
   const [totalProductSoldAmount, setTotalProductSoldAmount] = useState(0);
   const [totalServiceSoldAmount, setTotalServiceSoldAmount] = useState(0);
   const [noInvoice, setNoInvoice] = useState('');
-  const { openModal, ConfirmationModalComponent } = useConfirmationModal();
+  const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
 
   useEffect(() => {
     const fetchCurrUser = async () => {
@@ -270,7 +270,7 @@ export default function SalesOrderForm({
   // ------------------------
 
   const submitConfirmation = (payload: SalesOrderModel) => {
-    openModal({
+    openConfirmationModal({
       title: 'Simpan Penjualan',
       description: 'Penjualan yang telah disimpan tidak dapat diedit atau dihapus lagi. Apakah Anda yakin?',
       handleConfirm: () => onSubmit(payload),
@@ -443,7 +443,7 @@ export default function SalesOrderForm({
                         </RadioGroup>
                       )}
                     />
-                    <Controller
+                    {/* <Controller
                       control={control}
                       name='paymentMethod'
                       render={({ field: { value, onChange }, fieldState: { error } }) => (
@@ -475,7 +475,7 @@ export default function SalesOrderForm({
                           </div>
                         </RadioGroup>
                       )}
-                    />
+                    /> */}
                   </div>
                   <Controller
                     control={control}
@@ -505,7 +505,7 @@ export default function SalesOrderForm({
                       />
                     )}
                   />
-                  <Controller
+                  {/* <Controller
                     control={control}
                     name='paidAmount'
                     render={({ field: { value }, fieldState: { error } }) => {
@@ -519,6 +519,21 @@ export default function SalesOrderForm({
                           defaultValue={value}
                           error={error?.message}
                           readOnly={isReadOnly || value === grandTotal || grandTotal === 0}
+                        />
+                      );
+                    }}
+                  /> */}
+                  <Controller
+                    control={control}
+                    name='paidAmount'
+                    render={({ field: { value }, fieldState: { error } }) => {
+                      return (
+                        <RupiahFormInput
+                          label={<span className='required'>Jumlah yang Sudah Dibayar</span>}
+                          setValue={setValue}
+                          fieldName={`paidAmount`}
+                          defaultValue={value}
+                          readOnly={true}
                         />
                       );
                     }}

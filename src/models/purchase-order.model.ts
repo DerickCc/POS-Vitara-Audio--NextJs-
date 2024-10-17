@@ -5,16 +5,27 @@ import { getCurrDate } from '@/utils/helper-function';
 export const PurchaseOrderSchema = z.object({
   supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
   remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
-  details: z.array(PurchaseOrderDetailSchema).refine(
-    (details) => {
-      const productIds = details.map((d) => d.productId);
-      return new Set(productIds).size === productIds.length;
-    },
-    {
-      message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
-      path: ['details'],
-    }
-  ),
+  details: z
+    .array(PurchaseOrderDetailSchema)
+    .refine(
+      (details) => {
+        const productIds = details.map((d) => d.productId);
+        return new Set(productIds).size === productIds.length;
+      },
+      {
+        message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+        path: ['refinement'],
+      }
+    )
+    .refine(
+      (details) => {
+        return details.length > 0;
+      },
+      {
+        message: 'Harap pilih minimal 1 barang yang ingin dibeli',
+        path: ['refinement'],
+      }
+    ),
 });
 
 export class PurchaseOrderModel {

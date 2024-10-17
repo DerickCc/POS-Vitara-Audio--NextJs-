@@ -1,6 +1,6 @@
 import { routes } from '@/config/routes';
-import { Colors, TableColumnProps } from '@/models/global.model';
-import { createColumnHelper } from '@tanstack/react-table';
+import { Colors, TableColumnsProps } from '@/models/global.model';
+import { createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuEye, LuMoreVertical, LuPencil, LuCircleSlash } from 'react-icons/lu';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
@@ -11,85 +11,107 @@ import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
+
+function ActionColumn({
+  row,
+  actionHandlers,
+  role,
+}: {
+  row: Row<PurchaseOrderModel>;
+  actionHandlers: any;
+  role: string;
+}) {
+  const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+
+  return (
+    <>
+      <Dropdown>
+        <Dropdown.Trigger>
+          <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
+            <LuMoreVertical className='size-5 text-primary' />
+          </ActionIcon>
+        </Dropdown.Trigger>
+
+        <Dropdown.Menu style={{ fontSize: 15 }}>
+          {/* detail */}
+          <Link href={routes.transaction.purchaseOrder.view(row.original.id)}>
+            <Dropdown.Item>
+              <LuEye className='text-blue-500 w-5 h-5 cursor-pointer mr-3' /> Detail
+            </Dropdown.Item>
+          </Link>
+
+          {/* edit */}
+          {row.original.status === 'Dalam Proses' && (
+            <Link href={routes.transaction.purchaseOrder.edit(row.original.id)}>
+              <Dropdown.Item>
+                <LuPencil className='text-yellow-500 w-5 h-5 cursor-pointer mr-3' /> Edit
+              </Dropdown.Item>
+            </Link>
+          )}
+
+          {/* finish */}
+          {row.original.status === 'Dalam Proses' && (
+            <Dropdown.Item
+              onClick={() => {
+                openConfirmationModal({
+                  title: 'Selesaikan Transaksi Pembelian',
+                  description:
+                    'Transaksi yang sudah diselesaikan tidak dapat diedit atau dihapus lagi. Apakah Anda yakin?',
+                  handleConfirm: () => actionHandlers.finish(row.original.id),
+                });
+              }}
+            >
+              <IoCheckmarkDoneSharp className='text-green-500 w-5 h-5 cursor-pointer mr-3' /> Selesai
+            </Dropdown.Item>
+          )}
+
+          {/* delete */}
+          {row.original.status === 'Dalam Proses' && (
+            <Dropdown.Item
+              onClick={() => {
+                openConfirmationModal({
+                  title: 'Hapus Transaksi Pembelian',
+                  description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
+                  handleConfirm: () => actionHandlers.delete(row.original.id),
+                });
+              }}
+            >
+              <FaRegTrashAlt className='text-red-500 w-5 h-4 cursor-pointer mr-3' /> Hapus
+            </Dropdown.Item>
+          )}
+
+          {/* cancel */}
+          {role === 'Admin' && row.original.status === 'Selesai' && (
+            <Dropdown.Item
+              onClick={() => {
+                openConfirmationModal({
+                  title: 'Batalkan Transaksi Penjualan',
+                  description:
+                    'Stok barang akan ditambah dengan stok dari detail transaksi penjualan ini. Apakah Anda yakin?',
+                  handleConfirm: () => actionHandlers.cancel(row.original.id),
+                });
+              }}
+            >
+              <LuCircleSlash className='text-red-500 w-5 h-5 cursor-pointer mr-3' /> Batal
+            </Dropdown.Item>
+          )}
+        </Dropdown.Menu>
+      </Dropdown>
+
+      <ConfirmationModalComponent />
+    </>
+  );
+}
 
 const columnHelper = createColumnHelper<PurchaseOrderModel>();
 
-export const columns = ({ actions, openModal, ConfirmationModalComponent, role }: TableColumnProps) => [
+export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => {
-      return (
-        <>
-          <Dropdown>
-            <Dropdown.Trigger>
-              <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
-                <LuMoreVertical className='size-5 text-primary' />
-              </ActionIcon>
-            </Dropdown.Trigger>
-
-            <Dropdown.Menu style={{ fontSize: 15 }}>
-              <Link href={routes.transaction.purchaseOrder.view(row.original.id)}>
-                <Dropdown.Item>
-                  <LuEye className='text-blue-500 w-5 h-5 cursor-pointer mr-3' /> Detail
-                </Dropdown.Item>
-              </Link>
-              {row.original.status === 'Dalam Proses' && (
-                <Link href={routes.transaction.purchaseOrder.edit(row.original.id)}>
-                  <Dropdown.Item>
-                    <LuPencil className='text-yellow-500 w-5 h-5 cursor-pointer mr-3' /> Edit
-                  </Dropdown.Item>
-                </Link>
-              )}
-              {actions
-                .filter((action) => {
-                  // Filter logic:
-                  // Hide 'Selesai' and 'Hapus' if status is not 'Dalam Proses'
-                  if (
-                    (action.label === 'Selesai' || action.label === 'Hapus') &&
-                    row.original.status !== 'Dalam Proses'
-                  ) {
-                    return false;
-                  }
-                  // Hide 'Batal' if the role is not 'Admin' or status is not 'Selesai'
-                  if (action.label === 'Batal' && (role !== 'Admin' || row.original.status !== 'Selesai')) {
-                    return false;
-                  }
-                  return true;
-                })
-                .map((action) => {
-                  return (
-                    <Dropdown.Item
-                      key={action.label}
-                      onClick={() => {
-                        openModal({
-                          title: action.title,
-                          description: action.description,
-                          handleConfirm: () => action.handler(row.original.id),
-                        });
-                      }}
-                    >
-                      {action.label === 'Selesai' && (
-                        <IoCheckmarkDoneSharp className='text-green-500 w-5 h-5 cursor-pointer mr-3' />
-                      )}
-                      {action.label === 'Hapus' && (
-                        <FaRegTrashAlt className='text-red-500 w-5 h-4 cursor-pointer mr-3' />
-                      )}
-                      {action.label === 'Batal' && (
-                        <LuCircleSlash className='text-red-500 w-5 h-5 cursor-pointer mr-3' />
-                      )}
-                      {action.label}
-                    </Dropdown.Item>
-                  );
-                })}
-            </Dropdown.Menu>
-          </Dropdown>
-
-          <ConfirmationModalComponent />
-        </>
-      );
-    },
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',

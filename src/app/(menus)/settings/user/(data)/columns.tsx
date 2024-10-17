@@ -2,58 +2,64 @@ import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/utils/t
 import { routes } from '@/config/routes';
 import { UserModel } from '@/models/user.model';
 import cn from '@/utils/class-names';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip } from 'rizzui';
-import { TableColumnProps } from '@/models/global.model';
+import { TableColumnsProps } from '@/models/global.model';
 import { FiRefreshCcw } from 'react-icons/fi';
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
+
+function ActionColumn({ row, actionHandlers, role }: { row: Row<UserModel>; actionHandlers: any; role: string }) {
+  const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+
+  return (
+    <>
+      <div className='flex items-center justify-center gap-3'>
+        <Tooltip size='sm' content='Edit' color='invert'>
+          <Link href={routes.master.supplier.edit(row.original.id)} aria-label='ke halaman edit pelanggan'>
+            <ActionIcon
+              as='span'
+              size='sm'
+              variant='outline'
+              className='text-yellow-500 hover:border-yellow-600 hover:text-yellow-600'
+            >
+              <LuPencil className='size-4' />
+            </ActionIcon>
+          </Link>
+        </Tooltip>
+
+        <Tooltip size='sm' content='Ubah Status' color='invert'>
+          <ActionIcon
+            size='sm'
+            variant='outline'
+            className={cn(actionIconColorClass.red, 'cursor-pointer')}
+            onClick={() => {
+              openConfirmationModal({
+                title: 'Ubah Status Akun',
+                description: 'Apakah Anda yakin ingin mengubah status akun User ini?',
+                handleConfirm: () => actionHandlers.changeStatus(row.original.id),
+              });
+            }}
+          >
+            <FiRefreshCcw className='h-4 w-4' />
+          </ActionIcon>
+        </Tooltip>
+      </div>
+
+      <ConfirmationModalComponent />
+    </>
+  );
+}
 
 const columnHelper = createColumnHelper<UserModel>();
 
-export const columns = ({ actions, openModal, ConfirmationModalComponent }: TableColumnProps) => [
+export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
   columnHelper.display({
     id: 'actions',
     size: 100,
     header: () => 'Aksi',
-    cell: ({ row }) => (
-      <>
-        <div className='flex items-center justify-center gap-3'>
-          <Tooltip size='sm' content='Edit' color='invert'>
-            <Link href={routes.settings.user.edit(row.original.id)} aria-label='ke halaman edit pelanggan'>
-              <ActionIcon
-                as='span'
-                size='sm'
-                variant='outline'
-                className='text-yellow-500 hover:border-yellow-600 hover:text-yellow-600'
-              >
-                <LuPencil className='size-4' />
-              </ActionIcon>
-            </Link>
-          </Tooltip>
-          {actions.map((action) => (
-            <Tooltip key={action.label} size='sm' content={action.title} color='invert'>
-              <ActionIcon
-                size='sm'
-                variant='outline'
-                className={cn(actionIconColorClass[action.color], 'cursor-pointer')}
-                onClick={() => {
-                  openModal({
-                    title: action.title,
-                    description: action.description,
-                    handleConfirm: () => action.handler(row.original.id),
-                  });
-                }}
-              >
-                {action.label === 'Ubah Status' && <FiRefreshCcw className='h-4 w-4' />}
-              </ActionIcon>
-            </Tooltip>
-          ))}
-        </div>
-
-        <ConfirmationModalComponent />
-      </>
-    ),
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
   }),
   columnHelper.accessor('name', {
     id: 'name',

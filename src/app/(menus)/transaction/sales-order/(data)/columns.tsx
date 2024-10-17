@@ -1,5 +1,5 @@
 'use client';
-import { Colors } from '@/models/global.model';
+import { Colors, TableColumnsProps } from '@/models/global.model';
 import { createColumnHelper } from '@tanstack/react-table';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
@@ -15,15 +15,7 @@ import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt } from 'react-icons/fa';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
 
-function SalesOrderActionColumn({
-  row,
-  actionHandlers,
-  role,
-}: {
-  row: Row<SalesOrderModel>;
-  actionHandlers: any;
-  role: string;
-}) {
+function ActionColumn({ row, actionHandlers, role }: { row: Row<SalesOrderModel>; actionHandlers: any; role: string }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
 
@@ -79,14 +71,12 @@ function SalesOrderActionColumn({
 
 const columnHelper = createColumnHelper<SalesOrderModel>();
 
-export const columns = ({ actionHandlers, role }: { actionHandlers: any; role: string }) => [
+export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => {
-      return <SalesOrderActionColumn row={row} actionHandlers={actionHandlers} role={role} />;
-    },
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',
