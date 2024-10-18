@@ -1,9 +1,11 @@
+import { SalesOrderPaymentModel } from '@/models/sales-order';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // UpdateSoPayment
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
   if (!session) {
@@ -12,12 +14,43 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   const { id } = params;
 
+  const data: SalesOrderPaymentModel = await request.json();
+
   try {
     const userId = session.id;
 
     const so = await db.salesOrders.findUnique({
       where: { id },
-      include: { SalesOrderProductDetails: true },
+      select: {
+        status: true,
+        grandTotal: true,
+        PaymentHistories: {
+          select: { amount: true },
+        },
+      },
+    });
+
+    if (!so) {
+      return NextResponse.json({ message: 'Transaksi Penjualan tidak ditemukan' }, { status: 404 });
+    }
+
+    const paidAmount = so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+
+    if (new Decimal(data.paymentAmount) > so.grandTotal.minus(paidAmount)) {
+      return NextResponse.json({ message: 'Biaya yang dibayarkan lebih dari yang seharusnya' }, { status: 404 });
+    }
+
+    await db.paymentHistories.create({
+      data: {
+        SalesOrder: {
+          connect: { id },
+        },
+        paymentMethod: data.paymentMethod,
+        amount: data.paymentAmount,
+        CreatedBy: {
+          connect: { id: userId },
+        },
+      },
     });
 
     return NextResponse.json({ message: 'Pembayaran berhasil diupdate' }, { status: 200 });

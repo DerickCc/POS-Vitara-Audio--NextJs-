@@ -2,12 +2,26 @@
 import SalesOrderPaymentModal from '@/components/modals/sales-order-payment-modal';
 import React, { useState, useCallback } from 'react';
 
-export function useSalesOrderPaymentModal() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [handlePayment, setHandlePayment] = useState<() => void>(() => {});
+interface UseSalesOrderPaymentnModalReturnType {
+  isOpen: boolean;
+  openPaymentModal: (options: SalesOrderPaymentModalOptions) => void;
+  closeModal: () => void;
+  SalesOrderPaymentModalComponent: React.FC;
+}
 
-  const openPaymentModal = useCallback((handlePayment: () => void) => {
-    setHandlePayment(handlePayment);
+interface SalesOrderPaymentModalOptions {
+  soId: string;
+  soCode: string;
+  grandTotal: number;
+  paidAmount: number;
+}
+
+export function useSalesOrderPaymentModal(): UseSalesOrderPaymentnModalReturnType {
+  const [isOpen, setIsOpen] = useState(false);
+  const [modalOptions, setModalOptions] = useState<SalesOrderPaymentModalOptions | null>(null);
+
+  const openPaymentModal = useCallback((option: SalesOrderPaymentModalOptions) => {
+    setModalOptions(option);
     setIsOpen(true);
   }, []);
 
@@ -19,10 +33,10 @@ export function useSalesOrderPaymentModal() {
     <SalesOrderPaymentModal
       isOpen={isOpen}
       onClose={closeModal}
-      handlePayment={() => {
-        handlePayment();
-        closeModal();
-      }}
+      soId={modalOptions?.soId ?? ''}
+      soCode={modalOptions?.soCode ?? ''}
+      grandTotal={modalOptions?.grandTotal ?? 0}
+      paidAmount={modalOptions?.paidAmount ?? 0}
     />
   );
 

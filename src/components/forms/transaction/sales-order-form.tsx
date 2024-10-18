@@ -10,7 +10,7 @@ import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { SearchCustomerModel } from '@/models/customer.model';
 import { BasicFormProps } from '@/models/global.model';
 import { SearchProductModel } from '@/models/product.model';
-import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
+import { SalesOrderModel, SalesOrderPaymentModel, SalesOrderSchema } from '@/models/sales-order';
 import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
 import { SalesOrderServiceDetailModel } from '@/models/sales-order-service-detail';
 import { SessionData } from '@/models/session.model';
@@ -282,17 +282,6 @@ export default function SalesOrderForm({
   };
   // ------------------------
 
-  const handlePayment = async () => {
-    try {
-      const message = await updateSoPayment(getValues().id);
-      toast.success(message, { duration: 5000 });
-
-      router.push(routes.transaction.salesOrder.data);
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
   const submitConfirmation = (payload: SalesOrderModel) => {
     openConfirmationModal({
       title: 'Simpan Penjualan',
@@ -544,19 +533,6 @@ export default function SalesOrderForm({
                       );
                     }}
                   />
-
-                  {isReadOnly && (
-                    <div className='flex justify-end mt-6'>
-                      <Button
-                        onClick={() => {
-                          openPaymentModal(() => handlePayment);
-                        }}
-                        className={cn(buttonColorClass.green, baseButtonClass)}
-                      >
-                        <FaRegMoneyBillAlt className='size-4 me-2' /> Bayar
-                      </Button>
-                    </div>
-                  )}
                 </>
               )}
             </Card>
@@ -870,10 +846,28 @@ export default function SalesOrderForm({
             </Button>
           </Link>
 
+          {/* if is create */}
           {!isReadOnly && (
             <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
               {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
               <span>Simpan</span>
+            </Button>
+          )}
+
+          {/* if is view and loaded */}
+          {isReadOnly && defaultValues.id && (
+            <Button
+              onClick={() => {
+                openPaymentModal({
+                  soId: defaultValues.id,
+                  soCode: defaultValues.code,
+                  grandTotal: defaultValues.grandTotal,
+                  paidAmount: defaultValues.paidAmount,
+              });
+              }}
+              className={cn(buttonColorClass.green, baseButtonClass)}
+            >
+              <FaRegMoneyBillAlt className='size-4 me-2' /> <span>Bayar</span>
             </Button>
           )}
         </div>

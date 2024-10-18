@@ -1,5 +1,5 @@
 import { PaginatedApiResponse, PagingModel } from "@/models/global.model";
-import { SalesOrderModel } from "@/models/sales-order";
+import { SalesOrderModel, SalesOrderPaymentModel } from "@/models/sales-order";
 import { apiFetch, toQueryString } from "@/utils/api";
 
 // GET
@@ -81,10 +81,11 @@ export const updateSo = async (id: string, payload: SalesOrderModel): Promise<st
   }
 };
 
-export const updateSoPayment = async (id: string): Promise<string> => {
+export const updateSoPayment = async (payload: SalesOrderPaymentModel): Promise<string> => {
   try {
-    const response = await apiFetch(`/api/sales-orders/${id}/payment`, {
-      method: 'PUT'
+    const response = await apiFetch(`/api/sales-orders/${payload.soId}/payment`, {
+      method: 'POST',
+      body: payload
     });
     return response.message;
   } catch (e) {

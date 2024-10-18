@@ -1,27 +1,76 @@
+'use client';
+
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
+import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/utils/tailwind-classes';
 import { Controller, useForm } from 'react-hook-form';
-import { Button, Modal } from 'rizzui';
+import { Button, Input, Modal, Radio, RadioGroup, Text } from 'rizzui';
 import RupiahFormInput from '../form-inputs/rupiah-form-input';
+import { SalesOrderPaymentModel, SalesOrderPaymentSchema } from '@/models/sales-order';
+import RupiahInput from '../inputs/rupiah-input';
+import { useEffect, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import toast from 'react-hot-toast';
+import { routes } from '@/config/routes';
+import { useRouter } from 'next/navigation';
+import { updateSoPayment } from '@/services/sales-order-service';
 
 interface SalesOrderPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  handlePayment: () => void;
+  soId: string;
+  soCode: string;
+  grandTotal: number;
+  paidAmount: number;
 }
 
-export default function SalesOrderPaymentModal({ isOpen, onClose, handlePayment }: SalesOrderPaymentModalProps) {
-  const {
-    register,
-    setValue,
-    getValues,
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<any>({
-    defaultValues: null,
-    resolver: undefined,
+export default function SalesOrderPaymentModal({
+  isOpen,
+  onClose,
+  soId,
+  soCode,
+  grandTotal,
+  paidAmount,
+}: SalesOrderPaymentModalProps) {
+  const { register, setValue, control, handleSubmit } = useForm<SalesOrderPaymentModel>({
+    defaultValues: {
+      soId,
+      soCode,
+      grandTotal,
+      paidAmount,
+      paymentAmount: 0,
+      paymentMethod: 'Non-tunai',
+    },
+    resolver: zodResolver(SalesOrderPaymentSchema),
   });
+
+  const router = useRouter();
+  const [totalDue, setTotalDue] = useState(0);
+  const [unpaidAmount, setUnpaidAmount] = useState(0);
+
+  useEffect(() => {
+    if (grandTotal !== 0) setTotalDue(grandTotal - paidAmount);
+  }, [grandTotal]);
+
+  const onSubmit = async (data: SalesOrderPaymentModel) => {
+    try {
+      const message = await updateSoPayment(data);
+      toast.success(message, { duration: 5000 });
+      onClose();
+
+      router.push(routes.transaction.salesOrder.data);
+    } catch (e) {
+      toast.error(e + '', { duration: 5000 });
+    }
+  };
+
+  const handlePaymentAmountChange = (amount: number) => {
+    if (amount > totalDue) {
+      setValue('paymentAmount', totalDue);
+      setUnpaidAmount(0);
+    } else {
+      setUnpaidAmount(totalDue - amount);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -30,16 +79,23 @@ export default function SalesOrderPaymentModal({ isOpen, onClose, handlePayment 
       <div className='m-auto p-7'>
         <h2 className='mb-8 text-center'>Pembayaran</h2>
 
-        <form onSubmit={handleSubmit(handlePayment)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className='grid sm:grid-cols-2 gap-6'>
+            <Input
+              label='No. Invoice'
+              placeholder='No. Invoice'
+              inputClassName={readOnlyClass}
+              readOnly
+              {...register('soCode')}
+            />
             <Controller
               control={control}
-              name='discount'
+              name='grandTotal'
               render={({ field: { value } }) => (
                 <RupiahFormInput
-                  label='Total Diskon'
+                  label='Grand Total'
                   setValue={setValue}
-                  fieldName={`discount`}
+                  fieldName={`grandTotal`}
                   defaultValue={value}
                   readOnly={true}
                 />
@@ -47,77 +103,87 @@ export default function SalesOrderPaymentModal({ isOpen, onClose, handlePayment 
             />
             <Controller
               control={control}
-              name='discount'
+              name='paidAmount'
               render={({ field: { value } }) => (
                 <RupiahFormInput
-                  label='Total Diskon'
+                  label='Jumlah yang Telah Dibayar'
                   setValue={setValue}
-                  fieldName={`discount`}
+                  fieldName={`paidAmount`}
                   defaultValue={value}
                   readOnly={true}
                 />
               )}
             />
+            <RupiahInput
+              label='Jumlah yang Harus Dilunasi'
+              defaultValue={totalDue}
+              onChange={() => {}}
+              readOnly={true}
+            />
+
+            <hr className='sm:col-span-2 mt-2' />
+
             <Controller
               control={control}
-              name='discount'
-              render={({ field: { value } }) => (
+              name='paymentAmount'
+              render={({ field: { value }, fieldState: { error } }) => (
                 <RupiahFormInput
-                  label='Total Diskon'
+                  label={<span className='required'>Jumlah Pembayaran</span>}
                   setValue={setValue}
-                  fieldName={`discount`}
+                  onChange={(amount: number) => handlePaymentAmountChange(amount)}
+                  fieldName={`paymentAmount`}
                   defaultValue={value}
-                  readOnly={true}
+                  error={error?.message}
                 />
               )}
             />
+
             <Controller
               control={control}
-              name='discount'
-              render={({ field: { value } }) => (
-                <RupiahFormInput
-                  label='Total Diskon'
-                  setValue={setValue}
-                  fieldName={`discount`}
-                  defaultValue={value}
-                  readOnly={true}
-                />
+              name='paymentMethod'
+              render={({ field: { value, onChange }, fieldState: { error } }) => (
+                <RadioGroup value={value} setValue={onChange}>
+                  <Text className='font-medium mb-2 required'>Metode Pembayaran</Text>
+                  <div className='flex align-items gap-6'>
+                    <Radio
+                      name='paymentMethod'
+                      label='Tunai'
+                      value='Tunai'
+                      onChange={onChange}
+                      checked={value === 'Tunai'}
+                      size='sm'
+                      labelClassName='text-sm'
+                      error={error?.message}
+                    />
+                    <Radio
+                      name='paymentMethod'
+                      label='Non-tunai'
+                      value='Non-tunai'
+                      onChange={onChange}
+                      checked={value === 'Non-tunai'}
+                      size='sm'
+                      labelClassName='text-sm'
+                      error={error?.message}
+                    />
+                  </div>
+                </RadioGroup>
               )}
             />
-            <Controller
-              control={control}
-              name='discount'
-              render={({ field: { value } }) => (
-                <RupiahFormInput
-                  label='Total Diskon'
-                  setValue={setValue}
-                  fieldName={`discount`}
-                  defaultValue={value}
-                  readOnly={true}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name='discount'
-              render={({ field: { value } }) => (
-                <RupiahFormInput
-                  label='Total Diskon'
-                  setValue={setValue}
-                  fieldName={`discount`}
-                  defaultValue={value}
-                  readOnly={true}
-                />
-              )}
+
+            <RupiahInput
+              label='Sisa yang Harus Dilunasi'
+              defaultValue={unpaidAmount}
+              onChange={() => {}}
+              readOnly={true}
             />
           </div>
 
-          <div className='flex items-center justify-between mt-8'>
+          <div className='flex items-center justify-end gap-6 mt-8'>
             <Button variant='outline' style={{ width: 75 }} onClick={onClose}>
-              Tidak
+              Batal
             </Button>
-            <Button className={cn(buttonColorClass.red, baseButtonClass)} style={{ width: 75 }} onClick={handlePayment}>
-              Ya
+            <Button className={cn(buttonColorClass.red, baseButtonClass)} style={{ width: 75 }} type='submit'>
+              Bayar
             </Button>
           </div>
         </form>
