@@ -21,6 +21,7 @@ interface SalesOrderPaymentModalProps {
   soCode: string;
   grandTotal: number;
   paidAmount: number;
+  isFromView: boolean;
 }
 
 export default function SalesOrderPaymentModal({
@@ -30,6 +31,7 @@ export default function SalesOrderPaymentModal({
   soCode,
   grandTotal,
   paidAmount,
+  isFromView,
 }: SalesOrderPaymentModalProps) {
   const { register, setValue, control, handleSubmit } = useForm<SalesOrderPaymentModel>({
     defaultValues: {
@@ -57,7 +59,11 @@ export default function SalesOrderPaymentModal({
       toast.success(message, { duration: 5000 });
       onClose();
 
-      router.push(routes.transaction.salesOrder.data);
+      if (isFromView) {
+        router.push(routes.transaction.salesOrder.data);
+      } else {
+        // reload table data
+      }
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }

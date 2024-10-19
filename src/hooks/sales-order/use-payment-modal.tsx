@@ -14,6 +14,7 @@ interface SalesOrderPaymentModalOptions {
   soCode: string;
   grandTotal: number;
   paidAmount: number;
+  isFromView?: boolean;
 }
 
 export function useSalesOrderPaymentModal(): UseSalesOrderPaymentnModalReturnType {
@@ -37,6 +38,7 @@ export function useSalesOrderPaymentModal(): UseSalesOrderPaymentnModalReturnTyp
       soCode={modalOptions?.soCode ?? ''}
       grandTotal={modalOptions?.grandTotal ?? 0}
       paidAmount={modalOptions?.paidAmount ?? 0}
+      isFromView={modalOptions?.isFromView ?? false}
     />
   );
 

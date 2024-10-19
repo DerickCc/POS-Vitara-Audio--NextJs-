@@ -39,7 +39,12 @@ function ActionColumn({ row, actionHandlers, role }: { row: Row<SalesOrderModel>
           {/* pay */}
           <Dropdown.Item
             onClick={() => {
-              openPaymentModal(() => actionHandlers.payment);
+              openPaymentModal({
+                soId: row.original.id,
+                soCode: row.original.code,
+                grandTotal: row.original.grandTotal,
+                paidAmount: row.original.paidAmount,
+              });
             }}
           >
             <FaRegMoneyBillAlt className='text-green-500 w-5 h-5 cursor-pointer mr-3' /> Bayar

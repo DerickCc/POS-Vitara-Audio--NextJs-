@@ -107,6 +107,7 @@ export default function SalesOrderForm({
   }, [newSoCode]);
 
   // customer
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleCustomerSearchChange = useCallback(
     debounce(async (name: string) => {
       if (!name || name.trim() === '') return;
@@ -156,6 +157,7 @@ export default function SalesOrderForm({
     });
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProductSearchChange = useCallback(
     debounce(async (name: string) => {
       // only search if name is not empty
@@ -182,6 +184,7 @@ export default function SalesOrderForm({
     updateProductTotalPrice(idx);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateProductTotalPrice = useCallback(
     debounce((idx: number) => {
       const detail = getValues().productDetails[idx];
@@ -196,6 +199,7 @@ export default function SalesOrderForm({
   // ------------------------
 
   // Service Details
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateServiceTotalPrice = useCallback(
     debounce((idx: number) => {
       const detail = getValues().serviceDetails[idx];
@@ -863,6 +867,7 @@ export default function SalesOrderForm({
                   soCode: defaultValues.code,
                   grandTotal: defaultValues.grandTotal,
                   paidAmount: defaultValues.paidAmount,
+                  isFromView: true,
               });
               }}
               className={cn(buttonColorClass.green, baseButtonClass)}
