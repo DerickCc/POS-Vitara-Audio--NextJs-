@@ -15,6 +15,7 @@ interface SalesOrderPaymentModalOptions {
   grandTotal: number;
   paidAmount: number;
   isFromView?: boolean;
+  fetchSalesOrders?: () => void;
 }
 
 export function useSalesOrderPaymentModal(): UseSalesOrderPaymentnModalReturnType {
@@ -39,6 +40,7 @@ export function useSalesOrderPaymentModal(): UseSalesOrderPaymentnModalReturnTyp
       grandTotal={modalOptions?.grandTotal ?? 0}
       paidAmount={modalOptions?.paidAmount ?? 0}
       isFromView={modalOptions?.isFromView ?? false}
+      fetchSalesOrders={modalOptions?.fetchSalesOrders ?? (() => {})}
     />
   );
 

@@ -4,6 +4,7 @@ import ProductForm from "@/components/forms/inventory/product-form";
 import PageHeader from "@/components/page-header";
 import { routes } from "@/config/routes";
 import { ProductModel } from "@/models/product.model";
+import { getProductById, updateProduct } from "@/services/product-service";
 import { apiFetch } from "@/utils/api";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,18 +26,15 @@ const pageHeader = {
 
 export default function EditProductPage() {
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductModel>(new ProductModel());
   const [isLoading, setIsLoading] = useState(true);
 
-  const updateProduct = async (data: ProductModel) => {
+  const update = async (payload: ProductModel) => {
     try {
-      const response = await apiFetch(`/api/products/${id}`, {
-        method: 'PUT',
-        body: data,
-      });
-
-      toast.success(response.message, { duration: 4000 });
+      const message = await updateProduct(id, payload);
+      toast.success(message, { duration: 4000 });
+      
       router.push(routes.inventory.product.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -44,11 +42,10 @@ export default function EditProductPage() {
   };
 
   useEffect(() => {
-    const getProductById = async () => {
+    const fetchProduct = async () => {
       try {
         setIsLoading(true);
-        const response = await apiFetch(`/api/products/${id}`, { method: 'GET' });
-        setProduct(response.result);
+        setProduct(await getProductById(id));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       } finally {
@@ -56,14 +53,14 @@ export default function EditProductPage() {
       }
     };
 
-    getProductById();
+    fetchProduct();
   }, [id]);
 
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <ProductForm defaultValues={product} isLoading={isLoading} onSubmit={updateProduct} />
+      <ProductForm defaultValues={product} isLoading={isLoading} onSubmit={update} />
     </>
   );
 }

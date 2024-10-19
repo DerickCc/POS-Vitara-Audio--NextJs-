@@ -14,6 +14,7 @@ import { columns } from './columns';
 import BasicTable from '@/components/tables/basic-table';
 import { TableAction } from '@/models/global.model';
 import { CustomerModel } from '@/models/customer.model';
+import { browseCustomer, deleteCustomer } from '@/services/customer-service';
 
 const pageHeader = {
   title: 'Pelanggan',
@@ -29,7 +30,7 @@ const pageHeader = {
 };
 
 export default function CustomerDataPage() {
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState<CustomerModel[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -46,23 +47,14 @@ export default function CustomerDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const browseCustomer = useCallback(async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await apiFetch(
-        `/api/customers${toQueryString({
-          pageSize,
-          pageIndex,
-          sortColumn,
-          sortOrder,
-          ...filters,
-        })}`,
-        { method: 'GET' }
-      );
+      const response = await browseCustomer({ pageSize, pageIndex, sortColumn, sortOrder, filters })
 
       setCustomers(response.result);
       setTotalRowCount(response.recordsTotal);
@@ -72,6 +64,10 @@ export default function CustomerDataPage() {
       setIsLoading(false);
     }
   }, [pageSize, pageIndex, sorting, filters]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
@@ -89,7 +85,7 @@ export default function CustomerDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      browseCustomer();
+      fetchCustomers();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
@@ -98,28 +94,18 @@ export default function CustomerDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/customers/${id}`, { method: 'DELETE' });
+      const message = await deleteCustomer(id);
 
-      toast.success(response.message, { duration: 5000 });
-      browseCustomer();
+      toast.success(message, { duration: 5000 });
+      fetchCustomers();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
   };
 
-  const actions: TableAction[] = [
-    {
-      label: 'Hapus',
-      title: 'Hapus Pelanggan',
-      description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
-      color: 'red',
-      handler: (id: string) => handleDelete(id),
-    }
-  ]
-
-  useEffect(() => {
-    browseCustomer();
-  }, [browseCustomer]);
+  const actionHandlers = {
+    delete: (id: string) => handleDelete(id),
+  };
 
   return (
     <>
@@ -142,7 +128,7 @@ export default function CustomerDataPage() {
 
       <BasicTable<CustomerModel>
         data={customers}
-        columns={columns}
+        columns={columns(actionHandlers)}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
@@ -151,7 +137,6 @@ export default function CustomerDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actions={actions}
       />
     </>
   );

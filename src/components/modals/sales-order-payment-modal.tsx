@@ -22,6 +22,7 @@ interface SalesOrderPaymentModalProps {
   grandTotal: number;
   paidAmount: number;
   isFromView: boolean;
+  fetchSalesOrders: () => void;
 }
 
 export default function SalesOrderPaymentModal({
@@ -32,6 +33,7 @@ export default function SalesOrderPaymentModal({
   grandTotal,
   paidAmount,
   isFromView,
+  fetchSalesOrders,
 }: SalesOrderPaymentModalProps) {
   const { register, setValue, control, handleSubmit } = useForm<SalesOrderPaymentModel>({
     defaultValues: {
@@ -62,7 +64,7 @@ export default function SalesOrderPaymentModal({
       if (isFromView) {
         router.push(routes.transaction.salesOrder.data);
       } else {
-        // reload table data
+        fetchSalesOrders();
       }
     } catch (e) {
       toast.error(e + '', { duration: 5000 });

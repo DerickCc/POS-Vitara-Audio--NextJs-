@@ -1,4 +1,3 @@
-'use client';
 import cn from '@/utils/class-names';
 import { pageSizeOptions } from '@/config/global-variables';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
@@ -15,9 +14,6 @@ import Spinner from '@/components/spinner';
 import Card from '@/components/card';
 import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/utils/tailwind-classes';
-import { useEffect, useState } from 'react';
-import { getCurrUser } from '@/utils/sessionlib';
-import { SessionData } from '@/models/session.model';
 
 export default function BasicTable<T>({
   data,
@@ -30,19 +26,10 @@ export default function BasicTable<T>({
   setSorting,
   isLoading,
   totalRowCount,
-  actionHandlers,
 }: BasicTableProps<T>) {
-  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
-  useEffect(() => {
-    const fetchCurrUser = async () => {
-      setCurrUser(await getCurrUser());
-    };
-    fetchCurrUser();
-  }, []);
-
   const table = useReactTable({
     data: data,
-    columns: columns({actionHandlers, role: currUser.role}),
+    columns,
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {
       pagination: { pageIndex, pageSize },

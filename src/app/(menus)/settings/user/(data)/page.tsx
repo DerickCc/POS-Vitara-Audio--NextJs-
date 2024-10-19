@@ -3,7 +3,6 @@
 import PageHeader from '@/components/page-header';
 import BasicTable from '@/components/tables/basic-table';
 import { routes } from '@/config/routes';
-import { apiFetch, toQueryString } from '@/utils/api';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -14,6 +13,7 @@ import UserFilter, { UserTableFilters } from './filters';
 import { columns } from './columns';
 import { UserModel } from '@/models/user.model';
 import { TableAction } from '@/models/global.model';
+import { changeUserStatus, browseUser } from '@/services/user-service';
 
 const pageHeader = {
   title: 'User',
@@ -29,7 +29,7 @@ const pageHeader = {
 };
 
 export default function UserDataPage() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<UserModel[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -46,23 +46,14 @@ export default function UserDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const browseUser = useCallback(async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await apiFetch(
-        `/api/users${toQueryString({
-          pageSize,
-          pageIndex,
-          sortColumn,
-          sortOrder,
-          ...filters,
-        })}`,
-        { method: 'GET' }
-      );
+      const response = await browseUser({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
       setUsers(response.result);
       setTotalRowCount(response.recordsTotal);
@@ -72,6 +63,10 @@ export default function UserDataPage() {
       setIsLoading(false);
     }
   }, [pageSize, pageIndex, sorting, filters]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
@@ -89,7 +84,7 @@ export default function UserDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      browseUser();
+      fetchUsers();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
@@ -98,32 +93,18 @@ export default function UserDataPage() {
 
   const handleChangeStatus = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/users/${id}/change-status`, { method: 'PUT' });
+      const message = await changeUserStatus(id);
+      toast.success(message, { duration: 5000 });
 
-      toast.success(response.message, { duration: 5000 });
-      browseUser();
+      fetchUsers();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
   };
 
-  const actions: TableAction[] = [
-    {
-      label: 'Ubah Status',
-      title: 'Ubah Status Akun',
-      description: 'Apakah Anda yakin ingin mengubah status akun User ini?',
-      color: 'red',
-      handler: (id: string) => handleChangeStatus(id),
-    },
-  ];
-
   const actionHandlers = {
     changeStatus: (id: string) => handleChangeStatus(id),
   };
-
-  useEffect(() => {
-    browseUser();
-  }, [browseUser]);
 
   return (
     <>
@@ -142,7 +123,7 @@ export default function UserDataPage() {
 
       <BasicTable<UserModel>
         data={users}
-        columns={columns}
+        columns={columns(actionHandlers)}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
@@ -151,7 +132,6 @@ export default function UserDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actionHandlers={actionHandlers}
       />
     </>
   );

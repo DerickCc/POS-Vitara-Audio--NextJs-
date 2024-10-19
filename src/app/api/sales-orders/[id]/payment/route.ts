@@ -35,22 +35,34 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     const paidAmount = so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+    const unpaidAmount = so.grandTotal.minus(paidAmount);
 
-    if (new Decimal(data.paymentAmount) > so.grandTotal.minus(paidAmount)) {
+    if (new Decimal(data.paymentAmount).greaterThan(unpaidAmount)) {
       return NextResponse.json({ message: 'Biaya yang dibayarkan lebih dari yang seharusnya' }, { status: 404 });
     }
 
-    await db.paymentHistories.create({
-      data: {
-        SalesOrder: {
-          connect: { id },
+    await db.$transaction(async (prisma) => {
+      await prisma.paymentHistories.create({
+        data: {
+          SalesOrder: {
+            connect: { id },
+          },
+          paymentMethod: data.paymentMethod,
+          amount: data.paymentAmount,
+          CreatedBy: {
+            connect: { id: userId },
+          },
         },
-        paymentMethod: data.paymentMethod,
-        amount: data.paymentAmount,
-        CreatedBy: {
-          connect: { id: userId },
-        },
-      },
+      });
+
+      if (new Decimal(data.paymentAmount).equals(unpaidAmount)) {
+        await prisma.salesOrders.update({
+          where: { id },
+          data: {
+            status: 'Lunas',
+          },
+        });
+      }
     });
 
     return NextResponse.json({ message: 'Pembayaran berhasil diupdate' }, { status: 200 });

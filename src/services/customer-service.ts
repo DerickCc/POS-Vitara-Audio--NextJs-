@@ -24,7 +24,7 @@ export const browseCustomer = async ({
 
     return response;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -33,16 +33,16 @@ export const getCustomerById = async (id: string): Promise<CustomerModel> => {
     const response = await apiFetch(`/api/customers/${id}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
-}
+};
 
 export const searchCustomer = async (name?: string): Promise<SearchCustomerModel[]> => {
   try {
     const response = await apiFetch(`/api/customers/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -55,7 +55,7 @@ export const createCustomer = async (payload: CustomerModel): Promise<string> =>
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -68,7 +68,7 @@ export const updateCustomer = async (id: string, payload: CustomerModel): Promis
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -78,6 +78,6 @@ export const deleteCustomer = async (id: string): Promise<string> => {
     const response = await apiFetch(`/api/customers/${id}`, { method: 'DELETE' });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };

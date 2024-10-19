@@ -13,6 +13,8 @@ import { Button } from 'rizzui';
 import { PiPlusBold } from 'react-icons/pi';
 import Link from 'next/link';
 import { columns } from './columns';
+import { getCurrUser } from '@/utils/sessionlib';
+import { SessionData } from '@/models/session.model';
 
 const pageHeader = {
   title: 'Penjualan',
@@ -48,6 +50,14 @@ export default function SalesOrderDataPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
+  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
+
+  useEffect(() => {
+    const fetchCurrUser = async () => {
+      setCurrUser(await getCurrUser());
+    };
+    fetchCurrUser();
+  }, []);
 
   const fetchSalesOrders = useCallback(async () => {
     try {
@@ -74,6 +84,10 @@ export default function SalesOrderDataPage() {
     }
   }, [pageSize, pageIndex, sorting, filters]);
 
+  useEffect(() => {
+    fetchSalesOrders();
+  }, [fetchSalesOrders]);
+
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
     setPageSize(newPageSize);
@@ -97,17 +111,6 @@ export default function SalesOrderDataPage() {
     }
   };
 
-  const handlePayment = async (id: string) => {
-    try {
-      // const message = await cancelSo(id);
-      toast.success('tes', { duration: 5000 });
-
-      fetchSalesOrders();
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
   const handleCancel = async (id: string) => {
     try {
       const message = await cancelSo(id);
@@ -120,13 +123,8 @@ export default function SalesOrderDataPage() {
   };
 
   const actionHandlers: any = {
-    payment: (id: string) => handlePayment(id),
     cancel: (id: string) => handleCancel(id),
   };
-  
-  useEffect(() => {
-    fetchSalesOrders();
-  }, [fetchSalesOrders]);
 
   return (
     <>
@@ -149,7 +147,7 @@ export default function SalesOrderDataPage() {
 
       <BasicTable<SalesOrderModel>
         data={salesOrders}
-        columns={columns}
+        columns={columns({ actionHandlers, fetchSalesOrders, role: currUser.role })}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
@@ -158,7 +156,6 @@ export default function SalesOrderDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actionHandlers={actionHandlers}
       />
     </>
   );

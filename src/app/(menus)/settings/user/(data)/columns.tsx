@@ -2,15 +2,14 @@ import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/utils/t
 import { routes } from '@/config/routes';
 import { UserModel } from '@/models/user.model';
 import cn from '@/utils/class-names';
-import { createColumnHelper, Row } from '@tanstack/react-table';
+import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip } from 'rizzui';
-import { TableColumnsProps } from '@/models/global.model';
 import { FiRefreshCcw } from 'react-icons/fi';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 
-function ActionColumn({ row, actionHandlers, role }: { row: Row<UserModel>; actionHandlers: any; role: string }) {
+function ActionColumn({ row, actionHandlers }: { row: Row<UserModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
 
   return (
@@ -54,12 +53,12 @@ function ActionColumn({ row, actionHandlers, role }: { row: Row<UserModel>; acti
 
 const columnHelper = createColumnHelper<UserModel>();
 
-export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
+export const columns = (actionHandlers: any): ColumnDef<UserModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 100,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
   columnHelper.accessor('name', {
     id: 'name',

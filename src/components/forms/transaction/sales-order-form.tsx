@@ -192,7 +192,7 @@ export default function SalesOrderForm({
 
       updateTotalSoldAmount('productDetails', setTotalProductSoldAmount); // update total amount of all sold product
       updateDiscount();
-      updateGrandTotal();
+      updateGrandTotalAndPayment();
     }, 300),
     []
   );
@@ -206,7 +206,7 @@ export default function SalesOrderForm({
       setValue(`serviceDetails.${idx}.totalPrice`, detail.sellingPrice * detail.quantity);
 
       updateTotalSoldAmount('serviceDetails', setTotalServiceSoldAmount); // update total amount of all sold service
-      updateGrandTotal();
+      updateGrandTotalAndPayment();
     }, 500),
     []
   );
@@ -268,7 +268,7 @@ export default function SalesOrderForm({
     setValue('discount', totalDiscount);
   };
 
-  const updateGrandTotal = () => {
+  const updateGrandTotalAndPayment = () => {
     const formValues = getValues();
     const grandTotal = formValues.subTotal - formValues.discount;
 
@@ -279,7 +279,7 @@ export default function SalesOrderForm({
       setValue('paidAmount', grandTotal);
     }
     // if paidAmount exceed grandTotal, patch paidAmount to grandTotal and status 'Lunas'
-    else if (formValues.paidAmount >= grandTotal) {
+    else if (formValues.paidAmount >= grandTotal && grandTotal !== 0) {
       setValue('paymentType', 'Lunas');
       setValue('paidAmount', grandTotal);
     }

@@ -4,6 +4,7 @@ import UserForm from '@/components/forms/settings/user-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CreateUpdateUserModel, UpdateUserSchema, UserModel } from '@/models/user.model';
+import { getUserById, updateUser } from '@/services/user-service';
 import { apiFetch } from '@/utils/api';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -25,18 +26,15 @@ const pageHeader = {
 
 export default function EditUserPage() {
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<UserModel>(new UserModel());
   const [isLoading, setIsLoading] = useState(true);
 
-  const updateUser = async (data: CreateUpdateUserModel) => {
+  const update = async (payload: CreateUpdateUserModel) => {
     try {
-      const response = await apiFetch(`/api/users/${id}`, {
-        method: 'PUT',
-        body: data,
-      });
+      const message = await updateUser(id, payload);
+      toast.success(message, { duration: 4000 });
 
-      toast.success(response.message, { duration: 4000 });
       router.push(routes.settings.user.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -44,11 +42,10 @@ export default function EditUserPage() {
   };
 
   useEffect(() => {
-    const getUserById = async () => {
+    const fetchUser = async () => {
       try {
         setIsLoading(true);
-        const response = await apiFetch(`/api/users/${id}`, { method: 'GET' });
-        setUser(response.result);
+        setUser(await getUserById(id));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       } finally {
@@ -56,7 +53,7 @@ export default function EditUserPage() {
       }
     };
 
-    getUserById();
+    fetchUser();
   }, [id]);
 
   return (
@@ -67,7 +64,7 @@ export default function EditUserPage() {
         defaultValues={new CreateUpdateUserModel(user)}
         schema={UpdateUserSchema}
         isLoading={isLoading}
-        onSubmit={updateUser}
+        onSubmit={update}
       />
     </>
   );

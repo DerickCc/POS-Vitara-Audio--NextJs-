@@ -14,6 +14,8 @@ import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { columns } from './columns';
 import BasicTable from '@/components/tables/basic-table';
 import { browsePo, cancelPo, deletePo, finishPo } from '@/services/purchase-order-service';
+import { SessionData } from '@/models/session.model';
+import { getCurrUser } from '@/utils/sessionlib';
 
 const pageHeader = {
   title: 'Pembelian',
@@ -49,6 +51,14 @@ export default function PurchaseOrderDataPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
+  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
+  
+  useEffect(() => {
+    const fetchCurrUser = async () => {
+      setCurrUser(await getCurrUser());
+    };
+    fetchCurrUser();
+  }, []);
 
   const fetchPurchaseOrders = useCallback(async () => {
     try {
@@ -75,6 +85,10 @@ export default function PurchaseOrderDataPage() {
     }
   }, [pageSize, pageIndex, sorting, filters]);
 
+  useEffect(() => {
+    fetchPurchaseOrders();
+  }, [fetchPurchaseOrders]);
+  
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
     setPageSize(newPageSize);
@@ -131,39 +145,11 @@ export default function PurchaseOrderDataPage() {
     }
   };
 
-  const actions: TableAction[] = [
-    {
-      label: 'Selesai',
-      title: 'Selesaikan Transaksi Pembelian',
-      description: 'Transaksi yang sudah diselesaikan tidak dapat diedit atau dihapus lagi. Apakah Anda yakin?',
-      color: 'green',
-      handler: (id: string) => handleFinish(id),
-    },
-    {
-      label: 'Hapus',
-      title: 'Hapus Transaksi Pembelian',
-      description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
-      color: 'red',
-      handler: (id: string) => handleDelete(id),
-    },
-    {
-      label: 'Batal',
-      title: 'Batalkan Transaksi Pembelian',
-      description: 'Stok barang akan dikurangi dengan stok dari detail transaksi pembelian ini. Apakah Anda yakin?',
-      color: 'red',
-      handler: (id: string) => handleCancel(id),
-    },
-  ];
-
   const actionHandlers: any = {
     finish: (id: string) => handleFinish(id),
     delete: (id: string) => handleDelete(id),
     cancel: (id: string) => handleCancel(id),
   };
-
-  useEffect(() => {
-    fetchPurchaseOrders();
-  }, [fetchPurchaseOrders]);
 
   return (
     <>
@@ -186,7 +172,7 @@ export default function PurchaseOrderDataPage() {
 
       <BasicTable<PurchaseOrderModel>
         data={purchaseOrders}
-        columns={columns}
+        columns={columns({ actionHandlers, role: currUser.role })}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
@@ -195,7 +181,6 @@ export default function PurchaseOrderDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actionHandlers={actionHandlers}
       />
     </>
   );

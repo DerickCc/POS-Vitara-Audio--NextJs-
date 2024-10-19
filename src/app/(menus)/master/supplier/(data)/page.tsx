@@ -12,7 +12,6 @@ import toast from 'react-hot-toast';
 import BasicTable from '@/components/tables/basic-table';
 import { columns } from './columns';
 import { SupplierModel } from '@/models/supplier.model';
-import { TableAction } from '@/models/global.model';
 import { browseSupplier, deleteSupplier } from '@/services/supplier-service';
 
 const pageHeader = {
@@ -68,6 +67,10 @@ export default function SupplierDataPage() {
     }
   }, [pageSize, pageIndex, sorting, filters]);
 
+  useEffect(() => {
+    fetchSuppliers();
+  }, [fetchSuppliers]);
+
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
     setPageSize(newPageSize);
@@ -106,10 +109,6 @@ export default function SupplierDataPage() {
     delete: (id: string) => handleDelete(id),
   };
 
-  useEffect(() => {
-    fetchSuppliers();
-  }, [fetchSuppliers]);
-
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
@@ -131,7 +130,7 @@ export default function SupplierDataPage() {
 
       <BasicTable<SupplierModel>
         data={suppliers}
-        columns={columns}
+        columns={columns(actionHandlers)}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
@@ -140,7 +139,6 @@ export default function SupplierDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actionHandlers={actionHandlers}
       />
     </>
   );

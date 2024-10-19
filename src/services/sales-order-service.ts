@@ -1,6 +1,6 @@
-import { PaginatedApiResponse, PagingModel } from "@/models/global.model";
-import { SalesOrderModel, SalesOrderPaymentModel } from "@/models/sales-order";
-import { apiFetch, toQueryString } from "@/utils/api";
+import { PaginatedApiResponse, PagingModel } from '@/models/global.model';
+import { SalesOrderModel, SalesOrderPaymentModel } from '@/models/sales-order';
+import { apiFetch, toQueryString } from '@/utils/api';
 
 // GET
 export const browseSo = async ({
@@ -24,7 +24,7 @@ export const browseSo = async ({
 
     return response;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -33,25 +33,25 @@ export const getNewSoCode = async (): Promise<string> => {
     const response = await apiFetch(`/api/sales-orders/new-so-code`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
-}
+};
 
 export const getSoById = async (id: string): Promise<SalesOrderModel> => {
   try {
     const response = await apiFetch(`/api/sales-orders/${id}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
-}
+};
 
 export const searchSo = async (name?: string): Promise<any[]> => {
   try {
     const response = await apiFetch(`/api/sales-orders/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -64,7 +64,7 @@ export const createSo = async (payload: SalesOrderModel): Promise<string> => {
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -77,7 +77,7 @@ export const updateSo = async (id: string, payload: SalesOrderModel): Promise<st
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -85,22 +85,22 @@ export const updateSoPayment = async (payload: SalesOrderPaymentModel): Promise<
   try {
     const response = await apiFetch(`/api/sales-orders/${payload.soId}/payment`, {
       method: 'POST',
-      body: payload
+      body: payload,
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
 export const cancelSo = async (id: string): Promise<string> => {
   try {
     const response = await apiFetch(`/api/sales-orders/${id}/cancel`, {
-      method: 'PUT'
+      method: 'PUT',
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 

@@ -1,6 +1,6 @@
 import { routes } from '@/config/routes';
-import { Colors, TableColumnsProps } from '@/models/global.model';
-import { createColumnHelper, Row } from '@tanstack/react-table';
+import { Colors, PoStatusType } from '@/models/global.model';
+import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuEye, LuMoreVertical, LuPencil, LuCircleSlash } from 'react-icons/lu';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
@@ -106,7 +106,13 @@ function ActionColumn({
 
 const columnHelper = createColumnHelper<PurchaseOrderModel>();
 
-export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
+export const columns = ({
+  actionHandlers,
+  role,
+}: {
+  actionHandlers: any;
+  role: string;
+}): ColumnDef<PurchaseOrderModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
@@ -153,7 +159,7 @@ export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue();
+      const status = info.getValue() as PoStatusType;
       const color = mapTrxStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },

@@ -14,6 +14,7 @@ import BasicTable from '@/components/tables/basic-table';
 import { columns } from './colomns';
 import { TableAction } from '@/models/global.model';
 import { ProductModel } from '@/models/product.model';
+import { browseProduct, deleteProduct } from '@/services/product-service';
 
 const pageHeader = {
   title: 'Barang',
@@ -29,7 +30,7 @@ const pageHeader = {
 };
 
 export default function ProductDataPage() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<ProductModel[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -48,23 +49,14 @@ export default function ProductDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const browseProduct = useCallback(async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await apiFetch(
-        `/api/products${toQueryString({
-          pageSize,
-          pageIndex,
-          sortColumn,
-          sortOrder,
-          ...filters,
-        })}`,
-        { method: 'GET' }
-      );
+      const response = await browseProduct({ pageSize, pageIndex, sortColumn, sortOrder, filters })
 
       setProducts(response.result);
       setTotalRowCount(response.recordsTotal);
@@ -74,6 +66,10 @@ export default function ProductDataPage() {
       setIsLoading(false);
     }
   }, [pageSize, pageIndex, sorting, filters]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
@@ -91,7 +87,7 @@ export default function ProductDataPage() {
 
   const handleSearch = () => {
     if (pageIndex === 0 && localFilters === filters) {
-      browseProduct();
+      fetchProducts();
     } else {
       setPageIndex(0);
       setFilters(localFilters);
@@ -100,10 +96,10 @@ export default function ProductDataPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
+      const message = await deleteProduct(id);
 
-      toast.success(response.message, { duration: 5000 });
-      browseProduct();
+      toast.success(message, { duration: 5000 });
+      fetchProducts();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
@@ -112,10 +108,6 @@ export default function ProductDataPage() {
   const actionHandlers: any = {
     delete: (id: string) => handleDelete(id),
   };
-
-  useEffect(() => {
-    browseProduct();
-  }, [browseProduct]);
 
   return (
     <>
@@ -138,7 +130,7 @@ export default function ProductDataPage() {
 
       <BasicTable<ProductModel>
         data={products}
-        columns={columns}
+        columns={columns(actionHandlers)}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
@@ -147,7 +139,6 @@ export default function ProductDataPage() {
         setSorting={handleSortingChange}
         isLoading={isLoading}
         totalRowCount={totalRowCount}
-        actionHandlers={actionHandlers}
       />
     </>
   );

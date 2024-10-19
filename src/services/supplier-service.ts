@@ -24,7 +24,7 @@ export const browseSupplier = async ({
 
     return response;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -33,16 +33,16 @@ export const getSupplierById = async (id: string): Promise<SupplierModel> => {
     const response = await apiFetch(`/api/suppliers/${id}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
-}
+};
 
 export const searchSupplier = async (name?: string): Promise<SearchSupplierModel[]> => {
   try {
     const response = await apiFetch(`/api/suppliers/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -55,7 +55,7 @@ export const createSupplier = async (payload: SupplierModel): Promise<string> =>
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -68,7 +68,7 @@ export const updateSupplier = async (id: string, payload: SupplierModel): Promis
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -78,6 +78,6 @@ export const deleteSupplier = async (id: string): Promise<string> => {
     const response = await apiFetch(`/api/suppliers/${id}`, { method: 'DELETE' });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };

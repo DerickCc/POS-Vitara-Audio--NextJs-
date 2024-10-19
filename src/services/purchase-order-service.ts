@@ -1,6 +1,6 @@
-import { PaginatedApiResponse, PagingModel } from "@/models/global.model";
-import { PurchaseOrderModel } from "@/models/purchase-order.model";
-import { apiFetch, toQueryString } from "@/utils/api";
+import { PaginatedApiResponse, PagingModel } from '@/models/global.model';
+import { PurchaseOrderModel } from '@/models/purchase-order.model';
+import { apiFetch, toQueryString } from '@/utils/api';
 
 // GET
 export const browsePo = async ({
@@ -24,7 +24,7 @@ export const browsePo = async ({
 
     return response;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -33,16 +33,16 @@ export const getPoById = async (id: string): Promise<PurchaseOrderModel> => {
     const response = await apiFetch(`/api/purchase-orders/${id}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
-}
+};
 
 export const searchPo = async (name?: string): Promise<any[]> => {
   try {
     const response = await apiFetch(`/api/purchase-orders/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -55,7 +55,7 @@ export const createPo = async (payload: PurchaseOrderModel): Promise<string> => 
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -68,29 +68,29 @@ export const updatePo = async (id: string, payload: PurchaseOrderModel): Promise
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
 export const finishPo = async (id: string): Promise<string> => {
   try {
     const response = await apiFetch(`/api/purchase-orders/${id}/finish`, {
-      method: 'PUT'
+      method: 'PUT',
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
 export const cancelPo = async (id: string): Promise<string> => {
   try {
     const response = await apiFetch(`/api/purchase-orders/${id}/cancel`, {
-      method: 'PUT'
+      method: 'PUT',
     });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };
 
@@ -100,6 +100,6 @@ export const deletePo = async (id: string): Promise<string> => {
     const response = await apiFetch(`/api/purchase-orders/${id}`, { method: 'DELETE' });
     return response.message;
   } catch (e) {
-    throw (e + '');
+    throw e + '';
   }
 };

@@ -1,6 +1,6 @@
 import { routes } from '@/config/routes';
 import { formatToCurrency, formatToDecimal } from '@/utils/helper-function';
-import { createColumnHelper, Row } from '@tanstack/react-table';
+import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip, cn } from 'rizzui';
@@ -9,10 +9,9 @@ import imgPlaceholder from '@public/image-placeholder.png';
 import { ProductModel } from '@/models/product.model';
 import { actionIconColorClass } from '@/utils/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
-import { TableColumnsProps } from '@/models/global.model';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 
-function ActionColumn({ row, actionHandlers, role }: { row: Row<ProductModel>; actionHandlers: any; role: string }) {
+function ActionColumn({ row, actionHandlers }: { row: Row<ProductModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
 
   return (
@@ -48,7 +47,7 @@ function ActionColumn({ row, actionHandlers, role }: { row: Row<ProductModel>; a
           </ActionIcon>
         </Tooltip>
       </div>
-      
+
       <ConfirmationModalComponent />
     </>
   );
@@ -56,12 +55,12 @@ function ActionColumn({ row, actionHandlers, role }: { row: Row<ProductModel>; a
 
 const columnHelper = createColumnHelper<ProductModel>();
 
-export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
+export const columns = (actionHandlers: any): ColumnDef<ProductModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 100,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
   columnHelper.accessor('photo', {
     id: 'photo',

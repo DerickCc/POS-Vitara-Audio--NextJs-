@@ -1,15 +1,14 @@
 import { routes } from '@/config/routes';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { CustomerModel } from '@/models/customer.model';
-import { TableColumnsProps } from '@/models/global.model';
 import { actionIconColorClass } from '@/utils/tailwind-classes';
-import { createColumnHelper, Row } from '@tanstack/react-table';
+import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip, cn } from 'rizzui';
 
-function ActionColumn({ row, actionHandlers, role }: { row: Row<CustomerModel>; actionHandlers: any; role: string }) {
+function ActionColumn({ row, actionHandlers }: { row: Row<CustomerModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
 
   return (
@@ -53,12 +52,12 @@ function ActionColumn({ row, actionHandlers, role }: { row: Row<CustomerModel>; 
 
 const columnHelper = createColumnHelper<CustomerModel>();
 
-export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
+export const columns = (actionHandlers: any): ColumnDef<CustomerModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 100,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',

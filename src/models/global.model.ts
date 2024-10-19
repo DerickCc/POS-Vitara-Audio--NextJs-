@@ -1,7 +1,9 @@
-import { OnChangeFn, SortingState } from '@tanstack/react-table';
+import { ColumnDef, OnChangeFn, SortingState } from '@tanstack/react-table';
 import { Dispatch, SetStateAction } from 'react';
 
 export type Colors = 'red' | 'green' | 'yellow' | 'blue' | 'purple' | 'gray';
+export type PoStatusType = 'Dalam Proses' | 'Selesai' | 'Batal';
+export type SoStatusType = 'Belum Lunas' | 'Lunas' | 'Batal';
 
 export interface TableAction {
   label: string;
@@ -12,21 +14,9 @@ export interface TableAction {
   handler: (id: string) => void;
 }
 
-export interface TableColumnsProps {
-  actionHandlers: any;
-  role: string;
-}
-
-// export interface ActionColumnProps {
-//   openModal: (options: ModalOptions) => void;
-//   ConfirmationModalComponent: React.FC;
-//   role: string;
-// }
-
 export interface BasicTableProps<T> {
   data: T[];
-  // columns: ({ actions, openModal, ConfirmationModalComponent, role }: TableColumnsProps) => any[];
-  columns: ({ actionHandlers, role }: TableColumnsProps) => any[];
+  columns: ColumnDef<T>[];
   pageSize: number;
   setPageSize: (size: number) => void;
   pageIndex: number;
@@ -35,7 +25,6 @@ export interface BasicTableProps<T> {
   setSorting: OnChangeFn<SortingState>;
   isLoading: boolean;
   totalRowCount: number;
-  actionHandlers: any;
 }
 
 export interface FiltersProps<T> {

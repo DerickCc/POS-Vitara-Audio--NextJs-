@@ -1,6 +1,6 @@
 'use client';
-import { Colors, TableColumnsProps } from '@/models/global.model';
-import { createColumnHelper } from '@tanstack/react-table';
+import { Colors, SoStatusType } from '@/models/global.model';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
 import { mapSoStatusToColor } from '@/config/global-variables';
@@ -15,7 +15,17 @@ import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt } from 'react-icons/fa';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
 
-function ActionColumn({ row, actionHandlers, role }: { row: Row<SalesOrderModel>; actionHandlers: any; role: string }) {
+function ActionColumn({
+  row,
+  actionHandlers,
+  fetchSalesOrders,
+  role,
+}: {
+  row: Row<SalesOrderModel>;
+  actionHandlers: any;
+  fetchSalesOrders: () => void;
+  role: string;
+}) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
 
@@ -37,18 +47,21 @@ function ActionColumn({ row, actionHandlers, role }: { row: Row<SalesOrderModel>
           </Link>
 
           {/* pay */}
-          <Dropdown.Item
-            onClick={() => {
-              openPaymentModal({
-                soId: row.original.id,
-                soCode: row.original.code,
-                grandTotal: row.original.grandTotal,
-                paidAmount: row.original.paidAmount,
-              });
-            }}
-          >
-            <FaRegMoneyBillAlt className='text-green-500 w-5 h-5 cursor-pointer mr-3' /> Bayar
-          </Dropdown.Item>
+          {row.original.status === 'Belum Lunas' && (
+            <Dropdown.Item
+              onClick={() => {
+                openPaymentModal({
+                  soId: row.original.id,
+                  soCode: row.original.code,
+                  grandTotal: row.original.grandTotal,
+                  paidAmount: row.original.paidAmount,
+                  fetchSalesOrders,
+                });
+              }}
+            >
+              <FaRegMoneyBillAlt className='text-green-500 w-5 h-5 cursor-pointer mr-3' /> Bayar
+            </Dropdown.Item>
+          )}
 
           {/* cancel */}
           {role === 'Admin' && (
@@ -76,12 +89,22 @@ function ActionColumn({ row, actionHandlers, role }: { row: Row<SalesOrderModel>
 
 const columnHelper = createColumnHelper<SalesOrderModel>();
 
-export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
+export const columns = ({
+  actionHandlers,
+  fetchSalesOrders,
+  role,
+}: {
+  actionHandlers: any;
+  fetchSalesOrders: () => void;
+  role: string;
+}): ColumnDef<SalesOrderModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
+    cell: ({ row }) => (
+      <ActionColumn row={row} actionHandlers={actionHandlers} fetchSalesOrders={fetchSalesOrders} role={role} />
+    ),
   }),
   columnHelper.accessor('code', {
     id: 'code',
@@ -137,7 +160,7 @@ export const columns = ({ actionHandlers, role }: TableColumnsProps) => [
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue();
+      const status = info.getValue() as SoStatusType;
       const color = mapSoStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
