@@ -19,7 +19,6 @@ export class SalesOrderProductDetailModel {
   uom: string; // for UI
   stock: number; // for UI
   totalPrice: number;
-  profit: number;
 
   constructor(data: any = {}) {
     this.id = data.id;
@@ -33,6 +32,5 @@ export class SalesOrderProductDetailModel {
     this.uom = data.uom;
     this.stock = data.stock || 0;
     this.totalPrice = data.totalPrice || 0;
-    this.profit = data.profit || 0;
   }
 }

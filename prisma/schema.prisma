@@ -210,7 +210,6 @@ model SalesOrderProductDetails {
   sellingPrice    Decimal   @map("selling_price") @db.Decimal(10, 2)
   quantity        Decimal   @db.Decimal(10, 2)
   totalPrice      Decimal   @map("total_price") @db.Decimal(10, 2)
-  profit          Decimal   @db.Decimal(10, 2)
   createdBy       String    @map("created_by")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedBy       String?   @map("updated_by")

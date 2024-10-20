@@ -230,8 +230,6 @@ export async function POST(request: Request) {
             throw new Error('Barang yang ingin di-update tidak ditemukan');
           }
 
-          const profit = new Decimal(d.sellingPrice).minus(product.costPrice).times(d.quantity);
-
           // create soProductDetail
           promises.push(
             prisma.salesOrderProductDetails.create({
@@ -247,7 +245,6 @@ export async function POST(request: Request) {
                 sellingPrice: d.sellingPrice,
                 quantity: d.quantity,
                 totalPrice: d.sellingPrice * d.quantity,
-                profit,
                 CreatedBy: {
                   connect: { id: userId },
                 },

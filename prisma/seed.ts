@@ -38,6 +38,18 @@ async function main() {
       CreatedBy: { connect: { id: user.id }}
     },
   });
+
+  const product = await prisma.products.create({
+    data: {
+      code: 'PRD00000001',
+      name: 'Stir Mobil',
+      restockThreshold: 10,
+      uom: 'Pcs',
+      purchasePrice: 50,
+      sellingPrice: 100,
+      CreatedBy: { connect: { id: user.id }}
+    },
+  });
 }
 
 main()

@@ -35,15 +35,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           throw new Error('Barang yang ingin di-update tidak ditemukan');
         }
 
-        const totalCost = product.stock.times(product.costPrice); // total cost before substracted with purchase product
-        const updatedStock = product.stock.minus(d.quantity); // stock substracted added with purchased product qty
+        // total cost before substracted with purchase product
+        const totalCost = product.stock.times(product.costPrice); 
+        
+        // stock substracted added with purchased product qty
+        const updatedStock = product.stock.minus(d.quantity); 
+        
         if (updatedStock.isNegative()) {
           throw new Error(`Transaksi tidak dapat dibatalkan karena stok ${product.name} akan minus`);
         }
 
         const updatedCostPrice = totalCost.minus(d.totalPrice).isZero()
           ? 0
-          : totalCost.minus(d.totalPrice).div(updatedStock); // cost price calculated after purchase product
+          : totalCost.minus(d.totalPrice).div(updatedStock); // cost price calculated after cancel purchase product
 
         return prisma.products.update({
           where: { id: d.productId },

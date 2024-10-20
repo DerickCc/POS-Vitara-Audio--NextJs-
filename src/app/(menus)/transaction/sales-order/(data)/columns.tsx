@@ -64,7 +64,7 @@ function ActionColumn({
           )}
 
           {/* cancel */}
-          {role === 'Admin' && (
+          {role === 'Admin' && row.original.status !== 'Batal' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
