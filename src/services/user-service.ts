@@ -65,7 +65,7 @@ export const updateUser = async (id: string, payload: CreateUpdateUserModel): Pr
 
 export const changeUserStatus = async (id: string): Promise<string> => {
   try {
-    const response = await apiFetch(`/api/users/${id}`, { method: 'PUT' });
+    const response = await apiFetch(`/api/users/${id}/change-status`, { method: 'PUT' });
     return response.message;
   } catch (e) {
     throw e + '';
