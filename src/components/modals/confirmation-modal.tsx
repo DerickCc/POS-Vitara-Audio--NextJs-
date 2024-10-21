@@ -27,11 +27,11 @@ export default function ConfirmationModal({
           {description}
         </p>
         <div className='flex items-center justify-center gap-4'>
-          <Button className={cn(buttonColorClass.red, baseButtonClass)} style={{ width: 75 }} onClick={handleConfirm}>
-            Ya
-          </Button>
           <Button variant='outline' style={{ width: 75 }} onClick={onClose}>
             Tidak
+          </Button>
+          <Button className={cn(buttonColorClass.red, baseButtonClass)} style={{ width: 75 }} onClick={handleConfirm}>
+            Ya
           </Button>
         </div>
       </div>

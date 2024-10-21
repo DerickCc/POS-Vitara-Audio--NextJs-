@@ -118,7 +118,7 @@ export default function SalesOrderDataPage() {
 
       fetchSalesOrders();
     } catch (e) {
-      toast.error(e + '', { duration: 5000 });
+      toast.error(e + '', { duration: 10000 });
     }
   };
 

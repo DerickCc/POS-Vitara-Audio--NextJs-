@@ -1,6 +1,7 @@
 import { PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 // BrowsePurchaseOrders
@@ -74,9 +75,14 @@ export async function GET(request: Request) {
     const purchaseOrders = await db.purchaseOrders.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
-      orderBy: {
-        [sortColumn]: sortOrder,
-      },
+      orderBy:
+        sortColumn === 'supplierName'
+          ? {
+              Supplier: { name: sortOrder as Prisma.SortOrder },
+            }
+          : {
+              [sortColumn]: sortOrder,
+            },
       where,
       include: {
         Supplier: {

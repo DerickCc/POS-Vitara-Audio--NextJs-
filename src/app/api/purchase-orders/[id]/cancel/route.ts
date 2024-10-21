@@ -27,27 +27,73 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     await db.$transaction(async (prisma) => {
+      const cancelledProducts = po.PurchaseOrderDetails.map((d) => d.productId);
+
       // update stock and costPrice of each product in details
-      const updatePromises = po.PurchaseOrderDetails.map(async (d) => {
+      const adjustProductPromises = po.PurchaseOrderDetails.map(async (d) => {
+        // Fetch all purchase orders that were created after the canceled sales order, is not 'batal', and contains the cancelled products
+        const affectedPurchaseOrders = await prisma.purchaseOrders.findMany({
+          where: {
+            PurchaseOrderDetails: {
+              some: {
+                productId: { in: cancelledProducts },
+              },
+            },
+            createdAt: { gt: po.createdAt },
+            status: { not: 'Batal' },
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        });
+
+        if (affectedPurchaseOrders.length > 0) {
+          throw new Error(
+            'Transaksi ini tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.'
+          );
+        }
+
+        // Fetch all sales orders that were created after the canceled sales order
+        const affectedSalesOrders = await prisma.salesOrders.findMany({
+          where: {
+            SalesOrderProductDetails: {
+              some: {
+                productId: { in: cancelledProducts },
+              },
+            },
+            createdAt: { gt: po.createdAt },
+            status: { not: 'Batal' },
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        });
+
+        if (affectedSalesOrders.length > 0) {
+          throw new Error(
+            'Transaksi ini tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.'
+          );
+        }
+
         const product = await prisma.products.findUnique({ where: { id: d.productId } });
 
         if (!product) {
           throw new Error('Barang yang ingin di-update tidak ditemukan');
         }
 
-        // total cost before substracted with purchase product
-        const totalCost = product.stock.times(product.costPrice); 
-        
+        // total cost of product in db rn
+        const existingTotalCost = product.stock.times(product.costPrice);
+
         // stock substracted added with purchased product qty
-        const updatedStock = product.stock.minus(d.quantity); 
-        
+        const updatedStock = product.stock.minus(d.quantity);
+
         if (updatedStock.isNegative()) {
           throw new Error(`Transaksi tidak dapat dibatalkan karena stok ${product.name} akan minus`);
         }
 
-        const updatedCostPrice = totalCost.minus(d.totalPrice).isZero()
+        const updatedCostPrice = existingTotalCost.minus(d.totalPrice).isZero()
           ? 0
-          : totalCost.minus(d.totalPrice).div(updatedStock); // cost price calculated after cancel purchase product
+          : existingTotalCost.minus(d.totalPrice).div(updatedStock); // cost price calculated after cancel purchase product
 
         return prisma.products.update({
           where: { id: d.productId },
@@ -61,7 +107,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         });
       });
 
-      await Promise.all(updatePromises);
+      await Promise.all(adjustProductPromises);
 
       // set po status to 'Batal'
       await db.purchaseOrders.update({
@@ -85,6 +131,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     if (e.message.includes('akan minus')) {
       return NextResponse.json({ message: e.message }, { status: 422 }); // unprocessable entity
+    }
+    if (e.message.includes('tidak dapat dibatalkan')) {
+      return NextResponse.json({ message: e.message }, { status: 409 }); // conflict
     }
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

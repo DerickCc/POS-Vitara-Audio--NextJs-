@@ -42,11 +42,11 @@ async function main() {
   const product = await prisma.products.create({
     data: {
       code: 'PRD00000001',
-      name: 'Stir Mobil',
+      name: 'Stir Mobil Universal',
       restockThreshold: 10,
       uom: 'Pcs',
-      purchasePrice: 50,
-      sellingPrice: 100,
+      purchasePrice: 50000,
+      sellingPrice: 100000,
       CreatedBy: { connect: { id: user.id }}
     },
   });

@@ -1,6 +1,7 @@
 import { SalesOrderSchema } from '@/models/sales-order';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
@@ -75,9 +76,14 @@ export async function GET(request: Request) {
     const salesOrders = await db.salesOrders.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
-      orderBy: {
-        [sortColumn]: sortOrder,
-      },
+      orderBy:
+        sortColumn === 'customerName'
+          ? {
+              Customer: { name: sortOrder as Prisma.SortOrder },
+            }
+          : {
+              [sortColumn]: sortOrder,
+            },
       where,
       include: {
         Customer: {
@@ -104,7 +110,7 @@ export async function GET(request: Request) {
         Customer: undefined,
         PaymentHistories: undefined,
         CreatedBy: undefined,
-      }
+      };
     });
 
     return NextResponse.json({ message: 'Success', result: mappedSalesOrders, recordsTotal }, { status: 200 });
@@ -296,8 +302,8 @@ export async function POST(request: Request) {
           CreatedBy: {
             connect: { id: userId },
           },
-        }
-      })
+        },
+      });
     });
 
     return NextResponse.json({ message: 'Data Transaksi Penjualan berhasil disimpan' }, { status: 201 });

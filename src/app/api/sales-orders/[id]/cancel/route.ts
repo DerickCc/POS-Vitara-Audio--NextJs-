@@ -28,6 +28,52 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     await db.$transaction(async (prisma) => {
+      const cancelledProducts = so.SalesOrderProductDetails.map((d) => d.productId);
+
+      // Fetch all purchase orders that were created after the canceled sales order, is not 'batal', and contains the cancelled products
+      const affectedPurchaseOrders = await prisma.purchaseOrders.findMany({
+        where: {
+          PurchaseOrderDetails: {
+            some: {
+              productId: { in: cancelledProducts },
+            },
+          },
+          createdAt: { gt: so.createdAt },
+          status: { not: 'Batal' },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
+
+      if (affectedPurchaseOrders.length > 0) {
+        throw new Error(
+          'Transaksi ini tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.'
+        );
+      }
+
+      // Fetch all sales orders that were created after the canceled sales order
+      const affectedSalesOrders = await prisma.salesOrders.findMany({
+        where: {
+          SalesOrderProductDetails: {
+            some: {
+              productId: { in: cancelledProducts },
+            }
+          },
+          createdAt: { gt: so.createdAt },
+          status: { not: 'Batal' },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
+
+      if (affectedSalesOrders.length > 0) {
+        throw new Error(
+          'Transaksi ini tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.'
+        );
+      }
+
       // update stock and costPrice of each product in details
       const adjustProductPromises = so.SalesOrderProductDetails.map(async (d) => {
         const product = await prisma.products.findUnique({ where: { id: d.productId } });
@@ -36,7 +82,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           throw new Error('Barang yang ingin di-update tidak ditemukan');
         }
 
-        // total cost rn in db
+        // total cost of product in db rn
         const existingTotalCost = product.stock.times(product.costPrice);
 
         // total cost of the cancelled product
@@ -63,60 +109,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
       await Promise.all(adjustProductPromises);
 
-      const cancelledProducts = so.SalesOrderProductDetails.map((d) => d.productId);
-
-      // Fetch all purchase orders detail of product (in the sales order) that were created after the canceled sales order
-      const affectedPoDetails = await prisma.purchaseOrderDetails.findMany({
-        where: {
-          productId: { in: cancelledProducts },
-          createdAt: { gt: so.createdAt },
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-      });
-
-      // Fetch all sales orders detail of product (in the sales order) that were created after the canceled sales order
-      const affectedSoProductDetails = await prisma.salesOrderProductDetails.findMany({
-        where: {
-          productId: { in: cancelledProducts },
-          createdAt: { gt: so.createdAt },
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-      });
-
-      // recalculate cost price to get accurate profit
-      const recalculateCostPricePromises = affectedSoProductDetails.map(async (sopd) => {
-        // Fetch relevant purchase orders detail for the specific product in the sales order detail
-        const relevantPoDetails = affectedPoDetails.filter(
-          (pod) => pod.productId === sopd.productId && pod.createdAt <= sopd.createdAt
-        );
-
-        let totalQuantity = new Decimal(0);
-        let totalCost = new Decimal(0);
-
-        relevantPoDetails.forEach((pod) => {
-          totalCost = totalCost.plus(pod.quantity.times(pod.purchasePrice));
-          totalQuantity = totalQuantity.plus(pod.quantity);
-        });
-
-        const adjustedCostPrice = totalQuantity.equals(0)
-          ? sopd.costPrice // no purchase orders, use previous cost price
-          : totalCost.div(totalQuantity);
-
-        // Update the costPrice in the SalesOrderProductDetail
-        return prisma.salesOrderProductDetails.update({
-          where: { id: sopd.id },
-          data: {
-            costPrice: adjustedCostPrice,
-          },
-        });
-      });
-
-      await Promise.all(recalculateCostPricePromises);
-
       // set so status to 'Batal'
       await db.salesOrders.update({
         where: { id },
@@ -136,6 +128,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     if (e.message.includes('tidak ditemukan')) {
       return NextResponse.json({ message: e.message }, { status: 404 });
+    }
+    if (e.message.includes('tidak dapat dibatalkan')) {
+      return NextResponse.json({ message: e.message }, { status: 409 }); // conflict
     }
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
