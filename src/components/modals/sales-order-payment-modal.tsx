@@ -52,7 +52,10 @@ export default function SalesOrderPaymentModal({
   const [unpaidAmount, setUnpaidAmount] = useState(0);
 
   useEffect(() => {
-    if (grandTotal !== 0) setTotalDue(grandTotal - paidAmount);
+    if (grandTotal !== 0) {
+      setTotalDue(grandTotal - paidAmount);
+      setUnpaidAmount(grandTotal - paidAmount);
+    }
   }, [grandTotal]);
 
   const onSubmit = async (data: SalesOrderPaymentModel) => {

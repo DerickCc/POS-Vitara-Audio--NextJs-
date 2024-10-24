@@ -6,7 +6,7 @@ export const CURRENCY_OPTIONS = {
   fractions: 2,
 };
 
-export const mapTrxStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Batal: 'red' };
+export const mapPoStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Batal: 'red' };
 export const mapSoStatusToColor = { 'Belum Lunas': 'blue', Lunas: 'green', Batal: 'red' };
 
 // select options

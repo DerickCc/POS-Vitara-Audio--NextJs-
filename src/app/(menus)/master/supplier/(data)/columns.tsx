@@ -36,7 +36,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SupplierModel>; action
             onClick={() => {
               openConfirmationModal({
                 title: 'Hapus Supplier',
-                description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
+                description: 'Supplier yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
                 handleConfirm: () => actionHandlers.delete(row.original.id),
               });
             }}

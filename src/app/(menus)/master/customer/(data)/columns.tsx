@@ -35,7 +35,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<CustomerModel>; action
             onClick={() => {
               openConfirmationModal({
                 title: 'Hapus Pelanggan',
-                description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
+                description: 'Pelanggan yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
                 handleConfirm: () => actionHandlers.delete(row.original.id),
               });
             }}

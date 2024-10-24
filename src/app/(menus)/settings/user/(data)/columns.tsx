@@ -16,7 +16,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<UserModel>; actionHand
     <>
       <div className='flex items-center justify-center gap-3'>
         <Tooltip size='sm' content='Edit' color='invert'>
-          <Link href={routes.master.supplier.edit(row.original.id)} aria-label='ke halaman edit pelanggan'>
+          <Link href={routes.settings.user.edit(row.original.id)} aria-label='ke halaman edit pelanggan'>
             <ActionIcon
               as='span'
               size='sm'

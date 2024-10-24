@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const pageHeader = {
-  title: 'Lihat Penjualan',
+  title: 'Detail Penjualan',
   breadcrumb: [
     {
       name: 'Transaksi',
@@ -20,7 +20,7 @@ const pageHeader = {
       name: 'Penjualan',
     },
     {
-      name: 'Lihat Penjualan',
+      name: 'Detail Penjualan',
     },
   ],
 };

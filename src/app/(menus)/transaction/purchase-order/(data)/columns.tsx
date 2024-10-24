@@ -6,7 +6,7 @@ import { LuEye, LuMoreVertical, LuPencil, LuCircleSlash } from 'react-icons/lu';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
-import { mapTrxStatusToColor } from '@/config/global-variables';
+import { mapPoStatusToColor } from '@/config/global-variables';
 import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
@@ -86,9 +86,9 @@ function ActionColumn({
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
-                  title: 'Batalkan Transaksi Penjualan',
+                  title: 'Batalkan Transaksi Pembelian',
                   description:
-                    'Stok barang akan ditambah dengan stok dari detail transaksi penjualan ini. Apakah Anda yakin?',
+                    'Stok barang akan dikurangi dengan stok dari detail transaksi pembelian ini. Apakah Anda yakin?',
                   handleConfirm: () => actionHandlers.cancel(row.original.id),
                 });
               }}
@@ -160,7 +160,7 @@ export const columns = ({
     header: () => 'Status',
     cell: (info) => {
       const status = info.getValue() as PoStatusType;
-      const color = mapTrxStatusToColor[status] as Colors;
+      const color = mapPoStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,
