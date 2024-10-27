@@ -1,16 +1,19 @@
 import path from 'path';
 import fs from 'fs';
-import { writeFile } from "fs/promises";
+import { writeFile } from 'fs/promises';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/utils/sessionlib';
 
 export async function POST(request: any) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
-  
+
   const uploadDir = path.join(process.cwd(), 'public', 'product-photo');
 
   // Check if the directory exists, create if doesnt
@@ -22,38 +25,26 @@ export async function POST(request: any) {
   const file = formData.get('photo');
 
   if (!file) {
-    return NextResponse.json(
-      { message: 'Tidak Ada File yang Diupload' }, 
-      { status: 400 }
-    );
+    return NextResponse.json({ message: 'Tidak Ada File yang Diupload' }, { status: 400 });
   }
 
   // validate file type
   const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { message: 'Tipe file tidak didukung' }, 
-        { status: 400 }
-      );
-    }
+  if (!allowedTypes.includes(file.type)) {
+    return NextResponse.json({ message: 'Tipe file tidak didukung' }, { status: 400 });
+  }
 
   // Convert the file data to a Buffer
   const buffer = Buffer.from(await file.arrayBuffer());
 
   // Replace spaces in the file name with underscores
-  const filename = file.name.replaceAll(" ", "_");
+  const filename = file.name.replaceAll(' ', '_');
 
   try {
     await writeFile(path.join(uploadDir, filename), buffer);
 
-    return NextResponse.json(
-      { message: 'File Berhasil Diupload' }, 
-      { status: 200 }
-    );
+    return NextResponse.json({ message: 'File Berhasil Diupload' }, { status: 200 });
   } catch (e) {
-    return NextResponse.json(
-      { message: 'Error memproses file' }, 
-      { status: 500 }
-    )
+    return NextResponse.json({ message: 'Error memproses file' }, { status: 500 });
   }
 }

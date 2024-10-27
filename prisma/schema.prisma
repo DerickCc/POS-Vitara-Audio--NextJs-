@@ -47,6 +47,21 @@ model Users {
 
   CreatedPaymentHistories PaymentHistories[]
 
+  CreatedPurchaseReturns PurchaseReturns[]
+  UpdatedPurchaseReturns PurchaseReturns[] @relation("UpdatedByUser")
+
+  CreatedPurchaseReturnDetails PurchaseReturnDetails[]
+  UpdatedPurchaseReturnDetails PurchaseReturnDetails[] @relation("UpdatedByUser")
+
+  CreatedSalesReturns SalesReturns[]
+  UpdatedSalesReturns SalesReturns[] @relation("UpdatedByUser")
+
+  CreatedSalesReturnProductDetails SalesReturnProductDetails[]
+  UpdatedSalesReturnProductDetails SalesReturnProductDetails[] @relation("UpdatedByUser")
+
+  CreatedSalesReturnServiceDetails SalesReturnServiceDetails[]
+  UpdatedSalesReturnServiceDetails SalesReturnServiceDetails[] @relation("UpdatedByUser")
+
   @@index([name, accountStatus, role], map: "users_index")
 }
 
@@ -56,7 +71,7 @@ model Customers {
   name         String    @db.VarChar(100)
   licensePlate String    @map("license_plate") @db.VarChar(20)
   phoneNo      String?   @db.VarChar(20)
-  address      String?   @db.VarChar(100)
+  address      String?   @db.VarChar(250)
   createdBy    String    @map("created_by")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedBy    String?   @map("updated_by")
@@ -77,8 +92,8 @@ model Suppliers {
   name             String    @db.VarChar(100)
   pic              String    @db.VarChar(100)
   phoneNo          String?   @db.VarChar(20)
-  address          String?   @db.VarChar(100)
-  remarks          String?   @db.VarChar(250)
+  address          String?   @db.VarChar(250)
+  remarks          String?   @db.VarChar(500)
   receivables      Int       @default(0) @db.Integer()
   receivablesLimit Int       @default(0) @db.Integer()
   createdBy        String    @map("created_by")
@@ -107,7 +122,7 @@ model Products {
   costPriceCode    String    @default("") @map("cost_price_code") @db.VarChar(50)
   purchasePrice    Decimal   @map("purchase_price") @db.Decimal(10, 2)
   sellingPrice     Decimal   @map("selling_price") @db.Decimal(10, 2)
-  remarks          String?   @db.VarChar(250)
+  remarks          String?   @db.VarChar(500)
   createdBy        String    @map("created_by")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedBy        String?   @map("updated_by")
@@ -126,7 +141,7 @@ model Products {
 
 model PurchaseOrders {
   id           String    @id @default(cuid())
-  code         String    @unique @map("code") @db.VarChar(20)
+  code         String    @unique @db.VarChar(20)
   purchaseDate DateTime  @default(now()) @map("purchase_date")
   supplierId   String    @map("supplier_id")
   remarks      String?   @db.VarChar(500)
@@ -141,6 +156,8 @@ model PurchaseOrders {
   Supplier Suppliers @relation(fields: [supplierId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   PurchaseOrderDetails PurchaseOrderDetails[]
+
+  PurchaseReturns PurchaseReturns[]
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
@@ -165,6 +182,8 @@ model PurchaseOrderDetails {
 
   Product Products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
+  PurchaseReturnDetails PurchaseReturnDetails[]
+
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
@@ -172,7 +191,7 @@ model PurchaseOrderDetails {
 
 model SalesOrders {
   id          String    @id @default(cuid())
-  code        String    @unique @map("code") @db.VarChar(20)
+  code        String    @unique @db.VarChar(20)
   salesDate   DateTime  @default(now()) @map("sales_date")
   customerId  String    @map("customer_id")
   paymentType String    @map("payment_type") @db.VarChar(20)
@@ -193,6 +212,8 @@ model SalesOrders {
   SalesOrderServiceDetails SalesOrderServiceDetails[]
 
   PaymentHistories PaymentHistories[]
+
+  SalesReturns SalesReturns[]
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
@@ -219,6 +240,8 @@ model SalesOrderProductDetails {
 
   Product Products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
+  SalesReturnProductDetails SalesReturnProductDetails[]
+
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
@@ -238,6 +261,8 @@ model SalesOrderServiceDetails {
 
   SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
+  SalesReturnServiceDetails SalesReturnServiceDetails[]
+
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
@@ -255,4 +280,113 @@ model PaymentHistories {
   SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model PurchaseReturns {
+  id         String    @id @default(cuid())
+  poId       String    @map("po_id")
+  code       String    @unique @db.VarChar(20)
+  returnDate DateTime  @default(now()) @map("return_date")
+  returnType String    @map("return_type") @db.VarChar(30)
+  grandTotal Decimal   @map("grand_total") @db.Decimal(10, 2)
+  status     String    @default("Dalam Proses") @db.VarChar(50)
+  createdBy  String    @map("created_by")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedBy  String?   @map("updated_by")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+
+  PurchaseOrder PurchaseOrders @relation(fields: [poId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  PurchaseReturnDetails PurchaseReturnDetails[]
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@index([code, returnDate, returnType, grandTotal, status], map: "purchase_returns_index")
+}
+
+model PurchaseReturnDetails {
+  id             String    @id @default(cuid())
+  prId           String    @map("pr_id")
+  podId          String    @map("pod_id")
+  returnQuantity Decimal   @map("return_quantity") @db.Decimal(10, 2)
+  reason         String    @db.VarChar(500)
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedBy      String?   @map("updated_by")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  PurchaseReturn PurchaseReturns @relation(fields: [prId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  PurchaseOrderDetail PurchaseOrderDetails @relation(fields: [podId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model SalesReturns {
+  id         String    @id @default(cuid())
+  soId       String    @map("so_id")
+  code       String    @unique @db.VarChar(20)
+  returnDate DateTime  @default(now()) @map("return_date")
+  grandTotal Decimal   @map("grand_total") @db.Decimal(10, 2)
+  status     String    @default("Selesai") @db.VarChar(50)
+  createdBy  String    @map("created_by")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedBy  String?   @map("updated_by")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+
+  SalesReturnProductDetails SalesReturnProductDetails[]
+
+  SalesReturnServiceDetails SalesReturnServiceDetails[]
+
+  SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@index([code, returnDate, grandTotal, status], map: "sales_returns_index")
+}
+
+model SalesReturnProductDetails {
+  id             String    @id @default(cuid())
+  srId           String    @map("sr_id")
+  sopdId         String    @map("sopd_id")
+  returnQuantity Decimal   @map("return_quantity") @db.Decimal(10, 2)
+  reason         String    @db.VarChar(500)
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedBy      String?   @map("updated_by")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  SalesReturn SalesReturns @relation(fields: [srId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  SalesOrderProductDetail SalesOrderProductDetails @relation(fields: [sopdId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model SalesReturnServiceDetails {
+  id             String    @id @default(cuid())
+  srId           String    @map("sr_id")
+  sosdId         String    @map("sosd_id")
+  returnQuantity Decimal   @map("return_quantity") @db.Decimal(10, 2)
+  reason         String    @db.VarChar(500)
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedBy      String?   @map("updated_by")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  SalesReturn SalesReturns @relation(fields: [srId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  SalesOrderServiceDetail SalesOrderServiceDetails @relation(fields: [sosdId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }

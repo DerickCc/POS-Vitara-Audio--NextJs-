@@ -1,30 +1,24 @@
-import { LoginSchema } from "@/models/session.model";
-import { db } from "@/utils/prisma";
-import { getSession, saveSession } from "@/utils/sessionlib";
-import { compare } from "bcryptjs";
-import { NextResponse } from "next/server";
+import { LoginSchema } from '@/models/session.model';
+import { db } from '@/utils/prisma';
+import { getSession, saveSession } from '@/utils/sessionlib';
+import { compare } from 'bcryptjs';
+import { NextResponse } from 'next/server';
 
 // CheckCredentials
 export async function POST(request: Request) {
-  const session = await getSession();
-
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  }
-
   const validationRes = LoginSchema.safeParse(await request.json());
   // if validation failed
   if (!validationRes.success) {
     return NextResponse.json(
       {
-        message: "Terdapat kesalahan pada data yang dikirim.",
+        message: 'Terdapat kesalahan pada data yang dikirim.',
         error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
     );
   }
 
-  const data = validationRes.data
+  const data = validationRes.data;
 
   try {
     const user = await db.users.findUnique({
@@ -33,10 +27,7 @@ export async function POST(request: Request) {
 
     // if username not found on db
     if (!user) {
-      return NextResponse.json(
-        { message: "Username tidak ditemukan." },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'Username tidak ditemukan.' }, { status: 404 });
     }
 
     // compare plain input password with hashed db password
@@ -44,18 +35,12 @@ export async function POST(request: Request) {
 
     // if password doesn't match
     if (!passwordMatched) {
-      return NextResponse.json(
-        { message: "Password Anda salah." },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: 'Password Anda salah.' }, { status: 401 });
     }
 
     // if account status is not active
     if (!user.accountStatus) {
-      return NextResponse.json(
-        { message: "Akun telah di-nonaktifkan." },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: 'Akun telah di-nonaktifkan.' }, { status: 401 });
     }
 
     await saveSession({
@@ -64,11 +49,8 @@ export async function POST(request: Request) {
       username: user.username,
       role: user.role,
     });
-    return NextResponse.json({ message: "Login berhasil! Selamat datang, " + user.name + "." }, { status: 200 });
+    return NextResponse.json({ message: 'Login berhasil! Selamat datang, ' + user.name + '.' }, { status: 200 });
   } catch (e) {
-    return NextResponse.json(
-      { message: "Internal Server Error: " + e },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

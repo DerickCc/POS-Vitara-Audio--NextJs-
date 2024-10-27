@@ -111,8 +111,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const validationRes = PurchaseOrderSchema.safeParse(await request.json());

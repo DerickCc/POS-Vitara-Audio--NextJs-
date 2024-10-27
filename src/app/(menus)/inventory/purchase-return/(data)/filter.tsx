@@ -1,34 +1,35 @@
 'use client';
 
-import Card from '@/components/card';
-import { poPrStatusOptions } from '@/config/global-variables';
-import { FiltersProps } from '@/models/global.model';
-import { FormEvent, useCallback, useState } from 'react';
-import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
-import { Button, Input, Select } from 'rizzui';
+import Card from "@/components/card";
+import { FiltersProps } from "@/models/global.model";
+import { SearchSupplierModel } from "@/models/supplier.model";
+import { searchSupplier } from "@/services/supplier-service";
+import { debounce } from "lodash";
+import { FormEvent, useCallback, useState } from "react";
+import toast from "react-hot-toast";
+import { PiCalendarBlank, PiFunnel } from "react-icons/pi";
+import { Button, Input, Select } from "rizzui";
 import ReactDatePicker from 'react-datepicker';
-import { datepickerClass } from '@/utils/tailwind-classes';
 import 'react-datepicker/dist/react-datepicker.css';
-import cn from '@/utils/class-names';
 import { id } from 'date-fns/locale';
-import { SearchSupplierModel } from '@/models/supplier.model';
-import { searchSupplier } from '@/services/supplier-service';
-import toast from 'react-hot-toast';
-import { debounce } from 'lodash';
+import cn from '@/utils/class-names';
+import { datepickerClass } from '@/utils/tailwind-classes';
+import { poPrStatusOptions } from "@/config/global-variables";
 
-export type PurchaseOrderTableFilters = {
+export type PurchaseReturnTableFilters = {
   code: string;
   supplierId: string | null;
   startDate: any;
   endDate: any;
+  poCode: string;
   status: string;
 };
 
-export default function PurchaseOrderFilter({
+export default function PurchaseReturnFilter({
   localFilters,
   setLocalFilters,
   handleSearch,
-}: FiltersProps<PurchaseOrderTableFilters>) {
+}: FiltersProps<PurchaseReturnTableFilters>) {
   const [selectedSupplier, setSelectedSupplier] = useState<string>('');
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
 
@@ -45,7 +46,7 @@ export default function PurchaseOrderFilter({
     []
   );
 
-  const handleFilterChange = (field: keyof PurchaseOrderTableFilters) => (value: string | number | Date | null) => {
+  const handleFilterChange = (field: keyof PurchaseReturnTableFilters) => (value: string | number | Date | null) => {
     setLocalFilters((prevFilters) => ({
       ...prevFilters,
       [field]: value,

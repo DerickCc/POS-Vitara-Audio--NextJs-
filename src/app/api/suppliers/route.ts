@@ -1,14 +1,17 @@
-import { SupplierModel, SupplierSchema } from "@/models/supplier.model";
-import { db } from "@/utils/prisma";
-import { getSession } from "@/utils/sessionlib";
-import { NextResponse } from "next/server";
+import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
+import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
+import { NextResponse } from 'next/server';
 
 // BrowseSupplier
 export async function GET(request: Request) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized', result: null, recordsTotal: 0 }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const url = new URL(request.url);
@@ -16,19 +19,20 @@ export async function GET(request: Request) {
 
   const pageIndex = Number(queryParams.get('pageIndex')) ?? 0;
   const pageSize = Number(queryParams.get('pageSize')) ?? 10;
-  const sortOrder  = queryParams.get('sortOrder') ?? 'desc';
-  const sortColumn   = queryParams.get('sortColumn') ?? 'createdAt';
+  const sortOrder = queryParams.get('sortOrder') ?? 'desc';
+  const sortColumn = queryParams.get('sortColumn') ?? 'createdAt';
 
   // filters
   const name = queryParams.get('name') ?? '';
-  const pic =  queryParams.get('pic') ?? '';
-  const phoneNo =  queryParams.get('phoneNo') ?? '';
-  const receivablesOperator =  queryParams.get('receivablesOperator') ?? 'gte';
-  const receivables =  Number(queryParams.get('receivables')) ?? 0;
+  const pic = queryParams.get('pic') ?? '';
+  const phoneNo = queryParams.get('phoneNo') ?? '';
+  const receivablesOperator = queryParams.get('receivablesOperator') ?? 'gte';
+  const receivables = Number(queryParams.get('receivables')) ?? 0;
 
   const where: any = { AND: [] };
-  if (name) { // full text search
-    const searchTerm = name.split(' ').filter(term => term);
+  if (name) {
+    // full text search
+    const searchTerm = name.split(' ').filter((term) => term);
 
     if (searchTerm.length > 0) {
       searchTerm.forEach((term) => {
@@ -42,8 +46,9 @@ export async function GET(request: Request) {
     }
   }
 
-  if (pic) { // full text search
-    const searchTerm = pic.split(' ').filter(term => term);
+  if (pic) {
+    // full text search
+    const searchTerm = pic.split(' ').filter((term) => term);
 
     if (searchTerm.length > 0) {
       searchTerm.forEach((term) => {
@@ -69,8 +74,8 @@ export async function GET(request: Request) {
   if (receivables > 0) {
     where.AND.push({
       receivables: {
-        [receivablesOperator]: receivables // gte: xxx or let: xxx
-      }
+        [receivablesOperator]: receivables, // gte: xxx or let: xxx
+      },
     });
   }
   // ----------------
@@ -80,20 +85,17 @@ export async function GET(request: Request) {
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy: {
-        [sortColumn]: sortOrder
+        [sortColumn]: sortOrder,
       },
       where,
     });
-    
+
     const recordsTotal = await db.suppliers.count({ where });
 
-    return NextResponse.json(
-      { message: 'Success', result: suppliers, recordsTotal },
-      { status: 200 }
-    )
+    return NextResponse.json({ message: 'Success', result: suppliers, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
-      { message: "Internal Server Error: " + e, result: null, recordsTotal: 0 },
+      { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },
       { status: 500 }
     );
   }
@@ -103,8 +105,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const validationRes = SupplierSchema.safeParse(await request.json());
@@ -112,7 +117,7 @@ export async function POST(request: Request) {
   if (!validationRes.success) {
     return NextResponse.json(
       {
-        message: "Terdapat kesalahan pada data yang dikirim.",
+        message: 'Terdapat kesalahan pada data yang dikirim.',
         error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
@@ -123,10 +128,7 @@ export async function POST(request: Request) {
 
   try {
     if (data.receivables > data.receivablesLimit) {
-      return NextResponse.json(
-        { message: "Piutang tidak boleh lebih besar dari Limit Piutang" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'Piutang tidak boleh lebih besar dari Limit Piutang' }, { status: 400 });
     }
 
     const userId = session.id;
@@ -134,7 +136,7 @@ export async function POST(request: Request) {
     // retreive last supplier code
     const lastSupplier = await db.suppliers.findFirst({
       orderBy: { createdAt: 'desc' },
-      select: { code: true}
+      select: { code: true },
     });
 
     let newCode = 'SUP00000001'; // default code
@@ -154,16 +156,13 @@ export async function POST(request: Request) {
         remarks: data.remarks,
         receivablesLimit: data.receivablesLimit,
         CreatedBy: {
-          connect: { id: userId }
-        }
-      }
+          connect: { id: userId },
+        },
+      },
     });
 
-    return NextResponse.json({ message: "Data Supplier Berhasil Disimpan" }, { status: 201 });
+    return NextResponse.json({ message: 'Data Supplier Berhasil Disimpan' }, { status: 201 });
   } catch (e) {
-    return NextResponse.json(
-      { message: "Internal Server Error: " + e },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

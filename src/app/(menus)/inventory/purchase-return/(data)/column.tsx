@@ -1,24 +1,24 @@
-import { routes } from '@/config/routes';
-import { Colors, PoPrStatusType } from '@/models/global.model';
-import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
-import Link from 'next/link';
-import { LuEye, LuMoreVertical, LuPencil, LuCircleSlash } from 'react-icons/lu';
-import { PurchaseOrderModel } from '@/models/purchase-order.model';
-import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
-import cn from '@/utils/class-names';
-import { mapPoPrStatusToColor } from '@/config/global-variables';
-import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
+import { mapPoPrStatusToColor } from "@/config/global-variables";
+import { useConfirmationModal } from "@/hooks/use-confirmation-modal";
+import { Colors, PoPrStatusType } from "@/models/global.model";
+import { PurchaseReturnModel } from "@/models/purchase-return.model";
+import { formatToCurrency, isoStringToReadableDate } from "@/utils/helper-function";
+import { badgeColorClass, baseBadgeClass } from "@/utils/tailwind-classes";
+import { ColumnDef, Row, createColumnHelper } from "@tanstack/react-table";
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
-import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
+import cn from '@/utils/class-names';
+import { LuCircleSlash, LuEye, LuMoreVertical, LuPencil } from "react-icons/lu";
+import { routes } from '@/config/routes';
+import Link from 'next/link';
 
 function ActionColumn({
   row,
   actionHandlers,
   role,
 }: {
-  row: Row<PurchaseOrderModel>;
+  row: Row<PurchaseReturnModel>;
   actionHandlers: any;
   role: string;
 }) {
@@ -104,7 +104,7 @@ function ActionColumn({
   );
 }
 
-const columnHelper = createColumnHelper<PurchaseOrderModel>();
+const columnHelper = createColumnHelper<PurchaseReturnModel>();
 
 export const columns = ({
   actionHandlers,
@@ -112,7 +112,7 @@ export const columns = ({
 }: {
   actionHandlers: any;
   role: string;
-}): ColumnDef<PurchaseOrderModel, any>[] => [
+}): ColumnDef<PurchaseReturnModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
@@ -126,11 +126,25 @@ export const columns = ({
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('purchaseDate', {
-    id: 'purchaseDate',
+  columnHelper.accessor('returnDate', {
+    id: 'returnDate',
     size: 160,
-    header: () => 'Tanggal Pembelian',
+    header: () => 'Tanggal Retur',
     cell: (info) => isoStringToReadableDate(info.getValue()),
+    enableSorting: true,
+  }),
+  columnHelper.accessor('poCode', {
+    id: 'poCode',
+    size: 150,
+    header: () => 'Kode Transaksi Pembelian',
+    cell: (info) => info.getValue(),
+    enableSorting: true,
+  }),
+  columnHelper.accessor('returnType', {
+    id: 'returnType',
+    size: 150,
+    header: () => 'Tipe Retur',
+    cell: (info) => info.getValue(),
     enableSorting: true,
   }),
   columnHelper.accessor('supplierName', {
@@ -140,17 +154,10 @@ export const columns = ({
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('totalItem', {
-    id: 'totalItem',
-    size: 60,
-    header: () => 'Total Item',
-    cell: (info) => info.getValue(),
-    enableSorting: true,
-  }),
   columnHelper.accessor('grandTotal', {
     id: 'grandTotal',
     size: 130,
-    header: () => 'Grand Total',
+    header: () => 'Grand Total Retur',
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: true,
   }),
@@ -164,12 +171,5 @@ export const columns = ({
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,
-  }),
-  columnHelper.accessor('remarks', {
-    id: 'remarks',
-    size: 250,
-    header: () => 'Keterangan',
-    cell: (info) => info.getValue() || '-',
-    enableSorting: false,
   }),
 ];

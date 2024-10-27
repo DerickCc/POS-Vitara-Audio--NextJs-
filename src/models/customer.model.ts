@@ -11,7 +11,7 @@ export const CustomerSchema = z.object({
     })
     .optional()
     .nullable(),
-  address: z.string().max(100, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
+  address: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 250 huruf' }).optional().nullable(),
 });
 
 export class CustomerModel {

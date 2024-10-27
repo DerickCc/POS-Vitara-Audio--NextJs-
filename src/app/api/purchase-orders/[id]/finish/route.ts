@@ -6,8 +6,11 @@ import { NextResponse } from 'next/server';
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const { id } = params;
@@ -18,9 +21,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     await db.$transaction(async (prisma) => {
       const po = await prisma.purchaseOrders.findUnique({
         where: { id },
-        include: { PurchaseOrderDetails: true }
+        include: { PurchaseOrderDetails: true },
       });
-  
+
       if (!po) {
         throw new Error('Data Transaksi Pembelian tidak ditemukan');
       } else if (po.status !== 'Dalam Proses') {
@@ -28,9 +31,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
 
       // update stock and costPrice of each product in details
-      const updatePromises = po.PurchaseOrderDetails.map(async d => {
-        const product = await prisma.products.findUnique({ where: { id: d.productId }});
-      
+      const updatePromises = po.PurchaseOrderDetails.map(async (d) => {
+        const product = await prisma.products.findUnique({ where: { id: d.productId } });
+
         if (!product) {
           throw new Error('Barang yang ingin di-update tidak ditemukan');
         }
@@ -42,14 +45,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         return prisma.products.update({
           where: { id: d.productId },
-          data: { 
+          data: {
             stock: updatedStock,
             costPrice: updatedCostPrice,
             UpdatedBy: {
               connect: { id: userId },
             },
-          }
-        })
+          },
+        });
       });
 
       await Promise.all(updatePromises);
@@ -64,7 +67,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           },
         },
       });
-    })
+    });
 
     return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diselesaikan' }, { status: 200 });
   } catch (e: any) {

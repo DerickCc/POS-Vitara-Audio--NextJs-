@@ -74,8 +74,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const { id } = params;
@@ -169,8 +172,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const { id } = params;
@@ -181,10 +187,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     });
 
     if (!po) {
-      return NextResponse.json(
-        { message: 'Transaksi Pembelian tidak ditemukan' },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'Transaksi Pembelian tidak ditemukan' }, { status: 404 });
     } else if (po.status !== 'Dalam Proses') {
       return NextResponse.json(
         { message: 'Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat dihapus' },

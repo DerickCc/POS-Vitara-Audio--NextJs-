@@ -6,7 +6,7 @@ export const CURRENCY_OPTIONS = {
   fractions: 2,
 };
 
-export const mapPoStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Batal: 'red' };
+export const mapPoPrStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Batal: 'red' };
 export const mapSoStatusToColor = { 'Belum Lunas': 'blue', Lunas: 'green', Batal: 'red' };
 
 // select options
@@ -48,7 +48,7 @@ export const roleOptions = [
   { label: 'Kasir', value: 'Kasir' },
 ];
 
-export const poStatusOptions = [
+export const poPrStatusOptions = [
   { label: 'Dalam Proses', value: 'Dalam Proses' },
   { label: 'Selesai', value: 'Selesai' },
   { label: 'Batal', value: 'Batal' },

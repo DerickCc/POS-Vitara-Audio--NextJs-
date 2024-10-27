@@ -9,6 +9,7 @@ export const getSession = async () => {
     password: process.env.SECRET_KEY!,
     cookieName: 'vitara-session',
     cookieOptions: {
+      maxAge: 3600 * 12,
       httpOnly: true, // to prevent js from accessing session cookie
       secure: process.env.NODE_ENV === 'production', // true for https
     },

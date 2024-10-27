@@ -8,10 +8,13 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
-  
+
   const { id } = params;
 
   try {
@@ -23,7 +26,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         username: true,
         accountStatus: true,
         role: true,
-      }
+      },
     });
 
     if (!user) {
@@ -40,10 +43,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
-  
+
   const { id } = params;
 
   const validationRes = UpdateUserSchema.safeParse(await request.json());
@@ -72,7 +78,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     // compare plain input password with hashed db password
     const passwordMatched = await compare(data.oldPassword, user.password);
-    
+
     if (!passwordMatched) {
       return NextResponse.json({ message: 'Password Lama tidak sesuai' }, { status: 401 });
     }

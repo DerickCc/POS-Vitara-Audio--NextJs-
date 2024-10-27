@@ -1,7 +1,7 @@
-import { ProductSchema } from "@/models/product.model";
-import { db } from "@/utils/prisma";
-import { getSession } from "@/utils/sessionlib";
-import { NextResponse } from "next/server";
+import { ProductSchema } from '@/models/product.model';
+import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
+import { NextResponse } from 'next/server';
 
 // GetProductById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -32,8 +32,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const { id } = params;
@@ -43,7 +46,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   if (!validationRes.success) {
     return NextResponse.json(
       {
-        message: "Terdapat kesalahan pada data yang dikirim.",
+        message: 'Terdapat kesalahan pada data yang dikirim.',
         error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
@@ -51,20 +54,20 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   const data = validationRes.data;
-  
+
   try {
     const userId = session.id;
-    
+
     const updatedProduct = await db.products.update({
       where: { id: id },
       data: {
         ...data,
         UpdatedBy: {
-          connect: { id: userId }
-        }
+          connect: { id: userId },
+        },
       },
     });
-    
+
     if (!updatedProduct) {
       return NextResponse.json({ message: 'Data Barang Gagal Diupdate Karena Tidak Ditemukan' }, { status: 404 });
     }
@@ -79,15 +82,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const { id } = params;
-  
+
   try {
     const deletedProduct = await db.products.delete({
-      where: { id: id }
+      where: { id: id },
     });
 
     if (!deletedProduct) {

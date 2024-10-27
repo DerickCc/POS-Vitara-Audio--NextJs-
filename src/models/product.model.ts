@@ -9,7 +9,7 @@ export const ProductSchema = z.object({
   uom: z.string().min(1, { message: 'Satuan harus diisi' }),
   purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
   sellingPrice: z.coerce.number().min(0, { message: 'Harga Jual Restok tidak boleh negatif' }),
-  remarks: z.string().max(250, { message: 'Keterangan tidak boleh lebih dari 250 huruf' }).optional().nullable(),
+  remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
 });
 
 export class ProductModel {

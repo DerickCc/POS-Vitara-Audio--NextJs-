@@ -1,7 +1,7 @@
-import { ProductModel, ProductSchema } from "@/models/product.model";
-import { db } from "@/utils/prisma";
-import { getSession } from "@/utils/sessionlib";
-import { NextResponse } from "next/server";
+import { ProductModel, ProductSchema } from '@/models/product.model';
+import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
+import { NextResponse } from 'next/server';
 
 // BrowseProduct
 export async function GET(request: Request) {
@@ -16,21 +16,22 @@ export async function GET(request: Request) {
 
   const pageIndex = Number(queryParams.get('pageIndex')) ?? 0;
   const pageSize = Number(queryParams.get('pageSize')) ?? 10;
-  const sortOrder  = queryParams.get('sortOrder') ?? 'desc';
-  const sortColumn   = queryParams.get('sortColumn') ?? 'createdAt';
+  const sortOrder = queryParams.get('sortOrder') ?? 'desc';
+  const sortColumn = queryParams.get('sortColumn') ?? 'createdAt';
 
   // filters
   const name = queryParams.get('name') ?? '';
-  const stockOperator =  queryParams.get('stockOperator') ?? 'gte';
-  const stock =  Number(queryParams.get('stock')) ?? 0;
-  const uom =  queryParams.get('uom') ?? '';
+  const stockOperator = queryParams.get('stockOperator') ?? 'gte';
+  const stock = Number(queryParams.get('stock')) ?? 0;
+  const uom = queryParams.get('uom') ?? '';
 
   const where: any = {};
-  if (name) { // full text search
-    const searchTerm = name.split(' ').filter(term => term);
+  if (name) {
+    // full text search
+    const searchTerm = name.split(' ').filter((term) => term);
 
     if (searchTerm.length > 0) {
-      where['AND'] = searchTerm.map(term => ({
+      where['AND'] = searchTerm.map((term) => ({
         name: {
           contains: term,
           mode: 'insensitive',
@@ -44,10 +45,10 @@ export async function GET(request: Request) {
       ...(where['AND'] || []),
       {
         stock: {
-          [stockOperator]: stock // gte: xx or lte: xx
-        }
-      }
-    ]
+          [stockOperator]: stock, // gte: xx or lte: xx
+        },
+      },
+    ];
   }
 
   if (uom) {
@@ -57,9 +58,9 @@ export async function GET(request: Request) {
         uom: {
           contains: uom,
           mode: 'insensitive',
-        }
-      }
-    ]
+        },
+      },
+    ];
   }
   // ----------------
 
@@ -68,17 +69,14 @@ export async function GET(request: Request) {
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy: {
-        [sortColumn]: sortOrder
+        [sortColumn]: sortOrder,
       },
       where,
     });
 
-    const recordsTotal = await db.products.count({where});
+    const recordsTotal = await db.products.count({ where });
 
-    return NextResponse.json(
-      { message: 'Success', result: products, recordsTotal },
-      { status: 200}
-    )
+    return NextResponse.json({ message: 'Success', result: products, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },
@@ -91,10 +89,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
-  
+
   const validationRes = ProductSchema.safeParse(await request.json());
   // if validation failed
   if (!validationRes.success) {
@@ -115,8 +116,8 @@ export async function POST(request: Request) {
     // retreive last product code
     const lastProduct = await db.products.findFirst({
       orderBy: { createdAt: 'desc' },
-      select: { code: true }
-    })
+      select: { code: true },
+    });
 
     let newCode = 'PRD00000001'; // default code
 
@@ -130,19 +131,13 @@ export async function POST(request: Request) {
         ...data,
         code: newCode,
         CreatedBy: {
-          connect: { id: userId }
-        }
-      }
+          connect: { id: userId },
+        },
+      },
     });
 
-    return NextResponse.json(
-      { message: 'Data Barang Berhasil Disimpan' }, 
-      { status: 201 }
-    );
+    return NextResponse.json({ message: 'Data Barang Berhasil Disimpan' }, { status: 201 });
   } catch (e) {
-    return NextResponse.json(
-      { message: "Internal Server Error: " + e },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

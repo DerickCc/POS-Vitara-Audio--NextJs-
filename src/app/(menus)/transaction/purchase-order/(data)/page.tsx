@@ -5,9 +5,8 @@ import { routes } from '@/config/routes';
 import Link from 'next/link';
 import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
-import PurchaseOrderFilter, { PurchaseOrderFilters } from './filters';
+import PurchaseOrderFilter, { PurchaseOrderTableFilters } from './filters';
 import { useCallback, useEffect, useState } from 'react';
-import { TableAction } from '@/models/global.model';
 import toast from 'react-hot-toast';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
@@ -35,14 +34,14 @@ export default function PurchaseOrderDataPage() {
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [localFilters, setLocalFilters] = useState<PurchaseOrderFilters>({
+  const [localFilters, setLocalFilters] = useState<PurchaseOrderTableFilters>({
     code: '',
     supplierId: null,
     startDate: null,
     endDate: null,
     status: '',
   });
-  const [filters, setFilters] = useState<PurchaseOrderFilters>({
+  const [filters, setFilters] = useState<PurchaseOrderTableFilters>({
     code: '',
     supplierId: null,
     startDate: null,
