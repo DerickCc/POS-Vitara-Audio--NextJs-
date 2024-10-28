@@ -6,8 +6,11 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized', result: null }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const url = new URL(request.url);
@@ -34,11 +37,39 @@ export async function GET(request: Request) {
       select: {
         id: true,
         code: true,
+        Supplier: {
+          select: { name: true },
+        },
+        PurchaseOrderDetails: {
+          select: {
+            poId: true,
+            quantity: true,
+            Product: {
+              select: {
+                id: true,
+                name: true,
+                uom: true,
+                costPrice: true,
+              },
+            },
+          },
+        },
       },
     });
 
     const purchaseOrdersWithExtraData: any[] = purchaseOrders.map((po) => ({
       ...po,
+      supplierName: po.Supplier.name,
+      Supplier: undefined,
+      details: po.PurchaseOrderDetails.map((pod) => ({
+        ...pod,
+        productId: pod.Product.id,
+        productName: pod.Product.name,
+        productUom: pod.Product.uom,
+        productCostPrice: pod.Product.costPrice,
+        Product: undefined,
+      })),
+      PurchaseOrderDetails: undefined,
       value: po.id,
       label: po.code,
     }));

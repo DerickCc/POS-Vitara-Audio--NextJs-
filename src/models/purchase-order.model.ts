@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema } from './purchase-order-detail.model';
 import { getCurrDate } from '@/utils/helper-function';
+import { BasicSelectOptions } from './global.model';
 
 export const PurchaseOrderSchema = z.object({
   supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
@@ -52,4 +53,11 @@ export class PurchaseOrderModel {
     this.grandTotal = data.grandTotal;
     this.status = data.status || 'Dalam Proses';
   }
+}
+
+export interface SearchPurchaseOrderModel extends BasicSelectOptions {
+  id: string;
+  code: string;
+  supplierName: string;
+  details: PurchaseOrderDetailModel[];
 }

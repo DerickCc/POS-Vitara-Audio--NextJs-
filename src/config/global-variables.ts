@@ -54,8 +54,15 @@ export const poPrStatusOptions = [
   { label: 'Batal', value: 'Batal' },
 ];
 
+export const purchaseReturnTypeOptions = [
+  { label: 'Penggantian Barang', value: 'Penggantian Barang' },
+  { label: 'Pengembalian Dana', value: 'Pengembalian Dana' },
+  { label: 'Piutang', value: 'Piutang' },
+]
+
 export const soStatusOptions = [
   { label: 'Belum Lunas', value: 'Belum Lunas' },
   { label: 'Lunas', value: 'Lunas' },
   { label: 'Batal', value: 'Batal' },
 ];
+

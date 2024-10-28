@@ -1,10 +1,10 @@
-import { PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { PurchaseReturnSchema } from '@/models/purchase-return.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
-// BrowsePurchaseOrders
+// BrowsePurchaseReturns
 export async function GET(request: Request) {
   const session = await getSession();
 
@@ -28,6 +28,7 @@ export async function GET(request: Request) {
   const supplierId = queryParams.get('supplierId') ?? 0;
   const startDate = queryParams.get('startDate') ?? '';
   const endDate = queryParams.get('endDate') ?? '';
+  const poCode = queryParams.get('poCode') ?? '';
   const status = queryParams.get('status') ?? '';
 
   const where: any = { AND: [] };
@@ -69,39 +70,57 @@ export async function GET(request: Request) {
     });
   }
 
+  if (poCode) {
+    where.AND.push({
+      poCode: {
+        contains: poCode,
+        mode: 'insensitive',
+      },
+    });
+  }
+
   if (status) {
     where.AND.push({ status });
   }
   // ----------------
 
   try {
-    const purchaseOrders = await db.purchaseOrders.findMany({
+    const purchaseReturns = await db.purchaseReturns.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
       orderBy:
         sortColumn === 'supplierName'
           ? {
-              Supplier: { name: sortOrder as Prisma.SortOrder },
+              PurchaseOrder: {
+                Supplier: {
+                  name: sortOrder as Prisma.SortOrder,
+                },
+              },
             }
           : {
               [sortColumn]: sortOrder,
             },
       where,
       include: {
-        Supplier: {
-          select: { name: true },
+        PurchaseOrder: {
+          select: {
+            Supplier: {
+              select: { name: true },
+            },
+          },
         },
       },
     });
-    const recordsTotal = await db.purchaseOrders.count({ where });
+    const recordsTotal = await db.purchaseReturns.count({ where });
+    console.log(purchaseReturns)
 
-    const mappedPurchaseOrders = purchaseOrders.map((po) => ({
-      ...po,
-      supplierName: po.Supplier.name,
-      Supplier: undefined,
+    const mappedPurchaseReturns = purchaseReturns.map((pr) => ({
+      ...pr,
+      supplierName: pr.PurchaseOrder.Supplier.name,
+      // Supplier: undefined,
     }));
 
-    return NextResponse.json({ message: 'Success', result: mappedPurchaseOrders, recordsTotal }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: mappedPurchaseReturns, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },
@@ -110,7 +129,7 @@ export async function GET(request: Request) {
   }
 }
 
-// CreatePurchaseOrder
+// CreatePurchaseReturn
 export async function POST(request: Request) {
   const session = await getSession();
 
@@ -121,7 +140,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const validationRes = PurchaseOrderSchema.safeParse(await request.json());
+  const validationRes = PurchaseReturnSchema.safeParse(await request.json());
 
   // if validation failed
   if (!validationRes.success) {
@@ -139,55 +158,55 @@ export async function POST(request: Request) {
   try {
     const userId = session.id;
 
-    // retreive last po code
-    const lastPo = await db.purchaseOrders.findFirst({
+    // retreive last pr code
+    const lastPr = await db.purchaseReturns.findFirst({
       orderBy: { createdAt: 'desc' },
       select: { code: true },
     });
 
-    let newCode = 'PO00000001'; // default code
+    let newCode = 'PR00000001'; // default code
 
-    if (lastPo) {
-      const lastCodeNumber = parseInt(lastPo.code.replace('PO', ''), 10);
+    if (lastPr) {
+      const lastCodeNumber = parseInt(lastPr.code.replace('PR', ''), 10);
       newCode = 'PO' + (lastCodeNumber + 1).toString().padStart(8, '0');
     }
 
-    const purchaseDate = new Date().toISOString();
-    const grandTotal = data.details.reduce((acc, d) => {
-      return acc + d.purchasePrice * d.quantity;
-    }, 0);
+    // const purchaseDate = new Date().toISOString();
+    // const grandTotal = data.details.reduce((acc, d) => {
+    //   return acc + d.purchasePrice * d.quantity;
+    // }, 0);
 
-    await db.$transaction(async (prisma) => {
-      const po = await prisma.purchaseOrders.create({
-        data: {
-          code: newCode,
-          purchaseDate: purchaseDate,
-          Supplier: {
-            connect: { id: data.supplierId },
-          },
-          remarks: data.remarks,
-          totalItem: data.details.length,
-          grandTotal: grandTotal,
-          status: 'Dalam Proses',
-          CreatedBy: {
-            connect: { id: userId },
-          },
-        },
-      });
+    // await db.$transaction(async (prisma) => {
+    //   const po = await prisma.purchaseOrders.create({
+    //     data: {
+    //       code: newCode,
+    //       purchaseDate: purchaseDate,
+    //       Supplier: {
+    //         connect: { id: data.supplierId },
+    //       },
+    //       remarks: data.remarks,
+    //       totalItem: data.details.length,
+    //       grandTotal: grandTotal,
+    //       status: 'Dalam Proses',
+    //       CreatedBy: {
+    //         connect: { id: userId },
+    //       },
+    //     },
+    //   });
 
-      await prisma.purchaseOrderDetails.createMany({
-        data: data.details.map((d) => ({
-          poId: po.id,
-          productId: d.productId,
-          purchasePrice: d.purchasePrice,
-          quantity: d.quantity,
-          totalPrice: d.purchasePrice * d.quantity,
-          createdBy: userId,
-        })),
-      });
-    });
+    //   await prisma.purchaseOrderDetails.createMany({
+    //     data: data.details.map((d) => ({
+    //       poId: po.id,
+    //       productId: d.productId,
+    //       purchasePrice: d.purchasePrice,
+    //       quantity: d.quantity,
+    //       totalPrice: d.purchasePrice * d.quantity,
+    //       createdBy: userId,
+    //     })),
+    //   });
+    // });
 
-    return NextResponse.json({ message: 'Data Transaksi Pembelian berhasil disimpan' }, { status: 201 });
+    return NextResponse.json({ message: 'Data Retur Pembelian berhasil disimpan' }, { status: 201 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

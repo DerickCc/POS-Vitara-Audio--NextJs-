@@ -7,8 +7,11 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized', result: null }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const { id } = params;
@@ -101,7 +104,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       SalesOrderProductDetails: undefined,
       SalesOrderServiceDetails: undefined,
       CreatedBy: undefined,
-    }
+    };
 
     return NextResponse.json({ message: 'Success', result: formattedSo }, { status: 200 });
   } catch (e) {

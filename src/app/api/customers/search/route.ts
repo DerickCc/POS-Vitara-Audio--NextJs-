@@ -7,8 +7,11 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const session = await getSession();
 
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized', result: null }, { status: 401 });
+  if (!session.id) {
+    return NextResponse.json(
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { status: 401 }
+    );
   }
 
   const url = new URL(request.url);
@@ -46,7 +49,7 @@ export async function GET(request: Request) {
       },
     });
 
-    const customersWithExtraData: SearchCustomerModel[] = customers.map(customer => ({
+    const customersWithExtraData: SearchCustomerModel[] = customers.map((customer) => ({
       ...customer,
       value: customer.id,
       label: customer.name,
