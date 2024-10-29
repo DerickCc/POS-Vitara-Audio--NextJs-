@@ -18,6 +18,7 @@ export async function GET(request: Request) {
 
   // filters
   const code = queryParams.get('code') ?? '';
+  const status = queryParams.get('status') ?? '';
 
   const where: any = { AND: [] };
   if (code) {
@@ -27,6 +28,10 @@ export async function GET(request: Request) {
         mode: 'insensitive',
       },
     });
+  }
+
+  if (status) {
+    where.AND.push({ status });
   }
   // ----------------
 
@@ -42,14 +47,14 @@ export async function GET(request: Request) {
         },
         PurchaseOrderDetails: {
           select: {
-            poId: true,
+            id: true,
             quantity: true,
+            purchasePrice: true,
             Product: {
               select: {
                 id: true,
                 name: true,
                 uom: true,
-                costPrice: true,
               },
             },
           },
@@ -66,7 +71,8 @@ export async function GET(request: Request) {
         productId: pod.Product.id,
         productName: pod.Product.name,
         productUom: pod.Product.uom,
-        productCostPrice: pod.Product.costPrice,
+        value: pod.id,
+        label: pod.Product.name,
         Product: undefined,
       })),
       PurchaseOrderDetails: undefined,

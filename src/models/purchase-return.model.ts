@@ -50,7 +50,7 @@ export class PurchaseReturnModel {
     this.supplierName = data.supplierName;
     this.returnDate = data.returnDate || getCurrDate();
     this.returnType = data.returnType || 'Penggantian Barang';
-    this.details = data.details || [new PurchaseReturnDetailModel()];
+    this.details = data.details || [];
     this.grandTotal = data.grandTotal;
     this.status = data.status || 'Dalam Proses';
   }

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -22,11 +22,11 @@ async function main() {
       licensePlate: 'BK 888 AA',
       phoneNo: '082112121212',
       address: 'Jalan Sumatra No 88, Medan',
-      CreatedBy: { connect: { id: user.id }}
+      CreatedBy: { connect: { id: user.id } },
     },
   });
 
-  const supplier = await prisma.suppliers.create({
+  const supplier1 = await prisma.suppliers.create({
     data: {
       code: 'SUP00000001',
       name: 'PT. ABC Indonesia',
@@ -35,11 +35,24 @@ async function main() {
       address: 'Jakarta, Indonesia',
       remarks: 'Supplier of best audio products',
       receivablesLimit: 10000000,
-      CreatedBy: { connect: { id: user.id }}
+      CreatedBy: { connect: { id: user.id } },
     },
   });
 
-  const product = await prisma.products.create({
+  const supplier2 = await prisma.suppliers.create({
+    data: {
+      code: 'SUP00000002',
+      name: 'PT. DEF China',
+      pic: 'Ching Hua Chong',
+      phoneNo: '081239876540',
+      address: 'Chong Qing, China',
+      remarks: 'Supplier kain dan kulit premium',
+      receivablesLimit: 30000000,
+      CreatedBy: { connect: { id: user.id } },
+    },
+  });
+
+  const product1 = await prisma.products.create({
     data: {
       code: 'PRD00000001',
       name: 'Stir Mobil Universal',
@@ -47,7 +60,31 @@ async function main() {
       uom: 'Pcs',
       purchasePrice: 50000,
       sellingPrice: 100000,
-      CreatedBy: { connect: { id: user.id }}
+      CreatedBy: { connect: { id: user.id } },
+    },
+  });
+
+  const product2 = await prisma.products.create({
+    data: {
+      code: 'PRD00000002',
+      name: 'Ban Anti Bocor',
+      restockThreshold: 30,
+      uom: 'Pcs',
+      purchasePrice: 300000,
+      sellingPrice: 500000,
+      CreatedBy: { connect: { id: user.id } },
+    },
+  });
+
+  const product3 = await prisma.products.create({
+    data: {
+      code: 'PRD00000003',
+      name: 'Kain Sapi Wagyu',
+      restockThreshold: 20,
+      uom: 'Meter',
+      purchasePrice: 100000,
+      sellingPrice: 300000,
+      CreatedBy: { connect: { id: user.id } },
     },
   });
 }

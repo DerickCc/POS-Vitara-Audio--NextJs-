@@ -18,6 +18,7 @@ export async function GET(request: Request) {
 
   // filters
   const code = queryParams.get('code') ?? '';
+  const status = queryParams.get('status') ?? '';
 
   const where: any = { AND: [] };
   if (code) {
@@ -27,6 +28,10 @@ export async function GET(request: Request) {
         mode: 'insensitive',
       },
     });
+  }
+
+  if (status) {
+    where.AND.push({ status });
   }
   // ----------------
 

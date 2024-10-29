@@ -181,6 +181,7 @@ export async function POST(request: Request) {
           productId: d.productId,
           purchasePrice: d.purchasePrice,
           quantity: d.quantity,
+          returnedQuantity: d.quantity,
           totalPrice: d.purchasePrice * d.quantity,
           createdBy: userId,
         })),

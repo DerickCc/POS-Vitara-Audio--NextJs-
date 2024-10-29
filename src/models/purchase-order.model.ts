@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema } from './purchase-order-detail.model';
+import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema, SearchPurchaseOrderDetailModel } from './purchase-order-detail.model';
 import { getCurrDate } from '@/utils/helper-function';
 import { BasicSelectOptions } from './global.model';
 
@@ -59,5 +59,5 @@ export interface SearchPurchaseOrderModel extends BasicSelectOptions {
   id: string;
   code: string;
   supplierName: string;
-  details: PurchaseOrderDetailModel[];
+  details: SearchPurchaseOrderDetailModel[];
 }

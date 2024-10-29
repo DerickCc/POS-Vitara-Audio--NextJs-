@@ -24,12 +24,13 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
-import { ActionIcon, Button, Input, Loader, Select } from 'rizzui';
+import { ActionIcon, Button, Input, Loader, Select, Textarea } from 'rizzui';
 import { TbTruckReturn } from 'react-icons/tb';
 import { SearchPurchaseOrderModel } from '@/models/purchase-order.model';
 import { searchPo } from '@/services/purchase-order-service';
 import { purchaseReturnTypeOptions } from '@/config/global-variables';
-import { PurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
+import { PurchaseOrderDetailModel, SearchPurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
+import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 
 interface PurchaseReturnFormProps extends BasicFormProps<PurchaseReturnModel> {
   isReadOnly?: boolean;
@@ -66,14 +67,16 @@ export default function PurchaseReturnForm({
     fields: detailFields,
     append: appendDetail,
     remove: removeDetail,
+    replace: replaceDetail,
   } = useFieldArray({
     control,
     name: 'details',
   });
 
   const [poList, setPoList] = useState<SearchPurchaseOrderModel[]>([]);
-  const [selectedPoDetails, setSelectedPoDetails] = useState<PurchaseOrderDetailModel[]>([]);
-  const [poDetailList, setPoDetailList] = useState<PurchaseOrderDetailModel[]>([]);
+  const [selectedPoDetails, setSelectedPoDetails] = useState<SearchPurchaseOrderDetailModel[]>([]);
+  const [poDetailList, setPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
+  const [filteredPoDetailList, setFilteredPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
 
   //PurchaseOrder
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +85,7 @@ export default function PurchaseReturnForm({
       if (!code || code.trim() === '') return;
 
       try {
-        setPoList(await searchPo(code));
+        setPoList(await searchPo(code, 'Selesai'));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }
@@ -93,13 +96,53 @@ export default function PurchaseReturnForm({
   const handlePoChange = (option: SearchPurchaseOrderModel) => {
     setValue('poCode', option.code);
     setValue('supplierName', option.supplierName);
-    setPoDetailList(option.details)
-    console.log(option.details)
+    setValue('grandTotal', 0);
+
+    setPoDetailList(option.details);
+    setFilteredPoDetailList(option.details);
+
+    // clear detail
+    replaceDetail([]);
   };
 
   // ------------------------
 
-  // transaction detail
+  // transaction Detail
+  const handlePoDetailChange = (idx: number, pod: SearchPurchaseOrderDetailModel) => {
+    setValue(`details.${idx}`, {
+      ...getValues().details[idx],
+      purchasePrice: pod.purchasePrice,
+      returnQuantity: 0,
+      productUom: pod.productUom,
+      reason: '',
+    });
+
+    // Update selectedPoDetails
+    const updatedSelectedPoDetails = [...selectedPoDetails];
+    updatedSelectedPoDetails[idx] = pod;
+    setSelectedPoDetails(updatedSelectedPoDetails)
+
+    setFilteredPoDetailList(
+      poDetailList.filter((x) => !selectedPoDetails.some((selectedPod) => x.id === selectedPod.id))
+    );
+  };
+
+  const updatePrDetailTotalPrice = (idx: number) => {
+    const detail = getValues().details[idx];
+    const totalPrice = detail.purchasePrice * detail.returnQuantity;
+    setValue(`details.${idx}.totalPrice`, totalPrice);
+
+    updateGrandTotal();
+  };
+
+  const updateGrandTotal = () => {
+    const grandTotal = getValues().details.reduce((acc, d) => {
+      return acc + d.purchasePrice * d.returnQuantity;
+    }, 0);
+    setValue('grandTotal', grandTotal);
+  };
+
+  // ------------------------
 
   const onError = (errors: any) => {
     if (errors?.details?.refinement) {
@@ -211,11 +254,12 @@ export default function PurchaseReturnForm({
                     <th className='w-[70px]' style={{ textAlign: 'center' }}>
                       Aksi
                     </th>
-                    <th className='w-[300px]'>Barang</th>
-                    <th className=''>Harga Beli</th>
+                    <th className='w-[250px]'>Barang</th>
+                    <th className='w-[200px]'>Harga Beli</th>
                     <th className='w-[100px]'>Qty</th>
                     <th className='w-[150px]'>Satuan</th>
-                    <th className=''>Total</th>
+                    <th>Alasan</th>
+                    <th className='w-[200px]'>Total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -233,78 +277,78 @@ export default function PurchaseReturnForm({
                         </ActionIcon>
                       </td>
                       <td className='table-cell align-top'>
-                        {/* <Controller
+                        <Controller
                           control={control}
-                          name={`details.${idx}.productId`}
-                          render={({ field: { value, onChange }, fieldState: { error } }) => {
-                            const productName = watch(`details.${idx}.productName`);
-
-                            return (
-                              <Select<SearchProductModel>
-                                value={value}
-                                onChange={(option: SearchProductModel) => {
-                                  onChange(option.id);
-                                  handleProductChange(idx, option);
-                                }}
-                                placeholder='Pilih Barang'
-                                options={productList}
-                                displayValue={() => productName}
-                                getOptionValue={(option: SearchProductModel) => option}
-                                searchable={true}
-                                searchByKey='name'
-                                onSearchChange={(name: string) => handleProductSearchChange(name)}
-                                disableDefaultFilter={true}
-                                error={error?.message}
-                                disabled={isReadOnly}
-                                // error={errors.details ? errors.details[idx]?.purchasePrice?.message : ''}
-                              />
-                            );
-                          }}
-                        /> */}
+                          name={`details.${idx}.podId`}
+                          render={({ field: { value, onChange }, fieldState: { error } }) => (
+                            <Select<SearchPurchaseOrderDetailModel>
+                              value={value}
+                              onChange={(option: SearchPurchaseOrderDetailModel) => {
+                                onChange(option.id);
+                                handlePoDetailChange(idx, option);
+                              }}
+                              placeholder='Pilih Barang'
+                              options={filteredPoDetailList}
+                              displayValue={(value) =>
+                                poDetailList.find((option) => option.value === value)?.label ?? ''
+                              }
+                              getOptionValue={(option: SearchPurchaseOrderDetailModel) => option}
+                              error={error?.message}
+                              disabled={isReadOnly}
+                            />
+                          )}
+                        />
                       </td>
                       <td className='table-cell align-top'>
-                        {/* <Controller
+                        <Controller
                           control={control}
                           name={`details.${idx}.purchasePrice`}
                           render={({ field: { value }, fieldState: { error } }) => (
                             <RupiahFormInput
                               setValue={setValue}
-                              onChange={() => updateProductTotalPrice(idx)}
                               fieldName={`details.${idx}.purchasePrice`}
                               defaultValue={value}
                               error={error?.message}
-                              readOnly={isReadOnly}
+                              readOnly
                             />
                           )}
-                        /> */}
+                        />
                       </td>
                       <td className='table-cell align-top'>
-                        {/* <Controller
+                        <Controller
                           control={control}
-                          name={`details.${idx}.quantity`}
+                          name={`details.${idx}.returnQuantity`}
                           render={({ field: { value }, fieldState: { error } }) => (
                             <DecimalFormInput
                               setValue={setValue}
-                              onChange={() => updateProductTotalPrice(idx)}
-                              fieldName={`details.${idx}.quantity`}
+                              onChange={() => updatePrDetailTotalPrice(idx)}
+                              fieldName={`details.${idx}.returnQuantity`}
                               defaultValue={value}
                               error={error?.message}
                               readOnly={isReadOnly}
                             />
                           )}
-                        /> */}
+                        />
                       </td>
                       <td className='table-cell align-top'>
-                        {/* <Input
+                        <Input
                           placeholder='Satuan'
-                          error={errors.details ? errors?.details[idx]?.uom?.message : ''}
                           inputClassName='bg-gray-100/70'
                           readOnly
-                          {...register(`details.${idx}.uom`)}
-                        /> */}
+                          {...register(`details.${idx}.productUom`)}
+                        />
                       </td>
                       <td className='table-cell align-top'>
-                        {/* <Controller
+                        <Textarea
+                          placeholder='Alasan'
+                          rows={2}
+                          labelClassName='text-gray-600'
+                          disabled={isReadOnly}
+                          {...register(`details.${idx}.reason`)}
+                        />
+                      </td>
+                      <td className='table-cell align-top'>
+                        <Controller
                           control={control}
                           name={`details.${idx}.totalPrice`}
                           render={({ field: { value }, fieldState: { error } }) => (
@@ -316,7 +360,7 @@ export default function PurchaseReturnForm({
                               error={error?.message}
                             />
                           )}
-                        /> */}
+                        />
                       </td>
                     </tr>
                   ))}
@@ -333,7 +377,7 @@ export default function PurchaseReturnForm({
                         </ActionIcon>
                       )}
                     </td>
-                    <td className='table-cell text-right' colSpan={4}>
+                    <td className='table-cell text-right' colSpan={5}>
                       <span className='font-semibold'>GRAND TOTAL RETUR</span>
                     </td>
                     <td className='table-cell'>

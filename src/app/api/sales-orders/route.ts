@@ -256,6 +256,7 @@ export async function POST(request: Request) {
                 oriSellingPrice: product.sellingPrice,
                 sellingPrice: d.sellingPrice,
                 quantity: d.quantity,
+                returnedQuantity: d.quantity,
                 totalPrice: d.sellingPrice * d.quantity,
                 CreatedBy: {
                   connect: { id: userId },
@@ -291,6 +292,7 @@ export async function POST(request: Request) {
             serviceName: d.serviceName,
             sellingPrice: d.sellingPrice,
             quantity: d.quantity,
+            returnedQuantity: d.quantity,
             totalPrice: d.sellingPrice * d.quantity,
             createdBy: userId,
           })),

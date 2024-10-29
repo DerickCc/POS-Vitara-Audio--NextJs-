@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BasicSelectOptions } from './global.model';
 
 export const PurchaseOrderDetailSchema = z.object({
   id: z.string().optional().nullable(),
@@ -10,7 +11,7 @@ export const PurchaseOrderDetailSchema = z.object({
 export class PurchaseOrderDetailModel {
   id: string;
   poId: string;
-  productId: string;
+  productId: string; // for UI
   productName: string; // for UI
   purchasePrice: number;
   quantity: number;
@@ -27,4 +28,13 @@ export class PurchaseOrderDetailModel {
     this.uom = data.uom;
     this.totalPrice = data.totalPrice || 0;
   }
+}
+
+export interface SearchPurchaseOrderDetailModel extends BasicSelectOptions {
+  id: string;
+  productId: string;
+  productName: string;
+  productUom: string;
+  purchasePrice: number;
+  quantity: number;
 }
