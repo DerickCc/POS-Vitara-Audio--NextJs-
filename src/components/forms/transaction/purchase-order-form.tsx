@@ -55,13 +55,6 @@ export default function PurchaseOrderForm({
     resolver: isReadOnly ? undefined : zodResolver(PurchaseOrderSchema),
   });
 
-  useEffect(() => {
-    if (defaultValues.id) {
-      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
-      reset(defaultValues);
-    }
-  }, [defaultValues, reset]);
-
   const {
     fields: detailFields,
     append: appendDetail,
@@ -102,7 +95,6 @@ export default function PurchaseOrderForm({
 
     // add back previously selected product
     if (idx >= 0 && selectedProducts[idx]) filteredProductList.unshift(selectedProducts[idx]);
-
     setProductList(filteredProductList);
   };
 
@@ -115,12 +107,14 @@ export default function PurchaseOrderForm({
       uom: product.uom,
     });
 
-    filterSelectedProductFromList(productList);
+    filterSelectedProductFromList(productList, idx);
 
     // updated selected products
-    const updatedSelectedProducts = [...selectedProducts];
-    updatedSelectedProducts[idx] = product;
-    setSelectedProducts(updatedSelectedProducts);
+    setSelectedProducts((prev) => {
+      const updated = [...prev];
+      updated[idx] = product;
+      return updated;
+    });
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,6 +154,13 @@ export default function PurchaseOrderForm({
       toast.error(errors.details.refinement.message);
     }
   };
+
+  useEffect(() => {
+    if (defaultValues.id) {
+      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -290,7 +291,6 @@ export default function PurchaseOrderForm({
                                 disableDefaultFilter={true}
                                 error={error?.message}
                                 disabled={isReadOnly}
-                                // error={errors.details ? errors.details[idx]?.purchasePrice?.message : ''}
                               />
                             );
                           }}

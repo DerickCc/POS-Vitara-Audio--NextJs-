@@ -74,7 +74,6 @@ export default function PurchaseReturnForm({
   });
 
   const [poList, setPoList] = useState<SearchPurchaseOrderModel[]>([]);
-  const [selectedPoDetails, setSelectedPoDetails] = useState<SearchPurchaseOrderDetailModel[]>([]);
   const [poDetailList, setPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
   const [filteredPoDetailList, setFilteredPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
 
@@ -108,6 +107,13 @@ export default function PurchaseReturnForm({
   // ------------------------
 
   // transaction Detail
+  const filterSelectedPoDetails = () => {
+    const selectedPoDetails = getValues().details;
+    setFilteredPoDetailList(
+      poDetailList.filter((pod) => !selectedPoDetails.some((selectedPod) => pod.id === selectedPod.podId))
+    );
+  };
+
   const handlePoDetailChange = (idx: number, pod: SearchPurchaseOrderDetailModel) => {
     setValue(`details.${idx}`, {
       ...getValues().details[idx],
@@ -117,14 +123,7 @@ export default function PurchaseReturnForm({
       reason: '',
     });
 
-    // Update selectedPoDetails
-    const updatedSelectedPoDetails = [...selectedPoDetails];
-    updatedSelectedPoDetails[idx] = pod;
-    setSelectedPoDetails(updatedSelectedPoDetails)
-
-    setFilteredPoDetailList(
-      poDetailList.filter((x) => !selectedPoDetails.some((selectedPod) => x.id === selectedPod.id))
-    );
+    filterSelectedPoDetails();
   };
 
   const updatePrDetailTotalPrice = (idx: number) => {
@@ -257,7 +256,7 @@ export default function PurchaseReturnForm({
                     <th className='w-[250px]'>Barang</th>
                     <th className='w-[200px]'>Harga Beli</th>
                     <th className='w-[100px]'>Qty</th>
-                    <th className='w-[150px]'>Satuan</th>
+                    <th className='w-[130px]'>Satuan</th>
                     <th>Alasan</th>
                     <th className='w-[200px]'>Total</th>
                   </tr>
@@ -271,7 +270,10 @@ export default function PurchaseReturnForm({
                           variant='outline'
                           aria-label='delete'
                           className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
-                          onClick={() => removeDetail(idx)}
+                          onClick={() => {
+                            removeDetail(idx);
+                            filterSelectedPoDetails();
+                          }}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
                         </ActionIcon>
@@ -343,6 +345,7 @@ export default function PurchaseReturnForm({
                           placeholder='Alasan'
                           rows={2}
                           labelClassName='text-gray-600'
+                          error={errors.details && errors.details[idx]?.reason?.message}
                           disabled={isReadOnly}
                           {...register(`details.${idx}.reason`)}
                         />

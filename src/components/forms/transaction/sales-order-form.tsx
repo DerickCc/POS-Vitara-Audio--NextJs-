@@ -10,7 +10,7 @@ import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { SearchCustomerModel } from '@/models/customer.model';
 import { BasicFormProps } from '@/models/global.model';
 import { SearchProductModel } from '@/models/product.model';
-import { SalesOrderModel, SalesOrderPaymentModel, SalesOrderSchema } from '@/models/sales-order';
+import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
 import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
 import { SalesOrderServiceDetailModel } from '@/models/sales-order-service-detail';
 import { SessionData } from '@/models/session.model';
@@ -36,8 +36,6 @@ import { IoCartOutline } from 'react-icons/io5';
 import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
-import { updateSoPayment } from '@/services/sales-order-service';
-import { useRouter } from 'next/navigation';
 
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
@@ -84,7 +82,6 @@ export default function SalesOrderForm({
     name: 'serviceDetails',
   });
 
-  const router = useRouter();
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
   const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);

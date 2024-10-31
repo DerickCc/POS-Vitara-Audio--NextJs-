@@ -13,7 +13,7 @@ export const PurchaseReturnSchema = z.object({
         return new Set(podIds).size === podIds.length;
       },
       {
-        message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+        message: 'Mohon tidak memilih barang yang sama dalam 1 retur',
         path: ['refinement'],
       }
     )

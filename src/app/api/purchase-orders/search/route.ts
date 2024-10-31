@@ -49,6 +49,7 @@ export async function GET(request: Request) {
           select: {
             id: true,
             quantity: true,
+            returnedQuantity: true,
             purchasePrice: true,
             Product: {
               select: {
@@ -71,8 +72,11 @@ export async function GET(request: Request) {
         productId: pod.Product.id,
         productName: pod.Product.name,
         productUom: pod.Product.uom,
+        returnableQuantity: pod.returnedQuantity.minus(pod.quantity),
         value: pod.id,
         label: pod.Product.name,
+        quantity: undefined,
+        returnedQuantity: undefined,
         Product: undefined,
       })),
       PurchaseOrderDetails: undefined,

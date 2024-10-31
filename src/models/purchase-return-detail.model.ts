@@ -5,7 +5,7 @@ export const PurchaseReturnDetailSchema = z.object({
   podId: z.string().min(1, { message: 'Mohon memilih barang yang diretur' }),
   purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
   returnQuantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
-  reason: z.string().max(500, { message: 'Alasan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+  reason: z.string().min(1, { message: 'Mohon mengisi alasan retur' }).max(500, { message: 'Alasan tidak boleh lebih dari 500 huruf' }),
 });
 
 export class PurchaseReturnDetailModel {
