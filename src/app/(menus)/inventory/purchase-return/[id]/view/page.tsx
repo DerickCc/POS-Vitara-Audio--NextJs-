@@ -1,50 +1,41 @@
 'use client';
 
+import PurchaseReturnForm from '@/components/forms/inventory/purchase-return-form';
 import PurchaseOrderForm from '@/components/forms/transaction/purchase-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
-import { getPoById, updatePo } from '@/services/purchase-order-service';
-import { useParams, useRouter } from 'next/navigation';
+import { PurchaseReturnModel } from '@/models/purchase-return.model';
+import { getPoById } from '@/services/purchase-order-service';
+import { getPrById } from '@/services/purchase-return-service';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const pageHeader = {
-  title: 'Edit Pembelian',
+  title: 'Detail Pembelian',
   breadcrumb: [
-    { name: 'Transaksi' },
+    { name: 'Inventori' },
     {
       href: routes.transaction.purchaseOrder.data,
-      name: 'Pembelian',
+      name: 'Retur Pembelian',
     },
     {
-      name: 'Edit Pembelian',
+      name: 'Detail Retur Pembelian',
     },
   ],
 };
 
-export default function EditPurchaseOrderPage() {
-  const router = useRouter();
+export default function ViewPurchaseReturnPage() {
   const { id } = useParams<{ id: string }>();
-  const [po, setPo] = useState<PurchaseOrderModel>(new PurchaseOrderModel());
+  const [pr, setPr] = useState<PurchaseReturnModel>(new PurchaseReturnModel());
   const [isLoading, setIsLoading] = useState(true);
 
-  const update = async (payload: PurchaseOrderModel) => {
-    try {
-      const message = await updatePo(id, payload);
-      toast.success(message, { duration: 4000 });
-
-      router.push(routes.transaction.purchaseOrder.data);
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
   useEffect(() => {
-    const fetchPo = async () => {
+    const fetchPr = async () => {
       try {
         setIsLoading(true);
-        setPo(await getPoById(id));
+        setPr(await getPrById(id));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       } finally {
@@ -52,17 +43,18 @@ export default function EditPurchaseOrderPage() {
       }
     };
 
-    fetchPo();
+    fetchPr();
   }, [id]);
 
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <PurchaseOrderForm
-        defaultValues={po}
+      <PurchaseReturnForm
+        defaultValues={pr}
+        isReadOnly={true}
         isLoading={isLoading}
-        onSubmit={update}
+        onSubmit={async (payload: PurchaseReturnModel) => {}}
       />
     </>
   );

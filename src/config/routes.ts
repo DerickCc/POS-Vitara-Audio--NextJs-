@@ -21,11 +21,13 @@ export const routes = {
     purchaseReturn: {
       data: '/inventory/purchase-return',
       add: '/inventory/purchase-return/add',
+      view: (id: string) => `/inventory/purchase-return/${id}/view`,
       edit: (id: string) => `/inventory/purchase-return/${id}/edit`
     },
     salesReturn: {
       data: '/inventory/sales-return',
       add: '/inventory/sales-return/add',
+      view: (id: string) => `/inventory/sales-return/${id}/view`,
       edit: (id: string) => `/inventory/sales-return/${id}/edit`
     },
   },

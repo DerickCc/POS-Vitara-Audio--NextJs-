@@ -42,7 +42,9 @@ export async function GET(request: Request) {
   }
 
   if (supplierId) {
-    where.AND.push({ supplierId });
+    where.AND.push({
+      PurchaseOrder: { supplierId },
+    });
   }
 
   if (startDate) {
@@ -107,17 +109,18 @@ export async function GET(request: Request) {
             Supplier: {
               select: { name: true },
             },
+            code: true,
           },
         },
       },
     });
     const recordsTotal = await db.purchaseReturns.count({ where });
-    console.log(purchaseReturns)
 
     const mappedPurchaseReturns = purchaseReturns.map((pr) => ({
       ...pr,
       supplierName: pr.PurchaseOrder.Supplier.name,
-      // Supplier: undefined,
+      poCode: pr.PurchaseOrder.code,
+      PurchaseOrder: undefined,
     }));
 
     return NextResponse.json({ message: 'Success', result: mappedPurchaseReturns, recordsTotal }, { status: 200 });
@@ -168,43 +171,41 @@ export async function POST(request: Request) {
 
     if (lastPr) {
       const lastCodeNumber = parseInt(lastPr.code.replace('PR', ''), 10);
-      newCode = 'PO' + (lastCodeNumber + 1).toString().padStart(8, '0');
+      newCode = 'PR' + (lastCodeNumber + 1).toString().padStart(8, '0');
     }
 
-    // const purchaseDate = new Date().toISOString();
-    // const grandTotal = data.details.reduce((acc, d) => {
-    //   return acc + d.purchasePrice * d.quantity;
-    // }, 0);
+    const returnDate = new Date().toISOString();
+    const grandTotal = data.details.reduce((acc, d) => {
+      return acc + d.purchasePrice * d.returnQuantity;
+    }, 0);
 
-    // await db.$transaction(async (prisma) => {
-    //   const po = await prisma.purchaseOrders.create({
-    //     data: {
-    //       code: newCode,
-    //       purchaseDate: purchaseDate,
-    //       Supplier: {
-    //         connect: { id: data.supplierId },
-    //       },
-    //       remarks: data.remarks,
-    //       totalItem: data.details.length,
-    //       grandTotal: grandTotal,
-    //       status: 'Dalam Proses',
-    //       CreatedBy: {
-    //         connect: { id: userId },
-    //       },
-    //     },
-    //   });
+    await db.$transaction(async (prisma) => {
+      const pr = await prisma.purchaseReturns.create({
+        data: {
+          code: newCode,
+          PurchaseOrder: {
+            connect: { id: data.poId },
+          },
+          returnDate,
+          returnType: data.returnType,
+          grandTotal,
+          status: 'Dalam Proses',
+          CreatedBy: {
+            connect: { id: userId },
+          },
+        },
+      });
 
-    //   await prisma.purchaseOrderDetails.createMany({
-    //     data: data.details.map((d) => ({
-    //       poId: po.id,
-    //       productId: d.productId,
-    //       purchasePrice: d.purchasePrice,
-    //       quantity: d.quantity,
-    //       totalPrice: d.purchasePrice * d.quantity,
-    //       createdBy: userId,
-    //     })),
-    //   });
-    // });
+      await prisma.purchaseReturnDetails.createMany({
+        data: data.details.map((d) => ({
+          prId: pr.id,
+          podId: d.podId,
+          returnQuantity: d.returnQuantity,
+          reason: d.reason,
+          createdBy: userId,
+        })),
+      });
+    });
 
     return NextResponse.json({ message: 'Data Retur Pembelian berhasil disimpan' }, { status: 201 });
   } catch (e) {

@@ -37,4 +37,5 @@ export interface SearchPurchaseOrderDetailModel extends BasicSelectOptions {
   productUom: string;
   purchasePrice: number;
   quantity: number;
+  returnedQuantity: number;
 }

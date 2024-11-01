@@ -9,7 +9,7 @@ import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { FaSave } from 'react-icons/fa';
 import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button, Input, Loader, Textarea } from 'rizzui';
@@ -21,6 +21,7 @@ export default function SupplierForm({
 }: BasicFormProps<SupplierModel>) {
   const {
     register,
+    control,
     setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -61,20 +62,32 @@ export default function SupplierForm({
             />
 
             <div className='sm:col-span-3 grid sm:grid-cols-2 gap-6'>
-              <RupiahFormInput
-                setValue={setValue}
-                label='Piutang'
-                fieldName='receivablesLimit'
-                defaultValue={defaultValues.receivables}
-                readOnly={true}
-                error={errors.receivables?.message}
+              <Controller
+                control={control}
+                name='receivables'
+                render={({ field: { value }, fieldState: { error } }) => (
+                  <RupiahFormInput
+                    setValue={setValue}
+                    label='Piutang'
+                    fieldName='receivables'
+                    defaultValue={value}
+                    readOnly={true}
+                    error={error?.message}
+                  />
+                )}
               />
-              <RupiahFormInput
-                setValue={setValue}
-                label='Limit Piutang'
-                fieldName='receivablesLimit'
-                defaultValue={defaultValues.receivablesLimit}
-                error={errors.receivablesLimit?.message}
+              <Controller
+                control={control}
+                name='receivablesLimit'
+                render={({ field: { value }, fieldState: { error } }) => (
+                  <RupiahFormInput
+                    setValue={setValue}
+                    label='Limit Piutang'
+                    fieldName='receivablesLimit'
+                    defaultValue={value}
+                    error={error?.message}
+                  />
+                )}
               />
             </div>
             <div className='sm:col-span-3 grid sm:grid-cols-2 gap-6'>

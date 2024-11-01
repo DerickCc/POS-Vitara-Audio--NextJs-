@@ -29,7 +29,7 @@ import { TbTruckReturn } from 'react-icons/tb';
 import { SearchPurchaseOrderModel } from '@/models/purchase-order.model';
 import { searchPo } from '@/services/purchase-order-service';
 import { purchaseReturnTypeOptions } from '@/config/global-variables';
-import { PurchaseOrderDetailModel, SearchPurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
+import { SearchPurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 
 interface PurchaseReturnFormProps extends BasicFormProps<PurchaseReturnModel> {
@@ -114,16 +114,41 @@ export default function PurchaseReturnForm({
     );
   };
 
-  const handlePoDetailChange = (idx: number, pod: SearchPurchaseOrderDetailModel) => {
+  const handlePrDetailChange = (idx: number, pod: SearchPurchaseOrderDetailModel) => {
     setValue(`details.${idx}`, {
       ...getValues().details[idx],
+      productName: pod.productName,
       purchasePrice: pod.purchasePrice,
       returnQuantity: 0,
+      purchaseQuantity: pod.quantity,
+      returnedQuantity: pod.returnedQuantity,
       productUom: pod.productUom,
       reason: '',
     });
 
     filterSelectedPoDetails();
+  };
+
+  const handlePrDetailQtyChange = (idx: number, returnQty: number) => {
+    const prd = getValues().details[idx];
+    const returnableQty = prd.purchaseQuantity - prd.returnedQuantity;
+    if (returnQty > returnableQty) {
+      toast.error(
+        <>
+          Qty retur dari {prd.productName} melebihi Qty retur yang diperbolehkan. <br /> <br />
+          Qty pembelian: {prd.purchaseQuantity} <br />
+          Qty yang telah diretur: {prd.returnedQuantity} <br />
+          Qty retur yang diperbolehkan: {prd.purchaseQuantity} - {prd.returnedQuantity} ={' '}
+          {prd.purchaseQuantity - prd.returnedQuantity}
+        </>,
+        {
+          duration: 8000,
+        }
+      );
+      setValue(`details.${idx}.returnQuantity`, returnableQty);
+    }
+
+    updatePrDetailTotalPrice(idx);
   };
 
   const updatePrDetailTotalPrice = (idx: number) => {
@@ -144,6 +169,7 @@ export default function PurchaseReturnForm({
   // ------------------------
 
   const onError = (errors: any) => {
+    console.log(errors)
     if (errors?.details?.refinement) {
       toast.error(errors.details.refinement.message);
     }
@@ -287,7 +313,7 @@ export default function PurchaseReturnForm({
                               value={value}
                               onChange={(option: SearchPurchaseOrderDetailModel) => {
                                 onChange(option.id);
-                                handlePoDetailChange(idx, option);
+                                handlePrDetailChange(idx, option);
                               }}
                               placeholder='Pilih Barang'
                               options={filteredPoDetailList}
@@ -320,16 +346,23 @@ export default function PurchaseReturnForm({
                         <Controller
                           control={control}
                           name={`details.${idx}.returnQuantity`}
-                          render={({ field: { value }, fieldState: { error } }) => (
-                            <DecimalFormInput
-                              setValue={setValue}
-                              onChange={() => updatePrDetailTotalPrice(idx)}
-                              fieldName={`details.${idx}.returnQuantity`}
-                              defaultValue={value}
-                              error={error?.message}
-                              readOnly={isReadOnly}
-                            />
-                          )}
+                          render={({ field: { value }, fieldState: { error } }) => {
+                            const returnableQty =
+                              watch(`details.${idx}.purchaseQuantity`) - watch(`details.${idx}.returnedQuantity`);
+                            const podId = watch(`details.${idx}.podId`);
+
+                            return (
+                              <DecimalFormInput
+                                setValue={setValue}
+                                limit={returnableQty}
+                                onChange={(qty: number) => handlePrDetailQtyChange(idx, qty)}
+                                fieldName={`details.${idx}.returnQuantity`}
+                                defaultValue={value}
+                                error={error?.message}
+                                readOnly={isReadOnly || !podId}
+                              />
+                            );
+                          }}
                         />
                       </td>
                       <td className='table-cell align-top'>

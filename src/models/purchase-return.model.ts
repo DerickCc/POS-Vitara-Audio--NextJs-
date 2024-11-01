@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 export const PurchaseReturnSchema = z.object({
   poId: z.string().min(1, { message: 'Mohon memilih transaksi pembelian' }),
-  returnType: z.string().max(1, { message: 'Mohon memilih tipe retur' }),
+  returnType: z.string().min(1, { message: 'Mohon memilih tipe retur' }),
   details: z
     .array(PurchaseReturnDetailSchema)
     .refine(
@@ -25,7 +25,7 @@ export const PurchaseReturnSchema = z.object({
         message: 'Harap pilih minimal 1 barang yang ingin diretur',
         path: ['refinement'],
       }
-    ),
+    )
 });
 
 export class PurchaseReturnModel {

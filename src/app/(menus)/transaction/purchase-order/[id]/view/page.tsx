@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 const pageHeader = {
   title: 'Detail Pembelian',
   breadcrumb: [
-    { name: 'Transaksi Pembelian' },
+    { name: 'Transaksi' },
     {
       href: routes.transaction.purchaseOrder.data,
       name: 'Pembelian',
