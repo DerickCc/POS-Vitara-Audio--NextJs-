@@ -160,6 +160,37 @@ export async function POST(request: Request) {
 
   try {
     const userId = session.id;
+    const grandTotal = data.details.reduce((acc, d) => {
+      return acc + d.purchasePrice * d.returnQuantity;
+    }, 0);
+
+    // check receivables if piutang
+    if (data.returnType === 'Piutang') {
+      const supplier = (
+        await db.purchaseOrders.findUniqueOrThrow({
+          where: { id: data.poId },
+          select: {
+            Supplier: {
+              select: {
+                receivables: true,
+                receivablesLimit: true,
+              },
+            },
+          },
+        })
+      )?.Supplier;
+
+      if (grandTotal > supplier.receivablesLimit - supplier.receivables) {
+        const remainingReceivables = new Intl.NumberFormat('id-ID').format(
+          supplier.receivablesLimit - supplier.receivables
+        );
+
+        return NextResponse.json(
+          { message: `Grand total retur melebihi sisa piutang (Tersisa: Rp ${remainingReceivables})` },
+          { status: 400 }
+        );
+      }
+    }
 
     // retreive last pr code
     const lastPr = await db.purchaseReturns.findFirst({
@@ -175,9 +206,6 @@ export async function POST(request: Request) {
     }
 
     const returnDate = new Date().toISOString();
-    const grandTotal = data.details.reduce((acc, d) => {
-      return acc + d.purchasePrice * d.returnQuantity;
-    }, 0);
 
     await db.$transaction(async (prisma) => {
       const pr = await prisma.purchaseReturns.create({
