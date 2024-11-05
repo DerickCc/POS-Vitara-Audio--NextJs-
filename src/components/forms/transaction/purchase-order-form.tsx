@@ -261,8 +261,12 @@ export default function PurchaseOrderForm({
                           size='sm'
                           variant='outline'
                           aria-label='delete'
-                          className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
+                          className={cn(
+                            isReadOnly ? actionIconColorClass.gray : actionIconColorClass.red + 'cursor-pointer',
+                            'mt-1'
+                          )}
                           onClick={() => removeDetail(idx)}
+                          disabled={isReadOnly}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
                         </ActionIcon>

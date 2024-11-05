@@ -15,7 +15,7 @@ const pageHeader = {
       name: 'Inventori',
     },
     {
-      href: routes.transaction.purchaseOrder.data,
+      href: routes.inventory.purchaseReturn.data,
       name: 'Retur Pembelian',
     },
     {

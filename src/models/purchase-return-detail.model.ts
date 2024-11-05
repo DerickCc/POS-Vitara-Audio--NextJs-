@@ -12,6 +12,7 @@ export class PurchaseReturnDetailModel {
   id: string;
   prId: string;
   podId: string;
+  productId: string; // for UI
   productName: string; // for UI
   purchasePrice: number // for UI
   productUom: string // for UI
@@ -25,6 +26,7 @@ export class PurchaseReturnDetailModel {
     this.id = data.id;
     this.prId = data.prId || '';
     this.podId = data.podId || '';
+    this.productId = data.productId || '';
     this.productName = data.productName;
     this.purchasePrice = data.purchasePrice || 0;
     this.productUom = data.productUom;

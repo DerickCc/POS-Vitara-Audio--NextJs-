@@ -41,14 +41,14 @@ function ActionColumn({
             </Dropdown.Item>
           </Link>
 
-          {/* edit */}
+          {/* edit
           {row.original.status === 'Dalam Proses' && (
             <Link href={routes.inventory.purchaseReturn.edit(row.original.id)}>
               <Dropdown.Item>
                 <LuPencil className='text-yellow-500 w-5 h-5 cursor-pointer mr-3' /> Edit
               </Dropdown.Item>
             </Link>
-          )}
+          )} */}
 
           {/* finish */}
           {row.original.status === 'Dalam Proses' && (
@@ -66,7 +66,7 @@ function ActionColumn({
             </Dropdown.Item>
           )}
 
-          {/* delete */}
+          {/* delete
           {row.original.status === 'Dalam Proses' && (
             <Dropdown.Item
               onClick={() => {
@@ -79,10 +79,10 @@ function ActionColumn({
             >
               <FaRegTrashAlt className='text-red-500 w-5 h-4 cursor-pointer mr-3' /> Hapus
             </Dropdown.Item>
-          )}
+          )} */}
 
           {/* cancel */}
-          {role === 'Admin' && row.original.status === 'Selesai' && (
+          {role === 'Admin' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({

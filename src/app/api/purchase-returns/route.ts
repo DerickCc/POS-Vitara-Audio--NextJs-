@@ -2,6 +2,7 @@ import { PurchaseReturnSchema } from '@/models/purchase-return.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // BrowsePurchaseReturns
@@ -233,6 +234,50 @@ export async function POST(request: Request) {
           createdBy: userId,
         })),
       });
+
+      const updatePromises: any[] = [];
+
+      for (const prd of data.details) {
+        const poDetail = await prisma.purchaseOrderDetails.findUniqueOrThrow({
+          where: { id: prd.podId },
+          select: {
+            id: true,
+            Product: {
+              select: { id: true },
+            },
+          },
+        });
+
+        // update po detail's returned qty
+        updatePromises.push(
+          prisma.purchaseOrderDetails.update({
+            where: { id: poDetail.id },
+            data: {
+              returnedQuantity: { increment: new Decimal(prd.returnQuantity) },
+              UpdatedBy: {
+                connect: { id: userId },
+              },
+            },
+          })
+        );
+
+        const product = poDetail.Product;
+
+        // update product stock
+        updatePromises.push(
+          prisma.products.update({
+            where: { id: product.id },
+            data: {
+              stock: { decrement: new Decimal(prd.returnQuantity) },
+              UpdatedBy: {
+                connect: { id: userId },
+              },
+            },
+          })
+        );
+      }
+
+      await Promise.all(updatePromises);
     });
 
     return NextResponse.json({ message: 'Data Retur Pembelian berhasil disimpan' }, { status: 201 });

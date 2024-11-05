@@ -33,7 +33,6 @@ export class PurchaseReturnModel {
   code: string;
   poId: string;
   poCode: string; // for UI
-  supplierId: string; // for UI
   supplierName: string; // for UI
   returnDate: string;
   returnType: 'Penggantian Barang' | 'Pengembalian Dana' | 'Piutang';
@@ -46,7 +45,6 @@ export class PurchaseReturnModel {
     this.code = data.code;
     this.poId = data.poId || '';
     this.poCode = data.poCode;
-    this.supplierId = data.supplierId || '';
     this.supplierName = data.supplierName;
     this.returnDate = data.returnDate || getCurrDate();
     this.returnType = data.returnType || 'Penggantian Barang';

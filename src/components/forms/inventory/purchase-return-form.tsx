@@ -56,13 +56,6 @@ export default function PurchaseReturnForm({
     resolver: isReadOnly ? undefined : zodResolver(PurchaseReturnSchema),
   });
 
-  useEffect(() => {
-    if (defaultValues.id) {
-      defaultValues.returnDate = isoStringToReadableDate(defaultValues.returnDate);
-      reset(defaultValues);
-    }
-  }, [defaultValues, reset]);
-
   const {
     fields: detailFields,
     append: appendDetail,
@@ -76,6 +69,24 @@ export default function PurchaseReturnForm({
   const [poList, setPoList] = useState<SearchPurchaseOrderModel[]>([]);
   const [poDetailList, setPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
   const [filteredPoDetailList, setFilteredPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
+
+  useEffect(() => {
+    if (defaultValues.id) {
+      defaultValues.returnDate = isoStringToReadableDate(defaultValues.returnDate);
+
+      // set display product name
+      const formatPoDetails = defaultValues.details.map((d) => ({
+        ...d,
+        quantity: 0,
+        value: d.podId,
+        label: d.productName,
+      })) as SearchPurchaseOrderDetailModel[];
+      setPoDetailList(formatPoDetails);
+      // -------
+
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
 
   //PurchaseOrder
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,6 +138,7 @@ export default function PurchaseReturnForm({
     });
 
     filterSelectedPoDetails();
+    console.log(detailFields);
   };
 
   const handlePrDetailQtyChange = (idx: number, returnQty: number) => {
@@ -169,7 +181,7 @@ export default function PurchaseReturnForm({
   // ------------------------
 
   const onError = (errors: any) => {
-    console.log(errors)
+    console.log(errors);
     if (errors?.details?.refinement) {
       toast.error(errors.details.refinement.message);
     }
@@ -280,7 +292,7 @@ export default function PurchaseReturnForm({
                       Aksi
                     </th>
                     <th className='w-[250px]'>Barang</th>
-                    <th className='w-[200px]'>Harga Beli</th>
+                    <th className='w-[200px]'>Harga Retur</th>
                     <th className='w-[100px]'>Qty</th>
                     <th className='w-[130px]'>Satuan</th>
                     <th>Alasan</th>
@@ -295,11 +307,15 @@ export default function PurchaseReturnForm({
                           size='sm'
                           variant='outline'
                           aria-label='delete'
-                          className={cn(actionIconColorClass.red, 'cursor-pointer mt-1')}
+                          className={cn(
+                            isReadOnly ? actionIconColorClass.gray : actionIconColorClass.red + 'cursor-pointer',
+                            'mt-1'
+                          )}
                           onClick={() => {
                             removeDetail(idx);
                             filterSelectedPoDetails();
                           }}
+                          disabled={isReadOnly}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
                         </ActionIcon>
