@@ -1,15 +1,15 @@
-import { mapPoPrStatusToColor } from "@/config/global-variables";
-import { useConfirmationModal } from "@/hooks/use-confirmation-modal";
-import { Colors, PoPrStatusType } from "@/models/global.model";
-import { PurchaseReturnModel } from "@/models/purchase-return.model";
-import { formatToCurrency, isoStringToReadableDate } from "@/utils/helper-function";
-import { badgeColorClass, baseBadgeClass } from "@/utils/tailwind-classes";
-import { ColumnDef, Row, createColumnHelper } from "@tanstack/react-table";
+import { mapPoPrStatusToColor } from '@/config/global-variables';
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
+import { Colors, PoPrStatusType } from '@/models/global.model';
+import { PurchaseReturnModel } from '@/models/purchase-return.model';
+import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
+import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
+import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import cn from '@/utils/class-names';
-import { LuCircleSlash, LuEye, LuMoreVertical, LuPencil } from "react-icons/lu";
+import { LuCircleSlash, LuEye, LuMoreVertical, LuPencil } from 'react-icons/lu';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
 
@@ -41,23 +41,18 @@ function ActionColumn({
             </Dropdown.Item>
           </Link>
 
-          {/* edit
-          {row.original.status === 'Dalam Proses' && (
-            <Link href={routes.inventory.purchaseReturn.edit(row.original.id)}>
-              <Dropdown.Item>
-                <LuPencil className='text-yellow-500 w-5 h-5 cursor-pointer mr-3' /> Edit
-              </Dropdown.Item>
-            </Link>
-          )} */}
-
           {/* finish */}
           {row.original.status === 'Dalam Proses' && (
             <Dropdown.Item
               onClick={() => {
+                const note =
+                  row.original.returnType === 'Penggantian Barang'
+                    ? 'barang yang diretur telah diterima'
+                    : 'dana telah dikembalikan oleh supplier dengan jumlah yang sesuai';
+
                 openConfirmationModal({
-                  title: 'Selesaikan Transaksi Pembelian',
-                  description:
-                    'Transaksi yang sudah diselesaikan tidak dapat diedit atau dihapus lagi. Apakah Anda yakin?',
+                  title: 'Selesaikan Retur Pembelian',
+                  description: `Mohon hanya selesaikan retur ini jika ${note}. Selesaikan retur?`,
                   handleConfirm: () => actionHandlers.finish(row.original.id),
                 });
               }}
@@ -66,29 +61,14 @@ function ActionColumn({
             </Dropdown.Item>
           )}
 
-          {/* delete
-          {row.original.status === 'Dalam Proses' && (
-            <Dropdown.Item
-              onClick={() => {
-                openConfirmationModal({
-                  title: 'Hapus Transaksi Pembelian',
-                  description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
-                  handleConfirm: () => actionHandlers.delete(row.original.id),
-                });
-              }}
-            >
-              <FaRegTrashAlt className='text-red-500 w-5 h-4 cursor-pointer mr-3' /> Hapus
-            </Dropdown.Item>
-          )} */}
-
           {/* cancel */}
           {role === 'Admin' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
-                  title: 'Batalkan Transaksi Pembelian',
+                  title: 'Batalkan Retur Pembelian',
                   description:
-                    'Stok barang akan dikurangi dengan stok dari detail transaksi pembelian ini. Apakah Anda yakin?',
+                    'Stok barang-barang yang diretur akan kembali ke stok semula sebelum diretur. Apakah Anda yakin?',
                   handleConfirm: () => actionHandlers.cancel(row.original.id),
                 });
               }}

@@ -5,7 +5,7 @@ import { Button, Modal } from 'rizzui';
 interface ConfirmationModalProps {
   isOpen: boolean;
   title: string;
-  description: string;
+  description: string | JSX.Element;
   onClose: () => void;
   handleConfirm: () => void;
 }

@@ -165,14 +165,16 @@ export async function POST(request: Request) {
       return acc + d.purchasePrice * d.returnQuantity;
     }, 0);
 
+    let supplier: { id: string; receivables: Decimal; receivablesLimit: Decimal };
     // check receivables if piutang
     if (data.returnType === 'Piutang') {
-      const supplier = (
+      supplier = (
         await db.purchaseOrders.findUniqueOrThrow({
           where: { id: data.poId },
           select: {
             Supplier: {
               select: {
+                id: true,
                 receivables: true,
                 receivablesLimit: true,
               },
@@ -181,13 +183,12 @@ export async function POST(request: Request) {
         })
       )?.Supplier;
 
-      if (grandTotal > supplier.receivablesLimit - supplier.receivables) {
-        const remainingReceivables = new Intl.NumberFormat('id-ID').format(
-          supplier.receivablesLimit - supplier.receivables
-        );
+      const remainingReceivables = supplier.receivablesLimit.minus(supplier.receivables);
+      if (new Decimal(grandTotal).greaterThan(remainingReceivables)) {
+        const formattedRemainingReceivables = new Intl.NumberFormat('id-ID').format(remainingReceivables.toNumber());
 
         return NextResponse.json(
-          { message: `Grand total retur melebihi sisa piutang (Tersisa: Rp ${remainingReceivables})` },
+          { message: `Grand total retur melebihi sisa piutang (Tersisa: Rp ${formattedRemainingReceivables})` },
           { status: 400 }
         );
       }
@@ -209,6 +210,20 @@ export async function POST(request: Request) {
     const returnDate = new Date().toISOString();
 
     await db.$transaction(async (prisma) => {
+      let prStatus = 'Dalam Proses';
+
+      if (data.returnType === 'Piutang') {
+        // PR automatically finish if returnType is 'Piutang'
+        prStatus = 'Selesai';
+
+        await prisma.suppliers.update({
+          where: { id: supplier.id },
+          data: {
+            receivables: { increment: grandTotal },
+          },
+        });
+      }
+
       const pr = await prisma.purchaseReturns.create({
         data: {
           code: newCode,
@@ -218,7 +233,7 @@ export async function POST(request: Request) {
           returnDate,
           returnType: data.returnType,
           grandTotal,
-          status: 'Dalam Proses',
+          status: prStatus,
           CreatedBy: {
             connect: { id: userId },
           },

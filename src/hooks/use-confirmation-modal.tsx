@@ -11,7 +11,7 @@ interface UseConfirmationModalReturnType {
 
 interface ConfirmationModalOptions {
   title: string;
-  description: string;
+  description: string | JSX.Element;
   handleConfirm: () => void;
 }
 
