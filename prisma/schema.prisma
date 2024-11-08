@@ -313,6 +313,7 @@ model PurchaseReturnDetails {
   id             String    @id @default(cuid())
   prId           String    @map("pr_id")
   podId          String    @map("pod_id")
+  returnPrice    Decimal   @map("return_price") @db.Decimal(10, 2)
   returnQuantity Decimal   @map("return_quantity") @db.Decimal(10, 2)
   reason         String    @db.VarChar(500)
   createdBy      String    @map("created_by")

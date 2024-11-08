@@ -39,7 +39,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
             podId: true,
             PurchaseOrderDetail: {
               select: {
-                purchasePrice: true,
                 Product: {
                   select: {
                     id: true,
@@ -49,6 +48,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
                 },
               },
             },
+            returnPrice: true,
             returnQuantity: true,
             reason: true,
           },
@@ -63,14 +63,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
     let grandTotal = new Decimal(0);
 
     const formattedPrDetail = pr.PurchaseReturnDetails.map((d) => {
-      const totalPrice = d.returnQuantity.times(d.PurchaseOrderDetail.purchasePrice);
+      const totalPrice = d.returnQuantity.times(d.returnPrice);
       grandTotal = grandTotal.plus(totalPrice);
 
       return {
         ...d,
         productId: d.PurchaseOrderDetail.Product.id,
         productName: d.PurchaseOrderDetail.Product.name,
-        purchasePrice: d.PurchaseOrderDetail.purchasePrice,
         productUom: d.PurchaseOrderDetail.Product.uom,
         totalPrice,
         PurchaseOrderDetail: undefined,

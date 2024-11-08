@@ -124,10 +124,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ message: 'Transaksi Pembelian berhasil dibatalkan' }, { status: 200 });
   } catch (e: any) {
     if (e.message.includes('Hanya Transaksi Pembelian berstatus "Selesai" yang dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 403 });
+      return NextResponse.json({ message: e.message }, { status: 403 }); // forbidden
     }
     if (e.message.includes('tidak ditemukan')) {
-      return NextResponse.json({ message: e.message }, { status: 404 }); // forbidden
+      return NextResponse.json({ message: e.message }, { status: 404 }); 
     }
     if (e.message.includes('akan minus')) {
       return NextResponse.json({ message: e.message }, { status: 422 }); // unprocessable entity

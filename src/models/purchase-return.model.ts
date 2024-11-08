@@ -25,7 +25,7 @@ export const PurchaseReturnSchema = z.object({
         message: 'Harap pilih minimal 1 barang yang ingin diretur',
         path: ['refinement'],
       }
-    )
+    ),
 });
 
 export class PurchaseReturnModel {

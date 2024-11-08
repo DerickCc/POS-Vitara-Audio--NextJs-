@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const PurchaseReturnDetailSchema = z.object({
   id: z.string().optional().nullable(),
   podId: z.string().min(1, { message: 'Mohon memilih barang yang diretur' }),
-  purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
+  returnPrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
   returnQuantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
   reason: z.string().min(1, { message: 'Mohon mengisi alasan retur' }).max(500, { message: 'Alasan tidak boleh lebih dari 500 huruf' }),
 });
@@ -14,8 +14,8 @@ export class PurchaseReturnDetailModel {
   podId: string;
   productId: string; // for UI
   productName: string; // for UI
-  purchasePrice: number // for UI
   productUom: string // for UI
+  returnPrice: number
   returnQuantity: number; // qty that wanted to be return
   purchaseQuantity: number; // for UI
   returnedQuantity: number; // for UI (qty of product that have been returned in previous transaction)
@@ -28,8 +28,8 @@ export class PurchaseReturnDetailModel {
     this.podId = data.podId || '';
     this.productId = data.productId || '';
     this.productName = data.productName;
-    this.purchasePrice = data.purchasePrice || 0;
     this.productUom = data.productUom;
+    this.returnPrice = data.returnPrice || 0;
     this.returnQuantity = data.returnQuantity || 0;
     this.purchaseQuantity = data.purchaseQuantity || 0;
     this.returnedQuantity = data.returnedQuantity || 0;

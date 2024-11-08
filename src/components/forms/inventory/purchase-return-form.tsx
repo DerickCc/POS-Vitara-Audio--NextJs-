@@ -78,6 +78,7 @@ export default function PurchaseReturnForm({
       const formatPoDetails = defaultValues.details.map((d) => ({
         ...d,
         quantity: 0,
+        purchasePrice: d.returnPrice,
         value: d.podId,
         label: d.productName,
       })) as SearchPurchaseOrderDetailModel[];
@@ -129,7 +130,7 @@ export default function PurchaseReturnForm({
     setValue(`details.${idx}`, {
       ...getValues().details[idx],
       productName: pod.productName,
-      purchasePrice: pod.purchasePrice,
+      returnPrice: pod.purchasePrice,
       returnQuantity: 0,
       purchaseQuantity: pod.quantity,
       returnedQuantity: pod.returnedQuantity,
@@ -165,7 +166,7 @@ export default function PurchaseReturnForm({
 
   const updatePrDetailTotalPrice = (idx: number) => {
     const detail = getValues().details[idx];
-    const totalPrice = detail.purchasePrice * detail.returnQuantity;
+    const totalPrice = detail.returnPrice * detail.returnQuantity;
     setValue(`details.${idx}.totalPrice`, totalPrice);
 
     updateGrandTotal();
@@ -173,7 +174,7 @@ export default function PurchaseReturnForm({
 
   const updateGrandTotal = () => {
     const grandTotal = getValues().details.reduce((acc, d) => {
-      return acc + d.purchasePrice * d.returnQuantity;
+      return acc + d.returnPrice * d.returnQuantity;
     }, 0);
     setValue('grandTotal', grandTotal);
   };
@@ -346,11 +347,11 @@ export default function PurchaseReturnForm({
                       <td className='table-cell align-top'>
                         <Controller
                           control={control}
-                          name={`details.${idx}.purchasePrice`}
+                          name={`details.${idx}.returnPrice`}
                           render={({ field: { value }, fieldState: { error } }) => (
                             <RupiahFormInput
                               setValue={setValue}
-                              fieldName={`details.${idx}.purchasePrice`}
+                              fieldName={`details.${idx}.returnPrice`}
                               defaultValue={value}
                               error={error?.message}
                               readOnly

@@ -162,7 +162,7 @@ export async function POST(request: Request) {
   try {
     const userId = session.id;
     const grandTotal = data.details.reduce((acc, d) => {
-      return acc + d.purchasePrice * d.returnQuantity;
+      return acc + d.returnPrice * d.returnQuantity;
     }, 0);
 
     let supplier: { id: string; receivables: Decimal; receivablesLimit: Decimal };
@@ -244,6 +244,7 @@ export async function POST(request: Request) {
         data: data.details.map((d) => ({
           prId: pr.id,
           podId: d.podId,
+          returnPrice: d.returnPrice,
           returnQuantity: d.returnQuantity,
           reason: d.reason,
           createdBy: userId,
