@@ -1,3 +1,4 @@
+import { checkForRelatedRecords } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -18,7 +19,22 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const pr = await db.purchaseReturns.findUnique({
       where: { id },
-      include: { PurchaseReturnDetails: true, PurchaseOrder: true },
+      select: {
+        returnType: true,
+        createdAt: true,
+        status: true,
+        PurchaseReturnDetails: {
+          select: {
+            podId: true,
+            returnQuantity: true,
+            returnPrice: true,
+            PurchaseOrderDetail: {
+              select: { productId: true }
+            }
+          }
+        },
+        PurchaseOrder: true,
+      },
     });
 
     if (!pr) throw new Error('Data Retur Pembelian tidak ditemukan');
@@ -26,6 +42,49 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     await db.$transaction(async (prisma) => {
       if (pr.status !== 'Dalam Proses' && pr.status !== 'Selesai') {
         throw new Error('Hanya Retur Pembelian berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan');
+      }
+
+      const cancelledProducts = pr.PurchaseReturnDetails.map((d) => d.PurchaseOrderDetail.productId);
+
+      const entities = [
+        {
+          entity: 'purchaseOrders',
+          errorMessage:
+            'Retur tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+          relationPath: 'PurchaseOrderDetails',
+        },
+        {
+          entity: 'salesOrders',
+          errorMessage:
+            'Retur tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+          relationPath: 'SalesOrderProductDetails',
+        },
+        {
+          entity: 'purchaseReturns',
+          errorMessage:
+            'Retur tidak dapat dibatalkan karena telah ada retur pembelian terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+          relationPath: 'PurchaseReturnDetails',
+          additionalPath: 'PurchaseOrderDetail',
+        },
+        {
+          entity: 'salesReturns',
+          errorMessage:
+            'Retur tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+          relationPath: 'SalesReturnProductDetails',
+          additionalPath: 'SalesOrderProductDetail',
+        },
+      ];
+
+      // check if there is transaction or return that was created after the canceled purchase return, is not 'batal', and contains the cancelled products
+      for (const { entity, errorMessage, relationPath, additionalPath } of entities) {
+        await checkForRelatedRecords(
+          entity as any,
+          cancelledProducts,
+          pr.createdAt,
+          errorMessage,
+          relationPath,
+          additionalPath
+        );
       }
 
       const updatePromises: Promise<any>[] = [];

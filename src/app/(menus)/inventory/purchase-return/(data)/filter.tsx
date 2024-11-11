@@ -71,8 +71,8 @@ export default function PurchaseReturnFilter({
             value={localFilters.code}
             onChange={(e) => handleFilterChange('code')(e.target.value)}
             className='sm:col-span-3'
-            label='Kode'
-            placeholder='Cari Kode Transaksi'
+            label='Kode Retur Pembelian'
+            placeholder='Cari Kode Retur Pembelian'
           />
           <Select<SearchSupplierModel>
             value={localFilters.supplierId}
@@ -121,6 +121,13 @@ export default function PurchaseReturnFilter({
               clearButtonClassName='mt-3 mr-2'
             />
           </div>
+          <Input
+            value={localFilters.poCode}
+            onChange={(e) => handleFilterChange('poCode')(e.target.value)}
+            className='sm:col-span-3'
+            label='Kode Transaksi Pembelian'
+            placeholder='Cari Kode Transaksi Pembelian'
+          />
           <Select
             value={localFilters.status}
             onChange={(value: string) => handleFilterChange('status')(value)}
@@ -133,7 +140,7 @@ export default function PurchaseReturnFilter({
             clearable={true}
             onClear={() => handleFilterChange('status')('')}
           />
-          <div className='sm:col-span-7 flex justify-end items-end'>
+          <div className='sm:col-span-4 flex justify-end items-end'>
             <Button className='w-20' type='submit'>
               Cari
             </Button>

@@ -75,9 +75,11 @@ export async function GET(request: Request) {
 
   if (poCode) {
     where.AND.push({
-      poCode: {
-        contains: poCode,
-        mode: 'insensitive',
+      PurchaseOrder: {
+        code: {
+          contains: poCode,
+          mode: 'insensitive',
+        },
       },
     });
   }

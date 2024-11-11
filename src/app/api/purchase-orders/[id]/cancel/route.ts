@@ -1,3 +1,4 @@
+import { checkForRelatedRecords } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -29,52 +30,49 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     await db.$transaction(async (prisma) => {
       const cancelledProducts = po.PurchaseOrderDetails.map((d) => d.productId);
 
+      const entities = [
+        {
+          entity: 'purchaseOrders',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.',
+          relationPath: 'PurchaseOrderDetails',
+        },
+        {
+          entity: 'salesOrders',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.',
+          relationPath: 'SalesOrderProductDetails',
+        },
+        {
+          entity: 'purchaseReturns',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada retur pembelian terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.',
+          relationPath: 'PurchaseReturnDetails',
+          additionalPath: 'PurchaseOrderDetail',
+        },
+        {
+          entity: 'salesReturns',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.',
+          relationPath: 'SalesReturnProductDetails',
+          additionalPath: 'SalesOrderProductDetail',
+        },
+      ];
+
+      // check if there is transaction or return that was created after the canceled purchase order, is not 'batal', and contains the cancelled products
+      for (const { entity, errorMessage, relationPath, additionalPath } of entities) {
+        await checkForRelatedRecords(
+          entity as any,
+          cancelledProducts,
+          po.createdAt,
+          errorMessage,
+          relationPath,
+          additionalPath
+        );
+      }
+
       // update stock and costPrice of each product in details
       const adjustProductPromises = po.PurchaseOrderDetails.map(async (d) => {
-        // Fetch all purchase orders that were created after the canceled sales order, is not 'batal', and contains the cancelled products
-        const affectedPurchaseOrders = await prisma.purchaseOrders.findMany({
-          where: {
-            PurchaseOrderDetails: {
-              some: {
-                productId: { in: cancelledProducts },
-              },
-            },
-            createdAt: { gt: po.createdAt },
-            status: { not: 'Batal' },
-          },
-          orderBy: {
-            createdAt: 'asc',
-          },
-        });
-
-        if (affectedPurchaseOrders.length > 0) {
-          throw new Error(
-            'Transaksi ini tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.'
-          );
-        }
-
-        // Fetch all sales orders that were created after the canceled sales order
-        const affectedSalesOrders = await prisma.salesOrders.findMany({
-          where: {
-            SalesOrderProductDetails: {
-              some: {
-                productId: { in: cancelledProducts },
-              },
-            },
-            createdAt: { gt: po.createdAt },
-            status: { not: 'Batal' },
-          },
-          orderBy: {
-            createdAt: 'asc',
-          },
-        });
-
-        if (affectedSalesOrders.length > 0) {
-          throw new Error(
-            'Transaksi ini tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi pembelian yang ingin dibatalkan.'
-          );
-        }
-
         const product = await prisma.products.findUnique({ where: { id: d.productId } });
 
         if (!product) {
@@ -127,7 +125,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: e.message }, { status: 403 }); // forbidden
     }
     if (e.message.includes('tidak ditemukan')) {
-      return NextResponse.json({ message: e.message }, { status: 404 }); 
+      return NextResponse.json({ message: e.message }, { status: 404 });
     }
     if (e.message.includes('akan minus')) {
       return NextResponse.json({ message: e.message }, { status: 422 }); // unprocessable entity
