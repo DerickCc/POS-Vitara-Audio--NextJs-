@@ -50,4 +50,5 @@ export interface SearchSupplierModel extends BasicSelectOptions {
   id: string;
   code: string;
   name: string;
+  receivables: number;
 }

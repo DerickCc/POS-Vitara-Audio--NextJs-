@@ -1,6 +1,7 @@
 import { PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // GetPurchaseOrderById
@@ -25,10 +26,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
         purchaseDate: true,
         supplierId: true,
         Supplier: {
-          select: { name: true },
+          select: { name: true, receivables: true },
         },
         remarks: true,
         totalItem: true,
+        subTotal: true,
+        appliedReceivables: true,
         grandTotal: true,
         status: true,
         createdBy: true,
@@ -62,6 +65,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const formattedPo = {
       ...po,
       supplierName: po.Supplier.name,
+      supplierReceivable: Number(po.Supplier.receivables),
+      appliedReceivables: Number(po.appliedReceivables),
       details: formattedPoDetail,
       Supplier: undefined,
       PurchaseOrderDetails: undefined,
@@ -78,10 +83,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const session = await getSession();
 
   if (!session.id) {
-    return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
   const { id } = params;
@@ -102,14 +104,40 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const data = validationRes.data;
 
   try {
+    const supplierReceivables = (
+      await db.suppliers.findUniqueOrThrow({
+        where: { id: data.supplierId },
+        select: { receivables: true },
+      })
+    ).receivables;
+
+    const hasBeenAppliedReceivables = (
+      await db.purchaseOrders.findUniqueOrThrow({
+        where: { id },
+        select: { appliedReceivables: true },
+      })
+    ).appliedReceivables;
+
+    // adjustment may be + or -
+    const appliedReceivablesAdjustment = new Decimal(data.appliedReceivables).minus(hasBeenAppliedReceivables);
+    console.log(appliedReceivablesAdjustment)
+    if (new Decimal(appliedReceivablesAdjustment).greaterThan(supplierReceivables)) {
+      return NextResponse.json(
+        { message: 'Potongan piutang melebihi piutang yang dimiliki supplier' },
+        { status: 422 } // unprocessable entity
+      );
+    }
+
     const userId = session.id;
 
-    const grandTotal = data.details.reduce((acc, d) => {
+    const subTotal = data.details.reduce((acc, d) => {
       return acc + d.purchasePrice * d.quantity;
     }, 0);
+    const grandTotal = subTotal - data.appliedReceivables;
+
 
     await db.$transaction(async (prisma) => {
-      const updatedPo = await prisma.purchaseOrders.update({
+      await prisma.purchaseOrders.update({
         where: { id },
         data: {
           Supplier: {
@@ -117,7 +145,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           },
           remarks: data.remarks,
           totalItem: data.details.length,
-          grandTotal: grandTotal,
+          subTotal,
+          appliedReceivables: data.appliedReceivables,
+          grandTotal,
           UpdatedBy: {
             connect: { id: userId },
           },
@@ -163,6 +193,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       });
 
       await Promise.all(updatePromises);
+
+      // update supplier's receivable if there is adjustment on appliedReceivables
+      if (!appliedReceivablesAdjustment.isZero()) {
+        await prisma.suppliers.update({
+          where: { id: data.supplierId },
+          data: {
+            receivables: appliedReceivablesAdjustment.isPositive()
+              ? { decrement: appliedReceivablesAdjustment }
+              : { increment: appliedReceivablesAdjustment.abs() },
+          },
+        });
+      }
     });
 
     return NextResponse.json({ message: 'Transaksi Pembelian berhasil diupdate' }, { status: 200 });
@@ -187,6 +229,11 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   try {
     const po = await db.purchaseOrders.findUnique({
       where: { id },
+      select: {
+        status: true,
+        supplierId: true,
+        appliedReceivables: true,
+      },
     });
 
     if (!po) {
@@ -198,8 +245,17 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       );
     }
 
-    const deletedPo = await db.purchaseOrders.delete({
-      where: { id },
+    await db.$transaction(async (prisma) => {
+      await prisma.purchaseOrders.delete({
+        where: { id },
+      });
+
+      await prisma.suppliers.update({
+        where: { id: po.supplierId },
+        data: {
+          receivables: { increment: po.appliedReceivables },
+        },
+      });
     });
 
     return NextResponse.json({ message: 'Transaksi Pembelian berhasil dihapus' }, { status: 200 });

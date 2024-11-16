@@ -29,7 +29,7 @@ import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 import { SearchProductModel } from '@/models/product.model';
 import { searchProduct } from '@/services/product-service';
 import { debounce } from 'lodash';
-import { isoStringToReadableDate } from '@/utils/helper-function';
+import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 
 interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
   isReadOnly?: boolean;
@@ -68,6 +68,28 @@ export default function PurchaseOrderForm({
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
+  const supplierReceivables = watch('supplierReceivable');
+  const subTotal = watch('subTotal');
+  const appliedReceivables = watch('appliedReceivables');
+  const [appliedReceivablesLimit, setAppliedReceivablesLimit] = useState(0);
+
+  useEffect(() => {
+    if (defaultValues.id) {
+      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
+      defaultValues.supplierReceivable += defaultValues.appliedReceivables;
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
+
+  useEffect(() => {
+    const limit = Math.min(supplierReceivables, subTotal);
+    setAppliedReceivablesLimit(limit);
+
+    if (appliedReceivables > subTotal) setValue('appliedReceivables', subTotal);
+
+    setValue('grandTotal', subTotal - appliedReceivables);
+  }, [supplierReceivables, subTotal, appliedReceivables]);
+
   //supplier
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSupplierSearchChange = useCallback(
@@ -83,8 +105,10 @@ export default function PurchaseOrderForm({
     []
   );
 
-  const handleSupplierChange = (supplierName: string) => {
-    setValue('supplierName', supplierName);
+  const handleSupplierChange = (option: SearchSupplierModel) => {
+    setValue('supplierName', option.name);
+    setValue('supplierReceivable', option.receivables);
+    setValue('appliedReceivables', 0);
   };
   // ------------------------
 
@@ -138,14 +162,14 @@ export default function PurchaseOrderForm({
     const totalPrice = detail.purchasePrice * detail.quantity;
     setValue(`details.${idx}.totalPrice`, totalPrice);
 
-    updateGrandTotal();
+    updateSubTotal();
   };
 
-  const updateGrandTotal = () => {
-    const grandTotal = getValues().details.reduce((acc, d) => {
+  const updateSubTotal = () => {
+    const subTotal = getValues().details.reduce((acc, d) => {
       return acc + d.purchasePrice * d.quantity;
     }, 0);
-    setValue('grandTotal', grandTotal);
+    setValue('subTotal', subTotal);
   };
   // ------------------------
 
@@ -154,13 +178,6 @@ export default function PurchaseOrderForm({
       toast.error(errors.details.refinement.message);
     }
   };
-
-  useEffect(() => {
-    if (defaultValues.id) {
-      defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
-      reset(defaultValues);
-    }
-  }, [defaultValues, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -198,7 +215,7 @@ export default function PurchaseOrderForm({
                       value={value}
                       onChange={(option: SearchSupplierModel) => {
                         onChange(option.id);
-                        handleSupplierChange(option.name);
+                        handleSupplierChange(option);
                       }}
                       label={<span className='required'>Supplier</span>}
                       labelClassName='text-gray-600'
@@ -372,6 +389,32 @@ export default function PurchaseOrderForm({
                       )}
                     </td>
                     <td className='table-cell text-right' colSpan={4}>
+                      {!isReadOnly && (
+                        <>
+                          <span>Piutang Supplier: Rp. {formatToCurrency(supplierReceivables)}</span>
+                          <span className='mx-3'>|</span>
+                        </>
+                      )}
+                      <span className='font-semibold'>POTONG PIUTANG</span>
+                    </td>
+                    <td className='table-cell'>
+                      <Controller
+                        control={control}
+                        name='appliedReceivables'
+                        render={({ field: { value } }) => (
+                          <RupiahFormInput
+                            setValue={setValue}
+                            fieldName='appliedReceivables'
+                            defaultValue={value}
+                            limit={appliedReceivablesLimit}
+                            readOnly={isReadOnly}
+                          />
+                        )}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='table-cell text-right' colSpan={5}>
                       <span className='font-semibold'>GRAND TOTAL</span>
                     </td>
                     <td className='table-cell'>

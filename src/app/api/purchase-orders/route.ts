@@ -2,6 +2,7 @@ import { PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // BrowsePurchaseOrders
@@ -115,10 +116,7 @@ export async function POST(request: Request) {
   const session = await getSession();
 
   if (!session.id) {
-    return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
   const validationRes = PurchaseOrderSchema.safeParse(await request.json());
@@ -137,6 +135,20 @@ export async function POST(request: Request) {
   const data = validationRes.data;
 
   try {
+    const supplierReceivables = (
+      await db.suppliers.findUniqueOrThrow({
+        where: { id: data.supplierId },
+        select: { receivables: true },
+      })
+    ).receivables;
+
+    if (new Decimal(data.appliedReceivables).greaterThan(supplierReceivables)) {
+      return NextResponse.json(
+        { message: 'Potongan piutang melebihi piutang yang dimiliki supplier' },
+        { status: 422 } // unprocessable entity
+      );
+    }
+
     const userId = session.id;
 
     // retreive last po code
@@ -153,9 +165,10 @@ export async function POST(request: Request) {
     }
 
     const purchaseDate = new Date().toISOString();
-    const grandTotal = data.details.reduce((acc, d) => {
+    const subTotal = data.details.reduce((acc, d) => {
       return acc + d.purchasePrice * d.quantity;
     }, 0);
+    const grandTotal = subTotal - data.appliedReceivables;
 
     await db.$transaction(async (prisma) => {
       const po = await prisma.purchaseOrders.create({
@@ -167,7 +180,9 @@ export async function POST(request: Request) {
           },
           remarks: data.remarks,
           totalItem: data.details.length,
-          grandTotal: grandTotal,
+          subTotal,
+          appliedReceivables: data.appliedReceivables,
+          grandTotal,
           status: 'Dalam Proses',
           CreatedBy: {
             connect: { id: userId },
@@ -185,6 +200,15 @@ export async function POST(request: Request) {
           createdBy: userId,
         })),
       });
+
+      if (data.appliedReceivables > 0) {
+        await prisma.suppliers.update({
+          where: { id: data.supplierId },
+          data: {
+            receivables: { decrement: data.appliedReceivables },
+          },
+        });
+      }
     });
 
     return NextResponse.json({ message: 'Data Transaksi Pembelian berhasil disimpan' }, { status: 201 });

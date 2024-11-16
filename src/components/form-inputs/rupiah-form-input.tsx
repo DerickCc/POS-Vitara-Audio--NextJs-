@@ -10,6 +10,7 @@ type RupiahFormInputProps = {
   inputClassName?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   setValue: UseFormSetValue<any>; // Pass setValue from useForm
+  limit?: number;
   onChange?: (value: number) => void; // to process changes from other component
   label?: React__default.ReactNode;
   fieldName: string;
@@ -23,6 +24,7 @@ export default function RupiahFormInput({
   inputClassName,
   size = 'md',
   setValue,
+  limit = -1,
   onChange = (value: number) => null,
   label,
   fieldName,
@@ -41,7 +43,9 @@ export default function RupiahFormInput({
 
   // Update form value and display value when user inputs
   const handleChange = (e: any) => {
-    const numericValue = parseNumber(e.target.value);
+    let numericValue = parseNumber(e.target.value);
+
+    if (limit !== -1 && numericValue > limit) numericValue = limit;
     setDisplayValue(formatToCurrency(numericValue));
 
     setValue(fieldName, numericValue, { shouldValidate: true }); // Manually update the form state

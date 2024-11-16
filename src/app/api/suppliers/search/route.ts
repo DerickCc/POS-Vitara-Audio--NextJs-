@@ -46,10 +46,11 @@ export async function GET(request: Request) {
         id: true,
         code: true,
         name: true,
+        receivables: true,
       },
     });
 
-    const suppliersWithExtraData: SearchSupplierModel[] = suppliers.map(supplier => ({
+    const suppliersWithExtraData = suppliers.map(supplier => ({
       ...supplier,
       value: supplier.id,
       label: supplier.name,

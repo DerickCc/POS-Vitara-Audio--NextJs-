@@ -107,6 +107,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
       await Promise.all(adjustProductPromises);
 
+      await db.suppliers.update({
+        where: { id: po.supplierId },
+        data: {
+          receivables: { increment: po.appliedReceivables },
+        }
+      });
+
       // set po status to 'Batal'
       await db.purchaseOrders.update({
         where: { id },

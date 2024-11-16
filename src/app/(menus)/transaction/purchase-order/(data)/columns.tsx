@@ -128,7 +128,7 @@ export const columns = ({
   }),
   columnHelper.accessor('purchaseDate', {
     id: 'purchaseDate',
-    size: 160,
+    size: 170,
     header: () => 'Tanggal Pembelian',
     cell: (info) => isoStringToReadableDate(info.getValue()),
     enableSorting: true,
@@ -147,9 +147,23 @@ export const columns = ({
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
+  columnHelper.accessor('subTotal', {
+    id: 'subTotal',
+    size: 150,
+    header: () => 'Sub Total',
+    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    enableSorting: true,
+  }),
+  columnHelper.accessor('appliedReceivables', {
+    id: 'appliedReceivables',
+    size: 150,
+    header: () => 'Potong Piutang',
+    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    enableSorting: true,
+  }),
   columnHelper.accessor('grandTotal', {
     id: 'grandTotal',
-    size: 130,
+    size: 150,
     header: () => 'Grand Total',
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
     enableSorting: true,

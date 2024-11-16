@@ -16,7 +16,7 @@ type DecimalFormInputProps = {
 
 export default function DecimalFormInput({
   setValue,
-  limit = 0,
+  limit = -1,
   onChange = (value: number) => null,
   label,
   fieldName,
@@ -41,7 +41,7 @@ export default function DecimalFormInput({
       const numericValue = parseDecimal(inputValue);
 
       // if have limit and is over the limit
-      if (limit !== 0 && numericValue > limit) setDisplayValue(formatToDecimal(limit));
+      if (limit !== -1 && numericValue > limit) setDisplayValue(formatToDecimal(limit));
       else setDisplayValue(formatToDecimal(numericValue));
 
       setValue(fieldName, numericValue, { shouldValidate: true }); // Manually update the form state

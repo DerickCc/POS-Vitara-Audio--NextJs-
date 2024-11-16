@@ -89,10 +89,7 @@ export async function POST(request: Request) {
   const session = await getSession();
 
   if (!session.id) {
-    return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
   const validationRes = CustomerSchema.safeParse(await request.json());

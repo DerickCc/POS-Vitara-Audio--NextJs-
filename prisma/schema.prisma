@@ -140,18 +140,20 @@ model Products {
 }
 
 model PurchaseOrders {
-  id           String    @id @default(cuid())
-  code         String    @unique @db.VarChar(20)
-  purchaseDate DateTime  @default(now()) @map("purchase_date")
-  supplierId   String    @map("supplier_id")
-  remarks      String?   @db.VarChar(500)
-  totalItem    Int       @map("total_item") @db.Integer()
-  grandTotal   Decimal   @map("grand_total") @db.Decimal(10, 2)
-  status       String    @default("Dalam Proses") @db.VarChar(50)
-  createdBy    String    @map("created_by")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedBy    String?   @map("updated_by")
-  updatedAt    DateTime? @updatedAt @map("updated_at")
+  id                 String    @id @default(cuid())
+  code               String    @unique @db.VarChar(20)
+  purchaseDate       DateTime  @default(now()) @map("purchase_date")
+  supplierId         String    @map("supplier_id")
+  remarks            String?   @db.VarChar(500)
+  totalItem          Int       @map("total_item") @db.Integer()
+  subTotal           Decimal   @map("sub_total") @db.Decimal(10, 2)
+  appliedReceivables Decimal   @map("applied_receivables") @db.Decimal(10, 2)
+  grandTotal         Decimal   @map("grand_total") @db.Decimal(10, 2)
+  status             String    @default("Dalam Proses") @db.VarChar(50)
+  createdBy          String    @map("created_by")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedBy          String?   @map("updated_by")
+  updatedAt          DateTime? @updatedAt @map("updated_at")
 
   Supplier Suppliers @relation(fields: [supplierId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 

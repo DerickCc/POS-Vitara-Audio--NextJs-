@@ -1,11 +1,16 @@
 import { z } from 'zod';
-import { PurchaseOrderDetailModel, PurchaseOrderDetailSchema, SearchPurchaseOrderDetailModel } from './purchase-order-detail.model';
+import {
+  PurchaseOrderDetailModel,
+  PurchaseOrderDetailSchema,
+  SearchPurchaseOrderDetailModel,
+} from './purchase-order-detail.model';
 import { getCurrDate } from '@/utils/helper-function';
 import { BasicSelectOptions } from './global.model';
 
 export const PurchaseOrderSchema = z.object({
   supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
   remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+  appliedReceivables: z.coerce.number().min(0, { message: 'Potong Piutang tidak boleh negatif' }),
   details: z
     .array(PurchaseOrderDetailSchema)
     .refine(
@@ -35,9 +40,12 @@ export class PurchaseOrderModel {
   purchaseDate: string;
   supplierId: string;
   supplierName: string; // for UI
+  supplierReceivable: number; // for UI
+  appliedReceivables: number;
   remarks: string;
   details: PurchaseOrderDetailModel[]; // detail po
   totalItem: number;
+  subTotal: number;
   grandTotal: number;
   status: 'Dalam Proses' | 'Selesai' | 'Batal';
 
@@ -47,10 +55,13 @@ export class PurchaseOrderModel {
     this.purchaseDate = data.purchaseDate || getCurrDate();
     this.supplierId = data.supplierId || '';
     this.supplierName = data.supplierName;
+    this.supplierReceivable = data.supplierReceivable || 0;
+    this.appliedReceivables = data.appliedReceivables || 0;
     this.remarks = data.remarks;
     this.details = data.details || [new PurchaseOrderDetailModel()];
     this.totalItem = data.totalItem;
-    this.grandTotal = data.grandTotal;
+    this.subTotal = data.subTotal || 0;
+    this.grandTotal = data.grandTotal || 0;
     this.status = data.status || 'Dalam Proses';
   }
 }
