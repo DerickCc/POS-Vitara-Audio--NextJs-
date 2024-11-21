@@ -60,18 +60,6 @@ export const createPr = async (payload: PurchaseReturnModel): Promise<string> =>
 };
 
 // PUT
-export const updatePr = async (id: string, payload: PurchaseReturnModel): Promise<string> => {
-  try {
-    const response = await apiFetch(`/api/purchase-returns/${id}`, {
-      method: 'PUT',
-      body: payload,
-    });
-    return response.message;
-  } catch (e) {
-    throw e + '';
-  }
-};
-
 export const finishPr = async (id: string): Promise<string> => {
   try {
     const response = await apiFetch(`/api/purchase-returns/${id}/finish`, {
@@ -88,16 +76,6 @@ export const cancelPr = async (id: string): Promise<string> => {
     const response = await apiFetch(`/api/purchase-returns/${id}/cancel`, {
       method: 'PUT',
     });
-    return response.message;
-  } catch (e) {
-    throw e + '';
-  }
-};
-
-// DELETE
-export const deletePr = async (id: string): Promise<string> => {
-  try {
-    const response = await apiFetch(`/api/purchase-returns/${id}`, { method: 'DELETE' });
     return response.message;
   } catch (e) {
     throw e + '';

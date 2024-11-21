@@ -36,7 +36,7 @@ export class PurchaseReturnModel {
   supplierName: string; // for UI
   returnDate: string;
   returnType: 'Penggantian Barang' | 'Pengembalian Dana' | 'Piutang';
-  details: PurchaseReturnDetailModel[]; // detail po
+  details: PurchaseReturnDetailModel[]; // detail pr
   grandTotal: number;
   status: 'Dalam Proses' | 'Selesai' | 'Batal';
 

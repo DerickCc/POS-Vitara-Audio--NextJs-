@@ -182,7 +182,6 @@ export default function PurchaseReturnForm({
   // ------------------------
 
   const onError = (errors: any) => {
-    console.log(errors);
     if (errors?.details?.refinement) {
       toast.error(errors.details.refinement.message);
     }

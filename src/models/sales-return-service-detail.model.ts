@@ -1,0 +1,29 @@
+import { z } from 'zod';
+
+export const SalesReturnServiceDetailSchema = z.object({
+  id: z.string().optional().nullable(),
+  sosdId: z.string().min(1, { message: 'Mohon memilih jasa yang diretur' }),
+  returnQuantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
+  reason: z
+    .string()
+    .min(1, { message: 'Mohon mengisi alasan retur' })
+    .max(500, { message: 'Alasan tidak boleh lebih dari 500 huruf' }),
+});
+
+export class SalesReturnServiceDetailModel {
+  id: string;
+  srId: string;
+  sosdId: string;
+  serviceName: string; // for UI
+  returnQuantity: number;
+  reason: string;
+
+  constructor(data: any = {}) {
+    this.id = data.id;
+    this.srId = data.srId || '';
+    this.sosdId = data.sosdId || '';
+    this.serviceName = data.serviceName;
+    this.returnQuantity = data.returnQuantity || 0;
+    this.reason = data.reason;
+  }
+}

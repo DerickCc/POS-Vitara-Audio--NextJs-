@@ -1,5 +1,5 @@
 import { routes } from '@/config/routes';
-import { Colors, PoPrStatusType } from '@/models/global.model';
+import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuEye, LuMoreVertical, LuPencil, LuCircleSlash } from 'react-icons/lu';
@@ -173,7 +173,7 @@ export const columns = ({
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue() as PoPrStatusType;
+      const status = info.getValue() as PoPrSrStatusType;
       const color = mapPoPrStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },

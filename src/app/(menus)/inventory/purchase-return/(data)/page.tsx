@@ -13,7 +13,7 @@ import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import PurchaseReturnFilter, { PurchaseReturnTableFilters } from './filter';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
-import { browsePr, cancelPr, deletePr, finishPr } from '@/services/purchase-return-service';
+import { browsePr, cancelPr, finishPr } from '@/services/purchase-return-service';
 import { columns } from './column';
 
 const pageHeader = {
@@ -124,17 +124,6 @@ export default function PurchaseReturnDataPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const message = await deletePr(id);
-      toast.success(message, { duration: 5000 });
-
-      fetchPurchaseOrderReturns();
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
   const handleCancel = async (id: string) => {
     try {
       const message = await cancelPr(id);
@@ -148,7 +137,6 @@ export default function PurchaseReturnDataPage() {
 
   const actionHandlers: any = {
     finish: (id: string) => handleFinish(id),
-    delete: (id: string) => handleDelete(id),
     cancel: (id: string) => handleCancel(id),
   };
 

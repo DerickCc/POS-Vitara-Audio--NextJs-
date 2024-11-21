@@ -361,6 +361,7 @@ model SalesReturnProductDetails {
   id             String    @id @default(cuid())
   srId           String    @map("sr_id")
   sopdId         String    @map("sopd_id")
+  returnPrice    Decimal   @map("return_price") @db.Decimal(10, 2)
   returnQuantity Decimal   @map("return_quantity") @db.Decimal(10, 2)
   reason         String    @db.VarChar(500)
   createdBy      String    @map("created_by")

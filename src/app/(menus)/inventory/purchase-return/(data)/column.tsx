@@ -1,15 +1,14 @@
 import { mapPoPrStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
-import { Colors, PoPrStatusType } from '@/models/global.model';
+import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
-import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import cn from '@/utils/class-names';
-import { LuCircleSlash, LuEye, LuMoreVertical, LuPencil } from 'react-icons/lu';
+import { LuCircleSlash, LuEye, LuMoreVertical } from 'react-icons/lu';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
 
@@ -146,7 +145,7 @@ export const columns = ({
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue() as PoPrStatusType;
+      const status = info.getValue() as PoPrSrStatusType;
       const color = mapPoPrStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
