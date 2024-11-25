@@ -4,13 +4,15 @@ import Card from '@/components/card';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
-import { BasicFormProps, BasicSelectOptions } from '@/models/global.model';
+import { BasicFormProps, BasicSelectOptions, Colors } from '@/models/global.model';
 import { PurchaseReturnDetailModel } from '@/models/purchase-return-detail.model';
 import { PurchaseReturnModel, PurchaseReturnSchema } from '@/models/purchase-return.model';
 import cn from '@/utils/class-names';
 import { isoStringToReadableDate } from '@/utils/helper-function';
 import {
   actionIconColorClass,
+  badgeColorClass,
+  baseBadgeClass,
   baseButtonClass,
   buttonColorClass,
   readOnlyClass,
@@ -28,7 +30,7 @@ import { ActionIcon, Button, Input, Loader, Select, Textarea } from 'rizzui';
 import { TbTruckReturn } from 'react-icons/tb';
 import { SearchPurchaseOrderModel } from '@/models/purchase-order.model';
 import { searchPo } from '@/services/purchase-order-service';
-import { purchaseReturnTypeOptions } from '@/config/global-variables';
+import { mapTrxStatusToColor, purchaseReturnTypeOptions } from '@/config/global-variables';
 import { SearchPurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 
@@ -66,6 +68,7 @@ export default function PurchaseReturnForm({
     name: 'details',
   });
 
+  const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
   const [poList, setPoList] = useState<SearchPurchaseOrderModel[]>([]);
   const [poDetailList, setPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
   const [filteredPoDetailList, setFilteredPoDetailList] = useState<SearchPurchaseOrderDetailModel[]>([]);
@@ -73,6 +76,8 @@ export default function PurchaseReturnForm({
   useEffect(() => {
     if (defaultValues.id) {
       defaultValues.returnDate = isoStringToReadableDate(defaultValues.returnDate);
+      
+      setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
 
       // set display product name
       const formatPoDetails = defaultValues.details.map((d) => ({
@@ -89,7 +94,7 @@ export default function PurchaseReturnForm({
     }
   }, [defaultValues, reset]);
 
-  //PurchaseOrder
+  // Purchase Order
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handlePoSearchChange = useCallback(
     debounce(async (code: string) => {
@@ -115,7 +120,6 @@ export default function PurchaseReturnForm({
     // clear detail
     replaceDetail([]);
   };
-
   // ------------------------
 
   // transaction Detail
@@ -139,7 +143,6 @@ export default function PurchaseReturnForm({
     });
 
     filterSelectedPoDetails();
-    console.log(detailFields);
   };
 
   const handlePrDetailQtyChange = (idx: number, returnQty: number) => {
@@ -190,9 +193,14 @@ export default function PurchaseReturnForm({
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
       <Card className='mb-7'>
-        <div className='flex items-center mb-5'>
-          <PiInfoBold className='size-5 mr-2' />
-          <h5 className='font-medium'>Info Retur Pembelian</h5>
+        <div className='flex items-center justify-between mb-5'>
+          <div className='flex items-center'>
+            <PiInfoBold className='size-5 mr-2' />
+            <h5 className='font-medium'>Info Retur Pembelian</h5>
+          </div>
+          {defaultValues.id && (
+            <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>{defaultValues.status}</span>
+          )}
         </div>
         {isLoading ? (
           <Spinner />

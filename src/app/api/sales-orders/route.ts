@@ -292,7 +292,6 @@ export async function POST(request: Request) {
             serviceName: d.serviceName,
             sellingPrice: d.sellingPrice,
             quantity: d.quantity,
-            returnedQuantity: d.quantity,
             totalPrice: d.sellingPrice * d.quantity,
             createdBy: userId,
           })),

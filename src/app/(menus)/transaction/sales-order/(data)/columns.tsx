@@ -3,7 +3,7 @@ import { Colors, SoStatusType } from '@/models/global.model';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
-import { mapSoStatusToColor } from '@/config/global-variables';
+import { mapTrxStatusToColor } from '@/config/global-variables';
 import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
 import { SalesOrderModel } from '@/models/sales-order';
 import { ActionIcon, Dropdown } from 'rizzui';
@@ -161,7 +161,7 @@ export const columns = ({
     header: () => 'Status',
     cell: (info) => {
       const status = info.getValue() as SoStatusType;
-      const color = mapSoStatusToColor[status] as Colors;
+      const color = mapTrxStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,

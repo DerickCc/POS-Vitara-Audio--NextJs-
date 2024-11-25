@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const SalesReturnServiceDetailSchema = z.object({
   id: z.string().optional().nullable(),
-  sosdId: z.string().min(1, { message: 'Mohon memilih jasa yang diretur' }),
+  serviceName: z.string().min(1, { message: 'Mohon mengisi jasa yang diretur' }),
   returnQuantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
   reason: z
     .string()
@@ -13,15 +13,13 @@ export const SalesReturnServiceDetailSchema = z.object({
 export class SalesReturnServiceDetailModel {
   id: string;
   srId: string;
-  sosdId: string;
-  serviceName: string; // for UI
+  serviceName: string;
   returnQuantity: number;
   reason: string;
 
   constructor(data: any = {}) {
     this.id = data.id;
     this.srId = data.srId || '';
-    this.sosdId = data.sosdId || '';
     this.serviceName = data.serviceName;
     this.returnQuantity = data.returnQuantity || 0;
     this.reason = data.reason;

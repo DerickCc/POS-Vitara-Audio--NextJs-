@@ -14,7 +14,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { id } from 'date-fns/locale';
 import cn from '@/utils/class-names';
 import { datepickerClass } from '@/utils/tailwind-classes';
-import { poPrStatusOptions } from "@/config/global-variables";
+import { srStatusOptions } from "@/config/global-variables";
 
 export type SalesReturnTableFilters = {
   code: string;
@@ -134,8 +134,8 @@ export default function SalesReturnFilter({
             className='sm:col-span-3'
             label='Status'
             placeholder='Pilih Status'
-            options={poPrStatusOptions}
-            displayValue={(value) => poPrStatusOptions.find((option) => option.value === value)?.label ?? ''}
+            options={srStatusOptions}
+            displayValue={(value) => srStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
             onClear={() => handleFilterChange('status')('')}

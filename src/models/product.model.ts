@@ -42,6 +42,18 @@ export class ProductModel {
   }
 }
 
+export class ProductCurrPriceModel {
+  id: string;
+  name: string;
+  costPrice: number;
+
+  constructor(data: any = {}) {
+    this.id = data.id;
+    this.name = data.name || '';
+    this.costPrice = data.costPrice || 0;
+  }
+}
+
 export interface SearchProductModel extends BasicSelectOptions {
   id: string;
   code: string;

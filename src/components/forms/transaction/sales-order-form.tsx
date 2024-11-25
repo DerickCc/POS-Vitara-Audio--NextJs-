@@ -8,7 +8,7 @@ import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { SearchCustomerModel } from '@/models/customer.model';
-import { BasicFormProps } from '@/models/global.model';
+import { BasicFormProps, Colors } from '@/models/global.model';
 import { SearchProductModel } from '@/models/product.model';
 import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
 import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
@@ -20,6 +20,8 @@ import { isoStringToReadableDate } from '@/utils/helper-function';
 import { getCurrUser } from '@/utils/sessionlib';
 import {
   actionIconColorClass,
+  badgeColorClass,
+  baseBadgeClass,
   baseButtonClass,
   buttonColorClass,
   readOnlyClass,
@@ -36,6 +38,7 @@ import { IoCartOutline } from 'react-icons/io5';
 import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
+import { mapTrxStatusToColor } from '@/config/global-variables';
 
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
@@ -82,6 +85,7 @@ export default function SalesOrderForm({
     name: 'serviceDetails',
   });
 
+  const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
   const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
@@ -102,6 +106,22 @@ export default function SalesOrderForm({
   useEffect(() => {
     setNoInvoice(newSoCode);
   }, [newSoCode]);
+
+  useEffect(() => {
+    if (defaultValues.id) {
+      defaultValues.salesDate = isoStringToReadableDate(defaultValues.salesDate);
+
+      setNoInvoice(defaultValues.code);
+
+      setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
+
+      setTotalProductSoldAmount(defaultValues.productDetails.reduce((acc, d) => acc + d.totalPrice, 0));
+
+      setTotalServiceSoldAmount(defaultValues.serviceDetails.reduce((acc, d) => acc + d.totalPrice, 0));
+
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
 
   // customer
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -303,28 +323,20 @@ export default function SalesOrderForm({
     }
   };
 
-  useEffect(() => {
-    if (defaultValues.id) {
-      defaultValues.salesDate = isoStringToReadableDate(defaultValues.salesDate);
-      setNoInvoice(defaultValues.code);
-
-      setTotalProductSoldAmount(defaultValues.productDetails.reduce((acc, d) => acc + d.totalPrice, 0));
-
-      setTotalServiceSoldAmount(defaultValues.serviceDetails.reduce((acc, d) => acc + d.totalPrice, 0));
-
-      reset(defaultValues);
-    }
-  }, [defaultValues, reset]);
-
   return (
     <>
       <form onSubmit={handleSubmit(submitConfirmation, onError)}>
         <div className='grid sm:grid-cols-12 gap-6'>
           <div className='sm:col-span-7'>
             <Card className='mb-7'>
-              <div className='flex items-center mb-5'>
-                <PiInfoBold className='size-5 mr-2' />
-                <h5 className='font-medium'>Info Penjualan</h5>
+              <div className='flex items-center justify-between mb-5'>
+                <div className='flex items-center'>
+                  <PiInfoBold className='size-5 mr-2' />
+                  <h5 className='font-medium'>Info Penjualan</h5>
+                </div>
+                {defaultValues.id && (
+                  <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>{defaultValues.status}</span>
+                )}
               </div>
               {isLoading ? (
                 <Spinner />
@@ -379,7 +391,7 @@ export default function SalesOrderForm({
                       placeholder='Keterangan'
                       rows={9}
                       maxLength={500}
-                      className='sm:col-span-3'
+                      className='sm:col-span-2'
                       labelClassName='text-gray-600'
                       disabled={isReadOnly}
                       {...register('remarks')}
@@ -856,7 +868,7 @@ export default function SalesOrderForm({
           )}
 
           {/* if is view and loaded */}
-          {isReadOnly && defaultValues.id && (
+          {isReadOnly && defaultValues.id && defaultValues.status === 'Belum Lunas' && (
             <Button
               onClick={() => {
                 openPaymentModal({
@@ -865,7 +877,7 @@ export default function SalesOrderForm({
                   grandTotal: defaultValues.grandTotal,
                   paidAmount: defaultValues.paidAmount,
                   isFromView: true,
-              });
+                });
               }}
               className={cn(buttonColorClass.green, baseButtonClass)}
             >

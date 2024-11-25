@@ -42,13 +42,46 @@ export async function GET(request: Request) {
       select: {
         id: true,
         code: true,
+        Customer: {
+          select: { name: true }
+        },
+        SalesOrderProductDetails:  {
+          select: {
+            id: true,
+            quantity: true,
+            returnedQuantity: true,
+            Product: {
+              select: {
+                id: true,
+                name: true,
+                uom: true,
+                stock: true,
+              }
+            }
+          }
+        }
       },
     });
 
-    const salesOrdersWithExtraData: any[] = salesOrders.map((po) => ({
-      ...po,
-      value: po.id,
-      label: po.code,
+    const salesOrdersWithExtraData: any[] = salesOrders.map((so) => ({
+      ...so,
+      customerName: so.Customer.name,
+      Customer: undefined,
+      productDetails: so.SalesOrderProductDetails.map((sopd) => ({
+        ...sopd,
+        productId: sopd.Product.id,
+        productName: sopd.Product.name,
+        productUom: sopd.Product.uom,
+        productStock: Number(sopd.Product.stock),
+        quantity: Number(sopd.quantity),
+        returnedQuantity: Number(sopd.returnedQuantity),
+        value: sopd.id,
+        label: sopd.Product.name,
+        Product: undefined,
+      })),
+      SalesOrderProductDetails: undefined,
+      value: so.id,
+      label: so.code,
     }));
 
     return NextResponse.json({ message: 'Success', result: salesOrdersWithExtraData }, { status: 200 });

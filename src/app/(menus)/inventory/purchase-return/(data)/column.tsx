@@ -1,4 +1,4 @@
-import { mapPoPrStatusToColor } from '@/config/global-variables';
+import { mapTrxStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
@@ -146,7 +146,7 @@ export const columns = ({
     header: () => 'Status',
     cell: (info) => {
       const status = info.getValue() as PoPrSrStatusType;
-      const color = mapPoPrStatusToColor[status] as Colors;
+      const color = mapTrxStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,

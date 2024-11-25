@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BasicSelectOptions } from './global.model';
 
 export const SalesReturnProductDetailSchema = z.object({
   id: z.string().optional().nullable(),
@@ -18,8 +19,11 @@ export class SalesReturnProductDetailModel {
   productId: string; // for UI
   productName: string; // for UI
   productUom: string; // for UI
+  productStock: number; // for UI
   returnPrice: number;
-  returnQuantity: number;
+  returnQuantity: number; // qty that wanted to be return
+  salesQuantity: number; // for UI
+  returnedQuantity: number; // for UI (qty of product that have been returned in previous transaction)
   reason: string;
   totalPrice: number; // for UI
 
@@ -30,9 +34,23 @@ export class SalesReturnProductDetailModel {
     this.productId = data.productId || '';
     this.productName = data.productName;
     this.productUom = data.productUom;
+    this.productStock = data.productStock || 0;
     this.returnPrice = data.returnPrice || 0;
     this.returnQuantity = data.returnQuantity || 0;
+    this.salesQuantity = data.salesQuantity || 0;
+    this.returnedQuantity = data.returnedQuantity || 0;
     this.reason = data.reason;
     this.totalPrice = data.totalPrice || 0;
   }
+}
+
+export interface SearchSalesOrderProductDetailModel extends BasicSelectOptions {
+  id: string;
+  productId: string;
+  productName: string;
+  productUom: string;
+  productStock: number;
+  salesPrice: number;
+  quantity: number;
+  returnedQuantity: number; 
 }

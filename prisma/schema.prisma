@@ -233,7 +233,7 @@ model SalesOrderProductDetails {
   oriSellingPrice  Decimal   @map("ori_selling_price") @db.Decimal(10, 2)
   sellingPrice     Decimal   @map("selling_price") @db.Decimal(10, 2)
   quantity         Decimal   @db.Decimal(10, 2)
-  returnedQuantity Decimal   @map("returned_quantity") @db.Decimal(10, 2)
+  returnedQuantity Decimal   @default(0) @map("returned_quantity") @db.Decimal(10, 2)
   totalPrice       Decimal   @map("total_price") @db.Decimal(10, 2)
   createdBy        String    @map("created_by")
   createdAt        DateTime  @default(now()) @map("created_at")
@@ -265,8 +265,6 @@ model SalesOrderServiceDetails {
   updatedAt        DateTime? @updatedAt @map("updated_at")
 
   SalesOrder SalesOrders @relation(fields: [soId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-
-  SalesReturnServiceDetails SalesReturnServiceDetails[]
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
@@ -381,7 +379,7 @@ model SalesReturnProductDetails {
 model SalesReturnServiceDetails {
   id             String    @id @default(cuid())
   srId           String    @map("sr_id")
-  sosdId         String    @map("sosd_id")
+  serviceName    String    @map("service_name")
   returnQuantity Decimal   @map("return_quantity") @db.Decimal(10, 2)
   reason         String    @db.VarChar(500)
   createdBy      String    @map("created_by")
@@ -390,8 +388,6 @@ model SalesReturnServiceDetails {
   updatedAt      DateTime? @updatedAt @map("updated_at")
 
   SalesReturn SalesReturns @relation(fields: [srId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-
-  SalesOrderServiceDetail SalesOrderServiceDetails @relation(fields: [sosdId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 

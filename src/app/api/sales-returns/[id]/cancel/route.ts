@@ -4,7 +4,7 @@ import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
-// CancelPurchaseReturn
+// CancelSalesReturn
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
@@ -24,59 +24,58 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     const userId = session.id;
 
-    const pr = await db.purchaseReturns.findUnique({
+    const sr = await db.salesReturns.findUnique({
       where: { id },
       select: {
-        returnType: true,
         createdAt: true,
         status: true,
-        PurchaseReturnDetails: {
+        SalesReturnProductDetails: {
           select: {
-            podId: true,
+            sopdId: true,
             returnQuantity: true,
             returnPrice: true,
-            PurchaseOrderDetail: {
+            SalesOrderProductDetail: {
               select: { productId: true }
             }
           }
         },
-        PurchaseOrder: true,
+        SalesOrder: true,
       },
     });
 
-    if (!pr) throw new Error('Data Retur Pembelian tidak ditemukan');
+    if (!sr) throw new Error('Data Retur Penjualan tidak ditemukan');
 
     await db.$transaction(async (prisma) => {
-      if (pr.status !== 'Dalam Proses' && pr.status !== 'Selesai') {
-        throw new Error('Hanya Retur Pembelian berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan');
+      if (sr.status !== 'Selesai') {
+        throw new Error('Hanya Retur Penjualan berstatus "Selesai" yang dapat dibatalkan');
       }
 
-      const cancelledProducts = pr.PurchaseReturnDetails.map((d) => d.PurchaseOrderDetail.productId);
+      const cancelledProducts = sr.SalesReturnProductDetails.map((d) => d.SalesOrderProductDetail.productId);
 
       const entities = [
         {
           entity: 'purchaseOrders',
           errorMessage:
-            'Retur tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+            'Retur tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
           relationPath: 'PurchaseOrderDetails',
         },
         {
           entity: 'salesOrders',
           errorMessage:
-            'Retur tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+            'Retur tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
           relationPath: 'SalesOrderProductDetails',
         },
         {
           entity: 'purchaseReturns',
           errorMessage:
-            'Retur tidak dapat dibatalkan karena telah ada retur pembelian terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+            'Retur tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
           relationPath: 'PurchaseReturnDetails',
           additionalPath: 'PurchaseOrderDetail',
         },
         {
           entity: 'salesReturns',
           errorMessage:
-            'Retur tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari retur pembelian yang ingin dibatalkan.',
+            'Retur tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
           relationPath: 'SalesReturnProductDetails',
           additionalPath: 'SalesOrderProductDetail',
         },
@@ -87,7 +86,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         await checkForRelatedRecords(
           entity as any,
           cancelledProducts,
-          pr.createdAt,
+          sr.createdAt,
           errorMessage,
           relationPath,
           additionalPath
@@ -95,17 +94,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
 
       const updatePromises: Promise<any>[] = [];
-      let grandTotal = new Decimal(0);
-      // stock adjustment if
-      // - dalam proses
-      // - selesai && ('Pengembalian Dana' || 'Piutang')
-      const isStockAdjustmentNeeded =
-        pr.status === 'Dalam Proses' ||
-        (pr.status === 'Selesai' && (pr.returnType === 'Pengembalian Dana' || pr.returnType === 'Piutang'));
 
-      for (const prd of pr.PurchaseReturnDetails) {
-        const poDetail = await prisma.purchaseOrderDetails.findUniqueOrThrow({
-          where: { id: prd.podId },
+      for (const d of sr.SalesReturnProductDetails) {
+        const sopDetail = await prisma.salesOrderProductDetails.findUniqueOrThrow({
+          where: { id: d.sopdId },
           select: {
             id: true,
             Product: {
@@ -114,12 +106,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           },
         });
 
-        // update po detail's returned qty
+        // update sop detail's returned qty
         updatePromises.push(
-          prisma.purchaseOrderDetails.update({
-            where: { id: poDetail.id },
+          prisma.salesOrderProductDetails.update({
+            where: { id: sopDetail.id },
             data: {
-              returnedQuantity: { decrement: new Decimal(prd.returnQuantity) },
+              returnedQuantity: { decrement: new Decimal(d.returnQuantity) },
               UpdatedBy: {
                 connect: { id: userId },
               },
@@ -127,40 +119,23 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           })
         );
 
-        if (isStockAdjustmentNeeded) {
-          // update product stock
-          updatePromises.push(
-            prisma.products.update({
-              where: { id: poDetail.Product.id },
-              data: {
-                stock: { increment: new Decimal(prd.returnQuantity) },
-                UpdatedBy: {
-                  connect: { id: userId },
-                },
-              },
-            })
-          );
-        }
-
-        // Calculate total amount for 'Piutang' only
-        if (pr.returnType === 'Piutang') {
-          grandTotal = grandTotal.plus(prd.returnQuantity.times(prd.returnPrice));
-        }
-      }
-
-      // update supplier's receivable if returnType 'Piutang'
-      if (pr.returnType === 'Piutang') {
+        // update product stock
         updatePromises.push(
-          db.suppliers.update({
-            where: { id: pr.PurchaseOrder.supplierId },
-            data: { receivables: { decrement: grandTotal } },
+          prisma.products.update({
+            where: { id: sopDetail.Product.id },
+            data: {
+              stock: { increment: new Decimal(d.returnQuantity) },
+              UpdatedBy: {
+                connect: { id: userId },
+              },
+            },
           })
         );
       }
       await Promise.all(updatePromises);
 
       // set pr status to 'Batal'
-      await db.purchaseReturns.update({
+      await db.salesReturns.update({
         where: { id },
         data: {
           status: 'Batal',
@@ -171,9 +146,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       });
     });
 
-    return NextResponse.json({ message: 'Retur Pembelian berhasil dibatalkan' }, { status: 200 });
+    return NextResponse.json({ message: 'Retur penjualan berhasil dibatalkan' }, { status: 200 });
   } catch (e: any) {
-    if (e.message.includes('Hanya Retur Pembelian berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan')) {
+    if (e.message.includes('Hanya Retur penjualan berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan')) {
       return NextResponse.json({ message: e.message }, { status: 403 }); // forbidden
     }
     if (e.message.includes('tidak ditemukan')) {

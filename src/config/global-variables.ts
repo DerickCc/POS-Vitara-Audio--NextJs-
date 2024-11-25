@@ -6,8 +6,13 @@ export const CURRENCY_OPTIONS = {
   fractions: 2,
 };
 
-export const mapPoPrStatusToColor = { 'Dalam Proses': 'blue', Selesai: 'green', Batal: 'red' };
-export const mapSoStatusToColor = { 'Belum Lunas': 'blue', Lunas: 'green', Batal: 'red' };
+export const mapTrxStatusToColor = {
+  'Dalam Proses': 'blue',
+  'Belum Lunas': 'blue',
+  Selesai: 'green',
+  Lunas: 'green',
+  Batal: 'red',
+};
 
 // select options
 export const pageSizeOptions = [
@@ -58,7 +63,7 @@ export const purchaseReturnTypeOptions = [
   { label: 'Penggantian Barang', value: 'Penggantian Barang' },
   { label: 'Pengembalian Dana', value: 'Pengembalian Dana' },
   { label: 'Piutang', value: 'Piutang' },
-]
+];
 
 export const soStatusOptions = [
   { label: 'Belum Lunas', value: 'Belum Lunas' },
@@ -66,3 +71,7 @@ export const soStatusOptions = [
   { label: 'Batal', value: 'Batal' },
 ];
 
+export const srStatusOptions = [
+  { label: 'Lunas', value: 'Lunas' },
+  { label: 'Batal', value: 'Batal' },
+];

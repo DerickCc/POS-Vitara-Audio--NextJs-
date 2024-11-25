@@ -1,5 +1,5 @@
 import { PaginatedApiResponse, PagingModel } from '@/models/global.model';
-import { ProductModel, SearchProductModel } from '@/models/product.model';
+import { ProductCurrPriceModel, ProductModel, SearchProductModel } from '@/models/product.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
 // GET
@@ -36,6 +36,15 @@ export const getProductById = async (id: string): Promise<ProductModel> => {
     throw e + '';
   }
 };
+
+export const getProductCurrPriceById = async (id: string): Promise<ProductCurrPriceModel> => {
+  try {
+    const response = await apiFetch(`/api/products/${id}/current-price`, { method: 'GET'});
+    return response.result
+  } catch (e) {
+    throw e + '';
+  }
+}
 
 export const searchProduct = async (name?: string): Promise<SearchProductModel[]> => {
   try {

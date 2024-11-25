@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     const startOfDay = new Date(startDate);
 
     where.AND.push({
-      purchaseDate: {
+      returnDate: {
         gte: startOfDay,
       },
     });
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
     const endOfDay = new Date(new Date(endDate).getTime() + durationToEndOfDay);
 
     where.AND.push({
-      purchaseDate: {
+      returnDate: {
         lte: endOfDay,
       },
     });
@@ -89,22 +89,30 @@ export async function GET(request: Request) {
   }
   // ----------------
 
+  let orderBy;
+  if (sortColumn === 'supplierName') {
+    orderBy = {
+      PurchaseOrder: {
+        Supplier: {
+          name: sortOrder as Prisma.SortOrder,
+        },
+      },
+    };
+  } else if (sortColumn === 'poCode') {
+    orderBy = {
+      PurchaseOrder: {
+        code: sortOrder as Prisma.SortOrder,
+      },
+    };
+  } else {
+    orderBy = { [sortColumn]: sortOrder };
+  }
+
   try {
     const purchaseReturns = await db.purchaseReturns.findMany({
       skip: pageIndex * pageSize,
       take: pageSize,
-      orderBy:
-        sortColumn === 'supplierName'
-          ? {
-              PurchaseOrder: {
-                Supplier: {
-                  name: sortOrder as Prisma.SortOrder,
-                },
-              },
-            }
-          : {
-              [sortColumn]: sortOrder,
-            },
+      orderBy,
       where,
       include: {
         PurchaseOrder: {

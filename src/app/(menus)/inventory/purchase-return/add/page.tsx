@@ -1,12 +1,12 @@
 'use client';
 
-import PurchaseReturnForm from "@/components/forms/inventory/purchase-return-form";
-import PageHeader from "@/components/page-header";
-import { routes } from "@/config/routes";
-import { PurchaseReturnModel } from "@/models/purchase-return.model";
-import { createPr } from "@/services/purchase-return-service";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import PurchaseReturnForm from '@/components/forms/inventory/purchase-return-form';
+import PageHeader from '@/components/page-header';
+import { routes } from '@/config/routes';
+import { PurchaseReturnModel } from '@/models/purchase-return.model';
+import { createPr } from '@/services/purchase-return-service';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 const pageHeader = {
   title: 'Tambah Retur Pembelian',
@@ -24,7 +24,7 @@ const pageHeader = {
   ],
 };
 
-export default function EditPurchaseReturnPage() {
+export default function AddPurchaseReturnPage() {
   const router = useRouter();
 
   const create = async (payload: PurchaseReturnModel) => {
@@ -36,12 +36,12 @@ export default function EditPurchaseReturnPage() {
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
-  }
+  };
   return (
     <>
-    <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-    <PurchaseReturnForm onSubmit={create}/>
-  </>
-  )
+      <PurchaseReturnForm onSubmit={create} />
+    </>
+  );
 }

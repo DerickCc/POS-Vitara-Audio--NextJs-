@@ -3,13 +3,13 @@ import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
-// GetPurchaseReturnById
+// GetSalesReturnById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
   if (!session.id) {
     return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { message: 'Unauthorized, mohon melakukan login ulang' },
       { status: 401 }
     );
   }
@@ -17,27 +17,26 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const { id } = params;
 
   try {
-    const pr = await db.purchaseReturns.findUnique({
+    const sr = await db.salesReturns.findUnique({
       where: { id },
       select: {
         id: true,
-        poId: true,
-        PurchaseOrder: {
+        soId: true,
+        SalesOrder: {
           select: {
             code: true,
-            Supplier: { select: { name: true } },
+            Customer: { select: { name: true } },
           },
         },
         code: true,
         returnDate: true,
-        returnType: true,
         grandTotal: true,
         status: true,
-        PurchaseReturnDetails: {
+        SalesReturnProductDetails: {
           select: {
             id: true,
-            podId: true,
-            PurchaseOrderDetail: {
+            sopdId: true,
+            SalesOrderProductDetail: {
               select: {
                 Product: {
                   select: {
@@ -53,40 +52,50 @@ export async function GET(request: Request, { params }: { params: { id: string }
             reason: true,
           },
         },
+        SalesReturnServiceDetails: {
+          select: {
+            id: true,
+            serviceName: true,
+            returnQuantity: true,
+            reason: true,
+          }
+        }
       },
     });
 
-    if (!pr) {
-      return NextResponse.json({ message: 'Retur Pembelian tidak ditemukan' }, { status: 404 });
+    if (!sr) {
+      return NextResponse.json({ message: 'Retur Penjualan tidak ditemukan' }, { status: 404 });
     }
 
     let grandTotal = new Decimal(0);
 
-    const formattedPrDetails = pr.PurchaseReturnDetails.map((d) => {
+    const formattedSrpDetails = sr.SalesReturnProductDetails.map((d) => {
       const totalPrice = d.returnQuantity.times(d.returnPrice);
       grandTotal = grandTotal.plus(totalPrice);
 
       return {
         ...d,
-        productId: d.PurchaseOrderDetail.Product.id,
-        productName: d.PurchaseOrderDetail.Product.name,
-        productUom: d.PurchaseOrderDetail.Product.uom,
+        productId: d.SalesOrderProductDetail.Product.id,
+        productName: d.SalesOrderProductDetail.Product.name,
+        productUom: d.SalesOrderProductDetail.Product.uom,
         totalPrice,
-        PurchaseOrderDetail: undefined,
+        SalesOrderProductDetail: undefined,
       };
     });
 
-    const formattedPr = {
-      ...pr,
-      poCode: pr.PurchaseOrder.code,
-      supplierName: pr.PurchaseOrder.Supplier.name,
-      details: formattedPrDetails,
+    const formattedSr = {
+      ...sr,
+      soCode: sr.SalesOrder.code,
+      customerName: sr.SalesOrder.Customer.name,
+      productDetails: formattedSrpDetails,
+      serviceDetails: sr.SalesReturnServiceDetails,
       grandTotal,
-      PurchaseOrder: undefined,
-      PurchaseReturnDetails: undefined,
-    };
+      SalesOrder: undefined,
+      SalesReturnProductDetails: undefined,
+      SalesReturnServiceDetails: undefined,
+    }
 
-    return NextResponse.json({ message: 'Success', result: formattedPr }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: formattedSr }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

@@ -6,7 +6,7 @@ import { LuEye, LuMoreVertical, LuPencil, LuCircleSlash } from 'react-icons/lu';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
-import { mapPoPrStatusToColor } from '@/config/global-variables';
+import { mapTrxStatusToColor } from '@/config/global-variables';
 import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
@@ -174,7 +174,7 @@ export const columns = ({
     header: () => 'Status',
     cell: (info) => {
       const status = info.getValue() as PoPrSrStatusType;
-      const color = mapPoPrStatusToColor[status] as Colors;
+      const color = mapTrxStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,

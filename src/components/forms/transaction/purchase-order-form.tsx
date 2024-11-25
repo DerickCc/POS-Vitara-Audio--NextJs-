@@ -3,7 +3,7 @@
 import Card from '@/components/card';
 import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
-import { BasicFormProps } from '@/models/global.model';
+import { BasicFormProps, Colors } from '@/models/global.model';
 import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
@@ -18,6 +18,8 @@ import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui'
 import { IoCartOutline } from 'react-icons/io5';
 import {
   actionIconColorClass,
+  badgeColorClass,
+  baseBadgeClass,
   baseButtonClass,
   buttonColorClass,
   readOnlyClass,
@@ -30,6 +32,7 @@ import { SearchProductModel } from '@/models/product.model';
 import { searchProduct } from '@/services/product-service';
 import { debounce } from 'lodash';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
+import { mapTrxStatusToColor } from '@/config/global-variables';
 
 interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
   isReadOnly?: boolean;
@@ -64,6 +67,7 @@ export default function PurchaseOrderForm({
     name: 'details',
   });
 
+  const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
@@ -77,6 +81,9 @@ export default function PurchaseOrderForm({
     if (defaultValues.id) {
       defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
       defaultValues.supplierReceivable += defaultValues.appliedReceivables;
+
+      setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
+
       reset(defaultValues);
     }
   }, [defaultValues, reset]);
@@ -182,9 +189,14 @@ export default function PurchaseOrderForm({
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
       <Card className='mb-7'>
-        <div className='flex items-center mb-5'>
-          <PiInfoBold className='size-5 mr-2' />
-          <h5 className='font-medium'>Info Pembelian</h5>
+        <div className='flex items-center justify-between mb-5'>
+          <div className='flex items-center'>
+            <PiInfoBold className='size-5 mr-2' />
+            <h5 className='font-medium'>Info Pembelian</h5>
+          </div>
+          {defaultValues.id && (
+            <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>{defaultValues.status}</span>
+          )}
         </div>
         {isLoading ? (
           <Spinner />
