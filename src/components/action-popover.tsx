@@ -1,7 +1,7 @@
 import { ActionIcon, Button, Popover, Title, Text, Tooltip } from 'rizzui';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { FiRefreshCcw } from 'react-icons/fi';
-import { actionIconColorClass, baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
+import { actionIconColorClass, baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 import cn from '@/utils/class-names';
 import { Colors } from '@/models/global.model';
 

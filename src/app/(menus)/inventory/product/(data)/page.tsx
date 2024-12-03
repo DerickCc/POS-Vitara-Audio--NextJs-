@@ -8,11 +8,9 @@ import { Button } from 'rizzui';
 import ProductFilter, { ProductTableFilters } from './filter';
 import { useCallback, useEffect, useState } from 'react';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
-import { apiFetch, toQueryString } from '@/utils/api';
 import toast from 'react-hot-toast';
-import BasicTable from '@/components/tables/basic-table';
+import PaginationTable from '@/components/tables/pagination-table';
 import { columns } from './colomns';
-import { TableAction } from '@/models/global.model';
 import { ProductModel } from '@/models/product.model';
 import { browseProduct, deleteProduct } from '@/services/product-service';
 
@@ -56,10 +54,10 @@ export default function ProductDataPage() {
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await browseProduct({ pageSize, pageIndex, sortColumn, sortOrder, filters })
+      const { result, recordsTotal } = await browseProduct({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setProducts(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setProducts(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -128,7 +126,7 @@ export default function ProductDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable<ProductModel>
+      <PaginationTable<ProductModel>
         data={products}
         columns={columns(actionHandlers)}
         pageSize={pageSize}

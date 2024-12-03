@@ -14,7 +14,7 @@ export interface TableAction {
   handler: (id: string) => void;
 }
 
-export interface BasicTableProps<T> {
+export interface PaginationTableProps<T> {
   data: T[];
   columns: ColumnDef<T>[];
   pageSize: number;

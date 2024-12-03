@@ -12,7 +12,7 @@ import { Button, Input, Loader, Password, Select } from 'rizzui';
 import { FaSave } from 'react-icons/fa';
 import { accountStatusOptions, roleOptions } from '@/config/global-variables';
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 import { BasicFormProps, BasicSelectOptions } from '@/models/global.model';
 
 interface UserFormProps extends BasicFormProps<CreateUpdateUserModel> {

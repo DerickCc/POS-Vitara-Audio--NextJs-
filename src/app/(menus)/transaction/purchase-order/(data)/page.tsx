@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { columns } from './columns';
-import BasicTable from '@/components/tables/basic-table';
+import PaginationTable from '@/components/tables/pagination-table';
 import { browsePo, cancelPo, deletePo, finishPo } from '@/services/purchase-order-service';
 import { SessionData } from '@/models/session.model';
 import { getCurrUser } from '@/utils/sessionlib';
@@ -51,7 +51,7 @@ export default function PurchaseOrderDataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
-  
+
   useEffect(() => {
     const fetchCurrUser = async () => {
       setCurrUser(await getCurrUser());
@@ -73,10 +73,10 @@ export default function PurchaseOrderDataPage() {
         filters.endDate = filters.endDate.toISOString();
       }
 
-      const response = await browsePo({ pageSize, pageIndex, sortColumn, sortOrder, filters });
+      const { result, recordsTotal } = await browsePo({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setPurchaseOrders(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setPurchaseOrders(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -87,7 +87,7 @@ export default function PurchaseOrderDataPage() {
   useEffect(() => {
     fetchPurchaseOrders();
   }, [fetchPurchaseOrders]);
-  
+
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
     setPageSize(newPageSize);
@@ -169,7 +169,7 @@ export default function PurchaseOrderDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable<PurchaseOrderModel>
+      <PaginationTable<PurchaseOrderModel>
         data={purchaseOrders}
         columns={columns({ actionHandlers, role: currUser.role })}
         pageSize={pageSize}

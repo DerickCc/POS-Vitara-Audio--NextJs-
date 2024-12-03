@@ -1,20 +1,20 @@
 'use client';
 
-import Card from "@/components/card";
-import { FiltersProps } from "@/models/global.model";
-import { SearchSupplierModel } from "@/models/supplier.model";
-import { searchSupplier } from "@/services/supplier-service";
-import { debounce } from "lodash";
-import { FormEvent, useCallback, useState } from "react";
-import toast from "react-hot-toast";
-import { PiCalendarBlank, PiFunnel } from "react-icons/pi";
-import { Button, Input, Select } from "rizzui";
+import Card from '@/components/card';
+import { FiltersProps } from '@/models/global.model';
+import { SearchSupplierModel } from '@/models/supplier.model';
+import { searchSupplier } from '@/services/supplier-service';
+import { debounce } from 'lodash';
+import { FormEvent, useCallback, useState } from 'react';
+import toast from 'react-hot-toast';
+import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
+import { Button, Input, Select } from 'rizzui';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { id } from 'date-fns/locale';
 import cn from '@/utils/class-names';
-import { datepickerClass } from '@/utils/tailwind-classes';
-import { poPrStatusOptions } from "@/config/global-variables";
+import { datepickerClass } from '@/config/tailwind-classes';
+import { poPrStatusOptions } from '@/config/global-variables';
 
 export type PurchaseReturnTableFilters = {
   code: string;
@@ -109,7 +109,7 @@ export default function PurchaseReturnFilter({
               startDate={localFilters.startDate}
               endDate={localFilters.endDate}
               onCalendarOpen={() => {
-                if (!localFilters.endDate) handleFilterChange('startDate')(null)
+                if (!localFilters.endDate) handleFilterChange('startDate')(null);
               }}
               onChange={(value: [Date | null, Date | null]) => {
                 handleFilterChange('startDate')(value[0]);

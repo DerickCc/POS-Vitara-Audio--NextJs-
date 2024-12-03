@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '@/components/page-header';
-import BasicTable from '@/components/tables/basic-table';
+import PaginationTable from '@/components/tables/pagination-table';
 import { routes } from '@/config/routes';
 import { SessionData } from '@/models/session.model';
 import { getCurrUser } from '@/utils/sessionlib';
@@ -75,10 +75,10 @@ export default function PurchaseReturnDataPage() {
         filters.endDate = filters.endDate.toISOString();
       }
 
-      const response = await browsePr({ pageSize, pageIndex, sortColumn, sortOrder, filters });
+      const { result, recordsTotal } = await browsePr({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setPurchaseReturns(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setPurchaseReturns(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -159,7 +159,7 @@ export default function PurchaseReturnDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable<PurchaseReturnModel>
+      <PaginationTable<PurchaseReturnModel>
         data={purchaseReturns}
         columns={columns({ actionHandlers, role: currUser.role })}
         pageSize={pageSize}

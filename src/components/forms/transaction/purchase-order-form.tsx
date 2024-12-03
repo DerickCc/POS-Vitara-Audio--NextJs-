@@ -24,7 +24,7 @@ import {
   buttonColorClass,
   readOnlyClass,
   tableClass,
-} from '@/utils/tailwind-classes';
+} from '@/config/tailwind-classes';
 import { PurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';

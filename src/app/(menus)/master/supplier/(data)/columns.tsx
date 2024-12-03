@@ -2,7 +2,7 @@ import { routes } from '@/config/routes';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { SupplierModel } from '@/models/supplier.model';
 import { formatToCurrency } from '@/utils/helper-function';
-import { actionIconColorClass } from '@/utils/tailwind-classes';
+import { actionIconColorClass } from '@/config/tailwind-classes';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { FaRegTrashAlt } from 'react-icons/fa';

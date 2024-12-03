@@ -12,10 +12,10 @@ import {
 } from 'react-icons/pi';
 import Spinner from '@/components/spinner';
 import Card from '@/components/card';
-import { BasicTableProps } from '@/models/global.model';
-import { tableClass } from '@/utils/tailwind-classes';
+import { PaginationTableProps } from '@/models/global.model';
+import { tableClass } from '@/config/tailwind-classes';
 
-export default function BasicTable<T>({
+export default function PaginationTable<T>({
   data,
   columns,
   pageSize,
@@ -26,9 +26,9 @@ export default function BasicTable<T>({
   setSorting,
   isLoading,
   totalRowCount,
-}: BasicTableProps<T>) {
+}: PaginationTableProps<T>) {
   const table = useReactTable({
-    data: data,
+    data,
     columns,
     pageCount: Math.ceil(totalRowCount / pageSize),
     state: {

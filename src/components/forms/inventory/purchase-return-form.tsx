@@ -17,7 +17,7 @@ import {
   buttonColorClass,
   readOnlyClass,
   tableClass,
-} from '@/utils/tailwind-classes';
+} from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { debounce } from 'lodash';
 import Link from 'next/link';
@@ -76,7 +76,7 @@ export default function PurchaseReturnForm({
   useEffect(() => {
     if (defaultValues.id) {
       defaultValues.returnDate = isoStringToReadableDate(defaultValues.returnDate);
-      
+
       setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
 
       // set display product name

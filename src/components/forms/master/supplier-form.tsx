@@ -5,7 +5,7 @@ import { routes } from '@/config/routes';
 import { BasicFormProps } from '@/models/global.model';
 import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useEffect } from 'react';

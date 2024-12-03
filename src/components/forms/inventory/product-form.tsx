@@ -16,7 +16,7 @@ import imgPlaceholder from '@public/image-placeholder.png';
 import toast from 'react-hot-toast';
 import { BasicFormProps } from '@/models/global.model';
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 
 export default function ProductForm({
   defaultValues = new ProductModel(),

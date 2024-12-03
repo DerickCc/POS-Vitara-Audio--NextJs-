@@ -1,7 +1,7 @@
 'use client';
 
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/utils/tailwind-classes';
+import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
 import { Controller, useForm } from 'react-hook-form';
 import { Button, Input, Modal, Radio, RadioGroup, Text } from 'rizzui';
 import RupiahFormInput from '../form-inputs/rupiah-form-input';

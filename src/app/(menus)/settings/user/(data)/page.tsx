@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '@/components/page-header';
-import BasicTable from '@/components/tables/basic-table';
+import PaginationTable from '@/components/tables/pagination-table';
 import { routes } from '@/config/routes';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
@@ -53,10 +53,10 @@ export default function UserDataPage() {
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await browseUser({ pageSize, pageIndex, sortColumn, sortOrder, filters });
+      const { result, recordsTotal } = await browseUser({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setUsers(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setUsers(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -121,7 +121,7 @@ export default function UserDataPage() {
 
       <UserFilter localFilters={localFilters} setLocalFilters={setLocalFilters} handleSearch={() => handleSearch()} />
 
-      <BasicTable<UserModel>
+      <PaginationTable<UserModel>
         data={users}
         columns={columns(actionHandlers)}
         pageSize={pageSize}

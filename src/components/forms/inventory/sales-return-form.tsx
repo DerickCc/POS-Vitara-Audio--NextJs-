@@ -25,7 +25,7 @@ import {
   buttonColorClass,
   readOnlyClass,
   tableClass,
-} from '@/utils/tailwind-classes';
+} from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { debounce } from 'lodash';
 import Link from 'next/link';

@@ -7,7 +7,7 @@ import { FormEvent, useCallback, useState } from 'react';
 import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
 import ReactDatePicker from 'react-datepicker';
-import { datepickerClass } from '@/utils/tailwind-classes';
+import { datepickerClass } from '@/config/tailwind-classes';
 import 'react-datepicker/dist/react-datepicker.css';
 import cn from '@/utils/class-names';
 import { id } from 'date-fns/locale';
@@ -110,7 +110,7 @@ export default function SalesOrderFilter({
               startDate={localFilters.startDate}
               endDate={localFilters.endDate}
               onCalendarOpen={() => {
-                if (!localFilters.endDate) handleFilterChange('startDate')(null)
+                if (!localFilters.endDate) handleFilterChange('startDate')(null);
               }}
               onChange={(value: [Date | null, Date | null]) => {
                 handleFilterChange('startDate')(value[0]);

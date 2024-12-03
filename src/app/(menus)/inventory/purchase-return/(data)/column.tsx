@@ -3,7 +3,7 @@ import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
-import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
+import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';

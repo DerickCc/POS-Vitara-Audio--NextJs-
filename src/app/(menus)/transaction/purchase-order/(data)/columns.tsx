@@ -7,7 +7,7 @@ import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
 import { mapTrxStatusToColor } from '@/config/global-variables';
-import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
+import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';

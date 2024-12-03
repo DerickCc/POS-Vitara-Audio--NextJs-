@@ -7,7 +7,7 @@ import { ActionIcon, Tooltip, cn } from 'rizzui';
 import Image from 'next/image';
 import imgPlaceholder from '@public/image-placeholder.png';
 import { ProductModel } from '@/models/product.model';
-import { actionIconColorClass } from '@/utils/tailwind-classes';
+import { actionIconColorClass } from '@/config/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 

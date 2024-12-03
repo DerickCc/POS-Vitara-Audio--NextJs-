@@ -23,6 +23,8 @@ export const datepickerClass = `
   [&.react-datepicker>button>span]:before:h-[7px] [&.react-datepicker>button>span]:before:w-[7px]
   `;
 
+export const metricCardClass = `border border-muted bg-gray-0 p-4 dark:bg-gray-50 lg:p-5 rounded-lg shadow-spread`;
+
 export const baseBadgeClass = 'inline-flex items-center rounded-md py-1 px-3 font-medium';
 
 export const badgeColorClass = {

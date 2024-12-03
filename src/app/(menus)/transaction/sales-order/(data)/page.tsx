@@ -7,7 +7,7 @@ import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import SalesOrderFilter, { SalesOrderFilters } from './filters';
-import BasicTable from '@/components/tables/basic-table';
+import PaginationTable from '@/components/tables/pagination-table';
 import PageHeader from '@/components/page-header';
 import { Button } from 'rizzui';
 import { PiPlusBold } from 'react-icons/pi';
@@ -73,10 +73,10 @@ export default function SalesOrderDataPage() {
         filters.endDate = filters.endDate.toISOString();
       }
 
-      const response = await browseSo({ pageSize, pageIndex, sortColumn, sortOrder, filters });
+      const { result, recordsTotal } = await browseSo({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setSalesOrders(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setSalesOrders(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -145,7 +145,7 @@ export default function SalesOrderDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable<SalesOrderModel>
+      <PaginationTable<SalesOrderModel>
         data={salesOrders}
         columns={columns({ actionHandlers, fetchSalesOrders, role: currUser.role })}
         pageSize={pageSize}

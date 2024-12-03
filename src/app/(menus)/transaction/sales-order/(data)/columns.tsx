@@ -4,7 +4,7 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
 import { mapTrxStatusToColor } from '@/config/global-variables';
-import { badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
+import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { SalesOrderModel } from '@/models/sales-order';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { routes } from '@/config/routes';

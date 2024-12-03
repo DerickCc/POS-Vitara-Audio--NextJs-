@@ -9,7 +9,7 @@ import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import SupplierFilter, { SupplierTableFilters } from './filters';
 import toast from 'react-hot-toast';
-import BasicTable from '@/components/tables/basic-table';
+import PaginationTable from '@/components/tables/pagination-table';
 import { columns } from './columns';
 import { SupplierModel } from '@/models/supplier.model';
 import { browseSupplier, deleteSupplier } from '@/services/supplier-service';
@@ -56,10 +56,10 @@ export default function SupplierDataPage() {
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await browseSupplier({ pageSize, pageIndex, sortColumn, sortOrder, filters });
+      const { result, recordsTotal } = await browseSupplier({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setSuppliers(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setSuppliers(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -128,7 +128,7 @@ export default function SupplierDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable<SupplierModel>
+      <PaginationTable<SupplierModel>
         data={suppliers}
         columns={columns(actionHandlers)}
         pageSize={pageSize}

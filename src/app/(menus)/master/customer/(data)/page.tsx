@@ -9,10 +9,8 @@ import CustomerFilter, { CustomerTableFilters } from './filter';
 import { useCallback, useEffect, useState } from 'react';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import toast from 'react-hot-toast';
-import { apiFetch, toQueryString } from '@/utils/api';
 import { columns } from './columns';
-import BasicTable from '@/components/tables/basic-table';
-import { TableAction } from '@/models/global.model';
+import PaginationTable from '@/components/tables/pagination-table';
 import { CustomerModel } from '@/models/customer.model';
 import { browseCustomer, deleteCustomer } from '@/services/customer-service';
 
@@ -54,10 +52,10 @@ export default function CustomerDataPage() {
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const response = await browseCustomer({ pageSize, pageIndex, sortColumn, sortOrder, filters })
+      const { result, recordsTotal } = await browseCustomer({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setCustomers(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setCustomers(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -110,10 +108,10 @@ export default function CustomerDataPage() {
   return (
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
-        <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Link href={routes.master.customer.add} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
-              <PiPlusBold className="me-1.5 h-[17px] w-[17px]" />
+        <div className='flex items-center gap-3 mt-4 sm:mt-0'>
+          <Link href={routes.master.customer.add} className='w-full sm:w-auto'>
+            <Button className='w-full sm:w-auto'>
+              <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>
           </Link>
@@ -126,7 +124,7 @@ export default function CustomerDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable<CustomerModel>
+      <PaginationTable<CustomerModel>
         data={customers}
         columns={columns(actionHandlers)}
         pageSize={pageSize}

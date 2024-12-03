@@ -1,4 +1,4 @@
-import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
+import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { routes } from '@/config/routes';
 import { UserModel } from '@/models/user.model';
 import cn from '@/utils/class-names';

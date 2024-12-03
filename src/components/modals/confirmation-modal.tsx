@@ -1,5 +1,5 @@
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/utils/tailwind-classes';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 import { Button, Modal } from 'rizzui';
 
 interface ConfirmationModalProps {

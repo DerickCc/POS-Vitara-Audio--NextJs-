@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '@/components/page-header';
-import BasicTable from '@/components/tables/basic-table';
+import PaginationTable from '@/components/tables/pagination-table';
 import { routes } from '@/config/routes';
 import { SalesReturnModel } from '@/models/sales-return.model';
 import { SessionData } from '@/models/session.model';
@@ -75,10 +75,10 @@ export default function SaleReturnDataPage() {
         filters.endDate = filters.endDate.toISOString();
       }
 
-      const response = await browseSr({ pageSize, pageIndex, sortColumn, sortOrder, filters });
+      const { result, recordsTotal } = await browseSr({ pageSize, pageIndex, sortColumn, sortOrder, filters });
 
-      setSalesReturns(response.result);
-      setTotalRowCount(response.recordsTotal);
+      setSalesReturns(result);
+      setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
@@ -147,7 +147,7 @@ export default function SaleReturnDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <BasicTable<SalesReturnModel>
+      <PaginationTable<SalesReturnModel>
         data={salesReturns}
         columns={columns({ actionHandlers, role: currUser.role })}
         pageSize={pageSize}

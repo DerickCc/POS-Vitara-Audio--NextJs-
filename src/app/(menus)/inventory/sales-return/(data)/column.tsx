@@ -2,7 +2,7 @@ import { mapTrxStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
-import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/utils/tailwind-classes';
+import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
 import { ActionIcon, Tooltip } from 'rizzui';
 import cn from '@/utils/class-names';
