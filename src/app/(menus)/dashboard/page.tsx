@@ -1,7 +1,5 @@
 'use client';
 
-import Card from '@/components/card';
-import MetricCard from '@/components/dashboard-cards/metric-card';
 import { routes } from '@/config/routes';
 import { Colors } from '@/models/global.model';
 import { getOverviewMetrics } from '@/services/dashboard-service';
@@ -10,9 +8,13 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiMoneyBold, PiPackageDuotone, PiTruckDuotone, PiUsersBold } from 'react-icons/pi';
 import { Title } from 'rizzui';
+import { OverviewMetricsResult } from '@/models/dashboard.model';
+import MetricCard from '@/components/dashboard/metric-card';
+import IncompletePaymentTable from '@/components/dashboard/incomplete-payment-table';
+import LowStockProductTable from '@/components/dashboard/low-stock-product-table';
 
 interface OverviewMetricsModel {
-  key: string;
+  key: keyof OverviewMetricsResult;
   title: string;
   metric: number;
   icon: React.ReactNode;
@@ -61,12 +63,12 @@ export default function DashboardPage() {
 
   const fetchOverviewMetrics = async () => {
     try {
-      const { result } = await getOverviewMetrics();
+      const result = await getOverviewMetrics();
 
       setOverviewMetrics((prev: any) =>
         prev.map((data: any) => ({
           ...data,
-          metric: result[data.key] || 0,
+          metric: result[data.key as keyof OverviewMetricsResult] || 0,
         }))
       );
     } catch (e) {
@@ -103,10 +105,10 @@ export default function DashboardPage() {
 
         <div className='grid grid-cols-5 gap-6'>
           <div className='col-span-3'>
-            <Card></Card>
+            <IncompletePaymentTable/>
           </div>
           <div className='col-span-2'>
-            <Card></Card>
+            <LowStockProductTable/>
           </div>
         </div>
       </div>

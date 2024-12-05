@@ -25,6 +25,7 @@ export interface PaginationTableProps<T> {
   setSorting: OnChangeFn<SortingState>;
   isLoading: boolean;
   totalRowCount: number;
+  showPageInfo?: boolean;
 }
 
 export interface FiltersProps<T> {
@@ -45,11 +46,14 @@ export interface BasicFormProps<T> {
   onSubmit: (data: T) => Promise<void>;
 }
 
-export interface PagingModel {
+export interface PagingModelWithoutFilter {
   pageSize: number;
   pageIndex: number;
   sortColumn: string | null;
   sortOrder: string | null;
+}
+
+export interface PagingModel extends PagingModelWithoutFilter {
   filters: object;
 }
 

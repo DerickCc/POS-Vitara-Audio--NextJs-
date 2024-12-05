@@ -153,7 +153,7 @@ export const columns = ({
     size: 130,
     header: () => 'Dibayar',
     cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
-    enableSorting: true,
+    enableSorting: false,
   }),
   columnHelper.accessor('status', {
     id: 'status',

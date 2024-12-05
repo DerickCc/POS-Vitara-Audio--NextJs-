@@ -26,6 +26,7 @@ export default function PaginationTable<T>({
   setSorting,
   isLoading,
   totalRowCount,
+  showPageInfo = true,
 }: PaginationTableProps<T>) {
   const table = useReactTable({
     data,
@@ -58,24 +59,25 @@ export default function PaginationTable<T>({
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header, idx) => {
-                      const canSort = header.column.getCanSort();
+                      const column = header.column;
+                      const canSort = column.getCanSort();
 
                       return (
                         <th
                           key={header.id}
-                          onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                          onClick={canSort ? column.getToggleSortingHandler() : undefined}
                           className={canSort ? 'cursor-pointer' : ''}
                           style={{ width: header.getSize() }}
                         >
-                          <div className={idx === 0 ? 'flex justify-center' : 'flex justify-between'}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          <div className={column.id === 'actions' ? 'flex justify-center' : 'flex justify-between'}>
+                            {flexRender(column.columnDef.header, header.getContext())}
 
                             {/* render if canSort */}
                             {canSort &&
                               ({
                                 asc: <PiCaretUpFill size={14} />,
                                 desc: <PiCaretDownFill size={14} />,
-                              }[header.column.getIsSorted() as string] ??
+                              }[column.getIsSorted() as string] ??
                                 null)}
                           </div>
                         </th>
@@ -95,7 +97,10 @@ export default function PaginationTable<T>({
                   table.getRowModel().rows.map((row) => (
                     <tr key={row.id}>
                       {row.getVisibleCells().map((cell, idx) => (
-                        <td key={cell.id} className={cn(idx === 0 ? 'text-center' : '', 'table-cell')}>
+                        <td
+                          key={cell.id}
+                          className={cn(cell.column.id === 'actions' ? 'text-center' : '', 'table-cell')}
+                        >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       ))}
@@ -107,16 +112,16 @@ export default function PaginationTable<T>({
           </div>
 
           <div className='flex items-center justify-between px-7 mt-7'>
-            <Text className='font-medium'>
-              Halaman {pageIndex + 1} dari {table.getPageCount() || 1}
-            </Text>
+              <Text className='font-medium'>
+                {showPageInfo && `Halaman ${pageIndex + 1} dari ${table.getPageCount() || 1}`}
+              </Text>
             <div className='flex items-center gap-4'>
-              <Text className='font-medium hidden sm:block'>Baris Per Halaman</Text>
+              {showPageInfo && <Text className='font-medium hidden sm:block'>Baris Per Halaman</Text>}
               <Select
                 options={pageSizeOptions}
                 value={pageSize}
                 onChange={(s: SelectOption) => setPageSize(Number(s.value))}
-                className='w-[70px]'
+                className='w-[67px]'
                 dropdownClassName='font-medium [&_li]:text-sm'
               />
               <div className='grid grid-cols-4 gap-2'>
