@@ -14,7 +14,8 @@ export interface TableAction {
   handler: (id: string) => void;
 }
 
-export interface PaginationTableProps<T> {
+export interface BasicTableProps<T> {
+  header?: React.ReactNode;
   data: T[];
   columns: ColumnDef<T>[];
   pageSize: number;

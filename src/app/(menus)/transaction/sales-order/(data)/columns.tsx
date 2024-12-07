@@ -1,7 +1,7 @@
 'use client';
 import { Colors, SoStatusType } from '@/models/global.model';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
+import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
@@ -131,28 +131,28 @@ export const columns = ({
     id: 'subTotal',
     size: 130,
     header: () => 'Sub Total',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('discount', {
     id: 'discount',
     size: 130,
     header: () => 'Diskon',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('grandTotal', {
     id: 'grandTotal',
     size: 130,
     header: () => 'Grand Total',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('paidAmount', {
     id: 'paidAmount',
     size: 130,
     header: () => 'Dibayar',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: false,
   }),
   columnHelper.accessor('status', {

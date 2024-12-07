@@ -1,7 +1,7 @@
 import { routes } from '@/config/routes';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { SupplierModel } from '@/models/supplier.model';
-import { formatToCurrency } from '@/utils/helper-function';
+import { formatToReadableNumber } from '@/utils/helper-function';
 import { actionIconColorClass } from '@/config/tailwind-classes';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
@@ -92,14 +92,14 @@ export const columns = (actionHandlers: any): ColumnDef<SupplierModel, any>[] =>
     id: 'receivables',
     size: 160,
     header: () => 'Piutang',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('receivablesLimit', {
     id: 'receivablesLimit',
     size: 160,
     header: () => 'Limit Piutang',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('address', {

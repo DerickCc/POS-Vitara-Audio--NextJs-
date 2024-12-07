@@ -3,7 +3,7 @@
 import { routes } from '@/config/routes';
 import { Colors } from '@/models/global.model';
 import { getOverviewMetrics } from '@/services/dashboard-service';
-import { formatToCurrency } from '@/utils/helper-function';
+import { formatToReadableNumber } from '@/utils/helper-function';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiMoneyBold, PiPackageDuotone, PiTruckDuotone, PiUsersBold } from 'react-icons/pi';
@@ -12,6 +12,7 @@ import { OverviewMetricsResult } from '@/models/dashboard.model';
 import MetricCard from '@/components/dashboard/metric-card';
 import IncompletePaymentTable from '@/components/dashboard/incomplete-payment-table';
 import LowStockProductTable from '@/components/dashboard/low-stock-product-table';
+import TopProfitGeneratingProductChart from '@/components/dashboard/top-profit-generating-product-chart';
 
 interface OverviewMetricsModel {
   key: keyof OverviewMetricsResult;
@@ -94,7 +95,7 @@ export default function DashboardPage() {
             <MetricCard
               key={data.title}
               title={data.title}
-              metric={data.key === 'totalSales' ? `Rp. ${formatToCurrency(data.metric)}` : data.metric}
+              metric={data.key === 'totalSales' ? `Rp. ${formatToReadableNumber(data.metric)}` : data.metric}
               icon={data.icon}
               iconColor={data.iconColor}
               navigateTo={data.link}
@@ -103,12 +104,14 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        <TopProfitGeneratingProductChart />
+
         <div className='grid grid-cols-5 gap-6'>
           <div className='col-span-3'>
-            <IncompletePaymentTable/>
+            <IncompletePaymentTable />
           </div>
           <div className='col-span-2'>
-            <LowStockProductTable/>
+            <LowStockProductTable />
           </div>
         </div>
       </div>

@@ -14,8 +14,14 @@ export interface IncompletePaymentModel {
 }
 
 export interface LowStockProductModel {
-  productId: string;
   productName: string;
   stock: number;
+  uom: string;
+}
+
+export interface TopProfitGeneratingProductModel {
+  label: string; // productName
+  itemSold: number;
+  totalProfit: number;
   uom: string;
 }

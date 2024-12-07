@@ -9,7 +9,7 @@ import { PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import SupplierFilter, { SupplierTableFilters } from './filters';
 import toast from 'react-hot-toast';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { columns } from './columns';
 import { SupplierModel } from '@/models/supplier.model';
 import { browseSupplier, deleteSupplier } from '@/services/supplier-service';
@@ -128,7 +128,7 @@ export default function SupplierDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <PaginationTable<SupplierModel>
+      <BasicTable<SupplierModel>
         data={suppliers}
         columns={columns(actionHandlers)}
         pageSize={pageSize}

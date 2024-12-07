@@ -7,7 +7,7 @@ import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import SalesOrderFilter, { SalesOrderFilters } from './filters';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import PageHeader from '@/components/page-header';
 import { Button } from 'rizzui';
 import { PiPlusBold } from 'react-icons/pi';
@@ -145,7 +145,7 @@ export default function SalesOrderDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <PaginationTable<SalesOrderModel>
+      <BasicTable<SalesOrderModel>
         data={salesOrders}
         columns={columns({ actionHandlers, fetchSalesOrders, role: currUser.role })}
         pageSize={pageSize}

@@ -1,5 +1,5 @@
 import { routes } from '@/config/routes';
-import { formatToCurrency, formatToDecimal } from '@/utils/helper-function';
+import { formatToReadableNumber, formatToDecimal } from '@/utils/helper-function';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuPencil } from 'react-icons/lu';
@@ -115,14 +115,14 @@ export const columns = (actionHandlers: any): ColumnDef<ProductModel, any>[] => 
     id: 'purchasePrice',
     size: 160,
     header: () => 'Harga Beli',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('sellingPrice', {
     id: 'sellingPrice',
     size: 160,
     header: () => 'Harga Jual',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('remarks', {

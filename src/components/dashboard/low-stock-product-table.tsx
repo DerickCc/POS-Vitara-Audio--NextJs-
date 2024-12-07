@@ -1,11 +1,12 @@
 'use client';
 
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { LowStockProductModel } from '@/models/dashboard.model';
 import { browseLowStockProduct } from '@/services/dashboard-service';
 import { ColumnDef, OnChangeFn, SortingState, createColumnHelper } from '@tanstack/react-table';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { FiAlertTriangle } from 'react-icons/fi';
 
 const columnHelper = createColumnHelper<LowStockProductModel>();
 const columns = (): ColumnDef<LowStockProductModel, any>[] => [
@@ -26,14 +27,14 @@ const columns = (): ColumnDef<LowStockProductModel, any>[] => [
 ];
 
 export default function LowStockProductTable() {
-  const [lowStockProduct, setLowStockProduct] = useState<LowStockProductModel[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<LowStockProductModel[]>([]);
   const [pageSize, setPageSize] = useState(5);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const fetchlowStockProduct = useCallback(async () => {
+  const fetchlowStockProducts = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -42,7 +43,7 @@ export default function LowStockProductTable() {
 
       const { result, recordsTotal } = await browseLowStockProduct({ pageSize, pageIndex, sortColumn, sortOrder });
 
-      setLowStockProduct(result);
+      setLowStockProducts(result);
       setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -52,8 +53,8 @@ export default function LowStockProductTable() {
   }, [pageSize, pageIndex, sorting]);
 
   useEffect(() => {
-    fetchlowStockProduct();
-  }, [fetchlowStockProduct]);
+    fetchlowStockProducts();
+  }, [fetchlowStockProducts]);
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
@@ -70,8 +71,9 @@ export default function LowStockProductTable() {
   };
 
   return (
-    <PaginationTable<LowStockProductModel>
-      data={lowStockProduct}
+    <BasicTable<LowStockProductModel>
+      header={tableHeader()}
+      data={lowStockProducts}
       columns={columns()}
       pageSize={pageSize}
       setPageSize={handlePageSizeChange}
@@ -85,3 +87,13 @@ export default function LowStockProductTable() {
     />
   );
 }
+
+function tableHeader() {
+  return (
+    <div className='m-4 flex items-center'>
+      <FiAlertTriangle className='size-6 me-2 text-yellow-500' />
+      <h5 className='font-medium'>Barang yang Perlu Direstok</h5>
+    </div>
+  )
+}
+

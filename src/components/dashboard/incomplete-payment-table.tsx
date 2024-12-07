@@ -1,14 +1,15 @@
 'use client';
 
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { routes } from '@/config/routes';
 import { IncompletePaymentModel } from '@/models/dashboard.model';
 import { browseIncompletePayment } from '@/services/dashboard-service';
-import { formatToCurrency } from '@/utils/helper-function';
+import { formatToReadableNumber } from '@/utils/helper-function';
 import { ColumnDef, OnChangeFn, SortingState, createColumnHelper } from '@tanstack/react-table';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { PiCashRegisterDuotone, PiMoneyDuotone } from 'react-icons/pi';
 
 const columnHelper = createColumnHelper<IncompletePaymentModel>();
 const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [
@@ -34,14 +35,14 @@ const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [
     id: 'grandTotal',
     size: 100,
     header: () => 'Grand Total',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('paidAmount', {
     id: 'paidAmount',
     size: 100,
     header: () => 'Dibayar',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: false,
   }),
 ];
@@ -91,7 +92,8 @@ export default function IncompletePaymentTable() {
   };
 
   return (
-    <PaginationTable<IncompletePaymentModel>
+    <BasicTable<IncompletePaymentModel>
+      header={tableHeader()}
       data={incompletePayments}
       columns={columns()}
       pageSize={pageSize}
@@ -103,5 +105,14 @@ export default function IncompletePaymentTable() {
       isLoading={isLoading}
       totalRowCount={totalRowCount}
     />
+  );
+}
+
+function tableHeader() {
+  return (
+    <div className='m-4 flex items-center'>
+      <PiCashRegisterDuotone className='size-6 me-2 text-red' />
+      <h5 className='font-medium'>Transaksi Penjualan Belum Lunas</h5>
+    </div>
   );
 }

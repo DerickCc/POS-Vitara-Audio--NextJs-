@@ -1,5 +1,5 @@
 import cn from '@/utils/class-names';
-import { formatToCurrency, parseNumber } from '@/utils/helper-function';
+import { formatToReadableNumber, parseNumber } from '@/utils/helper-function';
 import { useEffect, useState } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
 import { Input } from 'rizzui';
@@ -37,7 +37,7 @@ export default function RupiahFormInput({
   // Format the initial value
   useEffect(() => {
     if (defaultValue !== undefined) {
-      setDisplayValue(formatToCurrency(defaultValue));
+      setDisplayValue(formatToReadableNumber(defaultValue));
     }
   }, [defaultValue, displayValue]);
 
@@ -46,7 +46,7 @@ export default function RupiahFormInput({
     let numericValue = parseNumber(e.target.value);
 
     if (limit !== -1 && numericValue > limit) numericValue = limit;
-    setDisplayValue(formatToCurrency(numericValue));
+    setDisplayValue(formatToReadableNumber(numericValue));
 
     setValue(fieldName, numericValue, { shouldValidate: true }); // Manually update the form state
     onChange(numericValue);

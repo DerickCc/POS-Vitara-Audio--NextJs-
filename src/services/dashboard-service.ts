@@ -1,4 +1,4 @@
-import { IncompletePaymentModel, LowStockProductModel, OverviewMetricsResult } from '@/models/dashboard.model';
+import { IncompletePaymentModel, LowStockProductModel, OverviewMetricsResult, TopProfitGeneratingProductModel } from '@/models/dashboard.model';
 import { PaginatedApiResponse, PagingModelWithoutFilter } from '@/models/global.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
@@ -57,3 +57,21 @@ export const browseLowStockProduct = async ({
     throw e + '';
   }
 };
+
+export const GetTopProfitGeneratingProduct = async ({
+  period,
+  limit
+}: { period?: any, limit?: number}): Promise<TopProfitGeneratingProductModel[]> => {
+  try {
+    const response = await apiFetch(
+      `/api/dashboard/top-profit-generating-products${toQueryString({
+        period, limit
+      })}`,
+      { method: 'GET' }
+    );
+
+    return response.result;
+  } catch (e) {
+    throw e + '';
+  }
+}

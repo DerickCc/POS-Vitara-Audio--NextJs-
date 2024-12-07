@@ -31,7 +31,7 @@ import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 import { SearchProductModel } from '@/models/product.model';
 import { searchProduct } from '@/services/product-service';
 import { debounce } from 'lodash';
-import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
+import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { mapTrxStatusToColor } from '@/config/global-variables';
 
 interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
@@ -403,7 +403,7 @@ export default function PurchaseOrderForm({
                     <td className='table-cell text-right' colSpan={4}>
                       {!isReadOnly && (
                         <>
-                          <span>Piutang Supplier: Rp. {formatToCurrency(supplierReceivables)}</span>
+                          <span>Piutang Supplier: Rp. {formatToReadableNumber(supplierReceivables)}</span>
                           <span className='mx-3'>|</span>
                         </>
                       )}

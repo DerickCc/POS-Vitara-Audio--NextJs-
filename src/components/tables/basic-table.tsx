@@ -12,10 +12,11 @@ import {
 } from 'react-icons/pi';
 import Spinner from '@/components/spinner';
 import Card from '@/components/card';
-import { PaginationTableProps } from '@/models/global.model';
+import { BasicTableProps } from '@/models/global.model';
 import { tableClass } from '@/config/tailwind-classes';
 
-export default function PaginationTable<T>({
+export default function BasicTable<T>({
+  header,
   data,
   columns,
   pageSize,
@@ -27,7 +28,7 @@ export default function PaginationTable<T>({
   isLoading,
   totalRowCount,
   showPageInfo = true,
-}: PaginationTableProps<T>) {
+}: BasicTableProps<T>) {
   const table = useReactTable({
     data,
     columns,
@@ -48,6 +49,8 @@ export default function PaginationTable<T>({
         <Spinner className='pt-7' />
       ) : (
         <>
+          { header }
+          
           <div className='custom-scrollbar w-full max-w-full overflow-x-auto'>
             <table
               className={tableClass}
@@ -112,9 +115,9 @@ export default function PaginationTable<T>({
           </div>
 
           <div className='flex items-center justify-between px-7 mt-7'>
-              <Text className='font-medium'>
-                {showPageInfo && `Halaman ${pageIndex + 1} dari ${table.getPageCount() || 1}`}
-              </Text>
+            <Text className='font-medium'>
+              {showPageInfo && `Halaman ${pageIndex + 1} dari ${table.getPageCount() || 1}`}
+            </Text>
             <div className='flex items-center gap-4'>
               {showPageInfo && <Text className='font-medium hidden sm:block'>Baris Per Halaman</Text>}
               <Select

@@ -1,16 +1,13 @@
-import { TIMEZONE } from "@/config/global-variables";
+import { TIMEZONE } from '@/config/global-variables';
 
-export const formatToCurrency = (numericValue: number): string => (
-  new Intl.NumberFormat('id-ID').format(numericValue)
-);
+export const formatToReadableNumber = (numericValue: number): string =>
+  new Intl.NumberFormat('id-ID').format(numericValue);
 
-export const parseNumber = (value: string): number => (
-  parseFloat(value.replace(/[^0-9,]+/g, '')) || 0
-);
+export const parseNumber = (value: string): number => parseFloat(value.replace(/[^0-9,]+/g, '')) || 0;
 
 export const formatToDecimal = (value: any): string => {
   if (typeof value !== 'number') {
-    value = parseFloat(value)
+    value = parseFloat(value);
   }
 
   return value.toLocaleString('id-ID', {
@@ -21,7 +18,7 @@ export const formatToDecimal = (value: any): string => {
 
 export const parseDecimal = (value: string): number => {
   const normalizedValue = value.replace(/\./g, '').replace(/,/g, '.');
-  return parseFloat(normalizedValue) || 0
+  return parseFloat(normalizedValue) || 0;
 };
 
 // Date Time Stuff
@@ -39,7 +36,7 @@ export const getCurrDate = () => {
   });
 
   return jakartaDate;
-}
+};
 
 /**
  * Format isoString date to normal (indonesian) date
@@ -55,7 +52,7 @@ export const isoStringToReadableDate = (isoStirng: string) => {
   });
 
   return date;
-}
+};
 
 // export const isoStringToReadableDateTime = (isoStirng: string) => {
 //   const datetime = new Date(isoStirng).toLocaleString('id-ID', {

@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { columns } from './columns';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { browsePo, cancelPo, deletePo, finishPo } from '@/services/purchase-order-service';
 import { SessionData } from '@/models/session.model';
 import { getCurrUser } from '@/utils/sessionlib';
@@ -169,7 +169,7 @@ export default function PurchaseOrderDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <PaginationTable<PurchaseOrderModel>
+      <BasicTable<PurchaseOrderModel>
         data={purchaseOrders}
         columns={columns({ actionHandlers, role: currUser.role })}
         pageSize={pageSize}

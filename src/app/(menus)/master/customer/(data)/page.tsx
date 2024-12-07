@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import toast from 'react-hot-toast';
 import { columns } from './columns';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { CustomerModel } from '@/models/customer.model';
 import { browseCustomer, deleteCustomer } from '@/services/customer-service';
 
@@ -124,7 +124,7 @@ export default function CustomerDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <PaginationTable<CustomerModel>
+      <BasicTable<CustomerModel>
         data={customers}
         columns={columns(actionHandlers)}
         pageSize={pageSize}

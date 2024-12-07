@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '@/components/page-header';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { routes } from '@/config/routes';
 import { SalesReturnModel } from '@/models/sales-return.model';
 import { SessionData } from '@/models/session.model';
@@ -147,7 +147,7 @@ export default function SaleReturnDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <PaginationTable<SalesReturnModel>
+      <BasicTable<SalesReturnModel>
         data={salesReturns}
         columns={columns({ actionHandlers, role: currUser.role })}
         pageSize={pageSize}

@@ -2,7 +2,7 @@ import { mapTrxStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
-import { formatToCurrency, isoStringToReadableDate } from '@/utils/helper-function';
+import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
 import { ActionIcon, Dropdown } from 'rizzui';
@@ -137,7 +137,7 @@ export const columns = ({
     id: 'grandTotal',
     size: 130,
     header: () => 'Grand Total Retur',
-    cell: (info) => `Rp ${formatToCurrency(info.getValue())}`,
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
   columnHelper.accessor('status', {

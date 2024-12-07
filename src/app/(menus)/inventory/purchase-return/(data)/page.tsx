@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '@/components/page-header';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { routes } from '@/config/routes';
 import { SessionData } from '@/models/session.model';
 import { getCurrUser } from '@/utils/sessionlib';
@@ -159,7 +159,7 @@ export default function PurchaseReturnDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <PaginationTable<PurchaseReturnModel>
+      <BasicTable<PurchaseReturnModel>
         data={purchaseReturns}
         columns={columns({ actionHandlers, role: currUser.role })}
         pageSize={pageSize}

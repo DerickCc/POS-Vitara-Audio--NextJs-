@@ -1,4 +1,4 @@
-import { formatToCurrency, parseNumber } from '@/utils/helper-function';
+import { formatToReadableNumber, parseNumber } from '@/utils/helper-function';
 import { useEffect, useState } from 'react';
 import { Input } from 'rizzui';
 
@@ -24,25 +24,25 @@ export default function RupiahInput({
   // Format the initial value
   useEffect(() => {
     if (defaultValue !== undefined) {
-      setDisplayValue(formatToCurrency(defaultValue));
+      setDisplayValue(formatToReadableNumber(defaultValue));
     }
   }, [defaultValue]);
 
   // Update form value and display value when user inputs
   const handleChange = (e: any) => {
     const numericValue = parseNumber(e.target.value);
-    setDisplayValue(formatToCurrency(numericValue));
+    setDisplayValue(formatToReadableNumber(numericValue));
     onChange(numericValue);
   };
 
   return (
     <Input
-      type="text"
+      type='text'
       value={displayValue}
       onChange={handleChange}
-      prefix="Rp "
+      prefix='Rp '
       label={label}
-      placeholder="xxx.xxx.xxx"
+      placeholder='xxx.xxx.xxx'
       error={error}
       readOnly={readOnly}
       className={className}

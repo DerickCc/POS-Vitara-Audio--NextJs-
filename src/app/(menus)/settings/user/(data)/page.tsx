@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '@/components/page-header';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { routes } from '@/config/routes';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
@@ -121,7 +121,7 @@ export default function UserDataPage() {
 
       <UserFilter localFilters={localFilters} setLocalFilters={setLocalFilters} handleSearch={() => handleSearch()} />
 
-      <PaginationTable<UserModel>
+      <BasicTable<UserModel>
         data={users}
         columns={columns(actionHandlers)}
         pageSize={pageSize}

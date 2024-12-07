@@ -9,7 +9,7 @@ import ProductFilter, { ProductTableFilters } from './filter';
 import { useCallback, useEffect, useState } from 'react';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import toast from 'react-hot-toast';
-import PaginationTable from '@/components/tables/pagination-table';
+import BasicTable from '@/components/tables/basic-table';
 import { columns } from './colomns';
 import { ProductModel } from '@/models/product.model';
 import { browseProduct, deleteProduct } from '@/services/product-service';
@@ -126,7 +126,7 @@ export default function ProductDataPage() {
         handleSearch={() => handleSearch()}
       />
 
-      <PaginationTable<ProductModel>
+      <BasicTable<ProductModel>
         data={products}
         columns={columns(actionHandlers)}
         pageSize={pageSize}
