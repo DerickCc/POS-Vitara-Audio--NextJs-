@@ -3,12 +3,15 @@ import Card from '../card';
 import SimpleBar from 'simplebar-react';
 import { Bar, XAxis, YAxis, Tooltip, CartesianGrid, ComposedChart, ResponsiveContainer, TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
-import { Text } from 'rizzui';
+import { Select, Text } from 'rizzui';
 import { useCallback, useEffect, useState } from 'react';
 import { TopProfitGeneratingProductModel } from '@/models/dashboard.model';
 import { GetTopProfitGeneratingProduct } from '@/services/dashboard-service';
 import toast from 'react-hot-toast';
 import { formatToReadableNumber } from '@/utils/helper-function';
+import { BasicSelectOptions } from '@/models/global.model';
+import { topProductLimitOptions, topProductPeriodOptions } from '@/config/global-variables';
+import Spinner from '../spinner';
 
 const data = [
   {
@@ -51,7 +54,7 @@ const data = [
 
 export default function TopProfitGeneratingProductChart() {
   const [topProfitGeneratingProducts, setTopProfitGeneratingProducts] = useState<TopProfitGeneratingProductModel[]>([]);
-  const [period, setPeriod] = useState(null);
+  const [period, setPeriod] = useState<string>('all-time');
   const [limit, setLimit] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,7 +62,7 @@ export default function TopProfitGeneratingProductChart() {
     try {
       setIsLoading(true);
 
-      const result = await GetTopProfitGeneratingProduct({});
+      const result = await GetTopProfitGeneratingProduct({ limit, period });
 
       setTopProfitGeneratingProducts(result);
     } catch (e) {
@@ -75,29 +78,70 @@ export default function TopProfitGeneratingProductChart() {
 
   return (
     <Card className='px-4'>
-      <div className='flex items-center'>
-        <PiMedalDuotone className='size-6 me-2 text-yellow-600' />
-        <h5 className='font-medium'>Barang dengan Total Keuntungan Tertinggi</h5>
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center'>
+          <PiMedalDuotone className='size-11 sm:size-6 me-2 text-yellow-600' />
+          <h5 className='font-medium'>Barang dengan Total Keuntungan Tertinggi</h5>
+        </div>
+        <div className='flex-col sm:flex-row sm:flex items-center gap-6'>
+          <div className='flex items-center gap-2 sm:mb-0 mb-5'>
+            <span>Top</span>
+            <Select<BasicSelectOptions>
+              value={limit}
+              onChange={(value: number) => setLimit(value)}
+              options={topProductLimitOptions}
+              displayValue={(value: number) =>
+                topProductLimitOptions.find((option) => option.value === value)?.label ?? ''
+              }
+              getOptionValue={(option) => option.value}
+              clearable={false}
+              className='w-16'
+            />
+          </div>
+          <Select<BasicSelectOptions>
+            value={period}
+            onChange={(value: string) => setPeriod(value)}
+            options={topProductPeriodOptions}
+            displayValue={(value: string) =>
+              topProductPeriodOptions.find((option) => option.value === value)?.label ?? ''
+            }
+            getOptionValue={(option) => option.value}
+            clearable={false}
+            className='w-44'
+          />
+        </div>
       </div>
 
-      <SimpleBar>
-        <div className='h-[24rem] w-full pt-6'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <ComposedChart data={topProfitGeneratingProducts} margin={{ top: 20, right: 20, left: 40 }}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey='label' axisLine={true} tickLine={false} />
-              <YAxis
-                axisLine={true}
-                tickLine={false}
-                tickFormatter={(label) => `Rp\u00A0${formatToReadableNumber(label / 1000000)}\u00A0juta`}
-                tickCount={8}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={false} />
-              <Bar dataKey='totalProfit' fill='#0047AB' stroke='#003366' barSize={28} radius={[4, 4, 0, 0]} />
-            </ComposedChart>
-          </ResponsiveContainer>
+      {isLoading ? (
+        <Spinner />
+      ) : topProfitGeneratingProducts.length === 0 ? (
+        <div className='my-5 mx-8'>
+          <Text className='text-[16px]'>Data tidak tersedia...</Text>
         </div>
-      </SimpleBar>
+      ) : (
+        <SimpleBar>
+          <div className='h-[24rem] w-full pt-6'>
+            <ResponsiveContainer width='100%' height='100%'>
+              <ComposedChart data={topProfitGeneratingProducts} margin={{ top: 20, right: 20, left: 40 }}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey='label' axisLine={true} tickLine={false} />
+                <YAxis
+                  axisLine={true}
+                  tickLine={false}
+                  tickFormatter={(label) =>
+                    period === 'month' || period === 'day'
+                      ? `Rp\u00A0${formatToReadableNumber(label)}`
+                      : `Rp\u00A0${formatToReadableNumber(label / 1_000_000)}\u00A0juta`
+                  }
+                  tickCount={8}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={false} />
+                <Bar dataKey='totalProfit' fill='#0047AB' stroke='#003366' barSize={28} radius={[4, 4, 0, 0]} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </SimpleBar>
+      )}
     </Card>
   );
 }

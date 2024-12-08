@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   try {
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999); // Last day of this month
 
     const dateFilter = {
       createdAt: { gte: startOfMonth, lte: endOfMonth },

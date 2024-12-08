@@ -38,6 +38,20 @@ export const pageSizeOptions = [
   },
 ];
 
+export const topProductLimitOptions = [
+  { label: '5', value: 5 },
+  { label: '6', value: 6 },
+  { label: '7', value: 7 },
+  { label: '8', value: 8 },
+];
+
+export const topProductPeriodOptions = [
+  { label: 'Sepanjang Masa', value: 'all-time'},
+  { label: 'Tahun Ini', value: 'year'},
+  { label: 'Bulan Ini', value: 'month'},
+  { label: 'Hari Ini', value: 'day'},
+]
+
 export const filterOperatorOptions = [
   { label: '>=', value: 'gte' },
   { label: '<=', value: 'lte' },

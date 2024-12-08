@@ -90,7 +90,7 @@ export default function DashboardPage() {
       </header>
 
       <div className='grid gap-6'>
-        <div className='grid grid-cols-4 gap-6'>
+        <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
           {overviewMetrics.map((data: any) => (
             <MetricCard
               key={data.title}
@@ -106,11 +106,11 @@ export default function DashboardPage() {
 
         <TopProfitGeneratingProductChart />
 
-        <div className='grid grid-cols-5 gap-6'>
-          <div className='col-span-3'>
+        <div className='grid md:grid-cols-5 gap-6'>
+          <div className='md:col-span-3'>
             <IncompletePaymentTable />
           </div>
-          <div className='col-span-2'>
+          <div className='md:col-span-2'>
             <LowStockProductTable />
           </div>
         </div>

@@ -37,7 +37,7 @@ export interface FiltersProps<T> {
 
 export interface BasicSelectOptions {
   value: any;
-  label: string;
+  label: any;
   disabled?: boolean;
 }
 
