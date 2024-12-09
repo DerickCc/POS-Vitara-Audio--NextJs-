@@ -45,12 +45,12 @@ export default function BasicTable<T>({
 
   return (
     <Card className='px-0 pt-0'>
+      {header}
+      
       {isLoading ? (
         <Spinner className='pt-7' />
       ) : (
         <>
-          { header }
-          
           <div className='custom-scrollbar w-full max-w-full overflow-x-auto'>
             <table
               className={tableClass}

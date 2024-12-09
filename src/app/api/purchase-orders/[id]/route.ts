@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   if (!session.id) {
     return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { message: 'Unauthorized, mohon melakukan login ulang' },
       { status: 401 }
     );
   }

@@ -53,20 +53,3 @@ export const isoStringToReadableDate = (isoStirng: string) => {
 
   return date;
 };
-
-// export const isoStringToReadableDateTime = (isoStirng: string) => {
-//   const datetime = new Date(isoStirng).toLocaleString('id-ID', {
-//     timeZone: 'Asia/Jakarta',
-//     year: 'numeric',
-//     month: 'long',
-//     day: 'numeric',
-//     hour: '2-digit',
-//     minute: '2-digit',
-//     second: '2-digit',
-//     hour12: false,
-//   });
-
-//   const [date, time] = datetime.split(' pukul ');
-
-//   return `${date} ${time.replaceAll('.', ':')}`;
-// }

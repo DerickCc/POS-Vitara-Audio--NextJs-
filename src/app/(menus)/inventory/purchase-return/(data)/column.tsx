@@ -8,7 +8,8 @@ import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import cn from '@/utils/class-names';
-import { LuCircleSlash, LuEye, LuMoreVertical } from 'react-icons/lu';
+import { LuCircleSlash, LuEye } from 'react-icons/lu';
+import { FiMoreVertical } from "react-icons/fi";
 import { routes } from '@/config/routes';
 import Link from 'next/link';
 
@@ -28,7 +29,7 @@ function ActionColumn({
       <Dropdown>
         <Dropdown.Trigger>
           <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
-            <LuMoreVertical className='size-5 text-primary' />
+            <FiMoreVertical className='size-5 text-primary' />
           </ActionIcon>
         </Dropdown.Trigger>
 

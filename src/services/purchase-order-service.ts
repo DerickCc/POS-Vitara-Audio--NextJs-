@@ -46,6 +46,34 @@ export const searchPo = async (code?: string, status?: string): Promise<any[]> =
   }
 };
 
+export const exportPo = async ({
+  sortColumn,
+  sortOrder,
+  filters,
+}: {
+  sortColumn: string | null;
+  sortOrder: string | null;
+  filters: object;
+}): Promise<void> => {
+  try {
+    const blob = await apiFetch(
+      `/api/purchase-orders/export${toQueryString({ sortColumn, sortOrder, ...filters })}`,
+      { method: 'GET' },
+      'blob'
+    );
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'Laporan Transaksi Pembelian.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (e) {
+    throw e + '';
+  }
+};
+
 // POST
 export const createPo = async (payload: PurchaseOrderModel): Promise<string> => {
   try {

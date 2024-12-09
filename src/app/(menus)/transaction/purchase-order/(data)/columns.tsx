@@ -2,7 +2,8 @@ import { routes } from '@/config/routes';
 import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
-import { LuEye, LuMoreVertical, LuPencil, LuCircleSlash } from 'react-icons/lu';
+import { LuEye, LuPencil, LuCircleSlash } from 'react-icons/lu';
+import { FiMoreVertical } from "react-icons/fi";
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
@@ -29,7 +30,7 @@ function ActionColumn({
       <Dropdown>
         <Dropdown.Trigger>
           <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
-            <LuMoreVertical className='size-5 text-primary' />
+            <FiMoreVertical className='size-5 text-primary' />
           </ActionIcon>
         </Dropdown.Trigger>
 

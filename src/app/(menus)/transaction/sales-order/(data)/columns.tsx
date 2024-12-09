@@ -9,7 +9,8 @@ import { SalesOrderModel } from '@/models/sales-order';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
-import { LuEye, LuMoreVertical, LuCircleSlash } from 'react-icons/lu';
+import { LuEye, LuCircleSlash } from 'react-icons/lu';
+import { FiMoreVertical } from "react-icons/fi";
 import { Row } from '@tanstack/react-table';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt } from 'react-icons/fa';
@@ -34,7 +35,7 @@ function ActionColumn({
       <Dropdown>
         <Dropdown.Trigger>
           <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
-            <LuMoreVertical className='size-5 text-primary' />
+            <FiMoreVertical  className='size-5 text-primary' />
           </ActionIcon>
         </Dropdown.Trigger>
 

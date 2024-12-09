@@ -7,7 +7,7 @@ export function toQueryString(obj: any): string {
   );
 }
 
-export async function apiFetch(url: string, options: any) {
+export async function apiFetch(url: string, options: any, responseType: 'json' | 'blob' = 'json') {
   const finalOptions = {
     method: options.method,
     headers: {
@@ -19,7 +19,14 @@ export async function apiFetch(url: string, options: any) {
 
   const response = await fetch(url, finalOptions);
 
-  const responseJson = await response.json();
+  let responseJson = null;
+
+  if (responseType === 'json') {
+    responseJson = await response.json();
+  } else if (responseType === 'blob') {
+    responseJson = await response.blob();
+  }
+  
   // Check if response status is not OK
   if (!response.ok) {
     throw new Error(responseJson.message || 'Terjadi Error');
