@@ -3,7 +3,6 @@ import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { Workbook } from 'exceljs';
-import fs from 'file-saver';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 
 // ExportPurchaseOrder
@@ -82,16 +81,26 @@ export async function GET(request: Request) {
               [sortColumn]: sortOrder,
             },
       where,
-      include: {
+      select: {
+        code: true,
+        purchaseDate: true,
+        Supplier: {
+          select: { name: true },
+        },
+        subTotal: true,
+        appliedReceivables: true,
+        grandTotal: true,
+        totalItem: true,
+        status: true,
         PurchaseOrderDetails: {
-          include: {
+          select: {
             Product: {
               select: { name: true, uom: true },
             },
+            purchasePrice: true,
+            quantity: true,
+            totalPrice: true,
           },
-        },
-        Supplier: {
-          select: { name: true },
         },
       },
     });
@@ -114,17 +123,15 @@ export async function GET(request: Request) {
       };
     });
 
-    const buffer = await exportPurchaseOrdersToExcel(
-      isoStringToReadableDate(new Date(startDate).toISOString()),
-      isoStringToReadableDate(new Date(endDate).toISOString()),
-      mappedPurchaseOrders
-    );
+    console.log(mappedPurchaseOrders);
+
+    const buffer = await exportPurchaseOrdersToExcel(startDate, endDate, mappedPurchaseOrders);
 
     return new Response(buffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="Laporan Transaksi Pembelian.xlsx"`,
+        'Content-Disposition': `attachment; filename="LaporanTransaksiPembelian.xlsx"`,
       },
     });
   } catch (e) {
@@ -133,7 +140,8 @@ export async function GET(request: Request) {
 }
 
 async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, data: any[]) {
-  const reportDate = startDate && endDate && `${startDate} - ${endDate}`;
+  const reportDate =
+    startDate && endDate && `${new Date(startDate).toISOString()} - ${new Date(endDate).toISOString()}`;
   const title = `Laporan Transaksi Pembelian ${reportDate}`;
 
   const wb = new Workbook();
@@ -155,6 +163,8 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
     'Kode PO',
     'Tanggal Pembelian',
     'Supplier',
+    'Sub Total',
+    'Potong Piutang',
     'Grand Total',
     'Item',
     'Status',
@@ -189,6 +199,8 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
       po.code,
       po.purchaseDate,
       po.supplierName,
+      'Rp ' + formatToReadableNumber(po.subTotal),
+      'Rp ' + formatToReadableNumber(po.appliedReceivables),
       'Rp ' + formatToReadableNumber(po.grandTotal),
       po.totalItem,
       po.status,
@@ -211,7 +223,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
         };
       }
 
-      if (colNum < 7) {
+      if (colNum < 9) {
         cell.border = {
           top: { style: 'thin' },
           bottom: { style: 'thin' },
@@ -220,7 +232,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
         };
       }
 
-      if (colNum == 5) {
+      if (colNum == 7) {
         cell.alignment = {
           horizontal: 'center',
           vertical: 'middle',
@@ -228,7 +240,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
       }
 
       // border for the rightmost side of table
-      if (colNum == 10) {
+      if (colNum == 12) {
         cell.border = {
           right: { style: 'thin' },
         };
@@ -238,6 +250,8 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
     // detail rows
     po.detail.forEach((detail: any, j: number) => {
       ws.addRow([
+        '',
+        '',
         '',
         '',
         '',
@@ -263,7 +277,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
           };
         }
 
-        if (colNum >= 7) {
+        if (colNum >= 9) {
           cell.border = {
             top: { style: 'thin' },
             bottom: { style: 'thin' },
@@ -272,7 +286,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
           };
         }
         // border for the bottom of table
-        else if (colNum < 7 && i == data.length - 1 && j == po.detail.length - 1) {
+        else if (colNum < 9 && i == data.length - 1 && j == po.detail.length - 1) {
           cell.border = {
             bottom: { style: 'thin' },
           };
@@ -285,12 +299,15 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
   ws.getColumn(2).width = 20;
   ws.getColumn(3).width = 25;
   ws.getColumn(4).width = 15;
-  ws.getColumn(5).width = 7;
+  ws.getColumn(5).width = 17;
   ws.getColumn(6).width = 15;
-  ws.getColumn(7).width = 30;
+  ws.getColumn(7).width = 7;
   ws.getColumn(8).width = 15;
-  ws.getColumn(9).width = 15;
+  ws.getColumn(9).width = 30;
+  // detail
   ws.getColumn(10).width = 15;
+  ws.getColumn(11).width = 15;
+  ws.getColumn(12).width = 15;
 
   return await wb.xlsx.writeBuffer();
 }

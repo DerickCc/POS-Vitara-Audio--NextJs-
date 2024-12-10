@@ -104,12 +104,31 @@ export const cancelSo = async (id: string): Promise<string> => {
   }
 };
 
-// // DELETE
-// export const deleteSo = async (id: string): Promise<string> => {
-//   try {
-//     const response = await apiFetch(`/api/sales-orders/${id}`, { method: 'DELETE' });
-//     return response.message;
-//   } catch (e) {
-//     throw (e + '');
-//   }
-// };
+// EXCEL
+export const exportSo = async ({
+  sortColumn,
+  sortOrder,
+  filters,
+}: {
+  sortColumn: string | null;
+  sortOrder: string | null;
+  filters: object;
+}): Promise<void> => {
+  try {
+    const blob = await apiFetch(
+      `/api/sales-orders/export${toQueryString({ sortColumn, sortOrder, ...filters })}`,
+      { method: 'GET' },
+      'blob'
+    );
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'LaporanTransaksiPenjualan.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (e) {
+    throw e + '';
+  }
+};

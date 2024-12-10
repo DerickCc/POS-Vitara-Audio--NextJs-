@@ -19,18 +19,18 @@ export async function apiFetch(url: string, options: any, responseType: 'json' |
 
   const response = await fetch(url, finalOptions);
 
-  let responseJson = null;
+  let finalResponse = null;
 
   if (responseType === 'json') {
-    responseJson = await response.json();
+    finalResponse = await response.json();
   } else if (responseType === 'blob') {
-    responseJson = await response.blob();
+    finalResponse = await response.blob();
   }
   
   // Check if response status is not OK
   if (!response.ok) {
-    throw new Error(responseJson.message || 'Terjadi Error');
+    throw new Error(finalResponse.message || 'Terjadi Error');
   }
 
-  return responseJson;
+  return finalResponse;
 }

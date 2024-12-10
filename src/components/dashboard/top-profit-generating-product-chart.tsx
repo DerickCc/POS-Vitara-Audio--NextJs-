@@ -13,45 +13,6 @@ import { BasicSelectOptions } from '@/models/global.model';
 import { topProductLimitOptions, topProductPeriodOptions } from '@/config/global-variables';
 import Spinner from '../spinner';
 
-const data = [
-  {
-    label: 'Barang A',
-    sales: 98,
-    profit: 80,
-    uom: 'mek',
-  },
-  {
-    label: 'Barang B',
-    sales: 87,
-    profit: 49,
-  },
-  {
-    label: 'Barang C',
-    sales: 50,
-    profit: 86,
-  },
-  {
-    label: 'Barang D',
-    sales: 45,
-    profit: 68,
-  },
-  {
-    label: 'Barang E',
-    sales: 25,
-    profit: 38,
-  },
-  {
-    label: 'Barang F',
-    sales: 80,
-    profit: 59,
-  },
-  {
-    label: 'Barang G',
-    sales: 87,
-    profit: 48,
-  },
-];
-
 export default function TopProfitGeneratingProductChart() {
   const [topProfitGeneratingProducts, setTopProfitGeneratingProducts] = useState<TopProfitGeneratingProductModel[]>([]);
   const [period, setPeriod] = useState<string>('all-time');

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { inter, lexendDeca } from "@/app/fonts";
-import GlobalDrawer from "@/app/shared/drawer-views/container";
 import { cn } from "@/utils/class-names";
 import NextProgress from "@/components/next-progress";
 import { siteConfig } from "@/config/site.config";
 import "@/app/globals.css";
 import { Toaster } from 'react-hot-toast';
+import { OverlayLoadingProvider } from "@/hooks/use-overlay-loading";
 
 export const metadata: Metadata = {
   title: siteConfig.title,
@@ -31,10 +31,11 @@ export default async function RootLayout({
         className={cn(inter.variable, lexendDeca.variable, "font-inter")}
       >
         <ThemeProvider>
-          <NextProgress />
-          {children}
-          <Toaster position="top-right" />
-          <GlobalDrawer />
+          <OverlayLoadingProvider>
+            <NextProgress />
+            {children}
+            <Toaster position="top-right" />
+          </OverlayLoadingProvider>
         </ThemeProvider>
       </body>
     </html>
