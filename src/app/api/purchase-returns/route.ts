@@ -127,14 +127,14 @@ export async function GET(request: Request) {
     });
     const recordsTotal = await db.purchaseReturns.count({ where });
 
-    const mappedPurchaseReturns = purchaseReturns.map((pr) => ({
+    const formattedPurchaseReturns = purchaseReturns.map((pr) => ({
       ...pr,
       supplierName: pr.PurchaseOrder.Supplier.name,
       poCode: pr.PurchaseOrder.code,
       PurchaseOrder: undefined,
     }));
 
-    return NextResponse.json({ message: 'Success', result: mappedPurchaseReturns, recordsTotal }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: formattedPurchaseReturns, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { message: 'Internal Server Error: ' + e, result: null, recordsTotal: 0 },

@@ -9,12 +9,14 @@ import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { PiPlusBold } from 'react-icons/pi';
+import { PiArrowLineUpBold, PiPlusBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 import PurchaseReturnFilter, { PurchaseReturnTableFilters } from './filter';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
-import { browsePr, cancelPr, finishPr } from '@/services/purchase-return-service';
+import { browsePr, cancelPr, exportPr, finishPr } from '@/services/purchase-return-service';
 import { columns } from './column';
+import Spinner from '@/components/spinner';
+import { useOverlayLoading } from '@/hooks/use-overlay-loading';
 
 const pageHeader = {
   title: 'Retur Pembelian',
@@ -51,6 +53,8 @@ export default function PurchaseReturnDataPage() {
     status: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const { showOverlayLoading, hideOverlayLoading } = useOverlayLoading();
   const [totalRowCount, setTotalRowCount] = useState(0);
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
 
@@ -113,6 +117,23 @@ export default function PurchaseReturnDataPage() {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      setIsExporting(true);
+      showOverlayLoading('Sedang meng-export data...');
+
+      const sortColumn = sorting.length > 0 ? sorting[0].id : null;
+      const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
+
+      await exportPr({ sortColumn, sortOrder, filters });
+    } catch (e) {
+      toast.error(e + '', { duration: 5000 });
+    } finally {
+      hideOverlayLoading();
+      setIsExporting(false);
+    }
+  };
+
   const handleFinish = async (id: string) => {
     try {
       const message = await finishPr(id);
@@ -144,6 +165,22 @@ export default function PurchaseReturnDataPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
         <div className='flex items-center gap-3 mt-4 sm:mt-0'>
+          <Button
+            variant='outline'
+            className='w-full sm:w-auto'
+            disabled={isExporting}
+            onClick={() => handleExportExcel()}
+          >
+            {isExporting ? (
+              <>
+                <Spinner className='mr-2' /> Sedang Meng-export
+              </>
+            ) : (
+              <>
+                <PiArrowLineUpBold className='me-1.5 h-[17px] w-[17px]' /> Export Excel
+              </>
+            )}
+          </Button>
           <Link href={routes.inventory.purchaseReturn.add} className='w-full sm:w-auto'>
             <Button className='w-full sm:w-auto'>
               <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />

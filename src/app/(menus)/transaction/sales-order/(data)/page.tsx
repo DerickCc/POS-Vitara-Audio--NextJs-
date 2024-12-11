@@ -118,7 +118,7 @@ export default function SalesOrderDataPage() {
   const handleExportExcel = async () => {
     try {
       setIsExporting(true);
-      showOverlayLoading();
+      showOverlayLoading('Sedang meng-export data...');
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;

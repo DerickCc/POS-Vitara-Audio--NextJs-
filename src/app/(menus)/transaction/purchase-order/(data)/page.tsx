@@ -16,6 +16,7 @@ import { browsePo, cancelPo, deletePo, exportPo, finishPo } from '@/services/pur
 import { SessionData } from '@/models/session.model';
 import { getCurrUser } from '@/utils/sessionlib';
 import Spinner from '@/components/spinner';
+import { useOverlayLoading } from '@/hooks/use-overlay-loading';
 
 const pageHeader = {
   title: 'Pembelian',
@@ -51,6 +52,7 @@ export default function PurchaseOrderDataPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const { showOverlayLoading, hideOverlayLoading } = useOverlayLoading();
   const [totalRowCount, setTotalRowCount] = useState(0);
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
 
@@ -116,6 +118,7 @@ export default function PurchaseOrderDataPage() {
   const handleExportExcel = async () => {
     try {
       setIsExporting(true);
+      showOverlayLoading('Sedang meng-export data...');
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
@@ -124,6 +127,7 @@ export default function PurchaseOrderDataPage() {
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     } finally {
+      hideOverlayLoading();
       setIsExporting(false);
     }
   };
@@ -171,7 +175,12 @@ export default function PurchaseOrderDataPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
         <div className='flex items-center gap-3 mt-4 sm:mt-0'>
-          <Button variant='outline' className='w-full sm:w-auto' disabled={isExporting} onClick={() => handleExportExcel()}>
+          <Button
+            variant='outline'
+            className='w-full sm:w-auto'
+            disabled={isExporting}
+            onClick={() => handleExportExcel()}
+          >
             {isExporting ? (
               <>
                 <Spinner className='mr-2' /> Sedang Meng-export

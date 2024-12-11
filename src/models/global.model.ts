@@ -47,15 +47,12 @@ export interface BasicFormProps<T> {
   onSubmit: (data: T) => Promise<void>;
 }
 
-export interface PagingModelWithoutFilter {
-  pageSize: number;
-  pageIndex: number;
-  sortColumn: string | null;
-  sortOrder: string | null;
-}
-
-export interface PagingModel extends PagingModelWithoutFilter {
-  filters: object;
+export interface QueryParamsModel {
+  pageSize?: number;
+  pageIndex?: number;
+  sortColumn?: string | null;
+  sortOrder?: string | null;
+  filters?: object
 }
 
 export interface PaginatedApiResponse<T> {

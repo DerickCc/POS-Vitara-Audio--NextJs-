@@ -1,4 +1,4 @@
-import { PaginatedApiResponse, PagingModel } from '@/models/global.model';
+import { PaginatedApiResponse, QueryParamsModel } from '@/models/global.model';
 import { SalesReturnModel } from '@/models/sales-return.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
@@ -9,7 +9,7 @@ export const browseSr = async ({
   sortColumn,
   sortOrder,
   filters,
-}: PagingModel): Promise<PaginatedApiResponse<SalesReturnModel>> => {
+}: QueryParamsModel): Promise<PaginatedApiResponse<SalesReturnModel>> => {
   try {
     const response = await apiFetch(
       `/api/sales-returns${toQueryString({

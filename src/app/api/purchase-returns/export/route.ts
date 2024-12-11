@@ -1,11 +1,11 @@
+import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
-import { NextResponse } from 'next/server';
 import { Workbook } from 'exceljs';
-import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
+import { NextResponse } from 'next/server';
 
-// ExportPurchaseOrder
+// ExportPurchaseReturn
 export async function GET(request: Request) {
   const session = await getSession();
 
@@ -24,6 +24,7 @@ export async function GET(request: Request) {
   const supplierId = queryParams.get('supplierId') ?? 0;
   const startDate = queryParams.get('startDate') ?? '';
   const endDate = queryParams.get('endDate') ?? '';
+  const poCode = queryParams.get('poCode') ?? '';
   const status = queryParams.get('status') ?? '';
 
   const where: any = { AND: [] };
@@ -37,14 +38,16 @@ export async function GET(request: Request) {
   }
 
   if (supplierId) {
-    where.AND.push({ supplierId });
+    where.AND.push({
+      PurchaseOrder: { supplierId },
+    });
   }
 
   if (startDate) {
     const startOfDay = new Date(startDate);
 
     where.AND.push({
-      purchaseDate: {
+      returnDate: {
         gte: startOfDay,
       },
     });
@@ -59,8 +62,19 @@ export async function GET(request: Request) {
     const endOfDay = new Date(new Date(endDate).getTime() + durationToEndOfDay);
 
     where.AND.push({
-      purchaseDate: {
+      returnDate: {
         lte: endOfDay,
+      },
+    });
+  }
+
+  if (poCode) {
+    where.AND.push({
+      PurchaseOrder: {
+        code: {
+          contains: poCode,
+          mode: 'insensitive',
+        },
       },
     });
   }
@@ -70,60 +84,87 @@ export async function GET(request: Request) {
   }
   // ----------------
 
+  let orderBy;
+  if (sortColumn === 'supplierName') {
+    orderBy = {
+      PurchaseOrder: {
+        Supplier: {
+          name: sortOrder as Prisma.SortOrder,
+        },
+      },
+    };
+  } else if (sortColumn === 'poCode') {
+    orderBy = {
+      PurchaseOrder: {
+        code: sortOrder as Prisma.SortOrder,
+      },
+    };
+  } else {
+    orderBy = { [sortColumn]: sortOrder };
+  }
+
   try {
-    const purchaseOrders = await db.purchaseOrders.findMany({
-      orderBy:
-        sortColumn === 'supplierName'
-          ? {
-              Supplier: { name: sortOrder as Prisma.SortOrder },
-            }
-          : {
-              [sortColumn]: sortOrder,
-            },
+    const purchaseReturns = await db.purchaseReturns.findMany({
+      orderBy,
       where,
       select: {
         code: true,
-        purchaseDate: true,
-        Supplier: {
-          select: { name: true },
-        },
-        subTotal: true,
-        appliedReceivables: true,
-        grandTotal: true,
-        totalItem: true,
-        status: true,
-        PurchaseOrderDetails: {
+        returnDate: true,
+        PurchaseOrder: {
           select: {
-            Product: {
-              select: { name: true, uom: true },
+            code: true,
+            Supplier: {
+              select: { name: true },
             },
-            purchasePrice: true,
-            quantity: true,
-            totalPrice: true,
+          },
+        },
+        returnType: true,
+        grandTotal: true,
+        status: true,
+        PurchaseReturnDetails: {
+          select: {
+            PurchaseOrderDetail: {
+              select: {
+                Product: {
+                  select: {
+                    name: true,
+                    uom: true,
+                  },
+                },
+              },
+            },
+            returnPrice: true,
+            returnQuantity: true,
+            reason: true,
           },
         },
       },
     });
 
-    const formattedPurchaseOrders = purchaseOrders.map((po) => {
-      const formattedPoDetails = po.PurchaseOrderDetails.map((d) => ({
+    const formattedPurchaseReturns = purchaseReturns.map((pr) => {
+      const formattedPrDetail = pr.PurchaseReturnDetails.map((d) => ({
         ...d,
-        productName: d.Product.name,
-        uom: d.Product.uom,
-        Product: undefined,
+        productName: d.PurchaseOrderDetail.Product.name,
+        uom: d.PurchaseOrderDetail.Product.uom,
+        returnPrice: Number(d.returnPrice),
+        returnQuantity: Number(d.returnQuantity),
+        totalPrice: d.returnPrice.times(d.returnQuantity),
+        PurchaseOrderDetail: undefined,
       }));
 
       return {
-        ...po,
-        purchaseDate: isoStringToReadableDate(po.purchaseDate.toISOString()),
-        details: formattedPoDetails,
-        supplierName: po.Supplier.name,
-        Supplier: undefined,
-        PurchaseOrderDetails: undefined,
+        ...pr,
+        returnDate: isoStringToReadableDate(pr.returnDate.toISOString()),
+        poCode: pr.PurchaseOrder.code,
+        supplierName: pr.PurchaseOrder.Supplier.name,
+        grandTotal: Number(pr.grandTotal),
+        details: formattedPrDetail,
+        PurchaseReturnDetails: undefined,
+        PurchaseOrder: undefined,
       };
     });
 
-    const buffer = await exportPurchaseOrdersToExcel(startDate, endDate, formattedPurchaseOrders);
+    const buffer = await exportPurchaseReturnsToExcel(startDate, endDate, formattedPurchaseReturns);
 
     return new Response(buffer, {
       status: 200,
@@ -137,10 +178,10 @@ export async function GET(request: Request) {
   }
 }
 
-async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, data: any[]) {
+async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, data: any[]) {
   const reportDate =
     startDate && endDate && `${new Date(startDate).toISOString()} - ${new Date(endDate).toISOString()}`;
-  const title = `Laporan Transaksi Pembelian ${reportDate}`;
+  const title = `Laporan Retur Pembelian ${reportDate}`;
 
   const wb = new Workbook();
   const ws = wb.addWorksheet('Laporan');
@@ -158,26 +199,27 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
 
   // headers
   const headerRow = ws.addRow([
-    'Kode PO',
-    'Tanggal Pembelian',
+    'Kode PR',
+    'Tanggal Retur',
+    'Kode PO yang Diretur',
     'Supplier',
-    'Sub Total',
-    'Potong Piutang',
+    'Tipe Retur',
     'Grand Total',
-    'Item',
     'Status',
     'Barang',
-    'Harga Beli',
+    'Harga Retur',
     'Qty',
     'Total Harga',
+    'Alasan',
   ]);
 
   headerRow.font = { bold: true, size: 12 };
   headerRow.alignment = {
     horizontal: 'center',
     vertical: 'middle',
+    wrapText: true
   };
-  headerRow.eachCell((cell) => {
+  headerRow.eachCell((cell, colNum) => {
     cell.border = {
       top: { style: 'thin' },
       bottom: { style: 'thin' },
@@ -192,16 +234,16 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
     };
   });
 
-  data.forEach((po, i) => {
+  data.forEach((pr, i) => {
     ws.addRow([
-      po.code,
-      po.purchaseDate,
-      po.supplierName,
-      'Rp ' + formatToReadableNumber(po.subTotal),
-      'Rp ' + formatToReadableNumber(po.appliedReceivables),
-      'Rp ' + formatToReadableNumber(po.grandTotal),
-      po.totalItem,
-      po.status,
+      pr.code,
+      pr.returnDate,
+      pr.poCode,
+      pr.supplierName,
+      pr.returnType,
+      'Rp ' + formatToReadableNumber(pr.grandTotal),
+      pr.status,
+      '',
       '',
       '',
       '',
@@ -221,19 +263,12 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
         };
       }
 
-      if (colNum < 9) {
+      if (colNum < 8) {
         cell.border = {
           top: { style: 'thin' },
           bottom: { style: 'thin' },
           left: { style: 'thin' },
           right: { style: 'thin' },
-        };
-      }
-
-      if (colNum == 7) {
-        cell.alignment = {
-          horizontal: 'center',
-          vertical: 'middle',
         };
       }
 
@@ -246,7 +281,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
     });
 
     // detail rows
-    po.details.forEach((detail: any, j: number) => {
+    pr.details.forEach((detail: any, j: number) => {
       ws.addRow([
         '',
         '',
@@ -255,11 +290,11 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
         '',
         '',
         '',
-        '',
         detail.productName,
-        'Rp ' + formatToReadableNumber(detail.purchasePrice),
-        detail.quantity + ' ' + detail.uom,
+        'Rp ' + formatToReadableNumber(detail.returnPrice),
+        detail.returnQuantity + ' ' + detail.uom,
         'Rp ' + formatToReadableNumber(detail.totalPrice),
+        detail.reason,
       ]).eachCell((cell, colNum) => {
         if (i % 2 == 0) {
           cell.fill = {
@@ -275,16 +310,25 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
           };
         }
 
-        if (colNum >= 9) {
+        if (colNum >= 8) {
           cell.border = {
             top: { style: 'thin' },
             bottom: { style: 'thin' },
             left: { style: 'thin' },
             right: { style: 'thin' },
           };
+
+          if (colNum === 12) {
+            cell.alignment = { wrapText: true };
+          } else {
+            cell.alignment = {
+              horizontal: 'left',
+              vertical: 'middle',
+            }
+          }
         }
         // border for the bottom of table
-        else if (colNum < 9 && i == data.length - 1 && j == po.details.length - 1) {
+        else if (colNum < 8 && i == data.length - 1 && j == pr.details.length - 1) {
           cell.border = {
             bottom: { style: 'thin' },
           };
@@ -295,17 +339,17 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
 
   ws.getColumn(1).width = 13;
   ws.getColumn(2).width = 20;
-  ws.getColumn(3).width = 25;
-  ws.getColumn(4).width = 15;
-  ws.getColumn(5).width = 17;
+  ws.getColumn(3).width = 13;
+  ws.getColumn(4).width = 25;
+  ws.getColumn(5).width = 20;
   ws.getColumn(6).width = 15;
-  ws.getColumn(7).width = 7;
-  ws.getColumn(8).width = 15;
-  ws.getColumn(9).width = 30;
+  ws.getColumn(7).width = 15;
   // detail
+  ws.getColumn(8).width = 30;
+  ws.getColumn(9).width = 15;
   ws.getColumn(10).width = 15;
   ws.getColumn(11).width = 15;
-  ws.getColumn(12).width = 15;
+  ws.getColumn(12).width = 40;
 
   return await wb.xlsx.writeBuffer();
 }

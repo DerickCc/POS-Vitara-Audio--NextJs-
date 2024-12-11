@@ -1,5 +1,5 @@
 import { IncompletePaymentModel, LowStockProductModel, OverviewMetricsResult, TopProfitGeneratingProductModel } from '@/models/dashboard.model';
-import { PaginatedApiResponse, PagingModelWithoutFilter } from '@/models/global.model';
+import { PaginatedApiResponse, QueryParamsModel } from '@/models/global.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
 // GET
@@ -17,7 +17,7 @@ export const browseIncompletePayment = async ({
   pageIndex,
   sortColumn,
   sortOrder,
-}: PagingModelWithoutFilter): Promise<PaginatedApiResponse<IncompletePaymentModel>> => {
+}: QueryParamsModel): Promise<PaginatedApiResponse<IncompletePaymentModel>> => {
   try {
     const response = await apiFetch(
       `/api/dashboard/incomplete-payments${toQueryString({
@@ -40,7 +40,7 @@ export const browseLowStockProduct = async ({
   pageIndex,
   sortColumn,
   sortOrder,
-}: PagingModelWithoutFilter): Promise<PaginatedApiResponse<LowStockProductModel>> => {
+}: QueryParamsModel): Promise<PaginatedApiResponse<LowStockProductModel>> => {
   try {
     const response = await apiFetch(
       `/api/dashboard/low-stock-products${toQueryString({
