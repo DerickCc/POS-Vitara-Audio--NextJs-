@@ -70,3 +70,24 @@ export const cancelSr = async (id: string): Promise<string> => {
     throw e + '';
   }
 };
+
+// EXCEL
+export const exportSr = async ({ sortColumn, sortOrder, filters }: QueryParamsModel): Promise<void> => {
+  try {
+    const blob = await apiFetch(
+      `/api/sales-returns/export${toQueryString({ sortColumn, sortOrder, ...filters })}`,
+      { method: 'GET' },
+      'blob'
+    );
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'LaporanReturPenjualan.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (e) {
+    throw e + '';
+  }
+};

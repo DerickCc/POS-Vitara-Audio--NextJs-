@@ -94,8 +94,8 @@ export async function GET(request: Request) {
         PaymentHistories: {
           select: { amount: true },
         },
-        CreatedBy: { 
-          select: { name: true }
+        CreatedBy: {
+          select: { name: true },
         },
         status: true,
         SalesOrderProductDetails: {
@@ -118,24 +118,24 @@ export async function GET(request: Request) {
             sellingPrice: true,
             quantity: true,
             totalPrice: true,
-          }
-        }
+          },
+        },
       },
     });
-    
+
     const formattedSalesOrders = salesOrders.map((so) => {
-      const formattedSoProductDetail = so.SalesOrderProductDetails.map((d) => ({
+      const formattedSoProductDetails = so.SalesOrderProductDetails.map((d) => ({
         ...d,
         productName: d.Product.name,
         uom: d.Product.uom,
         sellingPrice: Number(d.sellingPrice),
         quantity: Number(d.quantity),
         totalPrice: Number(d.totalPrice),
-        profit: (d.sellingPrice.minus(d.costPrice)).times(d.quantity),
+        profit: d.sellingPrice.minus(d.costPrice).times(d.quantity),
         Product: undefined,
       }));
-  
-      const formattedSoServiceDetail = so.SalesOrderServiceDetails.map((d) => ({
+
+      const formattedSoServiceDetails = so.SalesOrderServiceDetails.map((d) => ({
         ...d,
         sellingPrice: Number(d.sellingPrice),
         quantity: Number(d.quantity),
@@ -150,15 +150,15 @@ export async function GET(request: Request) {
         grandTotal: Number(so.grandTotal),
         paidAmount: so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0)),
         customerName: so.Customer.name,
-        productDetails: formattedSoProductDetail,
-        serviceDetails: formattedSoServiceDetail,
+        productDetails: formattedSoProductDetails,
+        serviceDetails: formattedSoServiceDetails,
         cashier: so.CreatedBy.name,
         Customer: undefined,
         SalesOrderProductDetails: undefined,
         SalesOrderServiceDetails: undefined,
         CreatedBy: undefined,
-      }
-    })
+      };
+    });
 
     const buffer = await exportSalesOrdersToExcel(startDate, endDate, formattedSalesOrders);
 
@@ -183,11 +183,11 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
   const ws = wb.addWorksheet('Laporan');
 
   // title
-  ws.addRow([title]).eachCell(cell => {
+  ws.addRow([title]).eachCell((cell) => {
     cell.font = {
       size: 16,
       bold: true,
-      underline: true
+      underline: true,
     };
   });
 
@@ -209,26 +209,26 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
     'Harga Jual',
     'Qty',
     'Total Harga',
-    'Keuntungan'
+    'Keuntungan',
   ]);
 
   headerRow.font = { bold: true, size: 12 };
   headerRow.alignment = {
     horizontal: 'center',
-    vertical: 'middle'
+    vertical: 'middle',
   };
-  headerRow.eachCell(cell => {
+  headerRow.eachCell((cell) => {
     cell.border = {
       top: { style: 'thin' },
       bottom: { style: 'thin' },
       left: { style: 'thin' },
-      right: { style: 'thin' }
+      right: { style: 'thin' },
     };
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FFFFFF00' },
-      bgColor: { argb: 'FF0000FF' }
+      bgColor: { argb: 'FF0000FF' },
     };
   });
 
@@ -249,19 +249,19 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
       '',
       '',
       '',
-      ''
+      '',
     ]).eachCell((cell, colNum) => {
       if (i % 2 == 0) {
         cell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: 'fff2f2f2' }
+          fgColor: { argb: 'fff2f2f2' },
         };
       } else {
         cell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: 'ffeeece1' }
+          fgColor: { argb: 'ffeeece1' },
         };
       }
 
@@ -270,13 +270,13 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
           top: { style: 'thin' },
           bottom: { style: 'thin' },
           left: { style: 'thin' },
-          right: { style: 'thin' }
+          right: { style: 'thin' },
         };
       }
       // border for the rightmost side of table
       if (colNum == 15) {
         cell.border = {
-          right: { style: 'thin' }
+          right: { style: 'thin' },
         };
       }
     });
@@ -298,19 +298,19 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
         'Rp ' + formatToReadableNumber(detail.sellingPrice),
         detail.quantity + ' ' + detail.uom,
         'Rp ' + formatToReadableNumber(detail.totalPrice),
-        'Rp ' + formatToReadableNumber(detail.profit)
+        'Rp ' + formatToReadableNumber(detail.profit),
       ]).eachCell((cell, colNum) => {
         if (i % 2 == 0) {
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'fff2f2f2' }
+            fgColor: { argb: 'fff2f2f2' },
           };
         } else {
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'ffeeece1' }
+            fgColor: { argb: 'ffeeece1' },
           };
         }
 
@@ -319,20 +319,25 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
             top: { style: 'thin' },
             bottom: { style: 'thin' },
             left: { style: 'thin' },
-            right: { style: 'thin' }
+            right: { style: 'thin' },
           };
 
           if (colNum === 13) {
-            cell.alignment = { 
+            cell.alignment = {
               horizontal: 'left',
               vertical: 'middle',
-            }
+            };
           }
         }
         // border for the bottom of table
-        else if (colNum < 11 && i == data.length - 1 && j == so.productDetails.length - 1 && so.serviceDetails.length == 0) {
+        else if (
+          colNum < 11 &&
+          i == data.length - 1 &&
+          j == so.productDetails.length - 1 &&
+          so.serviceDetails.length == 0
+        ) {
           cell.border = {
-            bottom: { style: 'thin' }
+            bottom: { style: 'thin' },
           };
         }
       });
@@ -355,19 +360,19 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
         'Rp ' + formatToReadableNumber(detail.sellingPrice),
         detail.quantity,
         'Rp ' + formatToReadableNumber(detail.totalPrice),
-        'Rp ' + formatToReadableNumber(detail.totalPrice)
+        'Rp ' + formatToReadableNumber(detail.totalPrice),
       ]).eachCell((cell, colNum) => {
         if (i % 2 == 0) {
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'fff2f2f2' }
+            fgColor: { argb: 'fff2f2f2' },
           };
         } else {
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'ffeeece1' }
+            fgColor: { argb: 'ffeeece1' },
           };
         }
 
@@ -376,20 +381,20 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
             top: { style: 'thin' },
             bottom: { style: 'thin' },
             left: { style: 'thin' },
-            right: { style: 'thin' }
+            right: { style: 'thin' },
           };
 
           if (colNum === 13) {
-            cell.alignment = { 
+            cell.alignment = {
               horizontal: 'left',
               vertical: 'middle',
-            }
+            };
           }
         }
         // border for the bottom of table
         else if (colNum < 11 && i == data.length - 1 && k == so.serviceDetails.length - 1) {
           cell.border = {
-            bottom: { style: 'thin' }
+            bottom: { style: 'thin' },
           };
         }
       });

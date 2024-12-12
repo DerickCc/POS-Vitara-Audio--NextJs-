@@ -1,11 +1,11 @@
+import { Workbook } from 'exceljs';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
-import { Workbook } from 'exceljs';
 import { NextResponse } from 'next/server';
+import { Decimal } from '@prisma/client/runtime/library';
 
-// ExportPurchaseReturn
 export async function GET(request: Request) {
   const session = await getSession();
 
@@ -21,10 +21,10 @@ export async function GET(request: Request) {
 
   // filters
   const code = queryParams.get('code') ?? '';
-  const supplierId = queryParams.get('supplierId') ?? 0;
+  const customerId = queryParams.get('customerId') ?? 0;
   const startDate = queryParams.get('startDate') ?? '';
   const endDate = queryParams.get('endDate') ?? '';
-  const poCode = queryParams.get('poCode') ?? '';
+  const soCode = queryParams.get('soCode') ?? '';
   const status = queryParams.get('status') ?? '';
 
   const where: any = { AND: [] };
@@ -37,9 +37,9 @@ export async function GET(request: Request) {
     });
   }
 
-  if (supplierId) {
+  if (customerId) {
     where.AND.push({
-      PurchaseOrder: { supplierId },
+      SalesOrder: { customerId },
     });
   }
 
@@ -68,11 +68,11 @@ export async function GET(request: Request) {
     });
   }
 
-  if (poCode) {
+  if (soCode) {
     where.AND.push({
-      PurchaseOrder: {
+      SalesOrder: {
         code: {
-          contains: poCode,
+          contains: soCode,
           mode: 'insensitive',
         },
       },
@@ -85,17 +85,17 @@ export async function GET(request: Request) {
   // ----------------
 
   let orderBy;
-  if (sortColumn === 'supplierName') {
+  if (sortColumn === 'customerName') {
     orderBy = {
-      PurchaseOrder: {
-        Supplier: {
+      SalesOrder: {
+        Customer: {
           name: sortOrder as Prisma.SortOrder,
         },
       },
     };
-  } else if (sortColumn === 'poCode') {
+  } else if (sortColumn === 'soCode') {
     orderBy = {
-      PurchaseOrder: {
+      SalesOrder: {
         code: sortOrder as Prisma.SortOrder,
       },
     };
@@ -104,26 +104,25 @@ export async function GET(request: Request) {
   }
 
   try {
-    const purchaseReturns = await db.purchaseReturns.findMany({
+    const salesReturns = await db.salesReturns.findMany({
       orderBy,
       where,
       select: {
         code: true,
         returnDate: true,
-        PurchaseOrder: {
+        SalesOrder: {
           select: {
             code: true,
-            Supplier: {
+            Customer: {
               select: { name: true },
             },
           },
         },
-        returnType: true,
         grandTotal: true,
         status: true,
-        PurchaseReturnDetails: {
+        SalesReturnProductDetails: {
           select: {
-            PurchaseOrderDetail: {
+            SalesOrderProductDetail: {
               select: {
                 Product: {
                   select: {
@@ -138,39 +137,53 @@ export async function GET(request: Request) {
             reason: true,
           },
         },
+        SalesReturnServiceDetails: {
+          select: {
+            serviceName: true,
+            returnQuantity: true,
+            reason: true,
+          },
+        },
       },
     });
 
-    const formattedPurchaseReturns = purchaseReturns.map((pr) => {
-      const formattedPrDetail = pr.PurchaseReturnDetails.map((d) => ({
+    const formattedSalesReturns = salesReturns.map((sr) => {
+      const formattedSrProductDetails = sr.SalesReturnProductDetails.map((d) => ({
         ...d,
-        productName: d.PurchaseOrderDetail.Product.name,
-        uom: d.PurchaseOrderDetail.Product.uom,
+        productName: d.SalesOrderProductDetail.Product.name,
+        uom: d.SalesOrderProductDetail.Product.uom,
         returnPrice: Number(d.returnPrice),
         returnQuantity: Number(d.returnQuantity),
         totalPrice: d.returnPrice.times(d.returnQuantity),
-        PurchaseOrderDetail: undefined,
+        SalesOrderProductDetail: undefined,
+      }));
+
+      const formattedSrServiceDetails = sr.SalesReturnServiceDetails.map((d) => ({
+        ...d,
+        returnQuantity: Number(d.returnQuantity),
       }));
 
       return {
-        ...pr,
-        returnDate: isoStringToReadableDate(pr.returnDate.toISOString()),
-        poCode: pr.PurchaseOrder.code,
-        supplierName: pr.PurchaseOrder.Supplier.name,
-        grandTotal: Number(pr.grandTotal),
-        details: formattedPrDetail,
-        PurchaseReturnDetails: undefined,
-        PurchaseOrder: undefined,
+        ...sr,
+        returnDate: isoStringToReadableDate(sr.returnDate.toISOString()),
+        soCode: sr.SalesOrder.code,
+        customerName: sr.SalesOrder.Customer.name,
+        grandTotal: Number(sr.grandTotal),
+        productDetails: formattedSrProductDetails,
+        serviceDetails: formattedSrServiceDetails,
+        SalesReturnProductDetails: undefined,
+        SalesReturnServiceDetails: undefined,
+        SalesOrder: undefined,
       };
     });
 
-    const buffer = await exportPurchaseReturnsToExcel(startDate, endDate, formattedPurchaseReturns);
+    const buffer = await exportSalesReturnsToExcel(startDate, endDate, formattedSalesReturns);
 
     return new Response(buffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="LaporanTransaksiPembelian.xlsx"`,
+        'Content-Disposition': `attachment; filename="LaporanReturPenjualan.xlsx"`,
       },
     });
   } catch (e) {
@@ -178,10 +191,10 @@ export async function GET(request: Request) {
   }
 }
 
-async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, data: any[]) {
+async function exportSalesReturnsToExcel(startDate: string, endDate: string, data: any[]) {
   const reportDate =
     startDate && endDate && `${new Date(startDate).toISOString()} - ${new Date(endDate).toISOString()}`;
-  const title = `Laporan Retur Pembelian ${reportDate}`;
+  const title = `Laporan Transaksi Penjualan ${reportDate}`;
 
   const wb = new Workbook();
   const ws = wb.addWorksheet('Laporan');
@@ -199,14 +212,13 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
 
   // headers
   const headerRow = ws.addRow([
-    'Kode PR',
+    'Kode SR',
     'Tanggal Retur',
-    'Kode PO yang Diretur',
-    'Supplier',
-    'Tipe Retur',
+    'No. Invoice yang Diretur',
+    'Pelanggan',
     'Grand Total',
     'Status',
-    'Barang',
+    'Barang / Jasa',
     'Harga Retur',
     'Qty',
     'Total Harga',
@@ -217,9 +229,8 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
   headerRow.alignment = {
     horizontal: 'center',
     vertical: 'middle',
-    wrapText: true,
   };
-  headerRow.eachCell((cell, colNum) => {
+  headerRow.eachCell((cell) => {
     cell.border = {
       top: { style: 'thin' },
       bottom: { style: 'thin' },
@@ -234,15 +245,15 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
     };
   });
 
-  data.forEach((pr, i) => {
+  data.forEach((sr, i) => {
+    // sr row
     ws.addRow([
-      pr.code,
-      pr.returnDate,
-      pr.poCode,
-      pr.supplierName,
-      pr.returnType,
-      'Rp ' + formatToReadableNumber(pr.grandTotal),
-      pr.status,
+      sr.code,
+      sr.returnDate,
+      sr.soCode,
+      sr.customerName,
+      'Rp ' + formatToReadableNumber(sr.grandTotal),
+      sr.status,
       '',
       '',
       '',
@@ -263,7 +274,7 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
         };
       }
 
-      if (colNum < 8) {
+      if (colNum < 7) {
         cell.border = {
           top: { style: 'thin' },
           bottom: { style: 'thin' },
@@ -271,7 +282,6 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
           right: { style: 'thin' },
         };
       }
-
       // border for the rightmost side of table
       if (colNum == 12) {
         cell.border = {
@@ -280,10 +290,9 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
       }
     });
 
-    // detail rows
-    pr.details.forEach((detail: any, j: number) => {
+    // product detail rows
+    sr.productDetails.forEach((detail: any, j: number) => {
       ws.addRow([
-        '',
         '',
         '',
         '',
@@ -310,7 +319,7 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
           };
         }
 
-        if (colNum >= 8) {
+        if (colNum >= 7) {
           cell.border = {
             top: { style: 'thin' },
             bottom: { style: 'thin' },
@@ -325,12 +334,59 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
           };
         }
         // border for the bottom of table
-        else if (colNum < 8 && i == data.length - 1 && j == pr.details.length - 1) {
+        else if (
+          colNum < 11 &&
+          i == data.length - 1 &&
+          j == sr.productDetails.length - 1 &&
+          sr.serviceDetails.length == 0
+        ) {
           cell.border = {
             bottom: { style: 'thin' },
           };
         }
       });
+    });
+
+    // service detail rows
+    sr.serviceDetails.forEach((detail: any, k: number) => {
+      ws.addRow(['', '', '', '', '', '', detail.serviceName, '-', detail.returnQuantity, '-', detail.reason]).eachCell(
+        (cell, colNum) => {
+          if (i % 2 == 0) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'fff2f2f2' },
+            };
+          } else {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'ffeeece1' },
+            };
+          }
+
+          if (colNum >= 7) {
+            cell.border = {
+              top: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+
+            cell.alignment = {
+              wrapText: true,
+              horizontal: 'left',
+              vertical: 'middle',
+            };
+          }
+          // border for the bottom of table
+          else if (colNum < 11 && i == data.length - 1 && k == sr.serviceDetails.length - 1) {
+            cell.border = {
+              bottom: { style: 'thin' },
+            };
+          }
+        }
+      );
     });
   });
 
@@ -338,15 +394,14 @@ async function exportPurchaseReturnsToExcel(startDate: string, endDate: string, 
   ws.getColumn(2).width = 20;
   ws.getColumn(3).width = 15;
   ws.getColumn(4).width = 25;
-  ws.getColumn(5).width = 20;
+  ws.getColumn(5).width = 15;
   ws.getColumn(6).width = 15;
-  ws.getColumn(7).width = 15;
   // detail
-  ws.getColumn(8).width = 30;
+  ws.getColumn(7).width = 30;
+  ws.getColumn(8).width = 15;
   ws.getColumn(9).width = 15;
   ws.getColumn(10).width = 15;
-  ws.getColumn(11).width = 15;
-  ws.getColumn(12).width = 40;
+  ws.getColumn(11).width = 40;
 
   return await wb.xlsx.writeBuffer();
 }
