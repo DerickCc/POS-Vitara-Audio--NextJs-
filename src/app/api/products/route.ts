@@ -1,4 +1,4 @@
-import { ProductModel, ProductSchema } from '@/models/product.model';
+import { ProductSchema } from '@/models/product.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';

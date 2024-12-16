@@ -37,14 +37,24 @@ export const getProductById = async (id: string): Promise<ProductModel> => {
   }
 };
 
-export const getProductCurrPriceById = async (id: string): Promise<ProductCurrPriceModel> => {
+// last bought (supplier) or sold price (customer)
+export const getProductLastPriceById = async ({productId, supOrCusId, type}: {productId: string, supOrCusId: string, type: 'supplier' | 'customer'}): Promise<number> => {
   try {
-    const response = await apiFetch(`/api/products/${id}/current-price`, { method: 'GET'});
-    return response.result
+    const response = await apiFetch(`/api/products/${productId}/last-price${toQueryString({ type, supOrCusId })}`, { method: 'GET' });
+    return response.result;
   } catch (e) {
     throw e + '';
   }
-}
+};
+
+export const getProductCurrCostPriceById = async (id: string): Promise<ProductCurrPriceModel> => {
+  try {
+    const response = await apiFetch(`/api/products/${id}/current-cost-price`, { method: 'GET' });
+    return response.result;
+  } catch (e) {
+    throw e + '';
+  }
+};
 
 export const searchProduct = async (name?: string): Promise<SearchProductModel[]> => {
   try {

@@ -88,6 +88,7 @@ export default function SalesOrderForm({
   const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
   const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
+  const selectedCustomer = watch('customerId');
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
   const [totalProductSoldAmount, setTotalProductSoldAmount] = useState(0);
@@ -695,6 +696,7 @@ export default function SalesOrderForm({
                               size='sm'
                               aria-label='add'
                               className='cursor-pointer'
+                              disabled={!selectedCustomer}
                               onClick={() => appendProductDetail(new SalesOrderProductDetailModel())}
                             >
                               <PiPlusBold className='h-4 w-4' />

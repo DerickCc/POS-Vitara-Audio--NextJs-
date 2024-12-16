@@ -2,7 +2,7 @@ import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
-// GetProductCurrPriceyId
+// GetProductCurrCostPriceyId
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 

@@ -13,7 +13,7 @@ import {
 } from '@/models/sales-return-product-detail.model';
 import { SalesReturnServiceDetailModel } from '@/models/sales-return-service-detail.model';
 import { SalesReturnModel, SalesReturnSchema, SearchSalesOrderModel } from '@/models/sales-return.model';
-import { getProductCurrPriceById } from '@/services/product-service';
+import { getProductCurrCostPriceById } from '@/services/product-service';
 import { searchSo } from '@/services/sales-order-service';
 import cn from '@/utils/class-names';
 import { isoStringToReadableDate } from '@/utils/helper-function';
@@ -151,7 +151,7 @@ export default function SalesReturnForm({
 
   const handleSrProductDetailChange = async (idx: number, sopd: SearchSalesOrderProductDetailModel) => {
     try {
-      const costPrice = (await getProductCurrPriceById(sopd.productId)).costPrice;
+      const costPrice = (await getProductCurrCostPriceById(sopd.productId)).costPrice;
 
       setValue(`productDetails.${idx}`, {
         ...getValues().productDetails[idx],
