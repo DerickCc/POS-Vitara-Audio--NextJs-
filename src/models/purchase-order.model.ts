@@ -58,7 +58,7 @@ export class PurchaseOrderModel {
     this.supplierReceivable = data.supplierReceivable || 0;
     this.appliedReceivables = data.appliedReceivables || 0;
     this.remarks = data.remarks;
-    this.details = data.details || [new PurchaseOrderDetailModel()];
+    this.details = data.details || [];
     this.totalItem = data.totalItem;
     this.subTotal = data.subTotal || 0;
     this.grandTotal = data.grandTotal || 0;

@@ -1,5 +1,6 @@
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // GetProductLastPriceyId
@@ -27,16 +28,38 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const { id: productId } = params;
 
   try {
-    const product = await db.products.findUnique({
-      where: { id: productId },
-      select: {
-        id: true,
-        name: true,
-        costPrice: true,
-      },
-    });
+    let lastPrice = new Decimal(0);
 
-    return NextResponse.json({ message: 'Success', result: 0 }, { status: 200 });
+    if (type === 'supplier') {
+      const pod = await db.purchaseOrderDetails.findFirst({
+        where: {
+          productId,
+          PurchaseOrder: {
+            supplierId: supOrCusId,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { purchasePrice: true },
+      });
+
+      lastPrice = pod?.purchasePrice || new Decimal(0);
+    } else if (type === 'customer') {
+      const sopd = await db.salesOrderProductDetails.findFirst({
+        where: {
+          productId,
+          SalesOrder: {
+            customerId: supOrCusId,
+            status: { not: 'Batal' }
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { sellingPrice: true },
+      });
+
+      lastPrice = sopd?.sellingPrice || new Decimal(0);
+    }
+
+    return NextResponse.json({ message: 'Success', result: Number(lastPrice) }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ message: 'Internal Server Error: ' + e, result: 0 }, { status: 500 });
   }

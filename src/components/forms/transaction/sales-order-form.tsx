@@ -15,7 +15,7 @@ import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detai
 import { SalesOrderServiceDetailModel } from '@/models/sales-order-service-detail';
 import { SessionData } from '@/models/session.model';
 import { searchCustomer } from '@/services/customer-service';
-import { searchProduct } from '@/services/product-service';
+import { getProductLastPriceById, searchProduct } from '@/services/product-service';
 import { isoStringToReadableDate } from '@/utils/helper-function';
 import { getCurrUser } from '@/utils/sessionlib';
 import {
@@ -88,7 +88,7 @@ export default function SalesOrderForm({
   const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
   const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
   const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
-  const selectedCustomer = watch('customerId');
+  const selectedCustomerId = watch('customerId');
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
   const [totalProductSoldAmount, setTotalProductSoldAmount] = useState(0);
@@ -154,16 +154,23 @@ export default function SalesOrderForm({
     setProductList(filteredProductList);
   };
 
-  const handleProductChange = (idx: number, product: SearchProductModel) => {
+  const handleProductChange = async (idx: number, product: SearchProductModel) => {
     setValue(`productDetails.${idx}`, {
       ...getValues().productDetails[idx],
       productName: product.name,
       oriSellingPrice: product.sellingPrice,
-      sellingPrice: product.sellingPrice,
       quantity: 0,
       uom: product.uom,
       stock: product.stock,
     });
+
+    const lastPrice = await getProductLastPriceById({
+      productId: product.id,
+      supOrCusId: selectedCustomerId,
+      type: 'customer',
+    });
+
+    setValue(`productDetails.${idx}.sellingPrice`, lastPrice || product.sellingPrice);
 
     filterSelectedProductFromList(productList, idx);
 
@@ -696,7 +703,7 @@ export default function SalesOrderForm({
                               size='sm'
                               aria-label='add'
                               className='cursor-pointer'
-                              disabled={!selectedCustomer}
+                              disabled={!selectedCustomerId}
                               onClick={() => appendProductDetail(new SalesOrderProductDetailModel())}
                             >
                               <PiPlusBold className='h-4 w-4' />

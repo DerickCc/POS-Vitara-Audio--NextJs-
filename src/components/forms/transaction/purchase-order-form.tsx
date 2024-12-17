@@ -29,7 +29,7 @@ import { PurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 import { SearchProductModel } from '@/models/product.model';
-import { searchProduct } from '@/services/product-service';
+import { getProductLastPriceById, searchProduct } from '@/services/product-service';
 import { debounce } from 'lodash';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { mapTrxStatusToColor } from '@/config/global-variables';
@@ -69,6 +69,7 @@ export default function PurchaseOrderForm({
 
   const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
   const [supplierList, setSupplierList] = useState<SearchSupplierModel[]>([]);
+  const selectedSupplierId = watch('supplierId');
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
 
@@ -129,14 +130,21 @@ export default function PurchaseOrderForm({
     setProductList(filteredProductList);
   };
 
-  const handleProductChange = (idx: number, product: SearchProductModel) => {
+  const handleProductChange = async (idx: number, product: SearchProductModel) => {
     setValue(`details.${idx}`, {
       ...getValues().details[idx],
       productName: product.name,
-      purchasePrice: product.purchasePrice,
       quantity: 0,
       uom: product.uom,
     });
+
+    const lastPrice = await getProductLastPriceById({
+      productId: product.id,
+      supOrCusId: selectedSupplierId,
+      type: 'supplier',
+    });
+
+    setValue(`details.${idx}.purchasePrice`, lastPrice || product.purchasePrice);
 
     filterSelectedProductFromList(productList, idx);
 
@@ -394,6 +402,7 @@ export default function PurchaseOrderForm({
                           size='sm'
                           aria-label='add'
                           className='cursor-pointer'
+                          disabled={!selectedSupplierId}
                           onClick={() => appendDetail(new PurchaseOrderDetailModel())}
                         >
                           <PiPlusBold className='h-4 w-4' />
