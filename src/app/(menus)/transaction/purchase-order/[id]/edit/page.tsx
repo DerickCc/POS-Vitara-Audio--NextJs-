@@ -1,6 +1,6 @@
 'use client';
 
-import PurchaseOrderForm from '@/components/forms/transaction/purchase-order-form';
+import PurchaseOrderForm from '@/components/transaction/purchase-order/purchase-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
@@ -59,11 +59,7 @@ export default function EditPurchaseOrderPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <PurchaseOrderForm
-        defaultValues={po}
-        isLoading={isLoading}
-        onSubmit={update}
-      />
+      <PurchaseOrderForm defaultValues={po} isLoading={isLoading} onSubmit={update} />
     </>
   );
 }

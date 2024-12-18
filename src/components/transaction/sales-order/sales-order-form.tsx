@@ -778,7 +778,7 @@ export default function SalesOrderForm({
                                   value={value}
                                   onChange={onChange}
                                   error={error?.message}
-                                  inputClassName={cn(isReadOnly ? readOnlyClass : '')}
+                                  inputClassName={isReadOnly ? readOnlyClass : ''}
                                   readOnly={isReadOnly}
                                 />
                               )}

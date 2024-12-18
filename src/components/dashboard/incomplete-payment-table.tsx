@@ -18,7 +18,7 @@ const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [
     size: 100,
     header: 'No. Invoice',
     cell: ({ row }) => (
-      <Link href={routes.transaction.salesOrder.view(row.original.soId)}>
+      <Link href={routes.transaction.salesOrder.detail(row.original.soId)}>
         <span className='text-primary'>{row.original.soCode}</span>
       </Link>
     ),

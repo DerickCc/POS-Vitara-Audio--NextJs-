@@ -1,6 +1,6 @@
 'use client';
 
-import UserForm from '@/components/forms/settings/user-form';
+import UserForm from '@/components/user/user-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CreateUpdateUserModel, UpdateUserSchema, UserModel } from '@/models/user.model';

@@ -1,11 +1,10 @@
 'use client';
 
-import CustomerForm from '@/components/forms/master/customer-form';
+import CustomerForm from '@/components/master/customer/customer-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CustomerModel } from '@/models/customer.model';
 import { createCustomer } from '@/services/customer-service';
-import { apiFetch } from '@/utils/api';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 

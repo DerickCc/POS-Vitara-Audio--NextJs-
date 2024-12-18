@@ -1,6 +1,6 @@
 'use client';
 
-import ProductForm from '@/components/forms/inventory/product-form';
+import ProductForm from '@/components/inventory/product/product-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { ProductModel } from '@/models/product.model';
@@ -32,7 +32,7 @@ export default function AddProductPage() {
     try {
       const message = await createProduct(payload);
       toast.success(message, { duration: 4000 });
-      
+
       router.push(routes.inventory.product.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });

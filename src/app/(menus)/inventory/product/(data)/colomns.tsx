@@ -2,7 +2,7 @@ import { routes } from '@/config/routes';
 import { formatToReadableNumber, formatToDecimal } from '@/utils/helper-function';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
-import { LuPencil } from 'react-icons/lu';
+import { LuEye, LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip, cn } from 'rizzui';
 import Image from 'next/image';
 import imgPlaceholder from '@public/image-placeholder.png';
@@ -17,6 +17,19 @@ function ActionColumn({ row, actionHandlers }: { row: Row<ProductModel>; actionH
   return (
     <>
       <div className='flex items-center justify-center gap-3'>
+        <Tooltip size='sm' content='Detail' color='invert'>
+          <Link href={routes.inventory.product.detail(row.original.id)} aria-label='ke halaman detail barang'>
+            <ActionIcon
+              as='span'
+              size='sm'
+              variant='outline'
+              className='text-blue-500 hover:border-blue-600 hover:text-blue-600'
+            >
+              <LuEye className='size-4' />
+            </ActionIcon>
+          </Link>
+        </Tooltip>
+
         <Tooltip size='sm' content='Edit' color='invert'>
           <Link href={routes.inventory.product.edit(row.original.id)} aria-label='ke halaman edit barang'>
             <ActionIcon

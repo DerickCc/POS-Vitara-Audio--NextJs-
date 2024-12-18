@@ -1,6 +1,6 @@
 'use client';
 
-import SalesOrderForm from '@/components/forms/transaction/sales-order-form';
+import SalesOrderForm from '@/components/transaction/sales-order/sales-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { SalesOrderModel } from '@/models/sales-order';

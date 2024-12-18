@@ -1,11 +1,10 @@
 'use client';
 
-import CustomerForm from '@/components/forms/master/customer-form';
+import CustomerForm from '@/components/master/customer/customer-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CustomerModel } from '@/models/customer.model';
 import { getCustomerById, updateCustomer } from '@/services/customer-service';
-import { apiFetch } from '@/utils/api';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

@@ -1,6 +1,6 @@
 'use client';
 
-import UserForm from '@/components/forms/settings/user-form';
+import UserForm from '@/components/user/user-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CreateUpdateUserModel, CreateUserSchema } from '@/models/user.model';
@@ -32,7 +32,7 @@ export default function AddUserPage() {
     try {
       const message = await createUser(payload);
       toast.success(message, { duration: 4000 });
-      
+
       router.push(routes.settings.user.data);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });

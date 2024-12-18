@@ -28,7 +28,7 @@ function ActionColumn({
         {/* detail */}
         <Tooltip size='sm' content='Detail' color='invert'>
           <Link
-            href={routes.inventory.salesReturn.view(row.original.id)}
+            href={routes.inventory.salesReturn.detail(row.original.id)}
             aria-label='ke halaman detail retur penjualan'
           >
             <ActionIcon

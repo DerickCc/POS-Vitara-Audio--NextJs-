@@ -4,11 +4,13 @@ export const routes = {
     supplier: {
       data: '/master/supplier',
       add: '/master/supplier/add',
+      detail: (id: string) => `/master/supplier/${id}/detail`,
       edit: (id: string) => `/master/supplier/${id}/edit`,
     },
     customer: {
       data: '/master/customer',
       add: '/master/customer/add',
+      detail: (id: string) => `/master/customer/${id}/detail`,
       edit: (id: string) => `/master/customer/${id}/edit`,
     },
   },
@@ -16,18 +18,19 @@ export const routes = {
     product: {
       data: '/inventory/product',
       add: '/inventory/product/add',
+      detail: (id: string) => `/inventory/product/${id}/detail`,
       edit: (id: string) => `/inventory/product/${id}/edit`,
     },
     purchaseReturn: {
       data: '/inventory/purchase-return',
       add: '/inventory/purchase-return/add',
-      view: (id: string) => `/inventory/purchase-return/${id}/view`,
+      detail: (id: string) => `/inventory/purchase-return/${id}/detail`,
       edit: (id: string) => `/inventory/purchase-return/${id}/edit`
     },
     salesReturn: {
       data: '/inventory/sales-return',
       add: '/inventory/sales-return/add',
-      view: (id: string) => `/inventory/sales-return/${id}/view`,
+      detail: (id: string) => `/inventory/sales-return/${id}/detail`,
       edit: (id: string) => `/inventory/sales-return/${id}/edit`
     },
   },
@@ -35,13 +38,13 @@ export const routes = {
     purchaseOrder: {
       data: '/transaction/purchase-order',
       add: '/transaction/purchase-order/add',
-      view: (id: string) => `/transaction/purchase-order/${id}/view`,
+      detail: (id: string) => `/transaction/purchase-order/${id}/detail`,
       edit: (id: string) => `/transaction/purchase-order/${id}/edit`
     },
     salesOrder: {
       data: '/transaction/sales-order',
       add: '/transaction/sales-order/add',
-      view: (id: string) => `/transaction/sales-order/${id}/view`,
+      detail: (id: string) => `/transaction/sales-order/${id}/detail`,
       edit: (id: string) => `/transaction/sales-order/${id}/edit`
     },
   },

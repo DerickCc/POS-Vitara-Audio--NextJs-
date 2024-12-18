@@ -1,6 +1,6 @@
 'use client';
 
-import PurchaseReturnForm from '@/components/forms/inventory/purchase-return-form';
+import PurchaseReturnForm from '@/components/inventory/purchase-return/purchase-return-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
@@ -23,7 +23,7 @@ const pageHeader = {
   ],
 };
 
-export default function ViewPurchaseReturnPage() {
+export default function DetailPurchaseReturnPage() {
   const { id } = useParams<{ id: string }>();
   const [pr, setPr] = useState<PurchaseReturnModel>(new PurchaseReturnModel());
   const [isLoading, setIsLoading] = useState(true);
@@ -47,12 +47,7 @@ export default function ViewPurchaseReturnPage() {
     <>
       <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
 
-      <PurchaseReturnForm
-        defaultValues={pr}
-        isReadOnly={true}
-        isLoading={isLoading}
-        onSubmit={async (payload: PurchaseReturnModel) => {}}
-      />
+      <PurchaseReturnForm defaultValues={pr} isReadOnly={true} isLoading={isLoading} onSubmit={async () => {}} />
     </>
   );
 }

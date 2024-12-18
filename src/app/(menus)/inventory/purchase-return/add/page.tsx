@@ -1,6 +1,6 @@
 'use client';
 
-import PurchaseReturnForm from '@/components/forms/inventory/purchase-return-form';
+import PurchaseReturnForm from '@/components/inventory/purchase-return/purchase-return-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';

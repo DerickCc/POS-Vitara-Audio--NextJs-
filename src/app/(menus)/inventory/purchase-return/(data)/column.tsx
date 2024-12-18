@@ -35,7 +35,7 @@ function ActionColumn({
 
         <Dropdown.Menu style={{ fontSize: 15 }}>
           {/* detail */}
-          <Link href={routes.inventory.purchaseReturn.view(row.original.id)}>
+          <Link href={routes.inventory.purchaseReturn.detail(row.original.id)}>
             <Dropdown.Item>
               <LuEye className='text-blue-500 w-5 h-5 cursor-pointer mr-3' /> Detail
             </Dropdown.Item>

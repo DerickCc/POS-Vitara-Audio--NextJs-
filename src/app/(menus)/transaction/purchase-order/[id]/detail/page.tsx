@@ -1,6 +1,6 @@
 'use client';
 
-import PurchaseOrderForm from '@/components/forms/transaction/purchase-order-form';
+import PurchaseOrderForm from '@/components/transaction/purchase-order/purchase-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
@@ -23,7 +23,7 @@ const pageHeader = {
   ],
 };
 
-export default function ViewPurchaseOrderPage() {
+export default function DetailPurchaseOrderPage() {
   const { id } = useParams<{ id: string }>();
   const [po, setPo] = useState<PurchaseOrderModel>(new PurchaseOrderModel());
   const [isLoading, setIsLoading] = useState(true);
@@ -45,14 +45,9 @@ export default function ViewPurchaseOrderPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
-      <PurchaseOrderForm
-        defaultValues={po}
-        isReadOnly={true}
-        isLoading={isLoading}
-        onSubmit={async (payload: PurchaseOrderModel) => {}}
-      />
+      <PurchaseOrderForm defaultValues={po} isReadOnly={true} isLoading={isLoading} onSubmit={async () => {}} />
     </>
   );
 }

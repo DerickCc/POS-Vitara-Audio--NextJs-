@@ -1,5 +1,5 @@
 'use client';
-import SalesOrderPaymentModal from '@/components/modals/sales-order-payment-modal';
+import SalesOrderPaymentModal from '@/components/transaction/sales-order/sales-order-payment-modal';
 import React, { useState, useCallback } from 'react';
 
 interface UseSalesOrderPaymentnModalReturnType {

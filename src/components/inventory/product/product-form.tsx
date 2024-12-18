@@ -16,13 +16,18 @@ import imgPlaceholder from '@public/image-placeholder.png';
 import toast from 'react-hot-toast';
 import { BasicFormProps } from '@/models/global.model';
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
+import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
+
+interface ProductFormProps extends BasicFormProps<ProductModel> {
+  isReadOnly?: boolean;
+}
 
 export default function ProductForm({
   defaultValues = new ProductModel(),
+  isReadOnly = false,
   isLoading = false,
   onSubmit,
-}: BasicFormProps<ProductModel>) {
+}: ProductFormProps) {
   const {
     control,
     register,
@@ -40,7 +45,7 @@ export default function ProductForm({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleImageClick = () => {
-    if (fileInputRef.current) fileInputRef.current.click();
+    if (fileInputRef.current && !isReadOnly) fileInputRef.current.click();
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +124,7 @@ export default function ProductForm({
                   height={220}
                   priority
                   onClick={handleImageClick}
-                  className='cursor-pointer rounded'
+                  className={cn(!isReadOnly && 'cursor-pointer', 'rounded')}
                 />
               </div>
               {fileError && <div className='text-center text-red'>{fileError}</div>}
@@ -128,6 +133,8 @@ export default function ProductForm({
               label={<span className='required'>Nama</span>}
               placeholder='Nama'
               className='sm:col-span-3'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.name?.message}
               {...register('name')}
             />
@@ -140,8 +147,8 @@ export default function ProductForm({
                   label='Stok'
                   fieldName='stock'
                   defaultValue={value}
-                  error={error?.message}
                   readOnly={true}
+                  error={error?.message}
                 />
               )}
             />
@@ -154,6 +161,7 @@ export default function ProductForm({
                   label='Ambang Batas Restok'
                   fieldName='restockThreshold'
                   defaultValue={value}
+                  readOnly={isReadOnly}
                   error={error?.message}
                 />
               )}
@@ -161,6 +169,8 @@ export default function ProductForm({
             <Input
               label={<span className='required'>Satuan</span>}
               placeholder='Satuan'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.uom?.message}
               {...register('uom')}
             />
@@ -174,6 +184,7 @@ export default function ProductForm({
                     label='Harga Beli'
                     fieldName='purchasePrice'
                     defaultValue={value}
+                    readOnly={isReadOnly}
                     error={error?.message}
                   />
                 )}
@@ -187,6 +198,7 @@ export default function ProductForm({
                     label='Harga Jual'
                     fieldName='sellingPrice'
                     defaultValue={value}
+                    readOnly={isReadOnly}
                     error={error?.message}
                   />
                 )}
@@ -221,6 +233,8 @@ export default function ProductForm({
               label='Keterangan'
               placeholder='Keterangan'
               className='sm:col-span-4'
+              labelClassName='text-gray-600'
+              disabled={isReadOnly}
               error={errors.remarks?.message}
               {...register('remarks')}
             />
@@ -234,14 +248,16 @@ export default function ProductForm({
               </Button>
             </Link>
 
-            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
-              {isSubmitting ? (
-                <Loader variant='spinner' className='me-1.5' />
-              ) : (
-                <FaSave className='size-4 me-1.5'></FaSave>
-              )}
-              <span>Simpan</span>
-            </Button>
+            { !isReadOnly && (
+              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <Loader variant='spinner' className='me-1.5' />
+                ) : (
+                  <FaSave className='size-4 me-1.5'></FaSave>
+                )}
+                <span>Simpan</span>
+              </Button>
+            )}
           </div>
         </form>
       )}

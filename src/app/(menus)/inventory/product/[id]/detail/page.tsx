@@ -1,16 +1,17 @@
 'use client';
 
 import ProductForm from '@/components/inventory/product/product-form';
+import ProductHistoryTable from '@/components/inventory/product/product-history-table';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { ProductModel } from '@/models/product.model';
-import { getProductById, updateProduct } from '@/services/product-service';
+import { getProductById } from '@/services/product-service';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const pageHeader = {
-  title: 'Edit Barang',
+  title: 'Detail Barang',
   breadcrumb: [
     { name: 'Master' },
     {
@@ -18,27 +19,16 @@ const pageHeader = {
       name: 'Barang',
     },
     {
-      name: 'Edit Barang',
+      name: 'Detail Barang',
     },
   ],
 };
 
-export default function EditProductPage() {
+export default function DetailProductPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductModel>(new ProductModel());
   const [isLoading, setIsLoading] = useState(true);
-
-  const update = async (payload: ProductModel) => {
-    try {
-      const message = await updateProduct(id, payload);
-      toast.success(message, { duration: 4000 });
-
-      router.push(routes.inventory.product.data);
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -59,7 +49,9 @@ export default function EditProductPage() {
     <>
       <PageHeader {...pageHeader}></PageHeader>
 
-      <ProductForm defaultValues={product} isLoading={isLoading} onSubmit={update} />
+      <ProductForm defaultValues={product} isReadOnly={true} isLoading={isLoading} onSubmit={async () => {}} />
+    
+      <ProductHistoryTable/>
     </>
   );
 }

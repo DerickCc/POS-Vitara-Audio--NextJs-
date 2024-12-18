@@ -1,6 +1,6 @@
 'use client';
 
-import SalesReturnForm from '@/components/forms/inventory/sales-return-form';
+import SalesReturnForm from '@/components/inventory/sales-return/sales-return-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { SalesReturnModel } from '@/models/sales-return.model';
