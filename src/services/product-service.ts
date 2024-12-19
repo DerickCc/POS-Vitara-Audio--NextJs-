@@ -65,6 +65,15 @@ export const searchProduct = async (name?: string): Promise<SearchProductModel[]
   }
 };
 
+export const getProductHistories = async (id: string): Promise<PaginatedApiResponse<any>> => {
+  try {
+    const response = await apiFetch(`/api/products/${id}/history`, { method: 'GET' });
+    return response;
+  } catch (e) {
+    throw e + '';
+  }
+};
+
 // POST
 export const createProduct = async (payload: ProductModel): Promise<string> => {
   try {

@@ -27,6 +27,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   const { id: productId } = params;
 
+  if (!productId) {
+    return NextResponse.json({ message: 'Id barang tidak boleh null' }, { status: 400 });
+  }
+
   try {
     let lastPrice = new Decimal(0);
 
@@ -36,6 +40,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           productId,
           PurchaseOrder: {
             supplierId: supOrCusId,
+            status: { not: 'Batal' }
           },
         },
         orderBy: { createdAt: 'desc' },
