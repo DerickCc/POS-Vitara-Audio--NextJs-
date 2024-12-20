@@ -1,5 +1,5 @@
 import { PaginatedApiResponse, QueryParamsModel } from '@/models/global.model';
-import { ProductCurrPriceModel, ProductModel, SearchProductModel } from '@/models/product.model';
+import { ProductCurrPriceModel, ProductHistoryModel, ProductModel, SearchProductModel } from '@/models/product.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
 // GET
@@ -38,9 +38,19 @@ export const getProductById = async (id: string): Promise<ProductModel> => {
 };
 
 // last bought (supplier) or sold price (customer)
-export const getProductLastPriceById = async ({productId, supOrCusId, type}: {productId: string, supOrCusId: string, type: 'supplier' | 'customer'}): Promise<number> => {
+export const getProductLastPriceById = async ({
+  productId,
+  supOrCusId,
+  type,
+}: {
+  productId: string;
+  supOrCusId: string;
+  type: 'supplier' | 'customer';
+}): Promise<number> => {
   try {
-    const response = await apiFetch(`/api/products/${productId}/last-price${toQueryString({ type, supOrCusId })}`, { method: 'GET' });
+    const response = await apiFetch(`/api/products/${productId}/last-price${toQueryString({ type, supOrCusId })}`, {
+      method: 'GET',
+    });
     return response.result;
   } catch (e) {
     throw e + '';
@@ -65,9 +75,20 @@ export const searchProduct = async (name?: string): Promise<SearchProductModel[]
   }
 };
 
-export const getProductHistories = async (id: string): Promise<PaginatedApiResponse<any>> => {
+export const browseProductHistories = async ({
+  pageSize,
+  pageIndex,
+  sortColumn,
+  sortOrder,
+  filters,
+}: QueryParamsModel): Promise<PaginatedApiResponse<ProductHistoryModel>> => {
   try {
-    const response = await apiFetch(`/api/products/${id}/history`, { method: 'GET' });
+    const response = await apiFetch(
+      `/api/products/${filters?.productId}/history${toQueryString({ pageSize, pageIndex, sortColumn, sortOrder })}`,
+      {
+        method: 'GET',
+      }
+    );
     return response;
   } catch (e) {
     throw e + '';

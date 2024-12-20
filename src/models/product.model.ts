@@ -42,16 +42,10 @@ export class ProductModel {
   }
 }
 
-export class ProductCurrPriceModel {
+export interface ProductCurrPriceModel {
   id: string;
   name: string;
   costPrice: number;
-
-  constructor(data: any = {}) {
-    this.id = data.id;
-    this.name = data.name || '';
-    this.costPrice = data.costPrice || 0;
-  }
 }
 
 export interface SearchProductModel extends BasicSelectOptions {
@@ -62,4 +56,15 @@ export interface SearchProductModel extends BasicSelectOptions {
   sellingPrice: number;
   uom: string;
   stock: number;
+}
+
+export interface ProductHistoryModel {
+  date: string;
+  id: string;
+  code: string;
+  type: string;
+  supOrCus: string;
+  price: number;
+  quantity: number;
+  totalPrice: number;
 }

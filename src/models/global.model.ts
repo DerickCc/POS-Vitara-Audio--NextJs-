@@ -52,7 +52,7 @@ export interface QueryParamsModel {
   pageIndex?: number;
   sortColumn?: string | null;
   sortOrder?: string | null;
-  filters?: object
+  filters?: any
 }
 
 export interface PaginatedApiResponse<T> {

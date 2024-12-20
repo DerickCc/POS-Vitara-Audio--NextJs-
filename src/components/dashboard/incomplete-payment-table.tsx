@@ -9,7 +9,7 @@ import { ColumnDef, OnChangeFn, SortingState, createColumnHelper } from '@tansta
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { PiCashRegisterDuotone, PiMoneyDuotone } from 'react-icons/pi';
+import { PiCashRegisterDuotone } from 'react-icons/pi';
 
 const columnHelper = createColumnHelper<IncompletePaymentModel>();
 const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [

@@ -1,6 +1,6 @@
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 // GetProductHistories
@@ -20,6 +20,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ message: 'Id barang tidak boleh null' }, { status: 400 });
   }
 
+  const url = new URL(request.url);
+  const queryParams = new URLSearchParams(url.search);
+
+  const pageIndex = Number(queryParams.get('pageIndex')) ?? 0;
+  const pageSize = Number(queryParams.get('pageSize')) ?? 5;
+  const sortOrder = queryParams.get('sortOrder') ?? 'desc';
+  const sortColumn = queryParams.get('sortColumn') ?? 'createdAt';
+
+  const orderBy = { createdAt: 'desc' as Prisma.SortOrder };
+
   try {
     // Purchase Order
     const poDetails = await db.purchaseOrderDetails.findMany({
@@ -38,8 +48,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
         quantity: true,
         totalPrice: true,
       },
-      where: { productId: id },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        productId: id,
+        PurchaseOrder: {
+          status: { not: 'Batal' },
+        },
+      },
+      orderBy,
     });
 
     const formattedPoDetails = poDetails.map((d) => ({
@@ -70,8 +85,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
         quantity: true,
         totalPrice: true,
       },
-      where: { productId: id },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        productId: id,
+        SalesOrder: {
+          status: { not: 'Batal' },
+        },
+      },
+      orderBy,
     });
 
     const formattedSopDetails = sopDetails.map((d) => ({
@@ -111,8 +131,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
         PurchaseOrderDetail: {
           productId: id,
         },
+        PurchaseReturn: {
+          status: { not: 'Batal' },
+        },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
     });
 
     const formattedPrDetails = prDetails.map((d) => ({
@@ -120,13 +143,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
       id: d.prId,
       code: d.PurchaseReturn.code,
       supOrCus: d.PurchaseReturn.PurchaseOrder.Supplier.name,
-      price: 0,
-      quantity:
-        d.PurchaseReturn.status === 'Selesai' && d.PurchaseReturn.returnType === 'Penggantian Barang'
-          ? 0
-          : d.returnQuantity,
-      totalPrice: 0,
-      type: `Retur Pembelian (${d.PurchaseReturn.returnType})`,
+      price: d.PurchaseReturn.returnType === 'Penggantian Barang' ? 0 : d.returnPrice,
+      quantity: d.returnQuantity,
+      totalPrice: d.PurchaseReturn.returnType === 'Penggantian Barang' ? 0 : d.returnPrice.times(d.returnQuantity),
+      type: `Retur Pembelian (${d.PurchaseReturn.returnType}${
+        d.PurchaseReturn.returnType === 'Penggantian Barang' ? ' ' + d.PurchaseReturn.status : ''
+      })`,
     }));
 
     // Sales Return
@@ -153,8 +175,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
         SalesOrderProductDetail: {
           productId: id,
         },
+        SalesReturn: {
+          status: { not: 'Batal' },
+        },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
     });
 
     const formattedSrDetails = srDetails.map((d) => ({
@@ -173,10 +198,18 @@ export async function GET(request: Request, { params }: { params: { id: string }
       ...formattedSopDetails,
       ...formattedPrDetails,
       ...formattedSrDetails,
-    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    ].sort((a, b) => {
+      if (sortOrder === 'desc') {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      } else {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      }
+    });
+
+    const pagedProductHistories = productHistories.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
     return NextResponse.json(
-      { message: 'Success', result: productHistories, recordsTotal: productHistories.length },
+      { message: 'Success', result: pagedProductHistories, recordsTotal: productHistories.length },
       { status: 200 }
     );
   } catch (e) {
