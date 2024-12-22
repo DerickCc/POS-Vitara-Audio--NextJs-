@@ -1,3 +1,5 @@
+import { Colors } from "@/models/global.model";
+
 export const TIMEZONE = 'Asia/Jakarta';
 export const CURRENCY_CODE = 'IDR';
 export const LOCALE = 'id';
@@ -6,7 +8,7 @@ export const CURRENCY_OPTIONS = {
   fractions: 2,
 };
 
-export const mapTrxStatusToColor = {
+export const mapTrxStatusToColor: { [key: string]: Colors } = {
   'Dalam Proses': 'blue',
   'Belum Lunas': 'blue',
   Selesai: 'green',
@@ -21,16 +23,16 @@ export const pageSizeOptions = [
     label: '5',
   },
   {
-    value: 10,
-    label: '10',
+    value: 2,
+    label: '2',
   },
   {
-    value: 15,
-    label: '15',
+    value: 3,
+    label: '3',
   },
   {
-    value: 25,
-    label: '25',
+    value: 1,
+    label: '1',
   },
   {
     value: 50,
@@ -46,11 +48,11 @@ export const topProductLimitOptions = [
 ];
 
 export const topProductPeriodOptions = [
-  { label: 'Sepanjang Masa', value: 'all-time'},
-  { label: 'Tahun Ini', value: 'year'},
-  { label: 'Bulan Ini', value: 'month'},
-  { label: 'Hari Ini', value: 'day'},
-]
+  { label: 'Sepanjang Masa', value: 'all-time' },
+  { label: 'Tahun Ini', value: 'year' },
+  { label: 'Bulan Ini', value: 'month' },
+  { label: 'Hari Ini', value: 'day' },
+];
 
 export const filterOperatorOptions = [
   { label: '>=', value: 'gte' },

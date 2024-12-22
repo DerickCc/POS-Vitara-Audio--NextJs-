@@ -27,7 +27,7 @@ export const metricCardClass = `border border-muted bg-gray-0 p-4 dark:bg-gray-5
 
 export const baseBadgeClass = 'inline-flex items-center rounded-md py-1 px-3 font-medium';
 
-export const badgeColorClass = {
+export const badgeColorClass: { [key: string]: string } = {
   red: 'bg-red-100 text-red-700',
   green: 'bg-green-100 text-green-700',
   yellow: 'bg-yellow-100 text-yellow-700',
@@ -36,7 +36,7 @@ export const badgeColorClass = {
   gray: 'bg-gray-100 text-gray-700',
 };
 
-export const actionIconColorClass = {
+export const actionIconColorClass: { [key: string]: string } = {
   red: 'text-red-500 hover:border-red-600 hover:text-red-600',
   green: 'text-green-500 hover:border-green-600 hover:text-green-600',
   yellow: 'text-yellow-500 hover:border-yellow-600 hover:text-yellow-600',
@@ -47,7 +47,7 @@ export const actionIconColorClass = {
 
 export const baseButtonClass = 'hover:text-gray-100 disabled:bg-gray-400 disabled:text-gray-200';
 
-export const buttonColorClass = {
+export const buttonColorClass: { [key: string]: string } = {
   red: 'bg-red-500 hover:bg-red-700',
   green: 'bg-green-500 hover:bg-green-700',
   yellow: 'bg-yellow-500 hover:bg-yellow-600',

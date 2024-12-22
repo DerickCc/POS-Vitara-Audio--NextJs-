@@ -5,7 +5,7 @@ import { routes } from '@/config/routes';
 import { BasicFormProps } from '@/models/global.model';
 import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
+import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -14,11 +14,16 @@ import { FaSave } from 'react-icons/fa';
 import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button, Input, Loader, Textarea } from 'rizzui';
 
+interface SupplierFormProps extends BasicFormProps<SupplierModel> {
+  isReadOnly?: boolean;
+}
+
 export default function SupplierForm({
   defaultValues = new SupplierModel(),
+  isReadOnly = false,
   isLoading = false,
   onSubmit,
-}: BasicFormProps<SupplierModel>) {
+}: SupplierFormProps) {
   const {
     register,
     control,
@@ -45,18 +50,24 @@ export default function SupplierForm({
             <Input
               label={<span className='required'>Nama</span>}
               placeholder='Nama'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.name?.message}
               {...register('name')}
             />
             <Input
               label={<span className='required'>PIC</span>}
               placeholder='PIC'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.pic?.message}
               {...register('pic')}
             />
             <Input
               label='No. Telepon'
               placeholder='No. Telepon'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.phoneNo?.message}
               {...register('phoneNo')}
             />
@@ -85,6 +96,7 @@ export default function SupplierForm({
                     label='Limit Piutang'
                     fieldName='receivablesLimit'
                     defaultValue={value}
+                    readOnly={isReadOnly}
                     error={error?.message}
                   />
                 )}
@@ -95,6 +107,7 @@ export default function SupplierForm({
                 label='Alamat'
                 placeholder='Alamat'
                 className='sm:col-span-1'
+                disabled={isReadOnly}
                 error={errors.address?.message}
                 {...register('address')}
               />
@@ -102,29 +115,25 @@ export default function SupplierForm({
                 label='Keterangan'
                 placeholder='Keterangan'
                 className='sm:col-span-1'
+                disabled={isReadOnly}
                 error={errors.remarks?.message}
                 {...register('remarks')}
               />
             </div>
           </div>
 
-          <div className='flex justify-between'>
-            <Link href={routes.master.supplier.data}>
-              <Button variant='outline' className='border-2 border-gray-200'>
-                <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
-                <span>Kembali</span>
+          {!isReadOnly && (
+            <div className='flex justify-end'>
+              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <Loader variant='spinner' className='me-1.5' />
+                ) : (
+                  <FaSave className='size-4 me-1.5'></FaSave>
+                )}
+                <span>Simpan</span>
               </Button>
-            </Link>
-
-            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
-              {isSubmitting ? (
-                <Loader variant='spinner' className='me-1.5' />
-              ) : (
-                <FaSave className='size-4 me-1.5'></FaSave>
-              )}
-              <span>Simpan</span>
-            </Button>
-          </div>
+            </div>
+          )}
         </form>
       )}
     </Card>

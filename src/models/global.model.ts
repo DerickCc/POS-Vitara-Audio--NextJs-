@@ -2,8 +2,6 @@ import { ColumnDef, OnChangeFn, SortingState } from '@tanstack/react-table';
 import { Dispatch, SetStateAction } from 'react';
 
 export type Colors = 'red' | 'green' | 'yellow' | 'blue' | 'purple' | 'gray';
-export type PoPrSrStatusType = 'Dalam Proses' | 'Selesai' | 'Batal';
-export type SoStatusType = 'Belum Lunas' | 'Lunas' | 'Batal';
 
 export interface TableAction {
   label: string;

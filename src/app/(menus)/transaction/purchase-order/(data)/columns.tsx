@@ -1,5 +1,4 @@
 import { routes } from '@/config/routes';
-import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuEye, LuPencil, LuCircleSlash } from 'react-icons/lu';
@@ -174,8 +173,8 @@ export const columns = ({
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue() as PoPrSrStatusType;
-      const color = mapTrxStatusToColor[status] as Colors;
+      const status = info.getValue();
+      const color = mapTrxStatusToColor[status];
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,

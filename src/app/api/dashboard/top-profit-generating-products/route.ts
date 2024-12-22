@@ -53,7 +53,12 @@ export async function GET(request: Request) {
         SUM(sopd.quantity * (sopd.selling_price - sopd.cost_price)) AS total_profit
       FROM "public"."SalesOrderProductDetails" sopd
       JOIN "public"."Products" p ON sopd.product_id = p.id
-      ${period !== 'all-time' ? Prisma.sql`WHERE sopd.created_at::text BETWEEN ${isoStartDate} AND ${isoEndDate}` : Prisma.empty}
+      JOIN "public"."SalesOrders" so ON sopd.so_id = so.id
+      ${
+        period !== 'all-time'
+          ? Prisma.sql`WHERE sopd.created_at::text BETWEEN ${isoStartDate} AND ${isoEndDate} AND so.status != 'Batal'`
+          : Prisma.sql`WHERE so.status != 'Batal'`
+      }
       GROUP BY p.id
       ORDER BY total_profit DESC
       LIMIT ${limit}

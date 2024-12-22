@@ -1,4 +1,4 @@
-import { CustomerModel, SearchCustomerModel } from '@/models/customer.model';
+import { CustomerHistoryModel, CustomerModel, SearchCustomerModel } from '@/models/customer.model';
 import { PaginatedApiResponse, QueryParamsModel } from '@/models/global.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
@@ -41,6 +41,26 @@ export const searchCustomer = async (name?: string): Promise<SearchCustomerModel
   try {
     const response = await apiFetch(`/api/customers/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
+  } catch (e) {
+    throw e + '';
+  }
+};
+
+export const browseCustomerHistories = async ({
+  pageSize,
+  pageIndex,
+  sortColumn,
+  sortOrder,
+  filters,
+}: QueryParamsModel): Promise<PaginatedApiResponse<CustomerHistoryModel>> => {
+  try {
+    const response = await apiFetch(
+      `/api/customers/${filters?.customerId}/history${toQueryString({ pageSize, pageIndex, sortColumn, sortOrder })}`,
+      {
+        method: 'GET',
+      }
+    );
+    return response;
   } catch (e) {
     throw e + '';
   }

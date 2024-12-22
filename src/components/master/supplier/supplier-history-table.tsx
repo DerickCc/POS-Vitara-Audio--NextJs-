@@ -1,6 +1,10 @@
 import BasicTable from '@/components/tables/basic-table';
-import { ProductHistoryModel } from '@/models/product.model';
-import { browseProductHistories } from '@/services/product-service';
+import { mapTrxStatusToColor } from '@/config/global-variables';
+import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
+import { Colors } from '@/models/global.model';
+import { SupplierHistoryModel } from '@/models/supplier.model';
+import { browseSupplierHistories } from '@/services/supplier-service';
+import cn from '@/utils/class-names';
 import { formatToReadableNumber, isoStringToReadableDate, mapTrxToRoute } from '@/utils/helper-function';
 import { ColumnDef, createColumnHelper, OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
@@ -8,8 +12,8 @@ import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiFileTextDuotone } from 'react-icons/pi';
 
-const columnHelper = createColumnHelper<ProductHistoryModel>();
-const columns = (): ColumnDef<ProductHistoryModel, any>[] => [
+const columnHelper = createColumnHelper<SupplierHistoryModel>();
+const columns = (): ColumnDef<SupplierHistoryModel, any>[] => [
   columnHelper.accessor('date', {
     id: 'createdAt',
     size: 120,
@@ -19,7 +23,7 @@ const columns = (): ColumnDef<ProductHistoryModel, any>[] => [
   }),
   columnHelper.accessor('code', {
     id: 'code',
-    size: 100,
+    size: 80,
     header: 'Kode',
     cell: ({ row }) => (
       <Link href={mapTrxToRoute(row.original.type, row.original.id)}>
@@ -30,80 +34,55 @@ const columns = (): ColumnDef<ProductHistoryModel, any>[] => [
   }),
   columnHelper.accessor('type', {
     id: 'type',
-    size: 140,
-    header: () => 'Tipe',
-    cell: (info) =>
-      info.getValue().includes('Penggantian Barang') ? 'Retur Pembelian (Penggantian Barang)' : info.getValue(),
-    enableSorting: false,
-  }),
-  columnHelper.accessor('supOrCus', {
-    id: 'supOrCus',
     size: 160,
-    header: () => 'Nama',
+    header: () => 'Tipe',
     cell: (info) => info.getValue(),
     enableSorting: false,
   }),
-  columnHelper.accessor('price', {
-    id: 'price',
-    size: 130,
-    header: () => 'Harga',
-    cell: (info) => (info.getValue() === 0 ? '-' : `Rp ${formatToReadableNumber(info.getValue())}`),
-    enableSorting: false,
-  }),
-  columnHelper.accessor('quantity', {
-    id: 'quantity',
-    size: 60,
-    header: () => 'Qty',
-    cell: ({ row }) => {
-      if (row.original.type === 'Pembelian') {
-        return <span className='text-green font-bold'>+ {row.original.quantity}</span>;
-      } else {
-        if (row.original.type.includes('Penggantian Barang Selesai')) {
-          return (
-            <>
-              <span className='text-red font-bold mr-2'>- {row.original.quantity}</span>
-              <span className='text-green font-bold'>+ {row.original.quantity}</span>
-            </>
-          );
-        }
-        return <span className='text-red font-bold'>- {row.original.quantity}</span>;
-      }
+  columnHelper.accessor('status', {
+    id: 'status',
+    size: 100,
+    header: () => 'Status',
+    cell: (info) => {
+      const status = info.getValue();
+      const color = mapTrxStatusToColor[status];
+      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: false,
   }),
-  columnHelper.accessor('totalPrice', {
-    id: 'totalPrice',
+  columnHelper.accessor('grandTotal', {
+    id: 'grandTotal',
     size: 130,
-    header: () => 'Total Harga',
+    header: () => 'Grand Total',
     cell: (info) => (info.getValue() === 0 ? '-' : `Rp ${formatToReadableNumber(info.getValue())}`),
     enableSorting: false,
   }),
 ];
 
-export default function ProductHistoryTable({ productId }: { productId: string }) {
-  const [productHistories, setProductHistories] = useState<ProductHistoryModel[]>([]);
+export default function SupplierHistoryTable({ supplierId }: { supplierId: string }) {
+  const [supplierHistories, setSupplierHistories] = useState<SupplierHistoryModel[]>([]);
   const [pageSize, setPageSize] = useState(5);
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
 
-  const fetchProductHistories = useCallback(async () => {
+  const fetchSupplierHistories = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const sortColumn = sorting.length > 0 ? sorting[0].id : null;
       const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null;
 
-      const { result, recordsTotal } = await browseProductHistories({
-        filters: { productId },
+      const { result, recordsTotal } = await browseSupplierHistories({
+        filters: { supplierId },
         pageSize,
         pageIndex,
         sortColumn,
         sortOrder,
       });
 
-      setProductHistories(result);
+      setSupplierHistories(result);
       setTotalRowCount(recordsTotal);
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
@@ -113,8 +92,8 @@ export default function ProductHistoryTable({ productId }: { productId: string }
   }, [pageSize, pageIndex, sorting]);
 
   useEffect(() => {
-    fetchProductHistories();
-  }, [fetchProductHistories]);
+    fetchSupplierHistories();
+  }, [fetchSupplierHistories]);
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageIndex(0);
@@ -131,9 +110,9 @@ export default function ProductHistoryTable({ productId }: { productId: string }
   };
 
   return (
-    <BasicTable<ProductHistoryModel>
+    <BasicTable<SupplierHistoryModel>
       header={tableHeader()}
-      data={productHistories}
+      data={supplierHistories}
       columns={columns()}
       pageSize={pageSize}
       setPageSize={handlePageSizeChange}
@@ -151,7 +130,7 @@ function tableHeader() {
   return (
     <div className='m-4 flex items-center'>
       <PiFileTextDuotone className='size-6 me-2 text-primary' />
-      <h5 className='font-medium'>Riwayat Barang</h5>
+      <h5 className='font-medium'>Riwayat Supplier</h5>
     </div>
   );
 }

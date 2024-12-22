@@ -3,7 +3,7 @@ import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
-// GetProductHistories
+// BrowseProductHistories
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 

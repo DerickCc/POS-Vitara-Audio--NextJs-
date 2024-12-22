@@ -1,6 +1,5 @@
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
-import { Colors, PoPrSrStatusType } from '@/models/global.model';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
@@ -124,8 +123,8 @@ export const columns = ({
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue() as PoPrSrStatusType;
-      const color = mapTrxStatusToColor[status] as Colors;
+      const status = info.getValue();
+      const color = mapTrxStatusToColor[status];
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,

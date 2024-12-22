@@ -1,5 +1,5 @@
 import { PaginatedApiResponse, QueryParamsModel } from '@/models/global.model';
-import { SearchSupplierModel, SupplierModel } from '@/models/supplier.model';
+import { SearchSupplierModel, SupplierHistoryModel, SupplierModel } from '@/models/supplier.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
 // GET
@@ -41,6 +41,26 @@ export const searchSupplier = async (name?: string): Promise<SearchSupplierModel
   try {
     const response = await apiFetch(`/api/suppliers/search${toQueryString({ name })}`, { method: 'GET' });
     return response.result;
+  } catch (e) {
+    throw e + '';
+  }
+};
+
+export const browseSupplierHistories = async ({
+  pageSize,
+  pageIndex,
+  sortColumn,
+  sortOrder,
+  filters,
+}: QueryParamsModel): Promise<PaginatedApiResponse<SupplierHistoryModel>> => {
+  try {
+    const response = await apiFetch(
+      `/api/suppliers/${filters?.supplierId}/history${toQueryString({ pageSize, pageIndex, sortColumn, sortOrder })}`,
+      {
+        method: 'GET',
+      }
+    );
+    return response;
   } catch (e) {
     throw e + '';
   }

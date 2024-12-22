@@ -37,3 +37,12 @@ export interface SearchCustomerModel extends BasicSelectOptions {
   code: string;
   name: string;
 }
+
+export interface CustomerHistoryModel {
+  date: string;
+  id: string;
+  code: string;
+  type: string;
+  status: string;
+  grandTotal: number;
+}

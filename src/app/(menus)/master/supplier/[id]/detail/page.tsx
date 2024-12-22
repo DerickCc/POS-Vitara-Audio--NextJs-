@@ -1,54 +1,42 @@
 'use client';
 
-import CustomerForm from '@/components/master/customer/customer-form';
+import SupplierForm from '@/components/master/supplier/supplier-form';
+import SupplierHistoryTable from '@/components/master/supplier/supplier-history-table';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { CustomerModel } from '@/models/customer.model';
-import { getCustomerById, updateCustomer } from '@/services/customer-service';
+import { SupplierModel } from '@/models/supplier.model';
+import { getSupplierById } from '@/services/supplier-service';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 
 const pageHeader = {
-  title: 'Edit Pelanggan',
+  title: 'Detail Supplier',
   breadcrumb: [
     { name: 'Master' },
     {
-      href: routes.master.customer.data,
-      name: 'Pelanggan',
+      href: routes.master.supplier.data,
+      name: 'Supplier',
     },
     {
-      name: 'Edit Pelanggan',
+      name: 'Detail Supplier',
     },
   ],
 };
 
-export default function EditCustomerPage() {
-  const router = useRouter();
+export default function DetailSupplierPage() {
   const { id } = useParams<{ id: string }>();
-  const [customer, setCustomer] = useState<CustomerModel>(new CustomerModel());
+  const [supplier, setSupplier] = useState<SupplierModel>(new SupplierModel());
   const [isLoading, setIsLoading] = useState(true);
 
-  const update = async (payload: CustomerModel) => {
-    try {
-      const message = await updateCustomer(id, payload);
-      toast.success(message, { duration: 4000 });
-
-      router.push(routes.master.customer.data);
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
   useEffect(() => {
-    const fetchCustomer = async () => {
+    const fetchSupplier = async () => {
       try {
         setIsLoading(true);
-        setCustomer(await getCustomerById(id));
+        setSupplier(await getSupplierById(id));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       } finally {
@@ -56,7 +44,7 @@ export default function EditCustomerPage() {
       }
     };
 
-    fetchCustomer();
+    fetchSupplier();
   }, [id]);
 
   return (
@@ -64,14 +52,16 @@ export default function EditCustomerPage() {
       <PageHeader {...pageHeader}></PageHeader>
 
       <div className='grid gap-6'>
-        <Link href={routes.master.customer.data}>
+        <Link href={routes.master.supplier.data}>
           <Button variant='outline' className='border-2 border-gray-200'>
             <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
             <span>Kembali</span>
           </Button>
         </Link>
 
-        <CustomerForm defaultValues={customer} isLoading={isLoading} onSubmit={update} />
+        <SupplierForm defaultValues={supplier} isReadOnly={true} isLoading={isLoading} onSubmit={async () => {}} />
+
+        <SupplierHistoryTable supplierId={id} />
       </div>
     </>
   );

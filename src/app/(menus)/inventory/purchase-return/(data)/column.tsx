@@ -1,6 +1,6 @@
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
-import { Colors, PoPrSrStatusType } from '@/models/global.model';
+import { Colors } from '@/models/global.model';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
@@ -146,7 +146,7 @@ export const columns = ({
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue() as PoPrSrStatusType;
+      const status = info.getValue();
       const color = mapTrxStatusToColor[status] as Colors;
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },

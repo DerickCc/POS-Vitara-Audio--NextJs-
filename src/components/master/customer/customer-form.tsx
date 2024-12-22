@@ -11,13 +11,18 @@ import { useEffect } from 'react';
 import Spinner from '@/components/spinner';
 import { BasicFormProps } from '@/models/global.model';
 import cn from '@/utils/class-names';
-import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
+import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
+
+interface CustomerFormProps extends BasicFormProps<CustomerModel> {
+  isReadOnly?: boolean;
+}
 
 export default function CustomerForm({
   defaultValues = new CustomerModel(),
+  isReadOnly = false,
   isLoading = false,
   onSubmit,
-}: BasicFormProps<CustomerModel>) {
+}: CustomerFormProps) {
   const {
     register,
     handleSubmit,
@@ -42,18 +47,24 @@ export default function CustomerForm({
             <Input
               label={<span className='required'>Nama</span>}
               placeholder='Nama'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.name?.message}
               {...register('name')}
             />
             <Input
               label={<span className='required'>No. Plat</span>}
               placeholder='No. Plat'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.licensePlate?.message}
               {...register('licensePlate')}
             />
             <Input
               label='No. Telepon'
               placeholder='No. Telepon'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.phoneNo?.message}
               {...register('phoneNo')}
             />
@@ -61,28 +72,24 @@ export default function CustomerForm({
               label='Alamat'
               placeholder='Alamat'
               className='sm:col-span-3'
+              disabled={isReadOnly}
               error={errors.address?.message}
               {...register('address')}
             />
           </div>
 
-          <div className='flex justify-between'>
-            <Link href={routes.master.customer.data}>
-              <Button variant='outline' className='border-2 border-gray-200'>
-                <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
-                <span>Kembali</span>
+          {!isReadOnly && (
+            <div className='flex justify-end'>
+              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <Loader variant='spinner' className='me-1.5' />
+                ) : (
+                  <FaSave className='size-4 me-1.5'></FaSave>
+                )}
+                <span>Simpan</span>
               </Button>
-            </Link>
-
-            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
-              {isSubmitting ? (
-                <Loader variant='spinner' className='me-1.5' />
-              ) : (
-                <FaSave className='size-4 me-1.5'></FaSave>
-              )}
-              <span>Simpan</span>
-            </Button>
-          </div>
+            </div>
+          )}
         </form>
       )}
     </Card>

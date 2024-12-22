@@ -5,7 +5,7 @@ import { actionIconColorClass } from '@/config/tailwind-classes';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { FaRegTrashAlt } from 'react-icons/fa';
-import { LuPencil } from 'react-icons/lu';
+import { LuEye, LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip, cn } from 'rizzui';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<CustomerModel>; actionHandlers: any }) {
@@ -14,6 +14,18 @@ function ActionColumn({ row, actionHandlers }: { row: Row<CustomerModel>; action
   return (
     <>
       <div className='flex items-center justify-center gap-3'>
+        <Tooltip size='sm' content='Detail' color='invert'>
+          <Link href={routes.master.customer.detail(row.original.id)} aria-label='ke halaman detail pelanggan'>
+            <ActionIcon
+              as='span'
+              size='sm'
+              variant='outline'
+              className='text-blue-500 hover:border-blue-600 hover:text-blue-600'
+            >
+              <LuEye className='size-4' />
+            </ActionIcon>
+          </Link>
+        </Tooltip>
         <Tooltip size='sm' content='Edit' color='invert'>
           <Link href={routes.master.customer.edit(row.original.id)} aria-label='ke halaman edit pelanggan'>
             <ActionIcon

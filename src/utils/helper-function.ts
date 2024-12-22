@@ -1,4 +1,6 @@
 import { TIMEZONE } from '@/config/global-variables';
+import { routes } from '@/config/routes';
+import { Url } from 'next/dist/shared/lib/router/router';
 
 export const formatToReadableNumber = (numericValue: number): string =>
   new Intl.NumberFormat('id-ID').format(numericValue);
@@ -20,6 +22,20 @@ export const parseDecimal = (value: string): number => {
   const normalizedValue = value.replace(/\./g, '').replace(/,/g, '.');
   return parseFloat(normalizedValue) || 0;
 };
+
+export const mapTrxToRoute = (type: string, id: string): Url => {
+  if (type.includes('Retur Pembelian')) {
+    return routes.inventory.purchaseReturn.detail(id);
+  } else if (type.includes('Retur Penjualan')) {
+    return routes.inventory.salesReturn.detail(id);
+  } else if (type.includes('Pembelian')) {
+    return routes.transaction.purchaseOrder.detail(id);
+  } else if (type.includes('Penjualan')) {
+    return routes.transaction.salesOrder.detail(id);
+  } else {
+    return routes.dashboard;
+  }
+}
 
 // Date Time Stuff
 /**

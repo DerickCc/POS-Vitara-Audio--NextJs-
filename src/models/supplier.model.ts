@@ -52,3 +52,12 @@ export interface SearchSupplierModel extends BasicSelectOptions {
   name: string;
   receivables: number;
 }
+
+export interface SupplierHistoryModel {
+  date: string;
+  id: string;
+  code: string;
+  type: string;
+  status: string;
+  grandTotal: number;
+}

@@ -1,5 +1,4 @@
 'use client';
-import { Colors, SoStatusType } from '@/models/global.model';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
@@ -161,8 +160,8 @@ export const columns = ({
     size: 150,
     header: () => 'Status',
     cell: (info) => {
-      const status = info.getValue() as SoStatusType;
-      const color = mapTrxStatusToColor[status] as Colors;
+      const status = info.getValue();
+      const color = mapTrxStatusToColor[status];
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,
