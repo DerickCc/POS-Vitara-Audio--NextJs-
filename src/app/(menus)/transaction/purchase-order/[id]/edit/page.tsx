@@ -8,6 +8,9 @@ import { getPoById, updatePo } from '@/services/purchase-order-service';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { PiArrowLeftBold } from 'react-icons/pi';
+import Link from 'next/link';
+import { Button } from 'rizzui';
 
 const pageHeader = {
   title: 'Edit Pembelian',
@@ -57,9 +60,18 @@ export default function EditPurchaseOrderPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
-      <PurchaseOrderForm defaultValues={po} isLoading={isLoading} onSubmit={update} />
+      <div className='grid gap-6'>
+        <Link href={routes.transaction.purchaseOrder.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5' />
+            <span>Kembali</span>
+          </Button>
+        </Link>
+
+        <PurchaseOrderForm defaultValues={po} isLoading={isLoading} onSubmit={update} />
+      </div>
     </>
   );
 }

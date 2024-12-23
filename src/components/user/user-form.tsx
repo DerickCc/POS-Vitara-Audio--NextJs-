@@ -137,14 +137,7 @@ export default function UserForm({
               />
             </div>
 
-            <div className='flex justify-between'>
-              <Link href={routes.settings.user.data}>
-                <Button variant='outline' className='border-2 border-gray-200'>
-                  <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
-                  <span>Kembali</span>
-                </Button>
-              </Link>
-
+            <div className='flex justify-end'>
               <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />

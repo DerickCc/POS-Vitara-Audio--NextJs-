@@ -5,8 +5,11 @@ import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
 import { createPr } from '@/services/purchase-return-service';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { PiArrowLeftBold } from 'react-icons/pi';
+import { Button } from 'rizzui';
 
 const pageHeader = {
   title: 'Tambah Retur Pembelian',
@@ -39,9 +42,18 @@ export default function AddPurchaseReturnPage() {
   };
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
-      <PurchaseReturnForm onSubmit={create} />
+      <div className='grid gap-6'>
+        <Link href={routes.inventory.purchaseReturn.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5' />
+            <span>Kembali</span>
+          </Button>
+        </Link>
+        
+        <PurchaseReturnForm onSubmit={create} />
+      </div>
     </>
   );
 }

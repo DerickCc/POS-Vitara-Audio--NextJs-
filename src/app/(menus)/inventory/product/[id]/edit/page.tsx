@@ -5,9 +5,12 @@ import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { ProductModel } from '@/models/product.model';
 import { getProductById, updateProduct } from '@/services/product-service';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { PiArrowLeftBold } from 'react-icons/pi';
+import { Button } from 'rizzui';
 
 const pageHeader = {
   title: 'Edit Barang',
@@ -59,7 +62,15 @@ export default function EditProductPage() {
     <>
       <PageHeader {...pageHeader}></PageHeader>
 
-      <ProductForm defaultValues={product} isLoading={isLoading} onSubmit={update} />
+      <div className='grid gap-6'>
+        <Link href={routes.inventory.product.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
+            <span>Kembali</span>
+          </Button>
+        </Link>
+        <ProductForm defaultValues={product} isLoading={isLoading} onSubmit={update} />
+      </div>
     </>
   );
 }

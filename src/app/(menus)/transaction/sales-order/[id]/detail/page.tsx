@@ -8,6 +8,9 @@ import { getSoById } from '@/services/sales-order-service';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { Button } from 'rizzui';
+import { PiArrowLeftBold } from 'react-icons/pi';
 
 const pageHeader = {
   title: 'Detail Penjualan',
@@ -47,14 +50,18 @@ export default function DetailSalesOrderPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
-      <SalesOrderForm
-        defaultValues={so}
-        isReadOnly={true}
-        isLoading={isLoading}
-        onSubmit={async (payload: SalesOrderModel) => {}}
-      />
+      <div className='grid gap-6'>
+        <Link href={routes.transaction.salesOrder.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5' />
+            <span>Kembali</span>
+          </Button>
+        </Link>
+
+        <SalesOrderForm defaultValues={so} isReadOnly={true} isLoading={isLoading} onSubmit={async () => {}} />
+      </div>
     </>
   );
 }

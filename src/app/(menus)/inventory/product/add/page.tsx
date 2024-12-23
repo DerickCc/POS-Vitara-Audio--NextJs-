@@ -6,8 +6,11 @@ import { routes } from '@/config/routes';
 import { ProductModel } from '@/models/product.model';
 import { createProduct } from '@/services/product-service';
 import { apiFetch } from '@/utils/api';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { PiArrowLeftBold } from 'react-icons/pi';
+import { Button } from 'rizzui';
 
 const pageHeader = {
   title: 'Tambah Barang',
@@ -41,9 +44,18 @@ export default function AddProductPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
-      <ProductForm onSubmit={create} />
+      <div className='grid gap-6'>
+        <Link href={routes.inventory.product.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
+            <span>Kembali</span>
+          </Button>
+        </Link>
+
+        <ProductForm onSubmit={create} />
+      </div>
     </>
   );
 }

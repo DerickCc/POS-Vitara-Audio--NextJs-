@@ -1,8 +1,5 @@
-import { routes } from '@/config/routes';
 import { CustomerModel, CustomerSchema } from '@/models/customer.model';
-import Link from 'next/link';
 import { FaSave } from 'react-icons/fa';
-import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button, Input, Loader, Textarea } from 'rizzui';
 import Card from '../../card';
 import { useForm } from 'react-hook-form';

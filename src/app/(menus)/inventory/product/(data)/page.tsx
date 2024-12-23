@@ -109,7 +109,7 @@ export default function ProductDataPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
+      <PageHeader {...pageHeader}>
         <div className='flex items-center gap-3 mt-4 sm:mt-0'>
           <Link href={routes.inventory.product.add} className='w-full sm:w-auto'>
             <Button className='w-full sm:w-auto'>

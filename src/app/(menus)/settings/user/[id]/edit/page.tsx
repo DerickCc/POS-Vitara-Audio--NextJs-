@@ -9,6 +9,9 @@ import { apiFetch } from '@/utils/api';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { Button } from 'rizzui';
+import { PiArrowLeftBold } from 'react-icons/pi';
 
 const pageHeader = {
   title: 'Edit User',
@@ -58,14 +61,23 @@ export default function EditUserPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
-      <UserForm
-        defaultValues={new CreateUpdateUserModel(user)}
-        schema={UpdateUserSchema}
-        isLoading={isLoading}
-        onSubmit={update}
-      />
+      <div className='grid gap-6'>
+        <Link href={routes.settings.user.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
+            <span>Kembali</span>
+          </Button>
+        </Link>
+
+        <UserForm
+          defaultValues={new CreateUpdateUserModel(user)}
+          schema={UpdateUserSchema}
+          isLoading={isLoading}
+          onSubmit={update}
+        />
+      </div>
     </>
   );
 }

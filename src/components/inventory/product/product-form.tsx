@@ -240,15 +240,8 @@ export default function ProductForm({
             />
           </div>
 
-          <div className='flex justify-between'>
-            <Link href={routes.inventory.product.data}>
-              <Button variant='outline' className='border-2 border-gray-200'>
-                <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
-                <span>Kembali</span>
-              </Button>
-            </Link>
-
-            { !isReadOnly && (
+          {!isReadOnly && (
+            <div className='flex justify-end'>
               <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />
@@ -257,8 +250,8 @@ export default function ProductForm({
                 )}
                 <span>Simpan</span>
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </form>
       )}
     </Card>

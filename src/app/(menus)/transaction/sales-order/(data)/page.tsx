@@ -149,7 +149,7 @@ export default function SalesOrderDataPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}>
+      <PageHeader {...pageHeader}>
         <div className='flex items-center gap-3 mt-4 sm:mt-0'>
           <Button
             variant='outline'

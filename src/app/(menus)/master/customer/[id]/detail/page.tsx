@@ -49,7 +49,7 @@ export default function DetailCustomerPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
       <div className='grid gap-6'>
         <Link href={routes.master.customer.data}>

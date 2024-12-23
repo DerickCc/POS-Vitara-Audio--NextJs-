@@ -2,18 +2,16 @@
 
 import Card from '@/components/card';
 import Spinner from '@/components/spinner';
-import { routes } from '@/config/routes';
 import { BasicFormProps, Colors } from '@/models/global.model';
 import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
 import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
-import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
+import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui';
 import { IoCartOutline } from 'react-icons/io5';
 import {
@@ -266,7 +264,7 @@ export default function PurchaseOrderForm({
         )}
       </Card>
 
-      <Card className='px-0'>
+      <Card className='px-0 mb-6'>
         <div className='flex items-center mb-5 px-7'>
           <IoCartOutline className='size-6 mr-2' />
           <h5 className='font-medium'>Detail Barang Pembelian</h5>
@@ -456,29 +454,18 @@ export default function PurchaseOrderForm({
                 </tbody>
               </table>
             </div>
-
-            <div className='flex justify-between px-7'>
-              <Link href={routes.transaction.purchaseOrder.data}>
-                <Button variant='outline' className='border-2 border-gray-200'>
-                  <PiArrowLeftBold className='size-4 me-1.5' />
-                  <span>Kembali</span>
-                </Button>
-              </Link>
-
-              {!isReadOnly && (
-                <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <Loader variant='spinner' className='me-1.5' />
-                  ) : (
-                    <FaSave className='size-4 me-1.5' />
-                  )}
-                  <span>Simpan</span>
-                </Button>
-              )}
-            </div>
           </>
         )}
       </Card>
+
+      {!isReadOnly && (
+        <div className='flex justify-end'>
+          <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+            {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
+            <span>Simpan</span>
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

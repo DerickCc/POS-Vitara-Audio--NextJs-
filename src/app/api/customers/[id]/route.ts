@@ -1,4 +1,4 @@
-import { CustomerModel, CustomerSchema } from '@/models/customer.model';
+import { CustomerSchema } from '@/models/customer.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -6,7 +6,6 @@ import { NextResponse } from 'next/server';
 // GetCustomerById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
-
   if (!session.id) {
     return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }

@@ -459,15 +459,8 @@ export default function PurchaseReturnForm({
               </table>
             </div>
 
-            <div className='flex justify-between px-7'>
-              <Link href={routes.inventory.purchaseReturn.data}>
-                <Button variant='outline' className='border-2 border-gray-200'>
-                  <PiArrowLeftBold className='size-4 me-1.5' />
-                  <span>Kembali</span>
-                </Button>
-              </Link>
-
-              {!isReadOnly && (
+            {!isReadOnly && (
+              <div className='flex justify-end px-7'>
                 <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
                   {isSubmitting ? (
                     <Loader variant='spinner' className='me-1.5' />
@@ -476,8 +469,8 @@ export default function PurchaseReturnForm({
                   )}
                   <span>Simpan</span>
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
       </Card>

@@ -860,14 +860,7 @@ export default function SalesOrderForm({
           </Card>
         )}
 
-        <div className='flex justify-between'>
-          <Link href={routes.transaction.salesOrder.data}>
-            <Button variant='outline' className='border-2 border-gray-200'>
-              <PiArrowLeftBold className='size-4 me-1.5' />
-              <span>Kembali</span>
-            </Button>
-          </Link>
-
+        <div className='flex justify-end'>
           {/* if is create */}
           {!isReadOnly && (
             <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>

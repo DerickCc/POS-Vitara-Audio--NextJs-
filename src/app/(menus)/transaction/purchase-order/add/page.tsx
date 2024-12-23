@@ -7,6 +7,9 @@ import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { createPo } from '@/services/purchase-order-service';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { Button } from 'rizzui';
+import { PiArrowLeftBold } from 'react-icons/pi';
 
 const pageHeader = {
   title: 'Tambah Pembelian',
@@ -40,9 +43,18 @@ export default function AddPurchaseOrderPage() {
 
   return (
     <>
-      <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb}></PageHeader>
+      <PageHeader {...pageHeader}></PageHeader>
 
-      <PurchaseOrderForm onSubmit={create} />
+      <div className='grid gap-6'>
+        <Link href={routes.transaction.purchaseOrder.data}>
+          <Button variant='outline' className='border-2 border-gray-200'>
+            <PiArrowLeftBold className='size-4 me-1.5' />
+            <span>Kembali</span>
+          </Button>
+        </Link>
+
+        <PurchaseOrderForm onSubmit={create} />
+      </div>
     </>
   );
 }
