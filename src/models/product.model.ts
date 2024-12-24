@@ -52,6 +52,7 @@ export interface SearchProductModel extends BasicSelectOptions {
   id: string;
   code: string;
   name: string;
+  costPriceCode: string;
   purchasePrice: number;
   sellingPrice: number;
   uom: string;

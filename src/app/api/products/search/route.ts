@@ -41,6 +41,7 @@ export async function GET(request: Request) {
         id: true,
         code: true,
         name: true,
+        costPriceCode: true,
         purchasePrice: true,
         sellingPrice: true,
         uom: true,

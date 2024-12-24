@@ -39,6 +39,7 @@ import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
 import { mapTrxStatusToColor } from '@/config/global-variables';
+import ProductOptionTemplate from '@/components/inventory/product/product-option-template';
 
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
@@ -621,6 +622,7 @@ export default function SalesOrderForm({
                                     options={productList}
                                     displayValue={() => productName}
                                     getOptionValue={(option: SearchProductModel) => option}
+                                    getOptionDisplayValue={(option) => <ProductOptionTemplate option={option} />}
                                     searchable={true}
                                     searchByKey='name'
                                     onSearchChange={(name: string) => handleProductSearchChange(name)}
@@ -839,6 +841,7 @@ export default function SalesOrderForm({
                               size='sm'
                               aria-label='add'
                               className='cursor-pointer'
+                              disabled={!selectedCustomerId}
                               onClick={() => appendServiceDetail(new SalesOrderServiceDetailModel())}
                             >
                               <PiPlusBold className='h-4 w-4' />

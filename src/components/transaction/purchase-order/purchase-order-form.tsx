@@ -31,6 +31,7 @@ import { getProductLastPriceById, searchProduct } from '@/services/product-servi
 import { debounce } from 'lodash';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { mapTrxStatusToColor } from '@/config/global-variables';
+import ProductOptionTemplate from '@/components/inventory/product/product-option-template';
 
 interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
   isReadOnly?: boolean;
@@ -324,6 +325,7 @@ export default function PurchaseOrderForm({
                                 options={productList}
                                 displayValue={() => productName}
                                 getOptionValue={(option: SearchProductModel) => option}
+                                getOptionDisplayValue={(option) => <ProductOptionTemplate option={option} />}
                                 searchable={true}
                                 searchByKey='name'
                                 onSearchChange={(name: string) => handleProductSearchChange(name)}
