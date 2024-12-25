@@ -1,4 +1,5 @@
 import { ProductSchema } from '@/models/product.model';
+import { encodeCostPrice } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -130,6 +131,7 @@ export async function POST(request: Request) {
       data: {
         ...data,
         code: newCode,
+        costPriceCode: await encodeCostPrice(0),
         CreatedBy: {
           connect: { id: userId },
         },

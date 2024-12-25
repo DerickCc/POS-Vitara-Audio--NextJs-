@@ -1,3 +1,4 @@
+import { encodeCostPrice } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -38,13 +39,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         const totalCost = product.stock.times(product.costPrice); // total cost before added with purchase product
         const updatedStock = product.stock.plus(d.quantity); // stock after added with purchased product qty
 
-        const updatedCostPrice = totalCost.plus(d.totalPrice).div(updatedStock); // cost price calculated after purchase product
+        const updatedCostPrice = totalCost.plus(d.totalPrice).div(updatedStock).round(); // cost price calculated after purchase product
 
         return prisma.products.update({
           where: { id: d.productId },
           data: {
             stock: updatedStock,
             costPrice: updatedCostPrice,
+            costPriceCode: await encodeCostPrice(updatedCostPrice),
             UpdatedBy: {
               connect: { id: userId },
             },

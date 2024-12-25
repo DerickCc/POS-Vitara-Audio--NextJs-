@@ -1,46 +1,27 @@
 "use client";
 
-import { Title, Text, Avatar, Button, Popover } from "rizzui";
+import { Title, Text, Avatar, Popover } from "rizzui";
 import cn from "@/utils/class-names";
 // import { signOut } from 'next-auth/react';
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import LogOut from "@/app/(auth)/logout/page";
-
-// const menuItems = [
-//   {
-//     name: "Pengaturan Akun",
-//     href: '/settings/account',
-//   },
-// ];
 
 function DropdownMenu() {
   return (
     <div className="w-64 text-left rtl:text-right">
       <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
         <Avatar
-          src="https://isomorphic-furyroad.s3.amazonaws.com/public/avatars/avatar-11.webp"
+          src="/avatar-male.webp"
           name="Albert Flores"
         />
         <div className="ms-3">
           <Title as="h6" className="font-semibold">
-            Albert Flores
+            ASDDD
           </Title>
           <Text className="text-gray-600">flores@doe.io</Text>
         </div>
       </div>
-      {/* <div className="grid px-3.5 py-3.5 font-medium text-gray-700">
-        {menuItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className="group my-0.5 flex items-center rounded-md px-2.5 py-2 hover:bg-gray-100 focus:outline-none hover:dark:bg-gray-50/50"
-          >
-            {item.name}
-          </Link>
-        ))}
-      </div> */}
       <div className="border-t border-gray-300 px-3 pb-3 pt-2">
         <LogOut />
       </div>

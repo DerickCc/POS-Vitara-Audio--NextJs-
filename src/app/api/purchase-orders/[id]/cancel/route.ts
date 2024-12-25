@@ -1,4 +1,4 @@
-import { checkForRelatedRecords } from '@/utils/backend-helper-function';
+import { checkForRelatedRecords, encodeCostPrice } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -89,15 +89,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           throw new Error(`Transaksi tidak dapat dibatalkan karena stok ${product.name} akan minus`);
         }
 
-        const updatedCostPrice = existingTotalCost.minus(d.totalPrice).isZero()
+        const updatedCostPrice = existingTotalCost.minus(d.totalPrice).isZero() || updatedStock.isZero()
           ? 0
-          : existingTotalCost.minus(d.totalPrice).div(updatedStock); // cost price calculated after cancel purchase product
+          : existingTotalCost.minus(d.totalPrice).div(updatedStock).round(); // cost price calculated after cancel purchase product
 
         return prisma.products.update({
           where: { id: d.productId },
           data: {
             stock: updatedStock,
             costPrice: updatedCostPrice,
+            costPriceCode: await encodeCostPrice(updatedCostPrice),
             UpdatedBy: {
               connect: { id: userId },
             },

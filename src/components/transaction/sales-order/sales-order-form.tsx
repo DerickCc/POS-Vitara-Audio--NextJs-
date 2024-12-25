@@ -252,7 +252,7 @@ export default function SalesOrderForm({
   const handlePaidAmountChange = (paidAmount: number) => {
     const grandTotal = getValues().grandTotal;
 
-    if (paidAmount > grandTotal) {
+    if (paidAmount >= grandTotal) {
       setValue('paidAmount', grandTotal);
       setValue('paymentType', 'Lunas');
       trigger('paidAmount');

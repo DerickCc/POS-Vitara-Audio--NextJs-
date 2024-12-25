@@ -1,3 +1,4 @@
+import { checkForRelatedRecords, encodeCostPrice } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -21,7 +22,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const so = await db.salesOrders.findUnique({
       where: { id },
-      include: { SalesOrderProductDetails: true },
+      select: {
+        status: true,
+        createdAt: true,
+        SalesOrderProductDetails: {
+          select: {
+            productId: true,
+            quantity: true,
+          },
+        },
+      },
     });
 
     if (!so) {
@@ -33,76 +43,53 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     await db.$transaction(async (prisma) => {
       const cancelledProducts = so.SalesOrderProductDetails.map((d) => d.productId);
 
-      // Fetch all purchase orders that were created after the canceled sales order, is not 'batal', and contains the cancelled products
-      const affectedPurchaseOrders = await prisma.purchaseOrders.findMany({
-        where: {
-          PurchaseOrderDetails: {
-            some: {
-              productId: { in: cancelledProducts },
-            },
-          },
-          createdAt: { gt: so.createdAt },
-          status: { not: 'Batal' },
+      const entities = [
+        {
+          entity: 'purchaseOrders',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
+          relationPath: 'PurchaseOrderDetails',
         },
-        orderBy: {
-          createdAt: 'asc',
+        {
+          entity: 'salesOrders',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
+          relationPath: 'SalesOrderProductDetails',
         },
-      });
+        {
+          entity: 'purchaseReturns',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
+          relationPath: 'PurchaseReturnDetails',
+          additionalPath: 'PurchaseOrderDetail',
+        },
+        {
+          entity: 'salesReturns',
+          errorMessage:
+            'Transaksi tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
+          relationPath: 'SalesReturnProductDetails',
+          additionalPath: 'SalesOrderProductDetail',
+        },
+      ];
 
-      if (affectedPurchaseOrders.length > 0) {
-        throw new Error(
-          'Transaksi ini tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.'
+      // check if there is transaction or return that was created after the canceled purchase return, is not 'batal', and contains the cancelled products
+      for (const { entity, errorMessage, relationPath, additionalPath } of entities) {
+        await checkForRelatedRecords(
+          entity as any,
+          cancelledProducts,
+          so.createdAt,
+          errorMessage,
+          relationPath,
+          additionalPath
         );
       }
 
-      // Fetch all sales orders that were created after the canceled sales order
-      const affectedSalesOrders = await prisma.salesOrders.findMany({
-        where: {
-          SalesOrderProductDetails: {
-            some: {
-              productId: { in: cancelledProducts },
-            }
-          },
-          createdAt: { gt: so.createdAt },
-          status: { not: 'Batal' },
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-      });
-
-      if (affectedSalesOrders.length > 0) {
-        throw new Error(
-          'Transaksi ini tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.'
-        );
-      }
-
-      // update stock and costPrice of each product in details
+      // update stock of each product in details
       const adjustProductPromises = so.SalesOrderProductDetails.map(async (d) => {
-        const product = await prisma.products.findUnique({ where: { id: d.productId } });
-
-        if (!product) {
-          throw new Error('Barang yang ingin di-update tidak ditemukan');
-        }
-
-        // total cost of product in db rn
-        const existingTotalCost = product.stock.times(product.costPrice);
-
-        // total cost of the cancelled product
-        const cancelledTotalCost = d.quantity.times(d.costPrice);
-
-        const updatedTotalCost = existingTotalCost.plus(cancelledTotalCost);
-
-        // Recalculate stock by adding back the quantity sold
-        const updatedStock = product.stock.plus(d.quantity);
-
-        const updatedCostPrice = updatedTotalCost.div(updatedStock); // cost price calculated
-
         return prisma.products.update({
           where: { id: d.productId },
           data: {
-            stock: updatedStock,
-            costPrice: updatedCostPrice,
+            stock: { increment: new Decimal(d.quantity)},
             UpdatedBy: {
               connect: { id: userId },
             },
