@@ -18,7 +18,26 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const po = await db.purchaseOrders.findUnique({
       where: { id },
-      include: { PurchaseOrderDetails: true },
+      select: {
+        status: true,
+        createdAt: true,
+        supplierId: true,
+        appliedReceivables: true,
+        PurchaseOrderDetails: {
+          select: {
+            productId: true,
+            Product: {
+              select: {
+                name: true,
+                stock: true,
+                costPrice: true,
+              }
+            },
+            quantity: true,
+            totalPrice: true,
+          }
+        }
+      }
     });
 
     if (!po) {
@@ -73,20 +92,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
       // update stock and costPrice of each product in details
       const adjustProductPromises = po.PurchaseOrderDetails.map(async (d) => {
-        const product = await prisma.products.findUnique({ where: { id: d.productId } });
-
-        if (!product) {
-          throw new Error('Barang yang ingin di-update tidak ditemukan');
-        }
-
         // total cost of product in db rn
-        const existingTotalCost = product.stock.times(product.costPrice);
+        const existingTotalCost = d.Product.stock.times(d.Product.costPrice);
 
         // stock substracted added with purchased product qty
-        const updatedStock = product.stock.minus(d.quantity);
+        const updatedStock = d.Product.stock.minus(d.quantity);
 
         if (updatedStock.isNegative()) {
-          throw new Error(`Transaksi tidak dapat dibatalkan karena stok ${product.name} akan minus`);
+          throw new Error(`Transaksi tidak dapat dibatalkan karena stok ${d.Product.name} akan minus`);
         }
 
         const updatedCostPrice = existingTotalCost.minus(d.totalPrice).isZero() || updatedStock.isZero()
