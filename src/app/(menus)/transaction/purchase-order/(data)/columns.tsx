@@ -2,7 +2,7 @@ import { routes } from '@/config/routes';
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuEye, LuPencil, LuCircleSlash } from 'react-icons/lu';
-import { FiMoreVertical } from "react-icons/fi";
+import { FiMoreVertical } from 'react-icons/fi';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import cn from '@/utils/class-names';
@@ -12,17 +12,11 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
+import { useAuth } from '@/hooks/use-auth';
 
-function ActionColumn({
-  row,
-  actionHandlers,
-  role,
-}: {
-  row: Row<PurchaseOrderModel>;
-  actionHandlers: any;
-  role: string;
-}) {
+function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+  const { user } = useAuth();
 
   return (
     <>
@@ -82,7 +76,7 @@ function ActionColumn({
           )}
 
           {/* cancel */}
-          {role === 'Admin' && row.original.status === 'Selesai' && (
+          {user?.role === 'Admin' && row.original.status === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -106,18 +100,12 @@ function ActionColumn({
 
 const columnHelper = createColumnHelper<PurchaseOrderModel>();
 
-export const columns = ({
-  actionHandlers,
-  role,
-}: {
-  actionHandlers: any;
-  role: string;
-}): ColumnDef<PurchaseOrderModel, any>[] => [
+export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<PurchaseOrderModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',

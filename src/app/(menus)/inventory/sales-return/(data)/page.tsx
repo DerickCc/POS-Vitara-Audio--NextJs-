@@ -4,9 +4,7 @@ import PageHeader from '@/components/page-header';
 import BasicTable from '@/components/tables/basic-table';
 import { routes } from '@/config/routes';
 import { SalesReturnModel } from '@/models/sales-return.model';
-import { SessionData } from '@/models/session.model';
 import { browseSr, cancelSr, exportSr } from '@/services/sales-return-service';
-import { getCurrUser } from '@/utils/sessionlib';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -56,14 +54,6 @@ export default function SaleReturnDataPage() {
   const [isExporting, setIsExporting] = useState(false);
   const { showOverlayLoading, hideOverlayLoading } = useOverlayLoading();
   const [totalRowCount, setTotalRowCount] = useState(0);
-  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
-
-  useEffect(() => {
-    const fetchCurrUser = async () => {
-      setCurrUser(await getCurrUser());
-    };
-    fetchCurrUser();
-  }, []);
 
   const fetchSalesOrderReturns = useCallback(async () => {
     try {
@@ -186,7 +176,7 @@ export default function SaleReturnDataPage() {
 
       <BasicTable<SalesReturnModel>
         data={salesReturns}
-        columns={columns({ actionHandlers, role: currUser.role })}
+        columns={columns({ actionHandlers })}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}

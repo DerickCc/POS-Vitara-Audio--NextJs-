@@ -17,16 +17,6 @@ export const getSession = async () => {
   return session;
 };
 
-export const getCurrUser = async (): Promise<SessionData> => {
-  const session = await getSession();
-  return {
-    id: session.id,
-    name: session.name,
-    username: session.username,
-    role: session.role,
-  } as SessionData;
-};
-
 export const saveSession = async (user: SessionData): Promise<void> => {
   const session = await getSession();
 
@@ -37,8 +27,3 @@ export const saveSession = async (user: SessionData): Promise<void> => {
 
   await session.save();
 }
-
-export const destroySession = async () => {
-  const session = await getSession();
-  session.destroy();
-};

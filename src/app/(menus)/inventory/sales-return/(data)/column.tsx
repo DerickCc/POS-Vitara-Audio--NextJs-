@@ -9,17 +9,11 @@ import { LuCircleSlash, LuEye } from 'react-icons/lu';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
 import { SalesReturnModel } from '@/models/sales-return.model';
+import { useAuth } from '@/hooks/use-auth';
 
-function ActionColumn({
-  row,
-  actionHandlers,
-  role,
-}: {
-  row: Row<SalesReturnModel>;
-  actionHandlers: any;
-  role: string;
-}) {
+function ActionColumn({ row, actionHandlers }: { row: Row<SalesReturnModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+  const { user } = useAuth();
 
   return (
     <>
@@ -42,7 +36,7 @@ function ActionColumn({
         </Tooltip>
 
         {/* cancel */}
-        {role === 'Admin' && row.original.status === 'Selesai' && (
+        {user?.role === 'Admin' && row.original.status === 'Selesai' && (
           <Tooltip size='sm' content='Batal' color='invert'>
             <ActionIcon
               size='sm'
@@ -70,18 +64,12 @@ function ActionColumn({
 
 const columnHelper = createColumnHelper<SalesReturnModel>();
 
-export const columns = ({
-  actionHandlers,
-  role,
-}: {
-  actionHandlers: any;
-  role: string;
-}): ColumnDef<SalesReturnModel, any>[] => [
+export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<SalesReturnModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',

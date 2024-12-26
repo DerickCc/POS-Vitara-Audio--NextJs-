@@ -13,8 +13,6 @@ import { Button } from 'rizzui';
 import { PiArrowLineUpBold, PiPlusBold } from 'react-icons/pi';
 import Link from 'next/link';
 import { columns } from './columns';
-import { getCurrUser } from '@/utils/sessionlib';
-import { SessionData } from '@/models/session.model';
 import Spinner from '@/components/spinner';
 import { useOverlayLoading } from '@/hooks/use-overlay-loading';
 
@@ -54,14 +52,6 @@ export default function SalesOrderDataPage() {
   const [isExporting, setIsExporting] = useState(false);
   const { showOverlayLoading, hideOverlayLoading } = useOverlayLoading();
   const [totalRowCount, setTotalRowCount] = useState(0);
-  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
-
-  useEffect(() => {
-    const fetchCurrUser = async () => {
-      setCurrUser(await getCurrUser());
-    };
-    fetchCurrUser();
-  }, []);
 
   const fetchSalesOrders = useCallback(async () => {
     try {
@@ -184,7 +174,7 @@ export default function SalesOrderDataPage() {
 
       <BasicTable<SalesOrderModel>
         data={salesOrders}
-        columns={columns({ actionHandlers, fetchSalesOrders, role: currUser.role })}
+        columns={columns({ actionHandlers, fetchSalesOrders })}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}

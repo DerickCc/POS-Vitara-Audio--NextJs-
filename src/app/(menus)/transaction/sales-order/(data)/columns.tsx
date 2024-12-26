@@ -9,32 +9,32 @@ import { ActionIcon, Dropdown } from 'rizzui';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
 import { LuEye, LuCircleSlash } from 'react-icons/lu';
-import { FiMoreVertical } from "react-icons/fi";
+import { FiMoreVertical } from 'react-icons/fi';
 import { Row } from '@tanstack/react-table';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt } from 'react-icons/fa';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
+import { useAuth } from '@/hooks/use-auth';
 
 function ActionColumn({
   row,
   actionHandlers,
   fetchSalesOrders,
-  role,
 }: {
   row: Row<SalesOrderModel>;
   actionHandlers: any;
   fetchSalesOrders: () => void;
-  role: string;
 }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
+  const { user } = useAuth();
 
   return (
     <>
       <Dropdown>
         <Dropdown.Trigger>
           <ActionIcon as='span' variant='outline' rounded='full' className='p-0'>
-            <FiMoreVertical  className='size-5 text-primary' />
+            <FiMoreVertical className='size-5 text-primary' />
           </ActionIcon>
         </Dropdown.Trigger>
 
@@ -64,7 +64,7 @@ function ActionColumn({
           )}
 
           {/* cancel */}
-          {role === 'Admin' && row.original.status !== 'Batal' && (
+          {user?.role === 'Admin' && row.original.status !== 'Batal' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -92,19 +92,15 @@ const columnHelper = createColumnHelper<SalesOrderModel>();
 export const columns = ({
   actionHandlers,
   fetchSalesOrders,
-  role,
 }: {
   actionHandlers: any;
   fetchSalesOrders: () => void;
-  role: string;
 }): ColumnDef<SalesOrderModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => (
-      <ActionColumn row={row} actionHandlers={actionHandlers} fetchSalesOrders={fetchSalesOrders} role={role} />
-    ),
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} fetchSalesOrders={fetchSalesOrders} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',

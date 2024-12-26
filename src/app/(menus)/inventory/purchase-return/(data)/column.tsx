@@ -9,20 +9,14 @@ import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import cn from '@/utils/class-names';
 import { LuCircleSlash, LuEye } from 'react-icons/lu';
-import { FiMoreVertical } from "react-icons/fi";
+import { FiMoreVertical } from 'react-icons/fi';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
 
-function ActionColumn({
-  row,
-  actionHandlers,
-  role,
-}: {
-  row: Row<PurchaseReturnModel>;
-  actionHandlers: any;
-  role: string;
-}) {
+function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseReturnModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+  const { user } = useAuth();
 
   return (
     <>
@@ -62,7 +56,7 @@ function ActionColumn({
           )}
 
           {/* cancel */}
-          {role === 'Admin' && (
+          {user?.role === 'Admin' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -86,18 +80,12 @@ function ActionColumn({
 
 const columnHelper = createColumnHelper<PurchaseReturnModel>();
 
-export const columns = ({
-  actionHandlers,
-  role,
-}: {
-  actionHandlers: any;
-  role: string;
-}): ColumnDef<PurchaseReturnModel, any>[] => [
+export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<PurchaseReturnModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} role={role} />,
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',

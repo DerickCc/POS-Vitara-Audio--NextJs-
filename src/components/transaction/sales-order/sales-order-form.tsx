@@ -13,11 +13,9 @@ import { SearchProductModel } from '@/models/product.model';
 import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
 import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
 import { SalesOrderServiceDetailModel } from '@/models/sales-order-service-detail';
-import { SessionData } from '@/models/session.model';
 import { searchCustomer } from '@/services/customer-service';
 import { getProductLastPriceById, searchProduct } from '@/services/product-service';
 import { isoStringToReadableDate } from '@/utils/helper-function';
-import { getCurrUser } from '@/utils/sessionlib';
 import {
   actionIconColorClass,
   badgeColorClass,
@@ -29,17 +27,17 @@ import {
 } from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { debounce } from 'lodash';
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegMoneyBillAlt, FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { IoCartOutline } from 'react-icons/io5';
-import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
+import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import ProductOptionTemplate from '@/components/inventory/product/product-option-template';
+import { useAuth } from '@/hooks/use-auth';
 
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
@@ -86,8 +84,8 @@ export default function SalesOrderForm({
     name: 'serviceDetails',
   });
 
+  const { user } = useAuth();
   const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
-  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
   const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
   const selectedCustomerId = watch('customerId');
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
@@ -97,13 +95,6 @@ export default function SalesOrderForm({
   const [noInvoice, setNoInvoice] = useState('');
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
-
-  useEffect(() => {
-    const fetchCurrUser = async () => {
-      setCurrUser(await getCurrUser());
-    };
-    fetchCurrUser();
-  }, []);
 
   useEffect(() => {
     setNoInvoice(newSoCode);
@@ -355,7 +346,7 @@ export default function SalesOrderForm({
                     <Input
                       label='Kasir'
                       placeholder='Kasir'
-                      value={currUser.name}
+                      value={user?.name}
                       inputClassName={readOnlyClass}
                       readOnly
                     />

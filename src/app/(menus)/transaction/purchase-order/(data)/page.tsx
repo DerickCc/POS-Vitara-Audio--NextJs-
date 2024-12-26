@@ -13,8 +13,6 @@ import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { columns } from './columns';
 import BasicTable from '@/components/tables/basic-table';
 import { browsePo, cancelPo, deletePo, exportPo, finishPo } from '@/services/purchase-order-service';
-import { SessionData } from '@/models/session.model';
-import { getCurrUser } from '@/utils/sessionlib';
 import Spinner from '@/components/spinner';
 import { useOverlayLoading } from '@/hooks/use-overlay-loading';
 
@@ -54,14 +52,6 @@ export default function PurchaseOrderDataPage() {
   const [isExporting, setIsExporting] = useState(false);
   const { showOverlayLoading, hideOverlayLoading } = useOverlayLoading();
   const [totalRowCount, setTotalRowCount] = useState(0);
-  const [currUser, setCurrUser] = useState<SessionData>(new SessionData());
-
-  useEffect(() => {
-    const fetchCurrUser = async () => {
-      setCurrUser(await getCurrUser());
-    };
-    fetchCurrUser();
-  }, []);
 
   const fetchPurchaseOrders = useCallback(async () => {
     try {
@@ -208,7 +198,7 @@ export default function PurchaseOrderDataPage() {
 
       <BasicTable<PurchaseOrderModel>
         data={purchaseOrders}
-        columns={columns({ actionHandlers, role: currUser.role })}
+        columns={columns({ actionHandlers })}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}
