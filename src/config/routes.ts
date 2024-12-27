@@ -45,6 +45,7 @@ export const routes = {
       data: '/transaction/sales-order',
       add: '/transaction/sales-order/add',
       detail: (id: string) => `/transaction/sales-order/${id}/detail`,
+      print: (id: string) => `/transaction/sales-order/${id}/print`,
       edit: (id: string) => `/transaction/sales-order/${id}/edit`
     },
   },

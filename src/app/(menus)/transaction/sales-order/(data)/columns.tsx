@@ -8,7 +8,7 @@ import { SalesOrderModel } from '@/models/sales-order';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
-import { LuEye, LuCircleSlash } from 'react-icons/lu';
+import { LuEye, LuCircleSlash, LuPrinter } from 'react-icons/lu';
 import { FiMoreVertical } from 'react-icons/fi';
 import { Row } from '@tanstack/react-table';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
@@ -59,8 +59,17 @@ function ActionColumn({
                 });
               }}
             >
-              <FaRegMoneyBillAlt className='text-green-500 w-5 h-5 cursor-pointer mr-3' /> Bayar
+              <FaRegMoneyBillAlt className='text-green-500 size-5 cursor-pointer mr-3' /> Bayar
             </Dropdown.Item>
+          )}
+
+          {/* print */}
+          {row.original.status !== 'Batal' && (
+            <Link href={routes.transaction.salesOrder.print(row.original.id)}>
+              <Dropdown.Item>
+                <LuPrinter className='text-purple-500 size-5 cursor-pointer mr-3' /> Print
+              </Dropdown.Item>
+            </Link>
           )}
 
           {/* cancel */}
@@ -75,7 +84,7 @@ function ActionColumn({
                 });
               }}
             >
-              <LuCircleSlash className='text-red-500 w-5 h-5 cursor-pointer mr-3' /> Batal
+              <LuCircleSlash className='text-red-500 size-5 cursor-pointer mr-3' /> Batal
             </Dropdown.Item>
           )}
         </Dropdown.Menu>

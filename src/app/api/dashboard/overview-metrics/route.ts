@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const [newCustomers, newProducts, salesThisMonth, onGoingPo] = await Promise.all([
       db.customers.count({ where: dateFilter }),
       db.products.count({ where: dateFilter }),
-      db.salesOrders.findMany({ where: dateFilter, select: { grandTotal: true } }),
+      db.salesOrders.findMany({ where: { ...dateFilter, status: { not: 'Batal' } }, select: { grandTotal: true } }),
       db.purchaseOrders.count({ where: { ...dateFilter, status: 'Dalam Proses' } }),
     ]);
 

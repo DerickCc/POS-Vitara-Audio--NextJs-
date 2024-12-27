@@ -35,7 +35,7 @@ export const mapTrxToRoute = (type: string, id: string): Url => {
   } else {
     return routes.dashboard;
   }
-}
+};
 
 // Date Time Stuff
 /**
@@ -68,4 +68,21 @@ export const isoStringToReadableDate = (isoStirng: string) => {
   });
 
   return date;
+};
+
+export const isoStringToDateWithTime = (isoString: string) => {
+  const dateTime = new Date(isoString).toLocaleString('id-ID', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const [date, time] = dateTime.split(', ');
+
+  return `${date.replaceAll('/', '-')} ${time.replaceAll('.', ':')}`;
 };

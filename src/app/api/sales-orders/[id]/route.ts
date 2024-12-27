@@ -25,7 +25,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
         salesDate: true,
         customerId: true,
         Customer: {
-          select: { name: true },
+          select: { 
+            name: true,
+            phoneNo: true,
+            address: true,
+          },
         },
         paymentType: true,
         PaymentHistories: {
@@ -97,6 +101,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       grandTotal: Number(so.grandTotal),
       paidAmount,
       customerName: so.Customer.name,
+      customerAddress: so.Customer.address,
+      customerPhoneNo: so.Customer.phoneNo,
       productDetails: formattedSoProductDetail,
       serviceDetails: formattedSoServiceDetail,
       cashier,

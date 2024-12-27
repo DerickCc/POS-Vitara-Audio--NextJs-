@@ -1348,3 +1348,21 @@ div[style='z-index: 1000001;'],
   content: ' *';
   color: #ef4444
 }
+
+@media print {
+  header {
+    display: none !important;
+  }
+
+  body {
+    margin: 0;
+    color: #000;
+    background-color: #fff;
+  }
+
+  .print-ref {
+    width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}
+

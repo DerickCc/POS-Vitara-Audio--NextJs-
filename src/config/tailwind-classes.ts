@@ -51,7 +51,7 @@ export const buttonColorClass: { [key: string]: string } = {
   red: 'bg-red-500 hover:bg-red-700',
   green: 'bg-green-500 hover:bg-green-700',
   yellow: 'bg-yellow-500 hover:bg-yellow-600',
-  purple: 'bg-purple-500 hover:bg-purple-700',
+  purple: 'bg-purple-600 hover:bg-purple-700',
   blue: '',
   gray: 'bg-gray-500 hover:bg-gray-700',
 };
