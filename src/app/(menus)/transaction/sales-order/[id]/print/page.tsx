@@ -9,9 +9,11 @@ import { SalesOrderModel } from '@/models/sales-order';
 import { getSoById } from '@/services/sales-order-service';
 import cn from '@/utils/class-names';
 import { formatToReadableNumber, isoStringToDateWithTime } from '@/utils/helper-function';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
 
 const pageHeader = {
@@ -53,9 +55,17 @@ export default function PrintSalesOrderPage() {
   return (
     <>
       <PageHeader {...pageHeader}>
-        <Button onClick={() => window.print()} className={cn(baseButtonClass, buttonColorClass.purple)}>
-          Print
-        </Button>
+        <div className='flex items-center gap-3 mt-4 sm:mt-0'>
+          <Link href={routes.transaction.salesOrder.data}>
+            <Button variant='outline' className='border-2 border-gray-200'>
+              <PiArrowLeftBold className='size-4 me-1.5' />
+              <span>Kembali</span>
+            </Button>
+          </Link>
+          <Button onClick={() => window.print()} className={cn(baseButtonClass, buttonColorClass.purple)}>
+            Print
+          </Button>
+        </div>
       </PageHeader>
 
       <Card>
