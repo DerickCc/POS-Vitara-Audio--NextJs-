@@ -12,6 +12,16 @@ const nextConfig = {
         destination: '/inventory/product',
         permanent: true,
       },
+      {
+        source: '/transaction',
+        destination: '/transaction/purchase-order',
+        permanent: true,
+      },
+      {
+        source: '/settings',
+        destination: '/settings/user',
+        permanent: true,
+      },
     ]
   },
 }
