@@ -11,8 +11,6 @@ import { datepickerClass } from '@/config/tailwind-classes';
 import 'react-datepicker/dist/react-datepicker.css';
 import cn from '@/utils/class-names';
 import { id } from 'date-fns/locale';
-import { SearchSupplierModel } from '@/models/supplier.model';
-import { searchSupplier } from '@/services/supplier-service';
 import toast from 'react-hot-toast';
 import { debounce } from 'lodash';
 import { searchCustomer } from '@/services/customer-service';
@@ -77,9 +75,9 @@ export default function SalesOrderFilter({
           />
           <Select<SearchCustomerModel>
             value={localFilters.customerId}
-            onChange={(option: SearchSupplierModel) => {
+            onChange={(option: SearchCustomerModel) => {
               handleFilterChange('customerId')(option.id);
-              setSelectedCustomer(option.name);
+              setSelectedCustomer(`${option.name} (${option.licensePlate})`);
             }}
             className='sm:col-span-3'
             label='Pelanggan'
@@ -87,9 +85,9 @@ export default function SalesOrderFilter({
             options={customerList}
             displayValue={() => selectedCustomer}
             getOptionValue={(option: SearchCustomerModel) => option}
+            getOptionDisplayValue={(option) => `${option.name} (${option.licensePlate})`}
             searchable={true}
-            searchByKey='name'
-            onSearchChange={(name: string) => handleCustomerSearchChange(name)}
+            onSearchChange={(search: string) => handleCustomerSearchChange(search)}
             disableDefaultFilter={true}
             clearable={true}
             onClear={() => handleFilterChange('customerId')(null)}

@@ -37,9 +37,9 @@ export const getCustomerById = async (id: string): Promise<CustomerModel> => {
   }
 };
 
-export const searchCustomer = async (name?: string): Promise<SearchCustomerModel[]> => {
+export const searchCustomer = async (search?: string): Promise<SearchCustomerModel[]> => {
   try {
-    const response = await apiFetch(`/api/customers/search${toQueryString({ name })}`, { method: 'GET' });
+    const response = await apiFetch(`/api/customers/search${toQueryString({ search })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
     throw e + '';

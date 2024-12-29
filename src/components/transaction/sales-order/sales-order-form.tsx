@@ -86,12 +86,17 @@ export default function SalesOrderForm({
 
   const { user } = useAuth();
   const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
+
   const [customerList, setCustomerList] = useState<SearchCustomerModel[]>([]);
   const selectedCustomerId = watch('customerId');
+  const customerName = watch('customerName');
+  const customerLicensePlate = watch('customerLicensePlate');
+
   const [selectedProducts, setSelectedProducts] = useState<SearchProductModel[]>([]);
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
   const [totalProductSoldAmount, setTotalProductSoldAmount] = useState(0);
   const [totalServiceSoldAmount, setTotalServiceSoldAmount] = useState(0);
+
   const [noInvoice, setNoInvoice] = useState('');
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
@@ -119,11 +124,11 @@ export default function SalesOrderForm({
   // customer
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleCustomerSearchChange = useCallback(
-    debounce(async (name: string) => {
-      if (!name || name.trim() === '') return;
+    debounce(async (search: string) => {
+      if (!search || search.trim() === '') return;
 
       try {
-        setCustomerList(await searchCustomer(name));
+        setCustomerList(await searchCustomer(search));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }
@@ -131,8 +136,9 @@ export default function SalesOrderForm({
     []
   );
 
-  const handleCustomerChange = (customerName: string) => {
+  const handleCustomerChange = (customerName: string, customerLicensePlate: string) => {
     setValue('customerName', customerName);
+    setValue('customerLicensePlate', customerLicensePlate);
   };
   // ------------------------
 
@@ -361,24 +367,23 @@ export default function SalesOrderForm({
                       control={control}
                       name='customerId'
                       render={({ field: { value, onChange }, fieldState: { error } }) => {
-                        const customerName = watch('customerName');
                         return (
                           <Select<SearchCustomerModel>
                             value={value}
                             onChange={(option: SearchCustomerModel) => {
                               onChange(option.id);
-                              handleCustomerChange(option.name);
+                              handleCustomerChange(option.name, option.licensePlate);
                             }}
                             label={<span className='required'>Pelanggan</span>}
                             labelClassName='text-gray-600'
                             className='sm:col-span-2'
                             placeholder='Pilih Pelanggan'
                             options={customerList}
-                            displayValue={() => customerName}
+                            displayValue={() => `${customerName} (${customerLicensePlate})`}
                             getOptionValue={(option: SearchCustomerModel) => option}
+                            getOptionDisplayValue={(option) => `${option.name} (${option.licensePlate})`}
                             searchable={true}
-                            searchByKey='name'
-                            onSearchChange={(name: string) => handleCustomerSearchChange(name)}
+                            onSearchChange={(search: string) => handleCustomerSearchChange(search)}
                             disableDefaultFilter={true}
                             error={error?.message}
                             disabled={isReadOnly}

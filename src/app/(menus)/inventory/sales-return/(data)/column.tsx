@@ -96,7 +96,13 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     id: 'customerName',
     size: 150,
     header: () => 'Pelanggan',
-    cell: (info) => info.getValue(),
+    cell: ({ row }) => (
+      <>
+        <span>{row.original.customerName}</span>
+        <br />
+        <span>({row.original.customerLicensePlate})</span>
+      </>
+    ),
     enableSorting: true,
   }),
   columnHelper.accessor('grandTotal', {

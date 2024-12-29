@@ -25,6 +25,7 @@ export class SalesReturnModel {
   soId: string;
   soCode: string; // for UI
   customerName: string; // for UI
+  customerLicensePlate: string; // for UI
   returnDate: string;
   productDetails: SalesReturnProductDetailModel[]; // detail product
   serviceDetails: SalesReturnServiceDetailModel[]; // detail service
@@ -37,6 +38,7 @@ export class SalesReturnModel {
     this.soId = data.soId || '';
     this.soCode = data.soCode;
     this.customerName = data.customerName;
+    this.customerLicensePlate = data.customerLicensePlate;
     this.returnDate = data.returnDate || getCurrDate();
     this.productDetails = data.productDetails || [];
     this.serviceDetails = data.serviceDetails || [];
@@ -49,5 +51,6 @@ export interface SearchSalesOrderModel extends BasicSelectOptions {
   id: string;
   code: string;
   customerName: string;
+  customerLicensePlate: string;
   productDetails: SearchSalesOrderProductDetailModel[];
 }

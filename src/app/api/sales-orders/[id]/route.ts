@@ -27,6 +27,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         Customer: {
           select: { 
             name: true,
+            licensePlate: true,
             phoneNo: true,
             address: true,
           },
@@ -101,6 +102,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       grandTotal: Number(so.grandTotal),
       paidAmount,
       customerName: so.Customer.name,
+      customerLicensePlate: so.Customer.licensePlate,
       customerAddress: so.Customer.address,
       customerPhoneNo: so.Customer.phoneNo,
       productDetails: formattedSoProductDetail,

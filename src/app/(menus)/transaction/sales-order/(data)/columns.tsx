@@ -129,7 +129,13 @@ export const columns = ({
     id: 'customerName',
     size: 200,
     header: () => 'Pelanggan',
-    cell: (info) => info.getValue(),
+    cell: ({ row }) => (
+      <>
+        <span>{row.original.customerName}</span>
+        <br />
+        <span>({row.original.customerLicensePlate})</span>
+      </>
+    ),
     enableSorting: true,
   }),
   columnHelper.accessor('subTotal', {

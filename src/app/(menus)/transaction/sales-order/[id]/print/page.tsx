@@ -10,7 +10,7 @@ import { getSoById } from '@/services/sales-order-service';
 import cn from '@/utils/class-names';
 import { formatToReadableNumber, isoStringToDateWithTime } from '@/utils/helper-function';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiArrowLeftBold } from 'react-icons/pi';
@@ -34,6 +34,7 @@ const pageHeader = {
 
 export default function PrintSalesOrderPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [so, setSo] = useState<SalesOrderModel>(new SalesOrderModel());
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,7 +42,13 @@ export default function PrintSalesOrderPage() {
     const fetchPo = async () => {
       try {
         setIsLoading(true);
-        setSo(await getSoById(id));
+        const soDetail = await getSoById(id);
+
+        if (soDetail.status === 'Batal') {
+          toast.error('Invoice tidak dapat di-print karena telah dibatalkan.');
+        } else {
+          setSo(soDetail);
+        }
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       } finally {
@@ -62,7 +69,11 @@ export default function PrintSalesOrderPage() {
               <span>Kembali</span>
             </Button>
           </Link>
-          <Button onClick={() => window.print()} className={cn(baseButtonClass, buttonColorClass.purple)}>
+          <Button
+            onClick={() => window.print()}
+            className={cn(baseButtonClass, buttonColorClass.purple)}
+            disabled={!so.id}
+          >
             Print
           </Button>
         </div>
@@ -74,7 +85,7 @@ export default function PrintSalesOrderPage() {
         ) : (
           <div className='print-ref'>
             {/* Invoice Header */}
-            <div className='flex justify-between'>
+            <div className='flex justify-between mb-5'>
               <div>
                 <h1 className='text-3xl font-bold mb-2'>VITARA AUDIO</h1>
                 <p className='mb-1'>Spesial Pemasangan: AC Mobil - Tape Mobil - Variasi</p>
@@ -83,10 +94,10 @@ export default function PrintSalesOrderPage() {
               </div>
 
               {/* Customer & Invoice Info */}
-              <div className='pr-5 mb-4'>
+              <div className='pr-5'>
                 {[
                   { label: 'No. Invoice', value: so.code },
-                  { label: 'Nama Pelanggan', value: so.customerName },
+                  { label: 'Pelanggan', value: `${so.customerName} (${so.customerLicensePlate})` },
                   { label: 'Alamat Pelanggan', value: so.customerAddress || '-' },
                   { label: 'No. Telp. Pelanggan', value: so.customerPhoneNo || '-' },
                   { label: 'Tanggal Transaksi', value: isoStringToDateWithTime(so.salesDate) },
@@ -100,7 +111,7 @@ export default function PrintSalesOrderPage() {
             </div>
 
             {/* Product Details */}
-            <table className='w-full border border-collapse border-gray-300 mb-4'>
+            <table className='w-full border border-gray-300 mb-4'>
               <thead>
                 <tr className='bg-gray-100 border-b'>
                   <th className='border p-2 text-left'>Banyaknya</th>
@@ -157,6 +168,11 @@ export default function PrintSalesOrderPage() {
                     <span>Rp {formatToReadableNumber(item.value)}</span>
                   </div>
                 ))}
+                <br />
+                <div className='flex'>
+                  <span className='w-28 font-medium'>Sudah Dibayar</span> : &nbsp;
+                  <span>Rp {formatToReadableNumber(so.paidAmount)}</span>
+                </div>
               </div>
             </div>
 

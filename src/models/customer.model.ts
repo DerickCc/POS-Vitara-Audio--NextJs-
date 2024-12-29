@@ -36,6 +36,7 @@ export interface SearchCustomerModel extends BasicSelectOptions {
   id: string;
   code: string;
   name: string;
+  licensePlate: string;
 }
 
 export interface CustomerHistoryModel {

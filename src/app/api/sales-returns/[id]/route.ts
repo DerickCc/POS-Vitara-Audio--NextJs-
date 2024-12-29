@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         SalesOrder: {
           select: {
             code: true,
-            Customer: { select: { name: true } },
+            Customer: { select: { name: true, licensePlate: true } },
           },
         },
         code: true,
@@ -87,6 +87,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       ...sr,
       soCode: sr.SalesOrder.code,
       customerName: sr.SalesOrder.Customer.name,
+      customerLicensePlate: sr.SalesOrder.Customer.licensePlate,
       productDetails: formattedSrpDetails,
       serviceDetails: sr.SalesReturnServiceDetails,
       grandTotal,

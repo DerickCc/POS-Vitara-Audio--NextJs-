@@ -118,7 +118,7 @@ export async function GET(request: Request) {
         SalesOrder: {
           select: {
             Customer: {
-              select: { name: true },
+              select: { name: true, licensePlate: true, },
             },
             code: true,
           },
@@ -130,6 +130,7 @@ export async function GET(request: Request) {
     const mappedSalesReturns = salesReturns.map((pr) => ({
       ...pr,
       customerName: pr.SalesOrder.Customer.name,
+      customerLicensePlate: pr.SalesOrder.Customer.licensePlate,
       soCode: pr.SalesOrder.code,
       SalesOrder: undefined,
     }));

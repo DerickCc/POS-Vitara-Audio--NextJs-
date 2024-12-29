@@ -78,7 +78,7 @@ export default function SalesReturnFilter({
             value={localFilters.customerId}
             onChange={(option: SearchCustomerModel) => {
               handleFilterChange('customerId')(option.id);
-              setSelectedCustomer(option.name);
+              setSelectedCustomer(`${option.name} (${option.licensePlate})`);
             }}
             className='sm:col-span-3'
             label='Pelanggan'
@@ -86,9 +86,9 @@ export default function SalesReturnFilter({
             options={customerList}
             displayValue={() => selectedCustomer}
             getOptionValue={(option: SearchCustomerModel) => option}
+            getOptionDisplayValue={(option) => `${option.name} (${option.licensePlate})`}
             searchable={true}
-            searchByKey='name'
-            onSearchChange={(name: string) => handleCustomerSearchChange(name)}
+            onSearchChange={(search: string) => handleCustomerSearchChange(search)}
             disableDefaultFilter={true}
             clearable={true}
             onClear={() => handleFilterChange('customerId')(null)}

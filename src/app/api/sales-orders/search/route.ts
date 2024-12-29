@@ -43,9 +43,9 @@ export async function GET(request: Request) {
         id: true,
         code: true,
         Customer: {
-          select: { name: true }
+          select: { name: true, licensePlate: true },
         },
-        SalesOrderProductDetails:  {
+        SalesOrderProductDetails: {
           select: {
             id: true,
             quantity: true,
@@ -56,16 +56,17 @@ export async function GET(request: Request) {
                 name: true,
                 uom: true,
                 stock: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
     });
 
     const salesOrdersWithExtraData: any[] = salesOrders.map((so) => ({
       ...so,
       customerName: so.Customer.name,
+      customerLicensePlate: so.Customer.licensePlate,
       Customer: undefined,
       productDetails: so.SalesOrderProductDetails.map((sopd) => ({
         ...sopd,

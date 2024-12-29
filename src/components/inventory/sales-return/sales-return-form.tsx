@@ -82,6 +82,9 @@ export default function SalesReturnForm({
   });
 
   const [trxStatusColor, setTrxStatusColor] = useState<Colors>('blue');
+
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('');
+
   const [soList, setSoList] = useState<SearchSalesOrderModel[]>([]);
   const [soProductDetailList, setSoProductDetailList] = useState<SearchSalesOrderProductDetailModel[]>([]);
   const [filteredSoProductDetailList, setFilteredSoProductDetailList] = useState<SearchSalesOrderProductDetailModel[]>(
@@ -93,6 +96,8 @@ export default function SalesReturnForm({
       defaultValues.returnDate = isoStringToReadableDate(defaultValues.returnDate);
 
       setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
+
+      setSelectedCustomer(`${defaultValues.customerName} (${defaultValues.customerLicensePlate})`);
 
       // set for displaying product name only
       const formatSoProductDetails = defaultValues.productDetails.map((d) => ({
@@ -127,9 +132,9 @@ export default function SalesReturnForm({
 
   const handleSoChange = (option: SearchSalesOrderModel) => {
     setValue('soCode', option.code);
-    setValue('customerName', option.customerName);
     setValue('grandTotal', 0);
 
+    setSelectedCustomer(`${option.customerName} (${option.customerLicensePlate})`);
     setSoProductDetailList(option.productDetails);
     setFilteredSoProductDetailList(option.productDetails);
 
@@ -279,7 +284,6 @@ export default function SalesReturnForm({
                       displayValue={() => soCode}
                       getOptionValue={(option: SearchSalesOrderModel) => option}
                       searchable={true}
-                      searchByKey='name'
                       onSearchChange={(name: string) => handleSoSearchChange(name)}
                       disableDefaultFilter={true}
                       error={error?.message}
@@ -291,9 +295,9 @@ export default function SalesReturnForm({
               <Input
                 label='Pelanggan'
                 placeholder='Pelanggan dari transaksi pembelian'
+                value={selectedCustomer}
                 inputClassName={readOnlyClass}
                 readOnly
-                {...register('customerName')}
               />
             </div>
           </>

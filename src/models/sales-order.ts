@@ -46,8 +46,9 @@ export class SalesOrderModel {
   salesDate: string;
   customerId: string;
   customerName: string; // for UI
-  customerAddress: string;
-  customerPhoneNo: string;
+  customerLicensePlate: string; // for UI
+  customerAddress: string; // for UI
+  customerPhoneNo: string; // for UI
   remarks: string;
   paymentType: 'DP' | 'Lunas';
   paymentMethod: 'Tunai' | 'Non-tunai'; // for UI
@@ -66,6 +67,7 @@ export class SalesOrderModel {
     this.salesDate = data.salesDate || getCurrDate();
     this.customerId = data.customerId || '';
     this.customerName = data.customerName;
+    this.customerLicensePlate = data.customerLicensePlate;
     this.customerAddress = data.customerAddress;
     this.customerPhoneNo = data.customerPhoneNo;
     this.remarks = data.remarks;

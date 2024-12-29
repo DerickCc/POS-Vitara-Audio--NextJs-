@@ -90,7 +90,7 @@ export async function GET(request: Request) {
       where,
       include: {
         Customer: {
-          select: { name: true },
+          select: { name: true, licensePlate: true },
         },
         PaymentHistories: {
           select: { amount: true },
@@ -108,6 +108,7 @@ export async function GET(request: Request) {
       return {
         ...so,
         customerName: so.Customer.name,
+        customerLicensePlate: so.Customer.licensePlate,
         paidAmount,
         cashier: so.CreatedBy.name,
         Customer: undefined,

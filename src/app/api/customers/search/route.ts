@@ -15,20 +15,30 @@ export async function GET(request: Request) {
   const queryParams = new URLSearchParams(url.search);
 
   // filters
-  const name = queryParams.get('name') ?? '';
+  const search = queryParams.get('search') ?? '';
 
   const where: any = { AND: [] };
-  if (name) {
+  if (search) {
     // full text search
-    const searchTerm = name.split(' ').filter((term) => term);
+    const searchTerm = search.split(' ').filter((term) => term);
 
     if (searchTerm.length > 0) {
       searchTerm.forEach((term) => {
         where.AND.push({
-          name: {
-            contains: term,
-            mode: 'insensitive',
-          },
+          OR: [
+            {
+              name: {
+                contains: term,
+                mode: 'insensitive',
+              },
+            },
+            {
+              licensePlate: {
+                contains: term,
+                mode: 'insensitive',
+              },
+            },
+          ],
         });
       });
     }
@@ -43,6 +53,7 @@ export async function GET(request: Request) {
         id: true,
         code: true,
         name: true,
+        licensePlate: true,
       },
     });
 
