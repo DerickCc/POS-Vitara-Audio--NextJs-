@@ -14,7 +14,8 @@ export interface IncompletePaymentModel {
 }
 
 export interface LowStockProductModel {
-  productName: string;
+  id: string;
+  name: string;
   stock: number;
   uom: string;
 }

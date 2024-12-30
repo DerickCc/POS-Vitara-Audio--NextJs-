@@ -23,6 +23,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         id: true,
         code: true,
         salesDate: true,
+        entryDate: true,
         customerId: true,
         Customer: {
           select: { 

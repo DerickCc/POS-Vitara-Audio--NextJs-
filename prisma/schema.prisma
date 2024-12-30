@@ -196,6 +196,7 @@ model SalesOrders {
   id          String    @id @default(cuid())
   code        String    @unique @db.VarChar(20)
   salesDate   DateTime  @default(now()) @map("sales_date")
+  entryDate   DateTime  @map("entry_date")
   customerId  String    @map("customer_id")
   paymentType String    @map("payment_type") @db.VarChar(20)
   subTotal    Decimal   @map("sub_total") @db.Decimal(10, 2)

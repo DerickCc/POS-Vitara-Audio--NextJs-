@@ -32,12 +32,16 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegMoneyBillAlt, FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { IoCartOutline } from 'react-icons/io5';
-import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
+import { PiCalendarBlank, PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
 import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import ProductOptionTemplate from '@/components/inventory/product/product-option-template';
 import { useAuth } from '@/hooks/use-auth';
+import ReactDatePicker from 'react-datepicker';
+import { datepickerClass } from '@/config/tailwind-classes';
+import 'react-datepicker/dist/react-datepicker.css';
+import { id } from 'date-fns/locale';
 
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
@@ -376,7 +380,6 @@ export default function SalesOrderForm({
                             }}
                             label={<span className='required'>Pelanggan</span>}
                             labelClassName='text-gray-600'
-                            className='sm:col-span-2'
                             placeholder='Pilih Pelanggan'
                             options={customerList}
                             displayValue={() => `${customerName} (${customerLicensePlate})`}
@@ -387,6 +390,33 @@ export default function SalesOrderForm({
                             disableDefaultFilter={true}
                             error={error?.message}
                             disabled={isReadOnly}
+                          />
+                        );
+                      }}
+                    />
+                    <Controller
+                      control={control}
+                      name='entryDate'
+                      render={({ field: { value, onChange }, fieldState: { error } }) => {
+                        return (
+                          <ReactDatePicker
+                            customInput={
+                              <Input
+                                prefix={<PiCalendarBlank className='h-5 w-5 text-gray-500' />}
+                                label='Tanggal Masuk'
+                                labelClassName='font-medium text-gray-700'
+                                inputClassName={cn(isReadOnly ? readOnlyClass : '', '[&_input]:text-ellipsis')}
+                                error={error?.message}
+                              />
+                            }
+                            minDate={new Date()}
+                            locale={id}
+                            dateFormat='d MMMM yyyy'
+                            selected={value ? new Date(value) : null}
+                            onChange={onChange}
+                            placeholderText='Pilih Tanggal'
+                            calendarClassName={cn(datepickerClass, 'w-full')}
+                            readOnly={isReadOnly}
                           />
                         );
                       }}

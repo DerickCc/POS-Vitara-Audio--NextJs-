@@ -219,6 +219,7 @@ export async function POST(request: Request) {
         data: {
           code: newCode,
           salesDate,
+          entryDate: data.entryDate,
           Customer: {
             connect: { id: data.customerId },
           },

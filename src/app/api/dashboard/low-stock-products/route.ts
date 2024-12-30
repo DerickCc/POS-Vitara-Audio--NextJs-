@@ -4,7 +4,8 @@ import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
-interface rawQueryModel {
+interface LowStockProductRawQueryModel {
+  id: string;
   name: string;
   stock: number;
   uom: string;
@@ -33,8 +34,8 @@ export async function GET(request: Request) {
     const direction = Prisma.sql([sortOrder]);
 
     const [lowStockProducts, recordsTotal] = await Promise.all([
-      db.$queryRaw<rawQueryModel[]>`
-        SELECT name, stock, uom, restock_threshold
+      db.$queryRaw<LowStockProductRawQueryModel[]>`
+        SELECT id, name, stock, uom, restock_threshold
         FROM "public"."Products" WHERE stock < restock_threshold
         ORDER BY stock ${direction} 
         LIMIT ${pageSize}
@@ -49,8 +50,6 @@ export async function GET(request: Request) {
 
     const mappedLowStockProducts: LowStockProductModel[] = lowStockProducts.map((prd) => ({
       ...prd,
-      productName: prd.name,
-      name: undefined,
       restock_threshold: undefined,
     }));
 

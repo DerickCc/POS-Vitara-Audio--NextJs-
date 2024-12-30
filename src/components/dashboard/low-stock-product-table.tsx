@@ -1,20 +1,26 @@
 'use client';
 
 import BasicTable from '@/components/tables/basic-table';
+import { routes } from '@/config/routes';
 import { LowStockProductModel } from '@/models/dashboard.model';
 import { browseLowStockProduct } from '@/services/dashboard-service';
 import { ColumnDef, OnChangeFn, SortingState, createColumnHelper } from '@tanstack/react-table';
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiAlertTriangle } from 'react-icons/fi';
 
 const columnHelper = createColumnHelper<LowStockProductModel>();
 const columns = (): ColumnDef<LowStockProductModel, any>[] => [
-  columnHelper.accessor('productName', {
-    id: 'productName',
+  columnHelper.accessor('name', {
+    id: 'name',
     size: 250,
     header: 'Barang',
-    cell: (info) => info.getValue(),
+    cell: ({ row }) => (
+      <Link href={routes.inventory.product.detail(row.original.id)}>
+        <span className='text-primary'>{row.original.name}</span>
+      </Link>
+    ),
     enableSorting: true,
   }),
   columnHelper.accessor('stock', {

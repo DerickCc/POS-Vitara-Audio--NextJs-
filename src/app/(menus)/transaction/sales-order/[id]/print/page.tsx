@@ -8,7 +8,7 @@ import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 import { SalesOrderModel } from '@/models/sales-order';
 import { getSoById } from '@/services/sales-order-service';
 import cn from '@/utils/class-names';
-import { formatToReadableNumber, isoStringToDateWithTime } from '@/utils/helper-function';
+import { formatToReadableNumber, isoStringToDateWithTime, isoStringToReadableDate } from '@/utils/helper-function';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -145,7 +145,10 @@ export default function PrintSalesOrderPage() {
             </table>
 
             <p>
-              <strong>Keterangan:</strong> {so.remarks}
+              <strong>Tanggal Masuk:</strong> {isoStringToReadableDate(so.entryDate)}
+            </p>
+            <p>
+              <strong>Keterangan:</strong> {so.remarks || '-'}
             </p>
 
             <div className='flex justify-between'>

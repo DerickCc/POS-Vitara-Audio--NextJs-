@@ -60,6 +60,7 @@ async function main() {
       uom: 'Pcs',
       purchasePrice: 50000,
       sellingPrice: 100000,
+      costPriceCode: 'I',
       CreatedBy: { connect: { id: user.id } },
     },
   });
@@ -72,6 +73,7 @@ async function main() {
       uom: 'Pcs',
       purchasePrice: 300000,
       sellingPrice: 500000,
+      costPriceCode: 'I',
       CreatedBy: { connect: { id: user.id } },
     },
   });
@@ -84,6 +86,7 @@ async function main() {
       uom: 'Meter',
       purchasePrice: 100000,
       sellingPrice: 300000,
+      costPriceCode: 'I',
       CreatedBy: { connect: { id: user.id } },
     },
   });
