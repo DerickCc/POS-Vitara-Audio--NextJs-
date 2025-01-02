@@ -109,7 +109,7 @@ export async function GET(request: Request) {
         ...so,
         customerName: so.Customer.name,
         customerLicensePlate: so.Customer.licensePlate,
-        paidAmount,
+        paidAmount: Number(paidAmount),
         cashier: so.CreatedBy.name,
         Customer: undefined,
         SalesOrderPaymentHistories: undefined,

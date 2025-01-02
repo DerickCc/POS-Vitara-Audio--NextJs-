@@ -47,6 +47,7 @@ export class PurchaseOrderModel {
   totalItem: number;
   subTotal: number;
   grandTotal: number;
+  paidAmount: number; // for UI
   status: 'Dalam Proses' | 'Selesai' | 'Batal';
 
   constructor(data: any = {}) {
@@ -62,6 +63,7 @@ export class PurchaseOrderModel {
     this.totalItem = data.totalItem;
     this.subTotal = data.subTotal || 0;
     this.grandTotal = data.grandTotal || 0;
+    this.paidAmount = data.paidAmount || 0;
     this.status = data.status || 'Dalam Proses';
   }
 }

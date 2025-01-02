@@ -8,14 +8,16 @@ import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-
 import cn from '@/utils/class-names';
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
-import { FaRegTrashAlt } from 'react-icons/fa';
+import { FaRegMoneyBillAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { useAuth } from '@/hooks/use-auth';
+import { usePaymentModal } from '@/hooks/use-payment-modal';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+  const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
   const { user } = useAuth();
 
   return (
@@ -60,6 +62,24 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
             </Dropdown.Item>
           )}
 
+          {/* pay */}
+          {row.original.status !== 'Batal' && row.original.paidAmount < row.original.grandTotal && (
+            <Dropdown.Item
+              onClick={() => {
+                openPaymentModal({
+                  id: row.original.id,
+                  code: row.original.code,
+                  type: 'po',
+                  grandTotal: row.original.grandTotal,
+                  paidAmount: row.original.paidAmount,
+                  fetchData: actionHandlers.fetchData,
+                });
+              }}
+            >
+              <FaRegMoneyBillAlt className='text-green-500 size-5 cursor-pointer mr-3' /> Bayar
+            </Dropdown.Item>
+          )}
+
           {/* delete */}
           {row.original.status === 'Dalam Proses' && (
             <Dropdown.Item
@@ -94,6 +114,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
       </Dropdown>
 
       <ConfirmationModalComponent />
+      <PaymentModalComponent />
     </>
   );
 }
@@ -128,13 +149,6 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('totalItem', {
-    id: 'totalItem',
-    size: 60,
-    header: () => 'Total Item',
-    cell: (info) => info.getValue(),
-    enableSorting: true,
-  }),
   columnHelper.accessor('subTotal', {
     id: 'subTotal',
     size: 150,
@@ -159,12 +173,43 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
   columnHelper.accessor('status', {
     id: 'status',
     size: 150,
-    header: () => 'Status',
+    header: () => 'Status Pengiriman',
     cell: (info) => {
       const status = info.getValue();
       const color = mapTrxStatusToColor[status];
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
+    enableSorting: true,
+  }),
+  columnHelper.display({
+    id: 'paymentStatus',
+    size: 150,
+    header: () => 'Status Pembayaran',
+    cell: ({ row }) => {
+      if (row.original.status === 'Batal') return '-';
+
+      const isPaidFully = row.original.paidAmount === row.original.grandTotal ? 'Lunas' : 'Belum Lunas';
+      const color = mapTrxStatusToColor[isPaidFully];
+
+      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{isPaidFully}</span>;
+    },
+  }),
+  columnHelper.accessor('paidAmount', {
+    id: 'paidAmount',
+    size: 150,
+    header: () => 'Telah Dibayar',
+    cell: ({ row }) => {
+      if (row.original.status === 'Batal') return '-';
+
+      return `Rp ${formatToReadableNumber(row.original.paidAmount)}`;
+    },
+    enableSorting: false,
+  }),
+  columnHelper.accessor('totalItem', {
+    id: 'totalItem',
+    size: 60,
+    header: () => 'Total Item',
+    cell: (info) => info.getValue(),
     enableSorting: true,
   }),
   columnHelper.accessor('remarks', {

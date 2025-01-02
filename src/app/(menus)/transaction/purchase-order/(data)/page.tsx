@@ -159,6 +159,7 @@ export default function PurchaseOrderDataPage() {
     finish: (id: string) => handleFinish(id),
     delete: (id: string) => handleDelete(id),
     cancel: (id: string) => handleCancel(id),
+    fetchData: () => fetchPurchaseOrders(),
   };
 
   return (

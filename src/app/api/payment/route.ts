@@ -60,7 +60,6 @@ export async function PUT(request: Request) {
       return NextResponse.json({ message: "Transaksi tidak ditemukan" }, { status: 404 });
     }
 
-    // type-type nya 
     const paymentHistories = data.type === "po" ? "PurchaseOrderPaymentHistories" : "SalesOrderPaymentHistories";
 
     const paidAmount = trx[paymentHistories].reduce(
@@ -74,26 +73,41 @@ export async function PUT(request: Request) {
     }
 
     await db.$transaction(async (prisma) => {
-      await prisma.salesOrderPaymentHistories.create({ //
-        data: {
-          SalesOrder: { //
-            connect: { id: data.id },
-          },
-          paymentMethod: data.paymentMethod,
-          amount: data.paymentAmount,
-          CreatedBy: {
-            connect: { id: userId },
-          },
-        },
-      });
-
-      if (new Decimal(data.paymentAmount).equals(unpaidAmount)) {
-        await prisma.salesOrders.update({ //
-          where: { id: data.id },
+      if (data.type === 'po') {
+        await prisma.purchaseOrderPaymentHistories.create({ //
           data: {
-            status: "Lunas",
+            PurchaseOrder: { //
+              connect: { id: data.id },
+            },
+            paymentMethod: data.paymentMethod,
+            amount: data.paymentAmount,
+            CreatedBy: {
+              connect: { id: userId },
+            },
           },
         });
+      } else if (data.type === 'so') {
+        await prisma.salesOrderPaymentHistories.create({ //
+          data: {
+            SalesOrder: { //
+              connect: { id: data.id },
+            },
+            paymentMethod: data.paymentMethod,
+            amount: data.paymentAmount,
+            CreatedBy: {
+              connect: { id: userId },
+            },
+          },
+        });
+  
+        if (new Decimal(data.paymentAmount).equals(unpaidAmount)) {
+          await prisma.salesOrders.update({ //
+            where: { id: data.id },
+            data: {
+              status: "Lunas",
+            },
+          });
+        }
       }
     });
 

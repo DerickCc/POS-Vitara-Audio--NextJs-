@@ -92,15 +92,24 @@ export async function GET(request: Request) {
         Supplier: {
           select: { name: true },
         },
+        PurchaseOrderPaymentHistories: {
+          select: { amount: true },
+        },
       },
     });
     const recordsTotal = await db.purchaseOrders.count({ where });
 
-    const mappedPurchaseOrders = purchaseOrders.map((po) => ({
-      ...po,
-      supplierName: po.Supplier.name,
-      Supplier: undefined,
-    }));
+    const mappedPurchaseOrders = purchaseOrders.map((po) => {
+      const paidAmount = po.PurchaseOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+
+      return {
+        ...po,
+        supplierName: po.Supplier.name,
+        paidAmount: Number(paidAmount),
+        Supplier: undefined,
+        PurchaseOrderPaymentHistories: undefined,
+      };
+    });
 
     return NextResponse.json({ message: 'Success', result: mappedPurchaseOrders, recordsTotal }, { status: 200 });
   } catch (e) {

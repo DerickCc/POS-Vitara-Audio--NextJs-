@@ -11,15 +11,14 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { updateSoPayment } from '@/services/sales-order-service';
-import { updatePoPayment } from '@/services/purchase-order-service';
+import { updatePayment } from '@/services/payment-service';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   id: string;
   code: string;
-  type: 'po' | 'so' | undefined,
+  type: 'po' | 'so',
   grandTotal: number;
   paidAmount: number;
   redirectTo?: string; // to redirect
@@ -63,12 +62,7 @@ export default function PaymentModal({
 
   const onSubmit = async (data: PaymentModel) => {
     try {
-      let message = null;
-      if (data.type === 'po') {
-        message = await updatePoPayment(data);
-      } else if (data.type === 'so') {
-        message = await updateSoPayment(data);
-      }
+      const message = await updatePayment(data);
       toast.success(message, { duration: 5000 });
       onClose();
 

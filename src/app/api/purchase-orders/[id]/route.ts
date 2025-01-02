@@ -48,6 +48,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
             totalPrice: true,
           },
         },
+        PurchaseOrderPaymentHistories: {
+          select: { amount: true }
+        }
       },
     });
 
@@ -62,13 +65,17 @@ export async function GET(request: Request, { params }: { params: { id: string }
       Product: undefined,
     }));
 
+    const paidAmount = po.PurchaseOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+
     const formattedPo = {
       ...po,
       supplierName: po.Supplier.name,
       supplierReceivable: Number(po.Supplier.receivables),
       appliedReceivables: Number(po.appliedReceivables),
+      paidAmount: Number(paidAmount),
       details: formattedPoDetail,
       Supplier: undefined,
+      PurchaseOrderPaymentHistories: undefined,
       PurchaseOrderDetails: undefined,
     };
 
