@@ -92,7 +92,7 @@ export async function GET(request: Request) {
         Customer: {
           select: { name: true, licensePlate: true },
         },
-        PaymentHistories: {
+        SalesOrderPaymentHistories: {
           select: { amount: true },
         },
         CreatedBy: {
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
     const recordsTotal = await db.salesOrders.count({ where });
 
     const mappedSalesOrders = salesOrders.map((so) => {
-      const paidAmount = so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+      const paidAmount = so.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
 
       return {
         ...so,
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
         paidAmount,
         cashier: so.CreatedBy.name,
         Customer: undefined,
-        PaymentHistories: undefined,
+        SalesOrderPaymentHistories: undefined,
         CreatedBy: undefined,
       };
     });
@@ -300,7 +300,7 @@ export async function POST(request: Request) {
       }
 
       // create payment history
-      await prisma.paymentHistories.create({
+      await prisma.salesOrderPaymentHistories.create({
         data: {
           SalesOrder: {
             connect: { id: so.id },

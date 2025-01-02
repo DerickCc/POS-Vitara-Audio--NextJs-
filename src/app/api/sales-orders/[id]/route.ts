@@ -34,7 +34,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           },
         },
         paymentType: true,
-        PaymentHistories: {
+        SalesOrderPaymentHistories: {
           select: { amount: true },
         },
         subTotal: true,
@@ -94,7 +94,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const cashier = so.CreatedBy.name;
 
-    const paidAmount = so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+    const paidAmount = so.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
 
     const formattedSo = {
       ...so,

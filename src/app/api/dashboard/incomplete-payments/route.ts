@@ -42,10 +42,10 @@ export async function GET(request: Request) {
         id: true,
         code: true,
         Customer: {
-          select: { name: true },
+          select: { name: true, licensePlate: true },
         },
         grandTotal: true,
-        PaymentHistories: {
+        SalesOrderPaymentHistories: {
           select: { amount: true },
         },
       },
@@ -53,18 +53,19 @@ export async function GET(request: Request) {
     const recordsTotal = await db.salesOrders.count({ where });
 
     const mappedIncompletePayments = incompletePayments.map((data) => {
-      const paidAmount = data.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+      const paidAmount = data.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
 
       return {
         ...data,
         soId: data.id,
         soCode: data.code,
         customerName: data.Customer.name,
+        customerLicensePlate: data.Customer.licensePlate,
         paidAmount,
         id: undefined,
         code: undefined,
         Customer: undefined,
-        PaymentHistories: undefined,
+        SalesOrderPaymentHistories: undefined,
       };
     });
 

@@ -91,7 +91,7 @@ export async function GET(request: Request) {
         subTotal: true,
         discount: true,
         grandTotal: true,
-        PaymentHistories: {
+        SalesOrderPaymentHistories: {
           select: { amount: true },
         },
         CreatedBy: {
@@ -148,7 +148,7 @@ export async function GET(request: Request) {
         subTotal: Number(so.subTotal),
         discount: Number(so.discount),
         grandTotal: Number(so.grandTotal),
-        paidAmount: so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0)),
+        paidAmount: so.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0)),
         customerName: so.Customer.name,
         productDetails: formattedSoProductDetails,
         serviceDetails: formattedSoServiceDetails,
@@ -195,7 +195,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
 
   // headers
   const headerRow = ws.addRow([
-    'No. Invoice',
+    'Kode',
     'Kasir',
     'Tanggal Penjualan',
     'Pelanggan',

@@ -214,7 +214,7 @@ async function exportSalesReturnsToExcel(startDate: string, endDate: string, dat
   const headerRow = ws.addRow([
     'Kode SR',
     'Tanggal Retur',
-    'No. Invoice yang Diretur',
+    'Kode SO yang Diretur',
     'Pelanggan',
     'Grand Total',
     'Status',

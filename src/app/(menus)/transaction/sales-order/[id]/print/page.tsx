@@ -96,7 +96,7 @@ export default function PrintSalesOrderPage() {
               {/* Customer & Invoice Info */}
               <div className='pr-5'>
                 {[
-                  { label: 'No. Invoice', value: so.code },
+                  { label: 'Kode', value: so.code },
                   { label: 'Pelanggan', value: `${so.customerName} (${so.customerLicensePlate})` },
                   { label: 'Alamat Pelanggan', value: so.customerAddress || '-' },
                   { label: 'No. Telp. Pelanggan', value: so.customerPhoneNo || '-' },

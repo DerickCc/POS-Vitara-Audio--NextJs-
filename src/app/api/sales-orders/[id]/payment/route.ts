@@ -27,7 +27,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       select: {
         status: true,
         grandTotal: true,
-        PaymentHistories: {
+        SalesOrderPaymentHistories: {
           select: { amount: true },
         },
       },
@@ -37,7 +37,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ message: 'Transaksi Penjualan tidak ditemukan' }, { status: 404 });
     }
 
-    const paidAmount = so.PaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
+    const paidAmount = so.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
     const unpaidAmount = so.grandTotal.minus(paidAmount);
 
     if (new Decimal(data.paymentAmount).greaterThan(unpaidAmount)) {
@@ -45,7 +45,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     await db.$transaction(async (prisma) => {
-      await prisma.paymentHistories.create({
+      await prisma.salesOrderPaymentHistories.create({
         data: {
           SalesOrder: {
             connect: { id },

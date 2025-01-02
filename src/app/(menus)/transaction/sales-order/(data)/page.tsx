@@ -135,6 +135,7 @@ export default function SalesOrderDataPage() {
 
   const actionHandlers: any = {
     cancel: (id: string) => handleCancel(id),
+    fetchData: () => fetchSalesOrders(),
   };
 
   return (
@@ -174,7 +175,7 @@ export default function SalesOrderDataPage() {
 
       <BasicTable<SalesOrderModel>
         data={salesOrders}
-        columns={columns({ actionHandlers, fetchSalesOrders })}
+        columns={columns({ actionHandlers })}
         pageSize={pageSize}
         setPageSize={handlePageSizeChange}
         pageIndex={pageIndex}

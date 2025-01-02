@@ -34,7 +34,7 @@ import { FaRegMoneyBillAlt, FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { IoCartOutline } from 'react-icons/io5';
 import { PiCalendarBlank, PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
-import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
+import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import ProductOptionTemplate from '@/components/inventory/product/product-option-template';
 import { useAuth } from '@/hooks/use-auth';
@@ -103,7 +103,7 @@ export default function SalesOrderForm({
 
   const [noInvoice, setNoInvoice] = useState('');
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
-  const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
+  const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
 
   useEffect(() => {
     setNoInvoice(newSoCode);
@@ -442,7 +442,7 @@ export default function SalesOrderForm({
                 <Spinner />
               ) : (
                 <>
-                  <Text className='mb-3 text-lg font-medium'>No. Invoice: {noInvoice}</Text>
+                  <Text className='mb-3 text-lg font-medium'>Kode: {noInvoice}</Text>
 
                   <Controller
                     control={control}
@@ -742,7 +742,7 @@ export default function SalesOrderForm({
                           <span className='font-semibold'>TOTAL</span>
                         </td>
                         <td className='table-cell'>
-                          <RupiahInput onChange={() => {}} defaultValue={totalProductSoldAmount} readOnly={true} />
+                          <RupiahInput onChange={() => { }} defaultValue={totalProductSoldAmount} readOnly={true} />
                         </td>
                       </tr>
                     </tbody>
@@ -878,7 +878,7 @@ export default function SalesOrderForm({
                           <span className='font-semibold'>TOTAL</span>
                         </td>
                         <td className='table-cell'>
-                          <RupiahInput onChange={() => {}} defaultValue={totalServiceSoldAmount} readOnly={true} />
+                          <RupiahInput onChange={() => { }} defaultValue={totalServiceSoldAmount} readOnly={true} />
                         </td>
                       </tr>
                     </tbody>
@@ -903,11 +903,12 @@ export default function SalesOrderForm({
             <Button
               onClick={() => {
                 openPaymentModal({
-                  soId: defaultValues.id,
-                  soCode: defaultValues.code,
+                  id: defaultValues.id,
+                  code: defaultValues.code,
+                  type: 'so',
                   grandTotal: defaultValues.grandTotal,
                   paidAmount: defaultValues.paidAmount,
-                  isFromView: true,
+                  redirectTo: routes.transaction.salesOrder.data,
                 });
               }}
               className={cn(buttonColorClass.green, baseButtonClass)}
@@ -919,7 +920,7 @@ export default function SalesOrderForm({
       </form>
 
       <ConfirmationModalComponent />
-      <SalesOrderPaymentModalComponent />
+      <PaymentModalComponent />
     </>
   );
 }

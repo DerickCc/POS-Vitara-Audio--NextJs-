@@ -70,8 +70,8 @@ export default function SalesOrderFilter({
             value={localFilters.code}
             onChange={(e) => handleFilterChange('code')(e.target.value)}
             className='sm:col-span-3'
-            label='No. Invoice'
-            placeholder='Cari No. Invoice'
+            label='Kode'
+            placeholder='Cari Kode'
           />
           <Select<SearchCustomerModel>
             value={localFilters.customerId}

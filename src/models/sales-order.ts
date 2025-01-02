@@ -93,19 +93,3 @@ export class SalesOrderModel {
     this.cashier = data.cashier;
   }
 }
-
-export const SalesOrderPaymentSchema = z.object({
-  soId: z.string().min(1, { message: 'Id Transaksi Penjualan tidak boleh kosong' }),
-  soCode: z.string().min(1, { message: 'Kode Transaksi Penjualan tidak boleh kosong' }),
-  paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
-  paymentAmount: z.coerce.number().min(1, { message: 'Harap mengisi jumlah pembayaran' }),
-});
-
-export interface SalesOrderPaymentModel {
-  soId: string;
-  soCode: string;
-  grandTotal: number;
-  paidAmount: number; // total
-  paymentAmount: number;
-  paymentMethod: string;
-}

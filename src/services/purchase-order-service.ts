@@ -1,4 +1,5 @@
 import { PaginatedApiResponse, QueryParamsModel } from '@/models/global.model';
+import { PaymentModel } from '@/models/payment-history.model';
 import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { apiFetch, toQueryString } from '@/utils/api';
 
@@ -64,6 +65,18 @@ export const updatePo = async (id: string, payload: PurchaseOrderModel): Promise
   try {
     const response = await apiFetch(`/api/purchase-orders/${id}`, {
       method: 'PUT',
+      body: payload,
+    });
+    return response.message;
+  } catch (e) {
+    throw e + '';
+  }
+};
+
+export const updatePoPayment = async (payload: PaymentModel): Promise<string> => {
+  try {
+    const response = await apiFetch(`/api/purchase-orders/${payload.id}/payment`, {
+      method: 'POST',
       body: payload,
     });
     return response.message;

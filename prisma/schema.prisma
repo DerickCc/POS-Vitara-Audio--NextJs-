@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Users {
-  id            String    @id @default(cuid())
+  id            String    @id @default(uuid())
   name          String    @db.VarChar(50)
   username      String    @unique @db.VarChar(50)
   password      String
@@ -36,6 +36,8 @@ model Users {
   CreatedPurchaseOrderDetails PurchaseOrderDetails[]
   UpdatedPurchaseOrderDetails PurchaseOrderDetails[] @relation("UpdatedByUser")
 
+  CreatedPurchaseOrderPaymentHistories PurchaseOrderPaymentHistories[]
+
   CreatedSalesOrders SalesOrders[]
   UpdatedSalesOrders SalesOrders[] @relation("UpdatedByUser")
 
@@ -45,7 +47,7 @@ model Users {
   CreatedSalesOrderServiceDetails SalesOrderServiceDetails[]
   UpdatedSalesOrderServiceDetails SalesOrderServiceDetails[] @relation("UpdatedByUser")
 
-  CreatedPaymentHistories PaymentHistories[]
+  CreatedSalesOrderPaymentHistories SalesOrderPaymentHistories[]
 
   CreatedPurchaseReturns PurchaseReturns[]
   UpdatedPurchaseReturns PurchaseReturns[] @relation("UpdatedByUser")
@@ -66,7 +68,7 @@ model Users {
 }
 
 model Customers {
-  id           String    @id @default(cuid())
+  id           String    @id @default(uuid())
   code         String    @unique @db.VarChar(20)
   name         String    @db.VarChar(100)
   licensePlate String    @map("license_plate") @db.VarChar(20)
@@ -87,7 +89,7 @@ model Customers {
 }
 
 model Suppliers {
-  id               String    @id @default(cuid())
+  id               String    @id @default(uuid())
   code             String    @unique @db.VarChar(20)
   name             String    @db.VarChar(100)
   pic              String    @db.VarChar(100)
@@ -111,7 +113,7 @@ model Suppliers {
 }
 
 model Products {
-  id               String    @id @default(cuid())
+  id               String    @id @default(uuid())
   code             String    @unique @db.VarChar(20)
   name             String    @db.VarChar(100)
   photo            String?   @db.VarChar(250)
@@ -140,7 +142,7 @@ model Products {
 }
 
 model PurchaseOrders {
-  id                 String    @id @default(cuid())
+  id                 String    @id @default(uuid())
   code               String    @unique @db.VarChar(20)
   purchaseDate       DateTime  @default(now()) @map("purchase_date")
   supplierId         String    @map("supplier_id")
@@ -163,13 +165,14 @@ model PurchaseOrders {
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  UpdatedBy                     Users?                          @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  PurchaseOrderPaymentHistories PurchaseOrderPaymentHistories[]
 
   @@index([code, purchaseDate, supplierId, grandTotal, status], map: "purchase_orders_index")
 }
 
 model PurchaseOrderDetails {
-  id               String    @id @default(cuid())
+  id               String    @id @default(uuid())
   poId             String    @map("po_id")
   productId        String    @map("product_id")
   purchasePrice    Decimal   @map("purchase_price") @db.Decimal(10, 2)
@@ -192,8 +195,22 @@ model PurchaseOrderDetails {
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }
 
+model PurchaseOrderPaymentHistories {
+  id            String   @id @default(uuid())
+  poId          String   @map("po_id")
+  paymentDate   DateTime @default(now()) @map("payment_date")
+  paymentMethod String   @map("payment_method") @db.VarChar(20)
+  amount        Decimal  @db.Decimal(10, 2)
+  createdBy     String   @map("created_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  PurchaseOrder PurchaseOrders @relation(fields: [poId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+}
+
 model SalesOrders {
-  id          String    @id @default(cuid())
+  id          String    @id @default(uuid())
   code        String    @unique @db.VarChar(20)
   salesDate   DateTime  @default(now()) @map("sales_date")
   entryDate   DateTime  @map("entry_date")
@@ -215,7 +232,7 @@ model SalesOrders {
 
   SalesOrderServiceDetails SalesOrderServiceDetails[]
 
-  PaymentHistories PaymentHistories[]
+  SalesOrderPaymentHistories SalesOrderPaymentHistories[]
 
   SalesReturns SalesReturns[]
 
@@ -227,7 +244,7 @@ model SalesOrders {
 }
 
 model SalesOrderProductDetails {
-  id               String    @id @default(cuid())
+  id               String    @id @default(uuid())
   soId             String    @map("so_id")
   productId        String    @map("product_id")
   costPrice        Decimal   @map("cost_price") @db.Decimal(10, 2)
@@ -253,7 +270,7 @@ model SalesOrderProductDetails {
 }
 
 model SalesOrderServiceDetails {
-  id               String    @id @default(cuid())
+  id               String    @id @default(uuid())
   soId             String    @map("so_id")
   serviceName      String    @map("service_name")
   sellingPrice     Decimal   @map("selling_price") @db.Decimal(10, 2)
@@ -272,8 +289,8 @@ model SalesOrderServiceDetails {
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }
 
-model PaymentHistories {
-  id            String   @id @default(cuid())
+model SalesOrderPaymentHistories {
+  id            String   @id @default(uuid())
   soId          String   @map("so_id")
   paymentDate   DateTime @default(now()) @map("payment_date")
   paymentMethod String   @map("payment_method") @db.VarChar(20)
@@ -287,7 +304,7 @@ model PaymentHistories {
 }
 
 model PurchaseReturns {
-  id         String    @id @default(cuid())
+  id         String    @id @default(uuid())
   poId       String    @map("po_id")
   code       String    @unique @db.VarChar(20)
   returnDate DateTime  @default(now()) @map("return_date")
@@ -311,7 +328,7 @@ model PurchaseReturns {
 }
 
 model PurchaseReturnDetails {
-  id             String    @id @default(cuid())
+  id             String    @id @default(uuid())
   prId           String    @map("pr_id")
   podId          String    @map("pod_id")
   returnPrice    Decimal   @map("return_price") @db.Decimal(10, 2)
@@ -332,7 +349,7 @@ model PurchaseReturnDetails {
 }
 
 model SalesReturns {
-  id         String    @id @default(cuid())
+  id         String    @id @default(uuid())
   soId       String    @map("so_id")
   code       String    @unique @db.VarChar(20)
   returnDate DateTime  @default(now()) @map("return_date")
@@ -357,7 +374,7 @@ model SalesReturns {
 }
 
 model SalesReturnProductDetails {
-  id             String    @id @default(cuid())
+  id             String    @id @default(uuid())
   srId           String    @map("sr_id")
   sopdId         String    @map("sopd_id")
   returnPrice    Decimal   @map("return_price") @db.Decimal(10, 2)
@@ -378,7 +395,7 @@ model SalesReturnProductDetails {
 }
 
 model SalesReturnServiceDetails {
-  id             String    @id @default(cuid())
+  id             String    @id @default(uuid())
   srId           String    @map("sr_id")
   serviceName    String    @map("service_name")
   returnQuantity Decimal   @map("return_quantity") @db.Decimal(10, 2)

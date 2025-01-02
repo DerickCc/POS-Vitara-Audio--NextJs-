@@ -3,48 +3,51 @@
 import cn from '@/utils/class-names';
 import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
 import { Controller, useForm } from 'react-hook-form';
-import { Button, Input, Modal, Radio, RadioGroup, Text } from 'rizzui';
-import RupiahFormInput from '../../form-inputs/rupiah-form-input';
-import { SalesOrderPaymentModel, SalesOrderPaymentSchema } from '@/models/sales-order';
-import RupiahInput from '../../inputs/rupiah-input';
+import { Button, Input, Loader, Modal, Radio, RadioGroup, Text } from 'rizzui';
+import RupiahFormInput from '../form-inputs/rupiah-form-input';
+import { PaymentModel, PaymentSchema } from '@/models/payment-history.model';
+import RupiahInput from '../inputs/rupiah-input';
 import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { routes } from '@/config/routes';
 import { useRouter } from 'next/navigation';
 import { updateSoPayment } from '@/services/sales-order-service';
+import { updatePoPayment } from '@/services/purchase-order-service';
 
-interface SalesOrderPaymentModalProps {
+interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  soId: string;
-  soCode: string;
+  id: string;
+  code: string;
+  type: 'po' | 'so' | undefined,
   grandTotal: number;
   paidAmount: number;
-  isFromView: boolean;
-  fetchSalesOrders: () => void;
+  redirectTo?: string; // to redirect
+  fetchData: () => void;
 }
 
-export default function SalesOrderPaymentModal({
+export default function PaymentModal({
   isOpen,
   onClose,
-  soId,
-  soCode,
+  id,
+  code,
+  type,
   grandTotal,
   paidAmount,
-  isFromView,
-  fetchSalesOrders,
-}: SalesOrderPaymentModalProps) {
-  const { register, setValue, control, handleSubmit } = useForm<SalesOrderPaymentModel>({
+  redirectTo = '',
+  fetchData,
+}: PaymentModalProps) {
+  const { register, setValue, control, handleSubmit, formState: { isSubmitting } } = useForm<PaymentModel>({
     defaultValues: {
-      soId,
-      soCode,
+      id,
+      code,
+      type,
       grandTotal,
       paidAmount,
       paymentAmount: 0,
       paymentMethod: 'Non-tunai',
     },
-    resolver: zodResolver(SalesOrderPaymentSchema),
+    resolver: zodResolver(PaymentSchema),
   });
 
   const router = useRouter();
@@ -58,17 +61,20 @@ export default function SalesOrderPaymentModal({
     }
   }, [grandTotal]);
 
-  const onSubmit = async (data: SalesOrderPaymentModel) => {
+  const onSubmit = async (data: PaymentModel) => {
     try {
-      const message = await updateSoPayment(data);
+      let message = null;
+      if (type === 'po') {
+        message = await updatePoPayment(data);
+      } else if (type === 'so') {
+        message = await updateSoPayment(data);
+      }
+      console.log(data)
       toast.success(message, { duration: 5000 });
       onClose();
 
-      if (isFromView) {
-        router.push(routes.transaction.salesOrder.data);
-      } else {
-        fetchSalesOrders();
-      }
+      if (redirectTo) router.push(redirectTo);
+      else fetchData();
     } catch (e) {
       toast.error(e + '', { duration: 5000 });
     }
@@ -93,11 +99,11 @@ export default function SalesOrderPaymentModal({
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className='grid sm:grid-cols-2 gap-6'>
             <Input
-              label='No. Invoice'
-              placeholder='No. Invoice'
+              label='Kode'
+              placeholder='Kode'
               inputClassName={readOnlyClass}
               readOnly
-              {...register('soCode')}
+              {...register('code')}
             />
             <Controller
               control={control}
@@ -128,7 +134,7 @@ export default function SalesOrderPaymentModal({
             <RupiahInput
               label='Jumlah yang Harus Dilunasi'
               defaultValue={totalDue}
-              onChange={() => {}}
+              onChange={() => { }}
               readOnly={true}
             />
 
@@ -184,7 +190,7 @@ export default function SalesOrderPaymentModal({
             <RupiahInput
               label='Sisa yang Harus Dilunasi'
               defaultValue={unpaidAmount}
-              onChange={() => {}}
+              onChange={() => { }}
               readOnly={true}
             />
           </div>
@@ -193,8 +199,8 @@ export default function SalesOrderPaymentModal({
             <Button variant='outline' style={{ width: 75 }} onClick={onClose}>
               Batal
             </Button>
-            <Button className={cn(buttonColorClass.red, baseButtonClass)} style={{ width: 75 }} type='submit'>
-              Bayar
+            <Button className={cn(buttonColorClass.red, baseButtonClass)} style={{ minWidth: 75 }} type='submit' disabled={isSubmitting}>
+              {isSubmitting && <Loader variant='spinner' className='me-1.5' />} Bayar
             </Button>
           </div>
         </form>

@@ -9,6 +9,7 @@ export interface IncompletePaymentModel {
   soId: string;
   soCode: string;
   customerName: string;
+  customerLicensePlate: string;
   grandTotal: number;
   paidAmount: number;
 }

@@ -13,20 +13,18 @@ import { FiMoreVertical } from 'react-icons/fi';
 import { Row } from '@tanstack/react-table';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt } from 'react-icons/fa';
-import { useSalesOrderPaymentModal } from '@/hooks/sales-order/use-payment-modal';
+import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { useAuth } from '@/hooks/use-auth';
 
 function ActionColumn({
   row,
   actionHandlers,
-  fetchSalesOrders,
 }: {
   row: Row<SalesOrderModel>;
   actionHandlers: any;
-  fetchSalesOrders: () => void;
 }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
-  const { openPaymentModal, SalesOrderPaymentModalComponent } = useSalesOrderPaymentModal();
+  const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
   const { user } = useAuth();
 
   return (
@@ -51,11 +49,12 @@ function ActionColumn({
             <Dropdown.Item
               onClick={() => {
                 openPaymentModal({
-                  soId: row.original.id,
-                  soCode: row.original.code,
+                  id: row.original.id,
+                  code: row.original.code,
+                  type: 'so',
                   grandTotal: row.original.grandTotal,
                   paidAmount: row.original.paidAmount,
-                  fetchSalesOrders,
+                  fetchData: actionHandlers.fetchData,
                 });
               }}
             >
@@ -91,30 +90,24 @@ function ActionColumn({
       </Dropdown>
 
       <ConfirmationModalComponent />
-      <SalesOrderPaymentModalComponent />
+      <PaymentModalComponent />
     </>
   );
 }
 
 const columnHelper = createColumnHelper<SalesOrderModel>();
 
-export const columns = ({
-  actionHandlers,
-  fetchSalesOrders,
-}: {
-  actionHandlers: any;
-  fetchSalesOrders: () => void;
-}): ColumnDef<SalesOrderModel, any>[] => [
+export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<SalesOrderModel, any>[] => [
   columnHelper.display({
     id: 'actions',
     size: 60,
     header: () => 'Aksi',
-    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} fetchSalesOrders={fetchSalesOrders} />,
+    cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
   columnHelper.accessor('code', {
     id: 'code',
     size: 120,
-    header: () => 'No. Invoice',
+    header: () => 'Kode',
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),

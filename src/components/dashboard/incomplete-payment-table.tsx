@@ -16,7 +16,7 @@ const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [
   columnHelper.accessor('soCode', {
     id: 'code',
     size: 100,
-    header: 'No. Invoice',
+    header: 'Kode',
     cell: ({ row }) => (
       <Link href={routes.transaction.salesOrder.detail(row.original.soId)}>
         <span className='text-primary'>{row.original.soCode}</span>
@@ -28,7 +28,13 @@ const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [
     id: 'customerName',
     size: 160,
     header: () => 'Pelanggan',
-    cell: (info) => info.getValue(),
+    cell: ({ row }) => (
+      <>
+        <span>{row.original.customerName}</span>
+        <br/>
+        <span>({row.original.customerLicensePlate})</span>
+      </>
+    ),
     enableSorting: true,
   }),
   columnHelper.accessor('grandTotal', {
