@@ -1,23 +1,23 @@
-import { SalesOrderPaymentModel } from '@/models/sales-order';
+import { PaymentModel } from '@/models/payment-history.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // UpdateSoPayment
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
   if (!session.id) {
     return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
+      { message: 'Unauthorized, mohon melakukan login ulang' },
       { status: 401 }
     );
   }
 
   const { id } = params;
 
-  const data: SalesOrderPaymentModel = await request.json();
+  const data: PaymentModel = await request.json();
 
   try {
     const userId = session.id;

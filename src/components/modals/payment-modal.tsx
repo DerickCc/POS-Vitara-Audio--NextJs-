@@ -64,12 +64,11 @@ export default function PaymentModal({
   const onSubmit = async (data: PaymentModel) => {
     try {
       let message = null;
-      if (type === 'po') {
+      if (data.type === 'po') {
         message = await updatePoPayment(data);
-      } else if (type === 'so') {
+      } else if (data.type === 'so') {
         message = await updateSoPayment(data);
       }
-      console.log(data)
       toast.success(message, { duration: 5000 });
       onClose();
 

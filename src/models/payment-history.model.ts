@@ -19,6 +19,9 @@ export class PaymentHistoryModel {
 export const PaymentSchema = z.object({
   id: z.string().min(1, { message: 'Id Transaksi tidak boleh kosong' }),
   code: z.string().min(1, { message: 'Kode Transaksi tidak boleh kosong' }),
+  type: z
+    .string()
+    .refine((type) => type === 'so' || type === 'po', { message: 'Tipe transaksi pembayaran tidak valid'}),
   paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
   paymentAmount: z.coerce.number().min(1, { message: 'Harap mengisi jumlah pembayaran' }),
 });
