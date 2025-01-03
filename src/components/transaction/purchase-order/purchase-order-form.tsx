@@ -12,7 +12,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegMoneyBillAlt, FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
-import { ActionIcon, Button, Input, Loader, Select, Textarea, cn } from 'rizzui';
+import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
 import { IoCartOutline } from 'react-icons/io5';
 import {
   actionIconColorClass,
@@ -52,7 +52,7 @@ export default function PurchaseOrderForm({
     getValues,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
   } = useForm<PurchaseOrderModel>({
     defaultValues,
@@ -79,12 +79,17 @@ export default function PurchaseOrderForm({
   const appliedReceivables = watch('appliedReceivables');
   const [appliedReceivablesLimit, setAppliedReceivablesLimit] = useState(0);
 
+  const grandTotal = watch('grandTotal');
+
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
 
   useEffect(() => {
     if (defaultValues.id) {
       defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
       defaultValues.supplierReceivable += defaultValues.appliedReceivables;
+
+      // if edit, reset paidAmount to 0
+      if (!isReadOnly) defaultValues.paidAmount = 0;
 
       setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
 
@@ -188,6 +193,12 @@ export default function PurchaseOrderForm({
       return acc + d.purchasePrice * d.quantity;
     }, 0);
     setValue('subTotal', subTotal);
+  };
+
+  const handlePaidAmountChange = (paidAmount: number) => {
+    if (paidAmount >= grandTotal) {
+      setValue('paidAmount', grandTotal);
+    }
   };
   // ------------------------
 
@@ -458,6 +469,66 @@ export default function PurchaseOrderForm({
                         />
                       </td>
                     </tr>
+                    <tr>
+                      <td className='table-cell text-right' colSpan={5}>
+                        <span className='font-semibold'>TELAH DIBAYAR</span>
+                      </td>
+                      <td className='table-cell'>
+                        <Controller
+                          control={control}
+                          name='paidAmount'
+                          render={({ field: { value }, fieldState: { error } }) => (
+                            <RupiahFormInput
+                              setValue={setValue}
+                              onChange={handlePaidAmountChange}
+                              fieldName='paidAmount'
+                              defaultValue={value}
+                              error={error?.message}
+                              readOnly={isReadOnly || grandTotal === 0}
+                            />
+                          )}
+                        />
+                      </td>
+                    </tr>
+                    {!isReadOnly && (
+                      <tr>
+                        <td className='table-cell text-right' colSpan={5}>
+                          <span className='font-semibold'>METODE PEMBAYARAN</span>
+                        </td>
+                        <td className='table-cell'>
+                          <Controller
+                            control={control}
+                            name='paymentMethod'
+                            render={({ field: { value, onChange }, fieldState: { error } }) => (
+                              <RadioGroup value={value} setValue={onChange}>
+                                <div className='flex align-items gap-6'>
+                                  <Radio
+                                    name='paymentMethod'
+                                    label='Tunai'
+                                    value='Tunai'
+                                    onChange={onChange}
+                                    checked={value === 'Tunai'}
+                                    size='sm'
+                                    labelClassName='text-sm'
+                                    error={error?.message}
+                                  />
+                                  <Radio
+                                    name='paymentMethod'
+                                    label='Non-tunai'
+                                    value='Non-tunai'
+                                    onChange={onChange}
+                                    checked={value === 'Non-tunai'}
+                                    size='sm'
+                                    labelClassName='text-sm'
+                                    error={error?.message}
+                                  />
+                                </div>
+                              </RadioGroup>
+                            )}
+                          />
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -467,7 +538,7 @@ export default function PurchaseOrderForm({
 
         <div className='flex justify-end'>
           {!isReadOnly && (
-            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
               {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
               <span>Simpan</span>
             </Button>

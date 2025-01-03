@@ -9,10 +9,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const session = await getSession();
 
   if (!session.id) {
-    return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang' },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
   const { id } = params;
@@ -49,8 +46,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
           },
         },
         PurchaseOrderPaymentHistories: {
-          select: { amount: true }
-        }
+          select: { amount: true },
+        },
       },
     });
 
@@ -127,7 +124,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     // adjustment may be + or -
     const appliedReceivablesAdjustment = new Decimal(data.appliedReceivables).minus(hasBeenAppliedReceivables);
-    console.log(appliedReceivablesAdjustment)
+    console.log(appliedReceivablesAdjustment);
     if (new Decimal(appliedReceivablesAdjustment).greaterThan(supplierReceivables)) {
       return NextResponse.json(
         { message: 'Potongan piutang melebihi piutang yang dimiliki supplier' },
@@ -141,7 +138,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return acc + d.purchasePrice * d.quantity;
     }, 0);
     const grandTotal = subTotal - data.appliedReceivables;
-
 
     await db.$transaction(async (prisma) => {
       await prisma.purchaseOrders.update({
@@ -209,6 +205,27 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             receivables: appliedReceivablesAdjustment.isPositive()
               ? { decrement: appliedReceivablesAdjustment }
               : { increment: appliedReceivablesAdjustment.abs() },
+          },
+        });
+      }
+
+      // delete all related purchaseOrderPaymentHistories to reset paidAmount to 0
+      await prisma.purchaseOrderPaymentHistories.deleteMany({
+        where: { poId: id },
+      });
+
+      if (data.paidAmount > 0) {
+        // create payment history
+        await prisma.purchaseOrderPaymentHistories.create({
+          data: {
+            PurchaseOrder: {
+              connect: { id },
+            },
+            paymentMethod: data.paymentMethod,
+            amount: data.paidAmount,
+            CreatedBy: {
+              connect: { id: userId },
+            },
           },
         });
       }

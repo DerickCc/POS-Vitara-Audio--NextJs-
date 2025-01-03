@@ -51,7 +51,7 @@ export default function PurchaseReturnForm({
     getValues,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
   } = useForm<PurchaseReturnModel>({
     defaultValues,
@@ -461,7 +461,7 @@ export default function PurchaseReturnForm({
 
             {!isReadOnly && (
               <div className='flex justify-end px-7'>
-                <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+                <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
                   {isSubmitting ? (
                     <Loader variant='spinner' className='me-1.5' />
                   ) : (

@@ -7,32 +7,39 @@ import {
 import { getCurrDate } from '@/utils/helper-function';
 import { BasicSelectOptions } from './global.model';
 
-export const PurchaseOrderSchema = z.object({
-  supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
-  remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
-  appliedReceivables: z.coerce.number().min(0, { message: 'Potong Piutang tidak boleh negatif' }),
-  details: z
-    .array(PurchaseOrderDetailSchema)
-    .refine(
-      (details) => {
-        const productIds = details.map((d) => d.productId);
-        return new Set(productIds).size === productIds.length;
-      },
-      {
-        message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
-        path: ['refinement'],
-      }
-    )
-    .refine(
-      (details) => {
-        return details.length > 0;
-      },
-      {
-        message: 'Harap pilih minimal 1 barang yang ingin dibeli',
-        path: ['refinement'],
-      }
-    ),
-});
+export const PurchaseOrderSchema = z
+  .object({
+    supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
+    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+    appliedReceivables: z.coerce.number().min(0, { message: 'Potong Piutang tidak boleh negatif' }),
+    paidAmount: z.coerce.number().min(0, { message: 'Jumlah yang telah dibayar tidak boleh bernilai negatif' }),
+    paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
+    details: z
+      .array(PurchaseOrderDetailSchema)
+      .refine(
+        (details) => {
+          const productIds = details.map((d) => d.productId);
+          return new Set(productIds).size === productIds.length;
+        },
+        {
+          message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+          path: ['refinement'],
+        }
+      )
+      .refine(
+        (details) => {
+          return details.length > 0;
+        },
+        {
+          message: 'Harap pilih minimal 1 barang yang ingin dibeli',
+          path: ['refinement'],
+        }
+      ),
+  })
+  .refine((data) => data.paidAmount <= data.details.reduce((acc, d) => acc + d.quantity * d.purchasePrice, 0), {
+    message: 'Jumlah yang telah dibayar tidak boleh melebihi Grand Total',
+    path: ['paidAmount'],
+  });
 
 export class PurchaseOrderModel {
   id: string;
@@ -47,7 +54,8 @@ export class PurchaseOrderModel {
   totalItem: number;
   subTotal: number;
   grandTotal: number;
-  paidAmount: number; // for UI
+  paidAmount: number;
+  paymentMethod: 'Tunai' | 'Non-tunai'; // for UI
   status: 'Dalam Proses' | 'Selesai' | 'Batal';
 
   constructor(data: any = {}) {
@@ -64,6 +72,7 @@ export class PurchaseOrderModel {
     this.subTotal = data.subTotal || 0;
     this.grandTotal = data.grandTotal || 0;
     this.paidAmount = data.paidAmount || 0;
+    this.paymentMethod = data.paymentMethod || 'Non-tunai';
     this.status = data.status || 'Dalam Proses';
   }
 }

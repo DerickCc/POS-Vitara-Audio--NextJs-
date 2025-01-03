@@ -23,7 +23,7 @@ export default function CustomerForm({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
   } = useForm<CustomerModel>({
     defaultValues,
@@ -77,7 +77,7 @@ export default function CustomerForm({
 
           {!isReadOnly && (
             <div className='flex justify-end'>
-              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />
                 ) : (

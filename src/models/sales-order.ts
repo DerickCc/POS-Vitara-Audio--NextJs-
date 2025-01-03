@@ -16,7 +16,7 @@ export const SalesOrderSchema = z
     remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
     paymentType: z.string().min(1, { message: 'Mohon memilih tipe pembayaran' }),
     paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
-    paidAmount: z.coerce.number().min(1, { message: 'Harap mengisi jumlah yang sudah dibayar' }),
+    paidAmount: z.coerce.number().min(1, { message: 'Harap mengisi jumlah yang telah dibayar' }),
     grandTotal: z.coerce.number().min(0, { message: 'Grand Total tidak boleh bernilai negatif' }),
     productDetails: z.array(SalesOrderProductDetailSchema).refine(
       (details) => {
@@ -44,7 +44,7 @@ export const SalesOrderSchema = z
     path: ['refinement'],
   })
   .refine((data) => data.paidAmount <= data.grandTotal, {
-    message: 'Jumlah yang sudah dibayar tidak boleh melebihi Grand Total',
+    message: 'Jumlah yang telah dibayar tidak boleh melebihi Grand Total',
     path: ['paidAmount'],
   });
 

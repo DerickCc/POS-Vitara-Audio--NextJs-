@@ -165,7 +165,8 @@ model PurchaseOrders {
 
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  UpdatedBy                     Users?                          @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
   PurchaseOrderPaymentHistories PurchaseOrderPaymentHistories[]
 
   @@index([code, purchaseDate, supplierId, grandTotal, status], map: "purchase_orders_index")

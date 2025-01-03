@@ -29,7 +29,7 @@ export default function UserForm({
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
   } = useForm<CreateUpdateUserModel>({
     defaultValues,
@@ -138,7 +138,7 @@ export default function UserForm({
             </div>
 
             <div className='flex justify-end'>
-              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />
                 ) : (

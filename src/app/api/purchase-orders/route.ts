@@ -105,7 +105,7 @@ export async function GET(request: Request) {
       return {
         ...po,
         supplierName: po.Supplier.name,
-        paidAmount: Number(paidAmount),
+        paidAmount,
         Supplier: undefined,
         PurchaseOrderPaymentHistories: undefined,
       };
@@ -174,6 +174,7 @@ export async function POST(request: Request) {
     }
 
     const purchaseDate = new Date().toISOString();
+
     const subTotal = data.details.reduce((acc, d) => {
       return acc + d.purchasePrice * d.quantity;
     }, 0);
@@ -215,6 +216,22 @@ export async function POST(request: Request) {
           where: { id: data.supplierId },
           data: {
             receivables: { decrement: data.appliedReceivables },
+          },
+        });
+      }
+
+      if (data.paidAmount > 0) {
+        // create payment history
+        await prisma.purchaseOrderPaymentHistories.create({
+          data: {
+            PurchaseOrder: {
+              connect: { id: po.id },
+            },
+            paymentMethod: data.paymentMethod,
+            amount: data.paidAmount,
+            CreatedBy: {
+              connect: { id: userId },
+            },
           },
         });
       }

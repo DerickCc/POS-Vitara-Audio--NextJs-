@@ -54,7 +54,7 @@ export default function SalesReturnForm({
     getValues,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
   } = useForm<SalesReturnModel>({
     defaultValues,
@@ -587,7 +587,7 @@ export default function SalesReturnForm({
 
       {!isReadOnly && (
         <div className='flex justify-end'>
-          <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+          <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
             {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
             <span>Simpan</span>
           </Button>

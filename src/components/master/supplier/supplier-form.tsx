@@ -29,7 +29,7 @@ export default function SupplierForm({
     control,
     setValue,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
   } = useForm<SupplierModel>({
     defaultValues,
@@ -124,7 +124,7 @@ export default function SupplierForm({
 
           {!isReadOnly && (
             <div className='flex justify-end'>
-              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />
                 ) : (

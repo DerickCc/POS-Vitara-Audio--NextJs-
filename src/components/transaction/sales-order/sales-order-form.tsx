@@ -63,7 +63,7 @@ export default function SalesOrderForm({
     trigger,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
     reset,
   } = useForm<SalesOrderModel>({
     defaultValues,
@@ -100,6 +100,8 @@ export default function SalesOrderForm({
   const [productList, setProductList] = useState<SearchProductModel[]>([]);
   const [totalProductSoldAmount, setTotalProductSoldAmount] = useState(0);
   const [totalServiceSoldAmount, setTotalServiceSoldAmount] = useState(0);
+
+  const grandTotal = watch('grandTotal');
 
   const [noInvoice, setNoInvoice] = useState('');
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
@@ -251,8 +253,6 @@ export default function SalesOrderForm({
   };
 
   const handlePaidAmountChange = (paidAmount: number) => {
-    const grandTotal = getValues().grandTotal;
-
     if (paidAmount >= grandTotal) {
       setValue('paidAmount', grandTotal);
       setValue('paymentType', 'Lunas');
@@ -297,18 +297,18 @@ export default function SalesOrderForm({
 
   const updateGrandTotalAndPayment = () => {
     const formValues = getValues();
-    const grandTotal = formValues.subTotal - formValues.discount;
+    const updatedGrandTotal = formValues.subTotal - formValues.discount;
 
-    setValue('grandTotal', grandTotal);
+    setValue('grandTotal', updatedGrandTotal);
 
     // the paidAmount will follow grandTotal if paymentType is lunas
     if (formValues.paymentType === 'Lunas') {
-      setValue('paidAmount', grandTotal);
+      setValue('paidAmount', updatedGrandTotal);
     }
     // if paidAmount exceed grandTotal, patch paidAmount to grandTotal and status 'Lunas'
-    else if (formValues.paidAmount >= grandTotal && grandTotal !== 0) {
+    else if (formValues.paidAmount >= updatedGrandTotal && updatedGrandTotal !== 0) {
       setValue('paymentType', 'Lunas');
-      setValue('paidAmount', grandTotal);
+      setValue('paidAmount', updatedGrandTotal);
     }
   };
   // ------------------------
@@ -567,13 +567,12 @@ export default function SalesOrderForm({
                     control={control}
                     name='paidAmount'
                     render={({ field: { value }, fieldState: { error } }) => {
-                      const grandTotal = watch('grandTotal');
                       return (
                         <RupiahFormInput
-                          label={<span className='required'>Jumlah yang Sudah Dibayar</span>}
+                          label={<span className='required'>Telah Dibayar</span>}
                           setValue={setValue}
                           onChange={handlePaidAmountChange}
-                          fieldName={`paidAmount`}
+                          fieldName='paidAmount'
                           defaultValue={value}
                           error={error?.message}
                           readOnly={isReadOnly || value === grandTotal || grandTotal === 0}
@@ -892,7 +891,7 @@ export default function SalesOrderForm({
         <div className='flex justify-end'>
           {/* if is create */}
           {!isReadOnly && (
-            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting}>
+            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
               {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
               <span>Simpan</span>
             </Button>

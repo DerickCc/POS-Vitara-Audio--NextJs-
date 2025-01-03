@@ -18,7 +18,7 @@ interface PaymentModalProps {
   onClose: () => void;
   id: string;
   code: string;
-  type: 'po' | 'so',
+  type: 'po' | 'so' | undefined,
   grandTotal: number;
   paidAmount: number;
   redirectTo?: string; // to redirect
