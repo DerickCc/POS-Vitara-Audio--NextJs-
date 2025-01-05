@@ -1,11 +1,12 @@
 'use client';
 
 import { SessionData } from '@/models/session.model';
-import { getSession } from '@/utils/sessionlib';
+import { destroySession, getSession } from '@/utils/sessionlib';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
   user: SessionData | null;
+  fetchUser: () => void;
   logout: () => void;
 }
 
@@ -37,15 +38,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
-      const session = await getSession();
-      session.destroy();
+      await destroySession();
       setUser(null);
     } catch (e) {
       console.error('Failed to log out:', e);
     }
   };
 
-  return <AuthContext.Provider value={{ user, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, fetchUser, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

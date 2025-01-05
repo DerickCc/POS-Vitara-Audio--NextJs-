@@ -9,9 +9,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function LogInForm() {
   const router = useRouter();
+  const { fetchUser } = useAuth();
 
   const {
     register,
@@ -30,6 +32,7 @@ export default function LogInForm() {
       });
 
       toast.success(response.message, { duration: 5000});
+      fetchUser();
       router.push(routes.dashboard);
     } catch (e) {
       toast.error(e + "", { duration: 5000});

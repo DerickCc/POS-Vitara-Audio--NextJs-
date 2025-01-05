@@ -55,7 +55,7 @@ export default function UserForm({
                 {...register('name')}
               />
               <Input
-                label={<span className='required'>Usernmae</span>}
+                label={<span className='required'>Username</span>}
                 placeholder='Username'
                 error={errors.username?.message}
                 {...register('username')}

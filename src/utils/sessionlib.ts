@@ -27,3 +27,8 @@ export const saveSession = async (user: SessionData): Promise<void> => {
 
   await session.save();
 }
+
+export const destroySession = async () => {
+  const session = await getSession();
+  session.destroy();
+}

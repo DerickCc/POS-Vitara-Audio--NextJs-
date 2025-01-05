@@ -27,15 +27,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         suppressHydrationWarning
         className={cn(inter.variable, lexendDeca.variable, 'font-inter')}
       >
-        <ThemeProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <ThemeProvider>
             <OverlayLoadingProvider>
               <NextProgress />
               {children}
               <Toaster position='top-right' />
             </OverlayLoadingProvider>
-          </AuthProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
