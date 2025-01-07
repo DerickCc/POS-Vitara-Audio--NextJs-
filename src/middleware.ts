@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "./utils/sessionlib";
 
-export default function authMiddleWare(req: NextRequest) {
-  const session = req.cookies.get("vitara-session")?.value;
+export default async function authMiddleware(req: NextRequest) {
+  const sessionCookie = req.cookies.get("vitara-session")?.value;
 
-  if (session === undefined) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+  if (!sessionCookie) return NextResponse.redirect(new URL('/login', req.url));
+  
+  const { role } = await getSession();
+  if (req.url.includes('/settings') && role !== 'Admin') {
+    return NextResponse.redirect(new URL('/unauthorized', req.url));
   }
 }
 
