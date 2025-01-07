@@ -54,6 +54,7 @@ export default function SalesOrderForm({
   isLoading = false,
   newSoCode = 'Loading...',
   onSubmit,
+  isSubmitSuccessful = false,
 }: SalesOrderFormProps) {
   const {
     watch,
@@ -63,7 +64,7 @@ export default function SalesOrderForm({
     trigger,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<SalesOrderModel>({
     defaultValues,

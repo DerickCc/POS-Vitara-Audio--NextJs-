@@ -24,12 +24,13 @@ export default function UserForm({
   schema,
   isLoading = false,
   onSubmit,
+  isSubmitSuccessful = false,
 }: UserFormProps) {
   const {
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateUpdateUserModel>({
     defaultValues,

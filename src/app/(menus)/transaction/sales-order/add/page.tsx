@@ -31,6 +31,7 @@ const pageHeader = {
 export default function AddSalesOrderPage() {
   const router = useRouter();
   const [newSoCode, setNewSoCode] = useState('Loading...');
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   useEffect(() => {
     const fetchNewSoCode = async () => {
@@ -46,10 +47,12 @@ export default function AddSalesOrderPage() {
   const create = async (payload: SalesOrderModel) => {
     try {
       const message = await createSo(payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.transaction.salesOrder.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -65,8 +68,8 @@ export default function AddSalesOrderPage() {
             <span>Kembali</span>
           </Button>
         </Link>
-        
-        <SalesOrderForm newSoCode={newSoCode} onSubmit={create} />
+
+        <SalesOrderForm newSoCode={newSoCode} onSubmit={create} isSubmitSuccessful={isSubmitSuccessful} />
       </div>
     </>
   );

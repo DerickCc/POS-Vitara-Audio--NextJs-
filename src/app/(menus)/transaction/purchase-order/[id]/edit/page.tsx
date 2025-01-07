@@ -31,14 +31,17 @@ export default function EditPurchaseOrderPage() {
   const { id } = useParams<{ id: string }>();
   const [po, setPo] = useState<PurchaseOrderModel>(new PurchaseOrderModel());
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const update = async (payload: PurchaseOrderModel) => {
     try {
       const message = await updatePo(id, payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.transaction.purchaseOrder.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -70,7 +73,12 @@ export default function EditPurchaseOrderPage() {
           </Button>
         </Link>
 
-        <PurchaseOrderForm defaultValues={po} isLoading={isLoading} onSubmit={update} />
+        <PurchaseOrderForm
+          defaultValues={po}
+          isLoading={isLoading}
+          onSubmit={update}
+          isSubmitSuccessful={isSubmitSuccessful}
+        />
       </div>
     </>
   );

@@ -5,12 +5,12 @@ import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { CreateUpdateUserModel, CreateUserSchema } from '@/models/user.model';
 import { createUser } from '@/services/user-service';
-import { apiFetch } from '@/utils/api';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Button } from 'rizzui';
 import { PiArrowLeftBold } from 'react-icons/pi';
+import { useState } from 'react';
 
 const pageHeader = {
   title: 'Tambah User',
@@ -30,14 +30,17 @@ const pageHeader = {
 
 export default function AddUserPage() {
   const router = useRouter();
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const create = async (payload: CreateUpdateUserModel) => {
     try {
       const message = await createUser(payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.settings.user.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -54,7 +57,7 @@ export default function AddUserPage() {
           </Button>
         </Link>
         
-        <UserForm schema={CreateUserSchema} onSubmit={create} />
+        <UserForm schema={CreateUserSchema} onSubmit={create} isSubmitSuccessful={isSubmitSuccessful} />
       </div>
     </>
   );

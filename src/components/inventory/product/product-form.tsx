@@ -24,13 +24,14 @@ export default function ProductForm({
   isReadOnly = false,
   isLoading = false,
   onSubmit,
+  isSubmitSuccessful = false,
 }: ProductFormProps) {
   const {
     control,
     register,
     setValue,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<ProductModel>({
     defaultValues,

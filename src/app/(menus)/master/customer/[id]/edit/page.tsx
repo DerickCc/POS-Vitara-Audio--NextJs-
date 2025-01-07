@@ -32,14 +32,17 @@ export default function EditCustomerPage() {
   const { id } = useParams<{ id: string }>();
   const [customer, setCustomer] = useState<CustomerModel>(new CustomerModel());
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const update = async (payload: CustomerModel) => {
     try {
       const message = await updateCustomer(id, payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.master.customer.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -71,7 +74,7 @@ export default function EditCustomerPage() {
           </Button>
         </Link>
 
-        <CustomerForm defaultValues={customer} isLoading={isLoading} onSubmit={update} />
+        <CustomerForm defaultValues={customer} isLoading={isLoading} onSubmit={update} isSubmitSuccessful={isSubmitSuccessful} />
       </div>
     </>
   );

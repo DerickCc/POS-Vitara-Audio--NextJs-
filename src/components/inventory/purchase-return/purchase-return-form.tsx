@@ -43,6 +43,7 @@ export default function PurchaseReturnForm({
   isReadOnly = false,
   isLoading = false,
   onSubmit,
+  isSubmitSuccessful = false,
 }: PurchaseReturnFormProps) {
   const {
     watch,
@@ -51,7 +52,7 @@ export default function PurchaseReturnForm({
     getValues,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<PurchaseReturnModel>({
     defaultValues,

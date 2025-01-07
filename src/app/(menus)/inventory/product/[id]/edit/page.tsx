@@ -31,14 +31,17 @@ export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductModel>(new ProductModel());
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const update = async (payload: ProductModel) => {
     try {
       const message = await updateProduct(id, payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.inventory.product.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -69,7 +72,7 @@ export default function EditProductPage() {
             <span>Kembali</span>
           </Button>
         </Link>
-        <ProductForm defaultValues={product} isLoading={isLoading} onSubmit={update} />
+        <ProductForm defaultValues={product} isLoading={isLoading} onSubmit={update} isSubmitSuccessful={isSubmitSuccessful}/>
       </div>
     </>
   );

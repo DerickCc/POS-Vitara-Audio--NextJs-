@@ -31,14 +31,17 @@ export default function EditSupplierPage() {
   const { id } = useParams<{ id: string }>();
   const [supplier, setSupplier] = useState<SupplierModel>(new SupplierModel());
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const update = async (payload: SupplierModel) => {
     try {
       const message = await updateSupplier(id, payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.master.supplier.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -70,7 +73,7 @@ export default function EditSupplierPage() {
           </Button>
         </Link>
 
-        <SupplierForm defaultValues={supplier} isLoading={isLoading} onSubmit={update} />
+        <SupplierForm defaultValues={supplier} isLoading={isLoading} onSubmit={update} isSubmitSuccessful={isSubmitSuccessful}/>
       </div>
     </>
   );

@@ -44,6 +44,7 @@ export default function PurchaseOrderForm({
   isReadOnly = false,
   isLoading = false,
   onSubmit,
+  isSubmitSuccessful = false,
 }: PurchaseOrderFormProps) {
   const {
     watch,
@@ -52,7 +53,7 @@ export default function PurchaseOrderForm({
     getValues,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<PurchaseOrderModel>({
     defaultValues,

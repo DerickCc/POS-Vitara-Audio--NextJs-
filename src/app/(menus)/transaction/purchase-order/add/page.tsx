@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Button } from 'rizzui';
 import { PiArrowLeftBold } from 'react-icons/pi';
+import { useState } from 'react';
 
 const pageHeader = {
   title: 'Tambah Pembelian',
@@ -29,14 +30,17 @@ const pageHeader = {
 
 export default function AddPurchaseOrderPage() {
   const router = useRouter();
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const create = async (payload: PurchaseOrderModel) => {
     try {
       const message = await createPo(payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.transaction.purchaseOrder.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -53,7 +57,7 @@ export default function AddPurchaseOrderPage() {
           </Button>
         </Link>
 
-        <PurchaseOrderForm onSubmit={create} />
+        <PurchaseOrderForm onSubmit={create} isSubmitSuccessful={isSubmitSuccessful} />
       </div>
     </>
   );

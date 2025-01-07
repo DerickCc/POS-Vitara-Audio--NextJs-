@@ -43,6 +43,7 @@ export interface BasicFormProps<T> {
   defaultValues?: T;
   isLoading?: boolean;
   onSubmit: (data: T) => Promise<void>;
+  isSubmitSuccessful?: boolean;
 }
 
 export interface QueryParamsModel {

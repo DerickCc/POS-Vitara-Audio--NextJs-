@@ -7,6 +7,7 @@ import { SupplierModel } from '@/models/supplier.model';
 import { createSupplier } from '@/services/supplier-service';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
@@ -29,14 +30,17 @@ const pageHeader = {
 
 export default function AddSupplierPage() {
   const router = useRouter();
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const create = async (payload: SupplierModel) => {
     try {
       const message = await createSupplier(payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.master.supplier.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -53,7 +57,7 @@ export default function AddSupplierPage() {
           </Button>
         </Link>
 
-        <SupplierForm onSubmit={create} />
+        <SupplierForm onSubmit={create} isSubmitSuccessful={isSubmitSuccessful}/>
       </div>
     </>
   );

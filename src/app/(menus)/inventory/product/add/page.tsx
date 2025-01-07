@@ -8,6 +8,7 @@ import { createProduct } from '@/services/product-service';
 import { apiFetch } from '@/utils/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button } from 'rizzui';
@@ -30,14 +31,17 @@ const pageHeader = {
 
 export default function AddProductPage() {
   const router = useRouter();
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const create = async (payload: ProductModel) => {
     try {
       const message = await createProduct(payload);
+      setIsSubmitSuccessful(true);
       toast.success(message, { duration: 4000 });
 
       router.push(routes.inventory.product.data);
     } catch (e) {
+      setIsSubmitSuccessful(false);
       toast.error(e + '', { duration: 5000 });
     }
   };
@@ -54,7 +58,7 @@ export default function AddProductPage() {
           </Button>
         </Link>
 
-        <ProductForm onSubmit={create} />
+        <ProductForm onSubmit={create} isSubmitSuccessful={isSubmitSuccessful}/>
       </div>
     </>
   );

@@ -5,7 +5,6 @@ import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
 import { mapTrxStatusToColor } from '@/config/global-variables';
-import { routes } from '@/config/routes';
 import { BasicFormProps, Colors } from '@/models/global.model';
 import {
   SalesReturnProductDetailModel,
@@ -28,12 +27,11 @@ import {
 } from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { debounce } from 'lodash';
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
-import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
+import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { TbTruckReturn } from 'react-icons/tb';
 import { ActionIcon, Button, Input, Loader, Select, Textarea } from 'rizzui';
 
@@ -46,6 +44,7 @@ export default function SalesReturnForm({
   isReadOnly = false,
   isLoading = false,
   onSubmit,
+  isSubmitSuccessful = false,
 }: SalesReturnFormProps) {
   const {
     watch,
@@ -54,7 +53,7 @@ export default function SalesReturnForm({
     getValues,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<SalesReturnModel>({
     defaultValues,

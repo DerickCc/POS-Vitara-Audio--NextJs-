@@ -1,17 +1,14 @@
 import Card from '@/components/card';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
-import { routes } from '@/config/routes';
 import { BasicFormProps } from '@/models/global.model';
 import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
 import cn from '@/utils/class-names';
 import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { FaSave } from 'react-icons/fa';
-import { PiArrowLeftBold } from 'react-icons/pi';
 import { Button, Input, Loader, Textarea } from 'rizzui';
 
 interface SupplierFormProps extends BasicFormProps<SupplierModel> {
@@ -23,13 +20,14 @@ export default function SupplierForm({
   isReadOnly = false,
   isLoading = false,
   onSubmit,
+  isSubmitSuccessful = false,
 }: SupplierFormProps) {
   const {
     register,
     control,
     setValue,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<SupplierModel>({
     defaultValues,
