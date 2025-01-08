@@ -105,7 +105,8 @@ export async function GET(request: Request) {
       return {
         ...po,
         supplierName: po.Supplier.name,
-        paidAmount,
+        paidAmount: Number(paidAmount),
+        grandTotal: Number(po.grandTotal),
         Supplier: undefined,
         PurchaseOrderPaymentHistories: undefined,
       };
