@@ -8,6 +8,7 @@ import '@/app/globals.css';
 import { Toaster } from 'react-hot-toast';
 import { OverlayLoadingProvider } from '@/hooks/use-overlay-loading';
 import { AuthProvider } from '@/hooks/use-auth';
+import GlobalDrawer from './shared/drawer-views/container';
 
 export const metadata: Metadata = {
   title: siteConfig.title,
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <NextProgress />
               {children}
               <Toaster position='top-right' />
+              <GlobalDrawer />
             </OverlayLoadingProvider>
           </ThemeProvider>
         </AuthProvider>

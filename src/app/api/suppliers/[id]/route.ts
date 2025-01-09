@@ -1,6 +1,7 @@
 import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 // GetSupplierById
@@ -109,6 +110,15 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Data Supplier berhasil dihapus' }, { status: 200 });
   } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === 'P2003') {
+        return NextResponse.json(
+          { message: 'Supplier tidak dapat dihapus karena telah memiliki transaksi terkait' },
+          { status: 500 }
+        );
+      }
+    }
+
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

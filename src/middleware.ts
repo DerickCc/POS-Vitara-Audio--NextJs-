@@ -6,9 +6,9 @@ export default async function authMiddleware(req: NextRequest) {
 
   if (!sessionCookie) return NextResponse.redirect(new URL('/login', req.url));
   
-  const { role } = await getSession();
-  if (req.url.includes('/settings') && role !== 'Admin') {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
+  if (req.url.includes('/settings')) {
+    const { role } = await getSession();
+    if (role !== 'Admin') return NextResponse.redirect(new URL('/unauthorized', req.url));
   }
 }
 
