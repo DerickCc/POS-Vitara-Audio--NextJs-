@@ -64,6 +64,11 @@ export const accountStatusOptions = [
   { label: 'Nonaktif', value: false },
 ];
 
+export const productTypeOptions = [
+  { label: 'Barang Jadi', value: 'Barang Jadi' },
+  { label: 'Material', value: 'Material' },
+];
+
 export const roleOptions = [
   { label: 'Admin', value: 'Admin' },
   { label: 'Kasir', value: 'Kasir' },

@@ -4,6 +4,7 @@ import BasicTable from '@/components/tables/basic-table';
 import { routes } from '@/config/routes';
 import { LowStockProductModel } from '@/models/dashboard.model';
 import { browseLowStockProduct } from '@/services/dashboard-service';
+import { formatToDecimal } from '@/utils/helper-function';
 import { ColumnDef, OnChangeFn, SortingState, createColumnHelper } from '@tanstack/react-table';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -26,8 +27,8 @@ const columns = (): ColumnDef<LowStockProductModel, any>[] => [
   columnHelper.accessor('stock', {
     id: 'stock',
     size: 150,
-    header: () => 'Stok',
-    cell: ({ row }) => `${row.original.stock} ${row.original.uom}`,
+    header: () => 'Sisa Stok',
+    cell: ({ row }) => `${formatToDecimal(row.original.stock)} ${row.original.uom}`,
     enableSorting: true,
   }),
 ];
@@ -100,6 +101,5 @@ function tableHeader() {
       <FiAlertTriangle className='size-6 me-2 text-yellow-500' />
       <h5 className='font-medium'>Barang yang Perlu Direstok</h5>
     </div>
-  )
+  );
 }
-

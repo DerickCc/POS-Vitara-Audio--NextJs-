@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { BasicSelectOptions } from "./global.model";
+import { z } from 'zod';
+import { BasicSelectOptions } from './global.model';
 
 export const ProductSchema = z.object({
   name: z.string().min(1, { message: 'Nama harus diisi' }),
-  photo: z.string().optional().nullable(),
+  type: z.string().min(1, { message: 'Mohon memilih tipe barang' }),
   stock: z.coerce.number().min(0, { message: 'Stok tidak boleh negatif' }),
   restockThreshold: z.coerce.number().min(0, { message: 'Ambang Batas Restok tidak boleh negatif' }),
   uom: z.string().min(1, { message: 'Satuan harus diisi' }),
@@ -16,13 +16,13 @@ export class ProductModel {
   id: string;
   code: string;
   name: string;
-  photo: string;
+  type: 'Barang Jadi' | 'Material';
   stock: number;
   restockThreshold: number;
   uom: string;
   costPrice: number;
-  costPriceCode: string;
   purchasePrice: number;
+  purchasePriceCode: string;
   sellingPrice: number;
   remarks: string;
 
@@ -30,13 +30,13 @@ export class ProductModel {
     this.id = data.id;
     this.code = data.code;
     this.name = data.name || '';
-    this.photo = data.photo || '';
+    this.type = data.type || 'Barang Jadi';
     this.stock = data.stock || 0;
     this.restockThreshold = data.restockThreshold || 0;
     this.uom = data.uom;
     this.costPrice = data.costPrice || 0;
-    this.costPriceCode = data.costPriceCode;
     this.purchasePrice = data.purchasePrice || 0;
+    this.purchasePriceCode = data.purchasePriceCode;
     this.sellingPrice = data.sellingPrice || 0;
     this.remarks = data.remarks;
   }
@@ -52,8 +52,8 @@ export interface SearchProductModel extends BasicSelectOptions {
   id: string;
   code: string;
   name: string;
-  costPriceCode: string;
   purchasePrice: number;
+  purchasePriceCode: string;
   sellingPrice: number;
   uom: string;
   stock: number;

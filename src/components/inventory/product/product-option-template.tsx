@@ -6,7 +6,7 @@ export default function ProductOptionTemplate({ option }: { option: SearchProduc
       <div className='flex flex-col'>
         <span className='font-semibold text-gray-800'>{option.name}</span>
         <span className='text-sm text-gray-600'>
-          {option.stock} {option.uom} ({option.costPriceCode})
+          {option.stock} {option.uom} ({option.purchasePriceCode})
         </span>
       </div>
     </div>

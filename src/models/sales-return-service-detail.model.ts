@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const SalesReturnServiceDetailSchema = z.object({
   id: z.string().optional().nullable(),
   serviceName: z.string().min(1, { message: 'Mohon mengisi jasa yang diretur' }),
-  returnQuantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
+  returnQuantity: z.coerce.number().gt(0, { message: 'Qty harus lebih besar dari 0' }),
   reason: z
     .string()
     .min(1, { message: 'Mohon mengisi alasan retur' })

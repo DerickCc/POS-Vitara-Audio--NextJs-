@@ -1,4 +1,4 @@
-import { checkForRelatedRecords, encodeCostPrice } from '@/utils/backend-helper-function';
+import { checkForRelatedRecords } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';

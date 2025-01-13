@@ -4,7 +4,7 @@ export const PurchaseReturnDetailSchema = z.object({
   id: z.string().optional().nullable(),
   podId: z.string().min(1, { message: 'Mohon memilih barang yang diretur' }),
   returnPrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
-  returnQuantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
+  returnQuantity: z.coerce.number().gt(0, { message: 'Qty harus lebih besar dari 0' }),
   reason: z
     .string()
     .min(1, { message: 'Mohon mengisi alasan retur' })

@@ -1,4 +1,5 @@
 import { ProductSchema } from '@/models/product.model';
+import { encodePurchasePrice } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
@@ -63,6 +64,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       where: { id: id },
       data: {
         ...data,
+        purchasePriceCode: await encodePurchasePrice(data.purchasePrice),
         UpdatedBy: {
           connect: { id: userId },
         },

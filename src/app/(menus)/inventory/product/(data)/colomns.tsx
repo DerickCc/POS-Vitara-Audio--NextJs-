@@ -75,20 +75,6 @@ export const columns = (actionHandlers: any): ColumnDef<ProductModel, any>[] => 
     header: () => 'Aksi',
     cell: ({ row }) => <ActionColumn row={row} actionHandlers={actionHandlers} />,
   }),
-  columnHelper.accessor('photo', {
-    id: 'photo',
-    size: 200,
-    header: () => 'Foto',
-    cell: (info) => (
-      <Image
-        src={info.getValue() ? `/product-photo/${info.getValue()}` : imgPlaceholder}
-        alt='Foto Barang'
-        width={150}
-        height={150}
-      />
-    ),
-    enableSorting: false,
-  }),
   columnHelper.accessor('name', {
     id: 'name',
     size: 200,
@@ -117,19 +103,12 @@ export const columns = (actionHandlers: any): ColumnDef<ProductModel, any>[] => 
     cell: (info) => formatToDecimal(info.getValue()),
     enableSorting: true,
   }),
-  columnHelper.accessor('costPriceCode', {
-    id: 'costPriceCode',
-    size: 160,
-    header: () => 'Harga Modal (Kode)',
+  columnHelper.accessor('purchasePriceCode', {
+    id: 'purchasePriceCode',
+    size: 150,
+    header: () => 'Harga Kode',
     cell: (info) => info.getValue() || '-',
     enableSorting: false,
-  }),
-  columnHelper.accessor('purchasePrice', {
-    id: 'purchasePrice',
-    size: 160,
-    header: () => 'Harga Beli',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
-    enableSorting: true,
   }),
   columnHelper.accessor('sellingPrice', {
     id: 'sellingPrice',

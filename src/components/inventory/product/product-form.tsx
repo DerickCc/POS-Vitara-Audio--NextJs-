@@ -4,16 +4,14 @@ import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
 import { ProductModel, ProductSchema } from '@/models/product.model';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { FaSave } from 'react-icons/fa';
-import { Button, Input, Loader, Textarea } from 'rizzui';
-import Image from 'next/image';
-import imgPlaceholder from '@public/image-placeholder.png';
-import toast from 'react-hot-toast';
-import { BasicFormProps } from '@/models/global.model';
+import { Button, Input, Loader, Select, Textarea } from 'rizzui';
+import { BasicFormProps, BasicSelectOptions } from '@/models/global.model';
 import cn from '@/utils/class-names';
 import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
+import { productTypeOptions } from '@/config/global-variables';
 
 interface ProductFormProps extends BasicFormProps<ProductModel> {
   isReadOnly?: boolean;
@@ -38,62 +36,8 @@ export default function ProductForm({
     resolver: zodResolver(ProductSchema),
   });
 
-  const [previewImg, setPreviewImg] = useState<string | null>(null);
-  const [fileError, setFileError] = useState('');
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const handleImageClick = () => {
-    if (fileInputRef.current && !isReadOnly) fileInputRef.current.click();
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
-
-    if (file) {
-      if (file.size > maxSize) {
-        setFileError('Foto tidak boleh melebihi 5 MB');
-        return;
-      }
-
-      // create a preview URL for selected file
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewImg(fileUrl);
-      setValue('photo', file.name.replaceAll(' ', '_'));
-    }
-  };
-
-  const onSubmitHandler = async (data: ProductModel) => {
-    // if upload photo and is different from stored photo
-    if (data.photo && data.photo !== defaultValues.photo) {
-      if (fileInputRef?.current?.files) {
-        const formData = new FormData();
-        formData.append('photo', fileInputRef?.current?.files[0]);
-
-        // Upload photo
-        try {
-          const response = await fetch('/api/products/upload-photo', {
-            method: 'POST',
-            body: formData,
-          });
-
-          const result = await response.json();
-          if (!response.ok) {
-            toast.error('Terjadi Error: ' + result.message, { duration: 5000 });
-            return;
-          }
-        } catch (e) {
-          toast.error(e + '', { duration: 5000 });
-        }
-      }
-    }
-
-    await onSubmit(data);
-  };
-
   useEffect(() => {
-    if (defaultValues.id) reset(defaultValues); // Update form values when defaultValues change and if have id
-    if (defaultValues.photo) setPreviewImg(`/product-photo/${defaultValues.photo}`);
+    if (defaultValues.id) reset(defaultValues);
   }, [defaultValues, reset]);
 
   return (
@@ -101,41 +45,35 @@ export default function ProductForm({
       {isLoading ? (
         <Spinner />
       ) : (
-        <form onSubmit={handleSubmit(onSubmitHandler)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className='grid sm:grid-cols-4 gap-6 mb-7'>
-            <div className='sm:row-span-4'>
-              <label className='font-medium'>Foto Barang</label>
-              <input
-                id='photo'
-                ref={fileInputRef}
-                type='file'
-                accept='image/png, image/jpeg, image/jpg, image/svg'
-                onChange={handleFileChange}
-                hidden
-              />
-              <div className='flex justify-center align-center my-5'>
-                <Image
-                  id='previewImg'
-                  src={previewImg || imgPlaceholder}
-                  alt='Foto Barang'
-                  width={220}
-                  height={220}
-                  priority
-                  onClick={handleImageClick}
-                  className={cn(!isReadOnly && 'cursor-pointer', 'rounded')}
-                />
-              </div>
-              {fileError && <div className='text-center text-red'>{fileError}</div>}
-            </div>
             <Input
               label={<span className='required'>Nama</span>}
               placeholder='Nama'
-              className='sm:col-span-3'
+              className='sm:col-span-2'
               readOnly={isReadOnly}
               inputClassName={isReadOnly ? readOnlyClass : ''}
               error={errors.name?.message}
               {...register('name')}
             />
+            <div className='grid sm:grid-cols-2 sm:col-span-2'>
+              <Controller
+                control={control}
+                name='type'
+                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                  <Select<BasicSelectOptions>
+                    value={value}
+                    onChange={onChange}
+                    label='Tipe'
+                    placeholder='Pilih Tipe Barang'
+                    options={productTypeOptions}
+                    displayValue={(value) => productTypeOptions.find((option) => option.value === value)?.label ?? ''}
+                    getOptionValue={(option) => option.value}
+                    error={error?.message}
+                  />
+                )}
+              />
+            </div>
             <Controller
               control={control}
               name='stock'
@@ -164,68 +102,66 @@ export default function ProductForm({
                 />
               )}
             />
-            <Input
-              label={<span className='required'>Satuan</span>}
-              placeholder='Satuan'
-              readOnly={isReadOnly}
-              inputClassName={isReadOnly ? readOnlyClass : ''}
-              error={errors.uom?.message}
-              {...register('uom')}
-            />
-            <div className='sm:col-span-3 grid sm:grid-cols-2 gap-6'>
-              <Controller
-                control={control}
-                name='purchasePrice'
-                render={({ field: { value }, fieldState: { error } }) => (
-                  <RupiahFormInput
-                    setValue={setValue}
-                    label='Harga Beli'
-                    fieldName='purchasePrice'
-                    defaultValue={value}
-                    readOnly={isReadOnly}
-                    error={error?.message}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name='sellingPrice'
-                render={({ field: { value }, fieldState: { error } }) => (
-                  <RupiahFormInput
-                    setValue={setValue}
-                    label='Harga Jual'
-                    fieldName='sellingPrice'
-                    defaultValue={value}
-                    readOnly={isReadOnly}
-                    error={error?.message}
-                  />
-                )}
-              />
-            </div>
-            <div className='sm:col-span-3 grid sm:grid-cols-2  gap-6'>
-              <Controller
-                control={control}
-                name='costPrice'
-                render={({ field: { value }, fieldState: { error } }) => (
-                  <RupiahFormInput
-                    setValue={setValue}
-                    label='Harga Modal'
-                    fieldName='costPrice'
-                    defaultValue={value}
-                    readOnly={true}
-                    error={error?.message}
-                  />
-                )}
-              />
+            <div className='grid sm:grid-cols-2 sm:col-span-2'>
               <Input
-                label='Harga Modal (Kode)'
-                placeholder='Kode Modal'
-                inputClassName={'bg-gray-100'}
-                readOnly={true}
-                error={errors.costPriceCode?.message}
-                {...register('costPriceCode')}
+                label={<span className='required'>Satuan</span>}
+                placeholder='Satuan'
+                readOnly={isReadOnly}
+                inputClassName={isReadOnly ? readOnlyClass : ''}
+                error={errors.uom?.message}
+                {...register('uom')}
               />
             </div>
+            <Controller
+              control={control}
+              name='purchasePrice'
+              render={({ field: { value }, fieldState: { error } }) => (
+                <RupiahFormInput
+                  setValue={setValue}
+                  label='Harga Beli'
+                  fieldName='purchasePrice'
+                  defaultValue={value}
+                  readOnly={isReadOnly}
+                  error={error?.message}
+                />
+              )}
+            />
+            <Input
+              label='Kode Harga Beli'
+              placeholder='Kode Modal'
+              inputClassName={'bg-gray-100'}
+              readOnly={true}
+              error={errors.purchasePriceCode?.message}
+              {...register('purchasePriceCode')}
+            />
+            <Controller
+              control={control}
+              name='sellingPrice'
+              render={({ field: { value }, fieldState: { error } }) => (
+                <RupiahFormInput
+                  setValue={setValue}
+                  label='Harga Jual'
+                  fieldName='sellingPrice'
+                  defaultValue={value}
+                  readOnly={isReadOnly}
+                  error={error?.message}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name='costPrice'
+              render={({ field: { value }, fieldState: { error } }) => (
+                <RupiahFormInput
+                  setValue={setValue}
+                  label='Harga Modal'
+                  fieldName='costPrice'
+                  defaultValue={value}
+                  readOnly={true}
+                  error={error?.message}
+                />
+              )}
+            />
 
             <Textarea
               label='Keterangan'
@@ -240,7 +176,11 @@ export default function ProductForm({
 
           {!isReadOnly && (
             <div className='flex justify-end'>
-              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
+              <Button
+                className={cn(baseButtonClass, buttonColorClass.green)}
+                type='submit'
+                disabled={isSubmitting || isSubmitSuccessful}
+              >
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />
                 ) : (

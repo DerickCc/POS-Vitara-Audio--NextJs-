@@ -1,7 +1,25 @@
 import { PrismaClient } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+const encodingMap: { [key: string]: string } = {
+  '1': 'T',
+  '2': 'A',
+  '3': 'N',
+  '4': 'G',
+  '5': 'W',
+  '6': 'E',
+  '7': 'K',
+  '8': 'C',
+  '9': 'U',
+  '0': 'I'
+}
+
+async function encodePurchasePrice(value: number | Decimal) {
+  return `${value}`.split('').map(digit => encodingMap[digit] ?? digit).join('');
+}
 
 async function main() {
   const hashPassword = await hash('Aa123456', 10);
@@ -56,11 +74,12 @@ async function main() {
     data: {
       code: 'PRD00000001',
       name: 'Stir Mobil Universal',
+      type: 'Barang Jadi',
       restockThreshold: 10,
       uom: 'Pcs',
       purchasePrice: 50000,
+      purchasePriceCode: await encodePurchasePrice(50000),
       sellingPrice: 100000,
-      costPriceCode: 'I',
       CreatedBy: { connect: { id: user.id } },
     },
   });
@@ -69,11 +88,12 @@ async function main() {
     data: {
       code: 'PRD00000002',
       name: 'Ban Anti Bocor',
+      type: 'Barang Jadi',
       restockThreshold: 30,
       uom: 'Pcs',
       purchasePrice: 300000,
+      purchasePriceCode: await encodePurchasePrice(300000),
       sellingPrice: 500000,
-      costPriceCode: 'I',
       CreatedBy: { connect: { id: user.id } },
     },
   });
@@ -82,11 +102,12 @@ async function main() {
     data: {
       code: 'PRD00000003',
       name: 'Kain Sapi Wagyu',
+      type: 'Material',
       restockThreshold: 20,
       uom: 'Meter',
       purchasePrice: 100000,
+      purchasePriceCode: await encodePurchasePrice(100000),
       sellingPrice: 300000,
-      costPriceCode: 'I',
       CreatedBy: { connect: { id: user.id } },
     },
   });

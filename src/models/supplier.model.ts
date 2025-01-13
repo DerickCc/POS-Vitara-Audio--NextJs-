@@ -4,7 +4,7 @@ import { BasicSelectOptions } from './global.model';
 export const SupplierSchema = z
   .object({
     name: z.string().min(1, { message: 'Nama harus diisi' }),
-    pic: z.string().min(1, { message: 'PIC harus diisi' }),
+    pic: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
     phoneNo: z
       .string()
       .refine((val) => !val || /^\d+$/.test(val), {

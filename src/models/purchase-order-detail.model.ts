@@ -5,7 +5,7 @@ export const PurchaseOrderDetailSchema = z.object({
   id: z.string().optional().nullable(),
   productId: z.string().min(1, { message: 'Mohon memilih barang' }),
   purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
-  quantity: z.coerce.number().min(1, { message: 'Qty minimal harus 1' }),
+  quantity: z.coerce.number().gt(0, { message: 'Qty harus lebih besar dari 0' }),
 });
 
 export class PurchaseOrderDetailModel {

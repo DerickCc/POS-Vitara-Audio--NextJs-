@@ -51,6 +51,6 @@ const encodingMap: { [key: string]: string } = {
   '0': 'I'
 }
 
-export async function encodeCostPrice(value: number | Decimal) {
+export async function encodePurchasePrice(value: number | Decimal) {
   return `${value}`.split('').map(digit => encodingMap[digit] ?? digit).join('');
 }

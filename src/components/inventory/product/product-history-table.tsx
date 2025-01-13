@@ -1,7 +1,7 @@
 import BasicTable from '@/components/tables/basic-table';
 import { ProductHistoryModel } from '@/models/product.model';
 import { browseProductHistories } from '@/services/product-service';
-import { formatToReadableNumber, isoStringToReadableDate, mapTrxToRoute } from '@/utils/helper-function';
+import { formatToDecimal, formatToReadableNumber, isoStringToReadableDate, mapTrxToRoute } from '@/utils/helper-function';
 import { ColumnDef, createColumnHelper, OnChangeFn, SortingState } from '@tanstack/react-table';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -55,18 +55,20 @@ const columns = (): ColumnDef<ProductHistoryModel, any>[] => [
     size: 60,
     header: () => 'Qty',
     cell: ({ row }) => {
+      const formattedQty = formatToDecimal(row.original.quantity);
+
       if (row.original.type === 'Pembelian') {
-        return <span className='text-green font-bold'>+ {row.original.quantity}</span>;
+        return <span className='text-green font-bold'>+ {formattedQty}</span>;
       } else {
         if (row.original.type.includes('Penggantian Barang Selesai')) {
           return (
             <>
-              <span className='text-red font-bold mr-2'>- {row.original.quantity}</span>
-              <span className='text-green font-bold'>+ {row.original.quantity}</span>
+              <span className='text-red font-bold mr-2'>- {formattedQty}</span>
+              <span className='text-green font-bold'>+ {formattedQty}</span>
             </>
           );
         }
-        return <span className='text-red font-bold'>- {row.original.quantity}</span>;
+        return <span className='text-red font-bold'>- {formattedQty}</span>;
       }
     },
     enableSorting: false,

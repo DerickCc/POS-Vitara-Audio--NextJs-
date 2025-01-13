@@ -1,4 +1,3 @@
-import { encodeCostPrice } from '@/utils/backend-helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
@@ -46,7 +45,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           data: {
             stock: updatedStock,
             costPrice: updatedCostPrice,
-            costPriceCode: await encodeCostPrice(updatedCostPrice),
             UpdatedBy: {
               connect: { id: userId },
             },

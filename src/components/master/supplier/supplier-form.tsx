@@ -54,7 +54,7 @@ export default function SupplierForm({
               {...register('name')}
             />
             <Input
-              label={<span className='required'>PIC</span>}
+              label='PIC'
               placeholder='PIC'
               readOnly={isReadOnly}
               inputClassName={isReadOnly ? readOnlyClass : ''}

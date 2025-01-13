@@ -139,7 +139,11 @@ export default function UserForm({
             </div>
 
             <div className='flex justify-end'>
-              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
+              <Button
+                className={cn(baseButtonClass, buttonColorClass.green)}
+                type='submit'
+                disabled={isSubmitting || isSubmitSuccessful}
+              >
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />
                 ) : (
