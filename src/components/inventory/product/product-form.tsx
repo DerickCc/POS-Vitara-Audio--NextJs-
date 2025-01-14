@@ -4,7 +4,7 @@ import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
 import { ProductModel, ProductSchema } from '@/models/product.model';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { FaSave } from 'react-icons/fa';
 import { Button, Input, Loader, Select, Textarea } from 'rizzui';
@@ -12,6 +12,8 @@ import { BasicFormProps, BasicSelectOptions } from '@/models/global.model';
 import cn from '@/utils/class-names';
 import { baseButtonClass, buttonColorClass, readOnlyClass } from '@/config/tailwind-classes';
 import { productTypeOptions } from '@/config/global-variables';
+import { debounce } from 'lodash';
+import { encodePurchasePrice } from '@/utils/encode-purchase-price';
 
 interface ProductFormProps extends BasicFormProps<ProductModel> {
   isReadOnly?: boolean;
@@ -25,6 +27,7 @@ export default function ProductForm({
   isSubmitSuccessful = false,
 }: ProductFormProps) {
   const {
+    watch,
     control,
     register,
     setValue,
@@ -35,10 +38,19 @@ export default function ProductForm({
     defaultValues,
     resolver: zodResolver(ProductSchema),
   });
+  const productType = watch('type');
 
   useEffect(() => {
     if (defaultValues.id) reset(defaultValues);
   }, [defaultValues, reset]);
+
+  const handlePurchasePriceChange = useCallback(
+    debounce(async (amount: number) => {
+      const purchasePriceCode = await encodePurchasePrice(amount);
+      setValue('purchasePriceCode', purchasePriceCode);
+    }, 500),
+    []
+  );
 
   return (
     <Card>
@@ -56,24 +68,27 @@ export default function ProductForm({
               error={errors.name?.message}
               {...register('name')}
             />
-            <div className='grid sm:grid-cols-2 sm:col-span-2'>
-              <Controller
-                control={control}
-                name='type'
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
-                  <Select<BasicSelectOptions>
-                    value={value}
-                    onChange={onChange}
-                    label='Tipe'
-                    placeholder='Pilih Tipe Barang'
-                    options={productTypeOptions}
-                    displayValue={(value) => productTypeOptions.find((option) => option.value === value)?.label ?? ''}
-                    getOptionValue={(option) => option.value}
-                    error={error?.message}
-                  />
-                )}
-              />
-            </div>
+            <Controller
+              control={control}
+              name='type'
+              render={({ field: { value, onChange }, fieldState: { error } }) => (
+                <Select<BasicSelectOptions>
+                  value={value}
+                  onChange={(option: string) => {
+                    onChange(option);
+                    setValue('sellingPrice', 0);
+                  }}
+                  label='Tipe'
+                  placeholder='Pilih Tipe Barang'
+                  options={productTypeOptions}
+                  displayValue={(value) => productTypeOptions.find((option) => option.value === value)?.label ?? ''}
+                  getOptionValue={(option) => option.value}
+                  error={error?.message}
+                />
+              )}
+            />
+            <div className='sm:col-span-1'></div>
+
             <Controller
               control={control}
               name='stock'
@@ -102,16 +117,16 @@ export default function ProductForm({
                 />
               )}
             />
-            <div className='grid sm:grid-cols-2 sm:col-span-2'>
-              <Input
-                label={<span className='required'>Satuan</span>}
-                placeholder='Satuan'
-                readOnly={isReadOnly}
-                inputClassName={isReadOnly ? readOnlyClass : ''}
-                error={errors.uom?.message}
-                {...register('uom')}
-              />
-            </div>
+            <Input
+              label={<span className='required'>Satuan</span>}
+              placeholder='Satuan'
+              readOnly={isReadOnly}
+              inputClassName={isReadOnly ? readOnlyClass : ''}
+              error={errors.uom?.message}
+              {...register('uom')}
+            />
+            <div className='sm:col-span-1'></div>
+
             <Controller
               control={control}
               name='purchasePrice'
@@ -119,6 +134,7 @@ export default function ProductForm({
                 <RupiahFormInput
                   setValue={setValue}
                   label='Harga Beli'
+                  onChange={(amount: number) => handlePurchasePriceChange(amount)}
                   fieldName='purchasePrice'
                   defaultValue={value}
                   readOnly={isReadOnly}
@@ -134,20 +150,22 @@ export default function ProductForm({
               error={errors.purchasePriceCode?.message}
               {...register('purchasePriceCode')}
             />
-            <Controller
-              control={control}
-              name='sellingPrice'
-              render={({ field: { value }, fieldState: { error } }) => (
-                <RupiahFormInput
-                  setValue={setValue}
-                  label='Harga Jual'
-                  fieldName='sellingPrice'
-                  defaultValue={value}
-                  readOnly={isReadOnly}
-                  error={error?.message}
-                />
-              )}
-            />
+            {productType === 'Barang Jadi' && (
+              <Controller
+                control={control}
+                name='sellingPrice'
+                render={({ field: { value }, fieldState: { error } }) => (
+                  <RupiahFormInput
+                    setValue={setValue}
+                    label='Harga Jual'
+                    fieldName='sellingPrice'
+                    defaultValue={value}
+                    readOnly={isReadOnly}
+                    error={error?.message}
+                  />
+                )}
+              />
+            )}
             <Controller
               control={control}
               name='costPrice'
@@ -162,6 +180,7 @@ export default function ProductForm({
                 />
               )}
             />
+            {productType === 'Material' && <div className='sm:col-span-1'></div>}
 
             <Textarea
               label='Keterangan'

@@ -82,6 +82,13 @@ export const columns = (actionHandlers: any): ColumnDef<ProductModel, any>[] => 
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
+  columnHelper.accessor('type', {
+    id: 'type',
+    size: 130,
+    header: () => 'Tipe',
+    cell: (info) => info.getValue(),
+    enableSorting: true,
+  }),
   columnHelper.accessor('stock', {
     id: 'stock',
     size: 100,
@@ -114,7 +121,8 @@ export const columns = (actionHandlers: any): ColumnDef<ProductModel, any>[] => 
     id: 'sellingPrice',
     size: 160,
     header: () => 'Harga Jual',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
+    cell: ({ row }) =>
+      row.original.type === 'Barang Jadi' ? `Rp ${formatToReadableNumber(row.original.sellingPrice)}` : '-',
     enableSorting: true,
   }),
   columnHelper.accessor('remarks', {

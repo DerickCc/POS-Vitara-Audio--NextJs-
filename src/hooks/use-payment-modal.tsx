@@ -1,4 +1,5 @@
 'use client';
+
 import PaymentModal from '@/components/modals/payment-modal';
 import React, { useState, useCallback } from 'react';
 

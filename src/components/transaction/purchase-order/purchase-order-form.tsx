@@ -259,10 +259,13 @@ export default function PurchaseOrderForm({
                         options={supplierList}
                         displayValue={() => supplierName}
                         getOptionValue={(option: SearchSupplierModel) => option}
-                        searchable={true}
+                        searchable
                         searchByKey='name'
+                        searchProps={{
+                          autoFocus: true, // This sets the search input to focus automatically
+                        }}
                         onSearchChange={(name: string) => handleSupplierSearchChange(name)}
-                        disableDefaultFilter={true}
+                        disableDefaultFilter
                         error={error?.message}
                         disabled={isReadOnly}
                       />
@@ -343,10 +346,13 @@ export default function PurchaseOrderForm({
                                   displayValue={() => productName}
                                   getOptionValue={(option: SearchProductModel) => option}
                                   getOptionDisplayValue={(option) => <ProductOptionTemplate option={option} />}
-                                  searchable={true}
+                                  searchable
                                   searchByKey='name'
+                                  searchProps={{
+                                    autoFocus: true, // This sets the search input to focus automatically
+                                  }}
                                   onSearchChange={(name: string) => handleProductSearchChange(name)}
-                                  disableDefaultFilter={true}
+                                  disableDefaultFilter
                                   error={error?.message}
                                   disabled={isReadOnly}
                                 />
@@ -539,7 +545,11 @@ export default function PurchaseOrderForm({
 
         <div className='flex justify-end'>
           {!isReadOnly && (
-            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
+            <Button
+              className={cn(baseButtonClass, buttonColorClass.green)}
+              type='submit'
+              disabled={isSubmitting || isSubmitSuccessful}
+            >
               {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
               <span>Simpan</span>
             </Button>

@@ -63,7 +63,7 @@ export interface ProductHistoryModel {
   date: string;
   id: string;
   code: string;
-  type: string;
+  type: string; // trx type, not product type
   supOrCus: string;
   price: number;
   quantity: number;

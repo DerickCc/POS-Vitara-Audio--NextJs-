@@ -1,5 +1,5 @@
 import { ProductSchema } from '@/models/product.model';
-import { encodePurchasePrice } from '@/utils/backend-helper-function';
+import { encodePurchasePrice } from '@/utils/encode-purchase-price';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
