@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         entryDate: true,
         customerId: true,
         Customer: {
-          select: { 
+          select: {
             name: true,
             licensePlate: true,
             phoneNo: true,
@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
             soId: true,
             productId: true,
             Product: {
-              select: { name: true, uom: true },
+              select: { name: true, uom: true, type: true },
             },
             sellingPrice: true,
             quantity: true,
@@ -82,6 +82,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       quantity: Number(d.quantity),
       totalPrice: Number(d.totalPrice),
       uom: d.Product.uom,
+      type: d.Product.type,
       Product: undefined,
     }));
 

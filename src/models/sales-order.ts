@@ -93,3 +93,10 @@ export class SalesOrderModel {
     this.cashier = data.cashier;
   }
 }
+
+export interface InvoiceDetailModel {
+  name: string;
+  quantity: number;
+  sellingPrice: number;
+  totalPrice: number;
+}

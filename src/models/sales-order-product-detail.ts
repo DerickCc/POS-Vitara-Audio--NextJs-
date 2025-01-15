@@ -18,6 +18,7 @@ export class SalesOrderProductDetailModel {
   quantity: number;
   uom: string; // for UI
   stock: number; // for UI
+  type: 'Barang Jadi' | 'Material'; // for UI
   totalPrice: number;
 
   constructor(data: any = {}) {
@@ -31,6 +32,7 @@ export class SalesOrderProductDetailModel {
     this.quantity = data.quantity || 0;
     this.uom = data.uom;
     this.stock = data.stock || 0;
+    this.type = data.type;
     this.totalPrice = data.totalPrice || 0;
   }
 }

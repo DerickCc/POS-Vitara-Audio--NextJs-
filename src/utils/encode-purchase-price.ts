@@ -1,4 +1,5 @@
 import { Decimal } from "@prisma/client/runtime/library";
+import { formatToDecimal } from "./helper-function";
 
 const encodingMap: { [key: string]: string } = {
   '1': 'T',
@@ -14,5 +15,7 @@ const encodingMap: { [key: string]: string } = {
 }
 
 export async function encodePurchasePrice(value: number | Decimal) {
-  return `${value}`.split('').map(digit => encodingMap[digit] ?? digit).join('');
+  const formattedValue = formatToDecimal(value);
+
+  return `${formattedValue}`.split('').map(digit => encodingMap[digit] ?? digit).join('');
 }

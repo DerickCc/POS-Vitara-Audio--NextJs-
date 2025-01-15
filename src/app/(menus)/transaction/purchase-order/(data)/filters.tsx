@@ -124,8 +124,8 @@ export default function PurchaseOrderFilter({
             value={localFilters.status}
             onChange={(value: string) => handleFilterChange('status')(value)}
             className='sm:col-span-3'
-            label='Status'
-            placeholder='Pilih Status'
+            label='Status Pengiriman'
+            placeholder='Pilih Status Pengiriman'
             options={poPrStatusOptions}
             displayValue={(value) => poPrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}

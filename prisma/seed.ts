@@ -18,7 +18,12 @@ const encodingMap: { [key: string]: string } = {
 }
 
 async function encodePurchasePrice(value: number | Decimal) {
-  return `${value}`.split('').map(digit => encodingMap[digit] ?? digit).join('');
+  const formattedValue =  value.toLocaleString('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+
+  return `${formattedValue}`.split('').map(digit => encodingMap[digit] ?? digit).join('');
 }
 
 async function main() {

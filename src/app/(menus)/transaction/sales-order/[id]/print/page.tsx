@@ -1,16 +1,18 @@
 'use client';
 
 import Card from '@/components/card';
+import PrintProductSelectionModal from '@/components/modals/print-product-selection-modal';
 import PageHeader from '@/components/page-header';
 import Spinner from '@/components/spinner';
 import { routes } from '@/config/routes';
 import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
-import { SalesOrderModel } from '@/models/sales-order';
+import { InvoiceDetailModel, SalesOrderModel } from '@/models/sales-order';
+import { SalesOrderServiceDetailModel } from '@/models/sales-order-service-detail';
 import { getSoById } from '@/services/sales-order-service';
 import cn from '@/utils/class-names';
 import { formatToReadableNumber, isoStringToDateWithTime, isoStringToReadableDate } from '@/utils/helper-function';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PiArrowLeftBold } from 'react-icons/pi';
@@ -34,20 +36,40 @@ const pageHeader = {
 
 export default function PrintSalesOrderPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
   const [so, setSo] = useState<SalesOrderModel>(new SalesOrderModel());
+  const [serviceDetails, setServiceDetails] = useState<InvoiceDetailModel[]>([]);
+  const [filteredInvoiceDetails, setFilteredInvoiceDetails] = useState<InvoiceDetailModel[]>([]);
+  const [includedProducts, setIncludedProducts] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPo = async () => {
+    const fetchSo = async () => {
       try {
         setIsLoading(true);
-        const soDetail = await getSoById(id);
+        const res = await getSoById(id);
 
-        if (soDetail.status === 'Batal') {
+        if (res.status === 'Batal') {
           toast.error('Invoice tidak dapat di-print karena telah dibatalkan.');
         } else {
-          setSo(soDetail);
+          setSo(res);
+
+          const resIncludedProducts = res.productDetails.reduce((acc, d) => {
+            if (d.type === 'Barang Jadi') acc.push(d.productId);
+            return acc;
+          }, [] as string[]);
+          setIncludedProducts(resIncludedProducts);
+
+          const resServiceDetails = res.serviceDetails.reduce((acc, d) => {
+            acc.push({
+              name: d.serviceName,
+              quantity: d.quantity,
+              sellingPrice: d.sellingPrice,
+              totalPrice: d.totalPrice,
+            });
+            return acc;
+          }, [] as InvoiceDetailModel[]);
+          setServiceDetails(resServiceDetails);
         }
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
@@ -56,8 +78,28 @@ export default function PrintSalesOrderPage() {
       }
     };
 
-    fetchPo();
+    fetchSo();
   }, [id]);
+
+  useEffect(() => {
+    if (so) filterInvoiceDetail(so);
+  }, [so, includedProducts]);
+
+  const filterInvoiceDetail = (res: SalesOrderModel = so) => {
+    const productDetails = res.productDetails.reduce((acc, d) => {
+      if (includedProducts.includes(d.productId)) {
+        acc.push({
+          name: d.productName,
+          quantity: d.quantity,
+          sellingPrice: d.sellingPrice,
+          totalPrice: d.totalPrice,
+        });
+      }
+      return acc;
+    }, [] as InvoiceDetailModel[]);
+
+    setFilteredInvoiceDetails(productDetails.concat(serviceDetails));
+  };
 
   return (
     <>
@@ -69,6 +111,13 @@ export default function PrintSalesOrderPage() {
               <span>Kembali</span>
             </Button>
           </Link>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className={cn(baseButtonClass, buttonColorClass.blue)}
+            disabled={!so.id}
+          >
+            Pilih Barang
+          </Button>
           <Button
             onClick={() => window.print()}
             className={cn(baseButtonClass, buttonColorClass.purple)}
@@ -110,7 +159,7 @@ export default function PrintSalesOrderPage() {
               </div>
             </div>
 
-            {/* Product Details */}
+            {/* Details */}
             <table className='w-full border border-gray-300 mb-4'>
               <thead>
                 <tr className='bg-gray-100 border-b'>
@@ -121,18 +170,10 @@ export default function PrintSalesOrderPage() {
                 </tr>
               </thead>
               <tbody>
-                {so.productDetails.map((item, index) => (
+                {filteredInvoiceDetails.map((item, index) => (
                   <tr key={index} className='border-b'>
                     <td className='border p-2'>{item.quantity}</td>
-                    <td className='border p-2'>{item.productName}</td>
-                    <td className='border p-2'>Rp {formatToReadableNumber(item.sellingPrice)}</td>
-                    <td className='border p-2'>Rp {formatToReadableNumber(item.totalPrice)}</td>
-                  </tr>
-                ))}
-                {so.serviceDetails.map((item, index) => (
-                  <tr key={index} className='border-b'>
-                    <td className='border p-2'>{item.quantity}</td>
-                    <td className='border p-2'>{item.serviceName}</td>
+                    <td className='border p-2'>{item.name}</td>
                     <td className='border p-2'>Rp {formatToReadableNumber(item.sellingPrice)}</td>
                     <td className='border p-2'>Rp {formatToReadableNumber(item.totalPrice)}</td>
                   </tr>
@@ -193,6 +234,14 @@ export default function PrintSalesOrderPage() {
           </div>
         )}
       </Card>
+
+      <PrintProductSelectionModal
+        isOpen={isModalOpen}
+        includedProducts={includedProducts}
+        setIncludedProducts={setIncludedProducts}
+        productDetails={so.productDetails}
+        onClose={() => setIsModalOpen(false)}
+      />
     </>
   );
 }

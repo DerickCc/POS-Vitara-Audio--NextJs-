@@ -41,6 +41,7 @@ export async function GET(request: Request) {
         id: true,
         code: true,
         name: true,
+        purchasePrice: true,
         purchasePriceCode: true,
         sellingPrice: true,
         uom: true,
@@ -50,6 +51,9 @@ export async function GET(request: Request) {
 
     const productsWithExtraData = products.map((product) => ({
       ...product,
+      purchasePrice: Number(product.purchasePrice),
+      sellingPrice: Number(product.sellingPrice),
+      stock: Number(product.stock),
       value: product.id,
       label: product.name,
     }));
