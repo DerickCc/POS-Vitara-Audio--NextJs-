@@ -97,6 +97,7 @@ export class SalesOrderModel {
 export interface InvoiceDetailModel {
   name: string;
   quantity: number;
+  oriSellingPrice: number;
   sellingPrice: number;
   totalPrice: number;
 }
