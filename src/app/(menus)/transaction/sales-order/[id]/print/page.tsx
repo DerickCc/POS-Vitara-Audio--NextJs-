@@ -38,6 +38,7 @@ export default function PrintSalesOrderPage() {
   const { id } = useParams<{ id: string }>();
   const [so, setSo] = useState<SalesOrderModel>(new SalesOrderModel());
   const [serviceDetails, setServiceDetails] = useState<InvoiceDetailModel[]>([]);
+  const [totalServicePrice, setTotalServicePrice] = useState<number>(0);
   const [filteredInvoiceDetails, setFilteredInvoiceDetails] = useState<InvoiceDetailModel[]>([]);
   const [includedProducts, setIncludedProducts] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,16 +61,21 @@ export default function PrintSalesOrderPage() {
           }, [] as string[]);
           setIncludedProducts(resIncludedProducts);
 
+          let totalPrice = 0;
           const resServiceDetails = res.serviceDetails.reduce((acc, d) => {
             acc.push({
               name: d.serviceName,
               quantity: d.quantity,
+              oriSellingPrice: 0,
               sellingPrice: d.sellingPrice,
               totalPrice: d.totalPrice,
             });
+            totalPrice += d.totalPrice;
             return acc;
           }, [] as InvoiceDetailModel[]);
+
           setServiceDetails(resServiceDetails);
+          setTotalServicePrice(totalPrice);
         }
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
@@ -82,15 +88,16 @@ export default function PrintSalesOrderPage() {
   }, [id]);
 
   useEffect(() => {
-    if (so) filterInvoiceDetail(so);
-  }, [so, includedProducts]);
+    if (so) processInvoice(so);
+  }, [includedProducts]);
 
-  const filterInvoiceDetail = (res: SalesOrderModel = so) => {
+  const processInvoice = (res: SalesOrderModel = so) => {
     const productDetails = res.productDetails.reduce((acc, d) => {
       if (includedProducts.includes(d.productId)) {
         acc.push({
           name: d.productName,
           quantity: d.quantity,
+          oriSellingPrice: d.oriSellingPrice,
           sellingPrice: d.sellingPrice,
           totalPrice: d.totalPrice,
         });
@@ -99,6 +106,25 @@ export default function PrintSalesOrderPage() {
     }, [] as InvoiceDetailModel[]);
 
     setFilteredInvoiceDetails(productDetails.concat(serviceDetails));
+
+    let newSubTotal = totalServicePrice;
+    let newDiscount = 0;
+    let newGrandTotal = totalServicePrice;
+
+    productDetails.map((d) => {
+      newSubTotal += (d.sellingPrice * d.quantity);
+      if (d.oriSellingPrice > d.sellingPrice) {
+        newDiscount += (d.oriSellingPrice - d.sellingPrice) * d.quantity;
+      }
+      newGrandTotal += d.totalPrice;
+    })
+
+    setSo((prev) => ({
+      ...prev,
+      subTotal: newSubTotal,
+      discount: newDiscount,
+      grandTotal: newGrandTotal,
+    }));
   };
 
   return (
