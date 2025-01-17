@@ -1,4 +1,4 @@
-import { Colors } from "@/models/global.model";
+import { Colors } from '@/models/global.model';
 
 export const TIMEZONE = 'Asia/Jakarta';
 export const CURRENCY_CODE = 'IDR';
@@ -80,7 +80,7 @@ export const poPrStatusOptions = [
   { label: 'Batal', value: 'Batal' },
 ];
 
-export const purchaseReturnTypeOptions = [
+export const prTypeOptions = [
   { label: 'Penggantian Barang', value: 'Penggantian Barang' },
   { label: 'Pengembalian Dana', value: 'Pengembalian Dana' },
   { label: 'Piutang', value: 'Piutang' },
@@ -93,6 +93,12 @@ export const soStatusOptions = [
 ];
 
 export const srStatusOptions = [
+  { label: 'Lunas', value: 'Lunas' },
+  { label: 'Batal', value: 'Batal' },
+];
+
+export const paymentStatusOptions = [
+  { label: 'Belum Lunas', value: 'Belum Lunas' },
   { label: 'Lunas', value: 'Lunas' },
   { label: 'Batal', value: 'Batal' },
 ];

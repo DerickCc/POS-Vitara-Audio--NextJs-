@@ -56,7 +56,8 @@ export class PurchaseOrderModel {
   grandTotal: number;
   paidAmount: number;
   paymentMethod: 'Tunai' | 'Non-tunai'; // for UI
-  status: 'Dalam Proses' | 'Selesai' | 'Batal';
+  progressStatus: 'Dalam Proses' | 'Selesai' | 'Batal';
+  paymentStatus: 'Belum Lunas' | 'Lunas' | 'Batal';
 
   constructor(data: any = {}) {
     this.id = data.id;
@@ -73,7 +74,8 @@ export class PurchaseOrderModel {
     this.grandTotal = data.grandTotal || 0;
     this.paidAmount = data.paidAmount || 0;
     this.paymentMethod = data.paymentMethod || 'Non-tunai';
-    this.status = data.status || 'Dalam Proses';
+    this.progressStatus = data.progressStatus || 'Dalam Proses';
+    this.paymentStatus = data.paymentStatus || 'Belum Lunas';
   }
 }
 

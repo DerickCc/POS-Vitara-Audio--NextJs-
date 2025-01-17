@@ -30,7 +30,7 @@ import { ActionIcon, Button, Input, Loader, Select, Textarea } from 'rizzui';
 import { TbTruckReturn } from 'react-icons/tb';
 import { SearchPurchaseOrderModel } from '@/models/purchase-order.model';
 import { searchPo } from '@/services/purchase-order-service';
-import { mapTrxStatusToColor, purchaseReturnTypeOptions } from '@/config/global-variables';
+import { mapTrxStatusToColor, prTypeOptions } from '@/config/global-variables';
 import { SearchPurchaseOrderDetailModel } from '@/models/purchase-order-detail.model';
 import DecimalFormInput from '@/components/form-inputs/decimal-form-input';
 
@@ -268,9 +268,9 @@ export default function PurchaseReturnForm({
                     label={<span className='required'>Tipe Retur</span>}
                     labelClassName='text-gray-600'
                     placeholder='Pilih Tipe Retur'
-                    options={purchaseReturnTypeOptions}
+                    options={prTypeOptions}
                     displayValue={(value) =>
-                      purchaseReturnTypeOptions.find((option) => option.value === value)?.label ?? ''
+                      prTypeOptions.find((option) => option.value === value)?.label ?? ''
                     }
                     getOptionValue={(option) => option.value}
                     error={error?.message}

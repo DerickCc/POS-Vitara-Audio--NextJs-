@@ -36,7 +36,7 @@ export async function PUT(request: Request) {
       trx = await db.purchaseOrders.findUnique({
         where: { id: data.id },
         select: {
-          status: true,
+          progressStatus: true,
           grandTotal: true,
           PurchaseOrderPaymentHistories: {
             select: { amount: true },
@@ -47,7 +47,7 @@ export async function PUT(request: Request) {
       trx = await db.salesOrders.findUnique({
         where: { id: data.id },
         select: {
-          status: true,
+          progressStatus: true,
           grandTotal: true,
           SalesOrderPaymentHistories: {
             select: { amount: true },
@@ -86,6 +86,15 @@ export async function PUT(request: Request) {
             },
           },
         });
+
+        if (new Decimal(data.paymentAmount).equals(unpaidAmount)) {
+          await prisma.purchaseOrders.update({ //
+            where: { id: data.id },
+            data: {
+              paymentStatus: "Lunas",
+            },
+          });
+        }
       } else if (data.type === 'so') {
         await prisma.salesOrderPaymentHistories.create({ //
           data: {
@@ -104,7 +113,7 @@ export async function PUT(request: Request) {
           await prisma.salesOrders.update({ //
             where: { id: data.id },
             data: {
-              status: "Lunas",
+              paymentStatus: "Lunas",
             },
           });
         }

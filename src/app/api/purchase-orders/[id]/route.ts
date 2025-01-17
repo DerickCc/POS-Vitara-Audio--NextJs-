@@ -30,7 +30,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
         subTotal: true,
         appliedReceivables: true,
         grandTotal: true,
-        status: true,
+        progressStatus: true,
+        paymentStatus: true,
         createdBy: true,
         PurchaseOrderDetails: {
           select: {
@@ -124,7 +125,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     // adjustment may be + or -
     const appliedReceivablesAdjustment = new Decimal(data.appliedReceivables).minus(hasBeenAppliedReceivables);
-    console.log(appliedReceivablesAdjustment);
+
     if (new Decimal(appliedReceivablesAdjustment).greaterThan(supplierReceivables)) {
       return NextResponse.json(
         { message: 'Potongan piutang melebihi piutang yang dimiliki supplier' },
@@ -138,6 +139,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return acc + d.purchasePrice * d.quantity;
     }, 0);
     const grandTotal = subTotal - data.appliedReceivables;
+    const paymentStatus = data.paidAmount === grandTotal ? 'Lunas' : 'Belum Lunas';
 
     await db.$transaction(async (prisma) => {
       await prisma.purchaseOrders.update({
@@ -151,6 +153,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           subTotal,
           appliedReceivables: data.appliedReceivables,
           grandTotal,
+          paymentStatus,
           UpdatedBy: {
             connect: { id: userId },
           },
@@ -254,7 +257,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const po = await db.purchaseOrders.findUnique({
       where: { id },
       select: {
-        status: true,
+        progressStatus: true,
         supplierId: true,
         appliedReceivables: true,
       },
@@ -262,7 +265,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     if (!po) {
       return NextResponse.json({ message: 'Transaksi Pembelian tidak ditemukan' }, { status: 404 });
-    } else if (po.status !== 'Dalam Proses') {
+    } else if (po.progressStatus !== 'Dalam Proses') {
       return NextResponse.json(
         { message: 'Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat dihapus' },
         { status: 403 } // 403 = Forbidden

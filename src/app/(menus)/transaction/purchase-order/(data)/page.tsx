@@ -35,18 +35,12 @@ export default function PurchaseOrderDataPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localFilters, setLocalFilters] = useState<PurchaseOrderTableFilters>({
-    code: '',
-    supplierId: null,
     startDate: null,
     endDate: null,
-    status: '',
   });
   const [filters, setFilters] = useState<PurchaseOrderTableFilters>({
-    code: '',
-    supplierId: null,
     startDate: null,
     endDate: null,
-    status: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);

@@ -29,7 +29,8 @@ export async function GET(request: Request) {
   const supplierId = queryParams.get('supplierId') ?? 0;
   const startDate = queryParams.get('startDate') ?? '';
   const endDate = queryParams.get('endDate') ?? '';
-  const status = queryParams.get('status') ?? '';
+  const progressStatus = queryParams.get('progressStatus') ?? '';
+  const paymentStatus = queryParams.get('paymentStatus') ?? '';
 
   const where: any = { AND: [] };
   if (code) {
@@ -70,8 +71,12 @@ export async function GET(request: Request) {
     });
   }
 
-  if (status) {
-    where.AND.push({ status });
+  if (progressStatus) {
+    where.AND.push({ progressStatus });
+  }
+
+  if (paymentStatus) {
+    where.AND.push({ paymentStatus });
   }
   // ----------------
 
@@ -180,6 +185,7 @@ export async function POST(request: Request) {
       return acc + d.purchasePrice * d.quantity;
     }, 0);
     const grandTotal = subTotal - data.appliedReceivables;
+    const paymentStatus = data.paidAmount === grandTotal ? 'Lunas' : 'Belum Lunas';
 
     await db.$transaction(async (prisma) => {
       const po = await prisma.purchaseOrders.create({
@@ -194,7 +200,8 @@ export async function POST(request: Request) {
           subTotal,
           appliedReceivables: data.appliedReceivables,
           grandTotal,
-          status: 'Dalam Proses',
+          progressStatus: 'Dalam Proses',
+          paymentStatus,
           CreatedBy: {
             connect: { id: userId },
           },

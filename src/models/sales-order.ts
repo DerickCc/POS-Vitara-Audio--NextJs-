@@ -67,7 +67,8 @@ export class SalesOrderModel {
   paidAmount: number;
   productDetails: SalesOrderProductDetailModel[];
   serviceDetails: SalesOrderServiceDetailModel[];
-  status: 'Belum Lunas' | 'Lunas' | 'Batal';
+  progressStatus: 'Belum Dikerjakan' | 'Selesai' | 'Batal';
+  paymentStatus: 'Belum Lunas' | 'Lunas' | 'Batal';
   cashier: string;
 
   constructor(data: any = {}) {
@@ -89,7 +90,8 @@ export class SalesOrderModel {
     this.paidAmount = data.paidAmount || 0;
     this.productDetails = data.productDetails || [];
     this.serviceDetails = data.serviceDetails || [];
-    this.status = data.status || 'Belum Lunas';
+    this.progressStatus = data.progressStatus || 'Belum Dikerjakan';
+    this.paymentStatus = data.paymentStatus || 'Belum Lunas';
     this.cashier = data.cashier;
   }
 }

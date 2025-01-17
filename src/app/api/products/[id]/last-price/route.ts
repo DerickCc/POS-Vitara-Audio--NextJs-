@@ -40,7 +40,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           productId,
           PurchaseOrder: {
             supplierId: supOrCusId,
-            status: { not: 'Batal' }
+            progressStatus: { not: 'Batal' }
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -54,7 +54,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           productId,
           SalesOrder: {
             customerId: supOrCusId,
-            status: { not: 'Batal' }
+            progressStatus: { not: 'Batal' }
           },
         },
         orderBy: { createdAt: 'desc' },

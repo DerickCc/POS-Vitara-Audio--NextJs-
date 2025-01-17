@@ -3,13 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("LOCAL_DATABASE_URL")
+  provider  = "postgresql"
+  // url      = env("LOCAL_DATABASE_URL")
   // Uses connection pooling
-  // url       = env("POSTGRES_PRISMA_URL")
-  // // Uses direct connection, ⚠️ make sure to keep this to `POSTGRES_URL_NON_POOLING`
-  // // or you'll have dangling databases from migrations
-  // directUrl = env("POSTGRES_URL_NON_POOLING")
+  url       = env("POSTGRES_PRISMA_URL")
+  // Uses direct connection, ⚠️ make sure to keep this to `POSTGRES_URL_NON_POOLING`
+  // or you'll have dangling databases from migrations
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Users {
@@ -152,7 +152,8 @@ model PurchaseOrders {
   subTotal           Decimal   @map("sub_total") @db.Decimal(10, 2)
   appliedReceivables Decimal   @map("applied_receivables") @db.Decimal(10, 2)
   grandTotal         Decimal   @map("grand_total") @db.Decimal(10, 2)
-  status             String    @default("Dalam Proses") @db.VarChar(50)
+  progressStatus     String    @default("Dalam Proses") @map("progress_status") @db.VarChar(50)
+  paymentStatus      String    @default("Belum Lunas") @map("payment_status") @db.VarChar(50)
   createdBy          String    @map("created_by")
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedBy          String?   @map("updated_by")
@@ -170,7 +171,7 @@ model PurchaseOrders {
 
   PurchaseOrderPaymentHistories PurchaseOrderPaymentHistories[]
 
-  @@index([code, purchaseDate, supplierId, grandTotal, status], map: "purchase_orders_index")
+  @@index([code, purchaseDate, supplierId, grandTotal, progressStatus, paymentStatus], map: "purchase_orders_index")
 }
 
 model PurchaseOrderDetails {
@@ -212,21 +213,22 @@ model PurchaseOrderPaymentHistories {
 }
 
 model SalesOrders {
-  id          String    @id @default(uuid())
-  code        String    @unique @db.VarChar(20)
-  salesDate   DateTime  @default(now()) @map("sales_date")
-  entryDate   DateTime  @map("entry_date")
-  customerId  String    @map("customer_id")
-  paymentType String    @map("payment_type") @db.VarChar(20)
-  subTotal    Decimal   @map("sub_total") @db.Decimal(10, 2)
-  discount    Decimal   @default(0) @db.Decimal(10, 2)
-  grandTotal  Decimal   @map("grand_total") @db.Decimal(10, 2)
-  remarks     String?   @db.VarChar(500)
-  status      String    @default("Belum Lunas") @db.VarChar(50)
-  createdBy   String    @map("created_by")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedBy   String?   @map("updated_by")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  code           String    @unique @db.VarChar(20)
+  salesDate      DateTime  @default(now()) @map("sales_date")
+  entryDate      DateTime  @map("entry_date")
+  customerId     String    @map("customer_id")
+  paymentType    String    @map("payment_type") @db.VarChar(20)
+  subTotal       Decimal   @map("sub_total") @db.Decimal(10, 2)
+  discount       Decimal   @default(0) @db.Decimal(10, 2)
+  grandTotal     Decimal   @map("grand_total") @db.Decimal(10, 2)
+  remarks        String?   @db.VarChar(500)
+  progressStatus String    @default("Belum Dikerjakan") @map("progress_status") @db.VarChar(50)
+  paymentStatus  String    @default("Belum Lunas") @map("payment_status") @db.VarChar(50)
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedBy      String?   @map("updated_by")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
 
   Customer Customers @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
@@ -242,7 +244,7 @@ model SalesOrders {
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-  @@index([code, salesDate, customerId, paymentType, grandTotal, status], map: "sales_orders_index")
+  @@index([code, salesDate, customerId, paymentType, grandTotal, progressStatus, paymentStatus], map: "sales_orders_index")
 }
 
 model SalesOrderProductDetails {

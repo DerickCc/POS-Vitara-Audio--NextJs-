@@ -9,7 +9,7 @@ export async function checkForRelatedRecords(
   createdAt: Date,
   errorMessage: string,
   relationPath: string,
-  additionalPath: string = '', // for purchase and sales return
+  additionalPath: string = '' // for purchase and sales return
 ) {
   // @ts-ignore
   const affectedRecords = await db[entity].findMany({
@@ -26,7 +26,7 @@ export async function checkForRelatedRecords(
             },
       },
       createdAt: { gt: createdAt },
-      status: { not: 'Batal' },
+      [entity === 'purchaseOrders' || entity === 'salesOrders' ? 'progressStatus' : 'status']: { not: 'Batal' },
     },
     select: { id: true },
     orderBy: { createdAt: 'asc' },

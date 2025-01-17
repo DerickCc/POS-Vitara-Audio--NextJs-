@@ -19,7 +19,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const po = await db.purchaseOrders.findUnique({
       where: { id },
       select: {
-        status: true,
+        progressStatus: true,
         createdAt: true,
         supplierId: true,
         appliedReceivables: true,
@@ -42,7 +42,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     if (!po) {
       throw new Error('Data Transaksi Pembelian tidak ditemukan');
-    } else if (po.status !== 'Selesai') {
+    } else if (po.progressStatus !== 'Selesai') {
       throw new Error('Hanya Transaksi Pembelian berstatus "Selesai" yang dapat dibatalkan');
     }
 
@@ -131,7 +131,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       await db.purchaseOrders.update({
         where: { id },
         data: {
-          status: 'Batal',
+          progressStatus: 'Batal',
+          paymentStatus: 'Batal',
           UpdatedBy: {
             connect: { id: userId },
           },

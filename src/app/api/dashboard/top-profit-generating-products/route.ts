@@ -56,8 +56,8 @@ export async function GET(request: Request) {
       JOIN "public"."SalesOrders" so ON sopd.so_id = so.id
       ${
         period !== 'all-time'
-          ? Prisma.sql`WHERE sopd.created_at::text BETWEEN ${isoStartDate} AND ${isoEndDate} AND so.status != 'Batal'`
-          : Prisma.sql`WHERE so.status != 'Batal'`
+          ? Prisma.sql`WHERE sopd.created_at::text BETWEEN ${isoStartDate} AND ${isoEndDate} AND so.progress_status != 'Batal'`
+          : Prisma.sql`WHERE so.progress_status != 'Batal'`
       }
       GROUP BY p.id
       ORDER BY total_profit DESC

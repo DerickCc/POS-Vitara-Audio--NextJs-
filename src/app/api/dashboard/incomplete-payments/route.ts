@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   const sortOrder = queryParams.get('sortOrder') ?? 'desc';
   const sortColumn = queryParams.get('sortColumn') ?? 'createdAt';
 
-  const where = { status: 'Belum Lunas' };
+  const where = { progressStatus: 'Belum Lunas' };
 
   try {
     const incompletePayments = await db.salesOrders.findMany({

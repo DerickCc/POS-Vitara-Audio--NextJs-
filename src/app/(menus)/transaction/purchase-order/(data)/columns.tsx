@@ -38,7 +38,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
           </Link>
 
           {/* edit */}
-          {row.original.status === 'Dalam Proses' && (
+          {row.original.progressStatus === 'Dalam Proses' && (
             <Link href={routes.transaction.purchaseOrder.edit(row.original.id)}>
               <Dropdown.Item>
                 <LuPencil className='text-yellow-500 w-5 h-5 cursor-pointer mr-3' /> Edit
@@ -47,7 +47,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
           )}
 
           {/* finish */}
-          {row.original.status === 'Dalam Proses' && (
+          {row.original.progressStatus === 'Dalam Proses' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -63,7 +63,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
           )}
 
           {/* pay */}
-          {row.original.status !== 'Batal' && row.original.paidAmount < row.original.grandTotal && (
+          {row.original.progressStatus !== 'Batal' && row.original.paymentStatus === 'Belum Lunas' && (
             <Dropdown.Item
               onClick={() => {
                 openPaymentModal({
@@ -81,7 +81,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
           )}
 
           {/* delete */}
-          {row.original.status === 'Dalam Proses' && (
+          {row.original.progressStatus === 'Dalam Proses' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -96,7 +96,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
           )}
 
           {/* cancel */}
-          {user?.role === 'Admin' && row.original.status === 'Selesai' && (
+          {user?.role === 'Admin' && row.original.progressStatus === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -170,8 +170,8 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
-  columnHelper.accessor('status', {
-    id: 'status',
+  columnHelper.accessor('progressStatus', {
+    id: 'progressStatus',
     size: 150,
     header: () => 'Status Pengiriman',
     cell: (info) => {
@@ -181,25 +181,23 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     },
     enableSorting: true,
   }),
-  columnHelper.display({
+  columnHelper.accessor('paymentStatus', {
     id: 'paymentStatus',
     size: 150,
     header: () => 'Status Pembayaran',
-    cell: ({ row }) => {
-      if (row.original.status === 'Batal') return '-';
-
-      const isPaidFully = row.original.paidAmount === row.original.grandTotal ? 'Lunas' : 'Belum Lunas';
-      const color = mapTrxStatusToColor[isPaidFully];
-
-      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{isPaidFully}</span>;
+    cell: (info) => {
+      const status = info.getValue();
+      const color = mapTrxStatusToColor[status];
+      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
+    enableSorting: true,
   }),
   columnHelper.accessor('paidAmount', {
     id: 'paidAmount',
     size: 150,
     header: () => 'Telah Dibayar',
     cell: ({ row }) => {
-      if (row.original.status === 'Batal') return '-';
+      if (row.original.paymentStatus === 'Batal') return '-';
 
       return `Rp ${formatToReadableNumber(row.original.paidAmount)}`;
     },

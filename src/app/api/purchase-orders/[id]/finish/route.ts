@@ -23,7 +23,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
       if (!po) {
         throw new Error('Data Transaksi Pembelian tidak ditemukan');
-      } else if (po.status !== 'Dalam Proses') {
+      } else if (po.progressStatus !== 'Dalam Proses') {
         throw new Error('Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat diselesaikan');
       }
 
@@ -58,7 +58,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       await prisma.purchaseOrders.update({
         where: { id },
         data: {
-          status: 'Selesai',
+          progressStatus: 'Selesai',
           UpdatedBy: {
             connect: { id: userId },
           },

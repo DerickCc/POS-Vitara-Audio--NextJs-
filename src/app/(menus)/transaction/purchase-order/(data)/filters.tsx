@@ -1,7 +1,7 @@
 'use client';
 
 import Card from '@/components/card';
-import { poPrStatusOptions } from '@/config/global-variables';
+import { paymentStatusOptions, poPrStatusOptions } from '@/config/global-variables';
 import { FiltersProps } from '@/models/global.model';
 import { FormEvent, useCallback, useState } from 'react';
 import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
@@ -17,11 +17,12 @@ import toast from 'react-hot-toast';
 import { debounce } from 'lodash';
 
 export type PurchaseOrderTableFilters = {
-  code: string;
-  supplierId: string | null;
-  startDate: any;
-  endDate: any;
-  status: string;
+  code?: string | undefined;
+  supplierId?: string | undefined;
+  startDate?: any;
+  endDate?: any;
+  progressStatus?: 'Dalam Proses' | 'Selesai' | 'Batal' | undefined;
+  paymentStatus?: 'Belum Lunas' | 'Lunas' | 'Batal' | undefined;
 };
 
 export default function PurchaseOrderFilter({
@@ -91,6 +92,7 @@ export default function PurchaseOrderFilter({
             disableDefaultFilter={true}
             clearable={true}
             onClear={() => handleFilterChange('supplierId')(null)}
+            searchProps={{autoFocus: true}}
           />
           <div className='sm:col-span-4 flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full'>
             <ReactDatePicker
@@ -121,8 +123,8 @@ export default function PurchaseOrderFilter({
             />
           </div>
           <Select
-            value={localFilters.status}
-            onChange={(value: string) => handleFilterChange('status')(value)}
+            value={localFilters.progressStatus}
+            onChange={(value: string) => handleFilterChange('progressStatus')(value)}
             className='sm:col-span-3'
             label='Status Pengiriman'
             placeholder='Pilih Status Pengiriman'
@@ -130,9 +132,21 @@ export default function PurchaseOrderFilter({
             displayValue={(value) => poPrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
-            onClear={() => handleFilterChange('status')('')}
+            onClear={() => handleFilterChange('progressStatus')('')}
           />
-          <div className='sm:col-span-7 flex justify-end items-end'>
+          <Select
+            value={localFilters.paymentStatus}
+            onChange={(value: string) => handleFilterChange('paymentStatus')(value)}
+            className='sm:col-span-3'
+            label='Status Pembayaran'
+            placeholder='Pilih Status Pembayaran'
+            options={paymentStatusOptions}
+            displayValue={(value) => paymentStatusOptions.find((option) => option.value === value)?.label ?? ''}
+            getOptionValue={(option) => option.value}
+            clearable={true}
+            onClear={() => handleFilterChange('paymentStatus')('')}
+          />
+          <div className='sm:col-span-4 flex justify-end items-end'>
             <Button className='w-20' type='submit'>
               Cari
             </Button>

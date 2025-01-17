@@ -92,7 +92,7 @@ export default function PurchaseOrderForm({
       // if edit, reset paidAmount to 0
       if (!isReadOnly) defaultValues.paidAmount = 0;
 
-      setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
+      setTrxStatusColor(mapTrxStatusToColor[defaultValues.progressStatus] as Colors);
 
       reset(defaultValues);
     }
@@ -219,7 +219,7 @@ export default function PurchaseOrderForm({
               <h5 className='font-medium'>Info Pembelian</h5>
             </div>
             {defaultValues.id && (
-              <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>{defaultValues.status}</span>
+              <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>{defaultValues.progressStatus}</span>
             )}
           </div>
           {isLoading ? (
@@ -558,8 +558,8 @@ export default function PurchaseOrderForm({
           {/* if is view and loaded */}
           {isReadOnly &&
             defaultValues.id &&
-            defaultValues.status !== 'Batal' &&
-            defaultValues.paidAmount < defaultValues.grandTotal && (
+            defaultValues.progressStatus !== 'Batal' &&
+            defaultValues.paymentStatus === 'Belum Lunas' && (
               <Button
                 onClick={() => {
                   openPaymentModal({

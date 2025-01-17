@@ -24,7 +24,8 @@ export async function GET(request: Request) {
   const supplierId = queryParams.get('supplierId') ?? 0;
   const startDate = queryParams.get('startDate') ?? '';
   const endDate = queryParams.get('endDate') ?? '';
-  const status = queryParams.get('status') ?? '';
+  const progressStatus = queryParams.get('progressStatus') ?? '';
+  const paymentStatus = queryParams.get('paymentStatus') ?? '';
 
   const where: any = { AND: [] };
   if (code) {
@@ -65,8 +66,12 @@ export async function GET(request: Request) {
     });
   }
 
-  if (status) {
-    where.AND.push({ status });
+  if (progressStatus) {
+    where.AND.push({ progressStatus });
+  }
+
+  if (paymentStatus) {
+    where.AND.push({ paymentStatus });
   }
   // ----------------
 
@@ -91,7 +96,8 @@ export async function GET(request: Request) {
         appliedReceivables: true,
         grandTotal: true,
         totalItem: true,
-        status: true,
+        progressStatus: true,
+        paymentStatus: true,
         PurchaseOrderDetails: {
           select: {
             Product: {
@@ -165,7 +171,8 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
     'Potong Piutang',
     'Grand Total',
     'Item',
-    'Status',
+    'Status Pengiriman',
+    'Status Pembayaran',
     'Barang',
     'Harga Beli',
     'Qty',
@@ -201,7 +208,8 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
       'Rp ' + formatToReadableNumber(po.appliedReceivables),
       'Rp ' + formatToReadableNumber(po.grandTotal),
       po.totalItem,
-      po.status,
+      po.progressStatus,
+      po.paymentStatus,
       '',
       '',
       '',
@@ -221,7 +229,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
         };
       }
 
-      if (colNum < 9) {
+      if (colNum < 10) {
         cell.border = {
           top: { style: 'thin' },
           bottom: { style: 'thin' },
@@ -230,7 +238,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
         };
       }
 
-      if (colNum == 7) {
+      if (colNum == 8) {
         cell.alignment = {
           horizontal: 'center',
           vertical: 'middle',
@@ -238,7 +246,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
       }
 
       // border for the rightmost side of table
-      if (colNum == 12) {
+      if (colNum == 13) {
         cell.border = {
           right: { style: 'thin' },
         };
@@ -248,6 +256,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
     // detail rows
     po.details.forEach((detail: any, j: number) => {
       ws.addRow([
+        '',
         '',
         '',
         '',
@@ -275,7 +284,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
           };
         }
 
-        if (colNum >= 9) {
+        if (colNum >= 10) {
           cell.border = {
             top: { style: 'thin' },
             bottom: { style: 'thin' },
@@ -284,7 +293,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
           };
         }
         // border for the bottom of table
-        else if (colNum < 9 && i == data.length - 1 && j == po.details.length - 1) {
+        else if (colNum < 10 && i == data.length - 1 && j == po.details.length - 1) {
           cell.border = {
             bottom: { style: 'thin' },
           };
@@ -301,11 +310,12 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
   ws.getColumn(6).width = 15;
   ws.getColumn(7).width = 7;
   ws.getColumn(8).width = 15;
-  ws.getColumn(9).width = 30;
+  ws.getColumn(9).width = 15;
   // detail
-  ws.getColumn(10).width = 15;
+  ws.getColumn(10).width = 30;
   ws.getColumn(11).width = 15;
   ws.getColumn(12).width = 15;
+  ws.getColumn(13).width = 15;
 
   return await wb.xlsx.writeBuffer();
 }
