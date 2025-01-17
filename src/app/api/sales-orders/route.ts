@@ -29,7 +29,8 @@ export async function GET(request: Request) {
   const customerId = queryParams.get('customerId') ?? 0;
   const startDate = queryParams.get('startDate') ?? '';
   const endDate = queryParams.get('endDate') ?? '';
-  const status = queryParams.get('status') ?? '';
+  const progressStatus = queryParams.get('progressStatus') ?? '';
+  const paymentStatus = queryParams.get('paymentStatus') ?? '';
 
   const where: any = { AND: [] };
   if (code) {
@@ -70,8 +71,12 @@ export async function GET(request: Request) {
     });
   }
 
-  if (status) {
-    where.AND.push({ status });
+  if (progressStatus) {
+    where.AND.push({ progressStatus });
+  }
+
+  if (paymentStatus) {
+    where.AND.push({ paymentStatus });
   }
   // ----------------
 
@@ -212,7 +217,7 @@ export async function POST(request: Request) {
 
       const grandTotal = subTotal.minus(discount);
 
-      const status = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
+      const paymentStatus = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
 
       // create so
       const so = await prisma.salesOrders.create({
@@ -228,7 +233,7 @@ export async function POST(request: Request) {
           discount,
           grandTotal,
           remarks: data.remarks,
-          status,
+          paymentStatus,
           CreatedBy: {
             connect: { id: userId },
           },

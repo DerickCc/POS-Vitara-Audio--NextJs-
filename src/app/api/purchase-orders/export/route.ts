@@ -183,6 +183,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
   headerRow.alignment = {
     horizontal: 'center',
     vertical: 'middle',
+    wrapText: true,
   };
   headerRow.eachCell((cell) => {
     cell.border = {
@@ -238,7 +239,7 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
         };
       }
 
-      if (colNum == 8) {
+      if (colNum == 7) {
         cell.alignment = {
           horizontal: 'center',
           vertical: 'middle',
@@ -290,6 +291,12 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
             bottom: { style: 'thin' },
             left: { style: 'thin' },
             right: { style: 'thin' },
+          };
+
+          cell.alignment = {
+            wrapText: true,
+            horizontal: 'left',
+            vertical: 'middle',
           };
         }
         // border for the bottom of table

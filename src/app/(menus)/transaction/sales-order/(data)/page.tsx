@@ -35,18 +35,12 @@ export default function SalesOrderDataPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localFilters, setLocalFilters] = useState<SalesOrderFilters>({
-    code: '',
-    customerId: null,
     startDate: null,
     endDate: null,
-    status: '',
   });
   const [filters, setFilters] = useState<SalesOrderFilters>({
-    code: '',
-    customerId: null,
     startDate: null,
     endDate: null,
-    status: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);

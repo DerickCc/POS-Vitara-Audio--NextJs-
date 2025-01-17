@@ -23,7 +23,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const so = await db.salesOrders.findUnique({
       where: { id },
       select: {
-        status: true,
+        progressStatus: true,
         createdAt: true,
         SalesOrderProductDetails: {
           select: {
@@ -36,7 +36,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     if (!so) {
       throw new Error('Data Transaksi Penjualan tidak ditemukan');
-    } else if (so.status === 'Batal') {
+    } else if (so.progressStatus === 'Batal') {
       throw new Error('Transaksi Penjualan telah berstatus "Batal"');
     }
 
@@ -103,7 +103,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       await db.salesOrders.update({
         where: { id },
         data: {
-          status: 'Batal',
+          progressStatus: 'Batal',
+          paymentStatus: 'Batal',
           UpdatedBy: {
             connect: { id: userId },
           },

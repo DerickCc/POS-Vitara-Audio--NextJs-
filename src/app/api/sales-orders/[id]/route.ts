@@ -40,7 +40,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
         subTotal: true,
         discount: true,
         grandTotal: true,
-        status: true,
+        progressStatus: true,
+        paymentStatus: true,
         remarks: true,
         SalesOrderProductDetails: {
           select: {

@@ -97,7 +97,8 @@ export async function GET(request: Request) {
         CreatedBy: {
           select: { name: true },
         },
-        status: true,
+        progressStatus: true,
+        paymentStatus: true,
         SalesOrderProductDetails: {
           select: {
             Product: {
@@ -216,6 +217,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
   headerRow.alignment = {
     horizontal: 'center',
     vertical: 'middle',
+    wrapText: true,
   };
   headerRow.eachCell((cell) => {
     cell.border = {
@@ -244,7 +246,8 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
       'Rp ' + formatToReadableNumber(so.discount),
       'Rp ' + formatToReadableNumber(so.grandTotal),
       'Rp ' + formatToReadableNumber(so.paidAmount),
-      so.status,
+      so.progressStatus,
+      so.paymentStatus,
       '',
       '',
       '',
@@ -265,7 +268,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
         };
       }
 
-      if (colNum < 11) {
+      if (colNum < 12) {
         cell.border = {
           top: { style: 'thin' },
           bottom: { style: 'thin' },
@@ -274,7 +277,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
         };
       }
       // border for the rightmost side of table
-      if (colNum == 15) {
+      if (colNum == 16) {
         cell.border = {
           right: { style: 'thin' },
         };
@@ -284,6 +287,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
     // product detail rows
     so.productDetails.forEach((detail: any, j: number) => {
       ws.addRow([
+        '',
         '',
         '',
         '',
@@ -314,7 +318,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
           };
         }
 
-        if (colNum >= 11) {
+        if (colNum >= 12) {
           cell.border = {
             top: { style: 'thin' },
             bottom: { style: 'thin' },
@@ -322,16 +326,16 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
             right: { style: 'thin' },
           };
 
-          if (colNum === 13) {
-            cell.alignment = {
-              horizontal: 'left',
-              vertical: 'middle',
-            };
-          }
+
+          cell.alignment = {
+            wrapText: true,
+            horizontal: 'left',
+            vertical: 'middle',
+          };
         }
         // border for the bottom of table
         else if (
-          colNum < 11 &&
+          colNum < 12 &&
           i == data.length - 1 &&
           j == so.productDetails.length - 1 &&
           so.serviceDetails.length == 0
@@ -346,6 +350,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
     // service detail rows
     so.serviceDetails.forEach((detail: any, k: number) => {
       ws.addRow([
+        '',
         '',
         '',
         '',
@@ -376,7 +381,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
           };
         }
 
-        if (colNum >= 11) {
+        if (colNum >= 12) {
           cell.border = {
             top: { style: 'thin' },
             bottom: { style: 'thin' },
@@ -384,15 +389,14 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
             right: { style: 'thin' },
           };
 
-          if (colNum === 13) {
-            cell.alignment = {
-              horizontal: 'left',
-              vertical: 'middle',
-            };
-          }
+          cell.alignment = {
+            wrapText: true,
+            horizontal: 'left',
+            vertical: 'middle',
+          };
         }
         // border for the bottom of table
-        else if (colNum < 11 && i == data.length - 1 && k == so.serviceDetails.length - 1) {
+        else if (colNum < 12 && i == data.length - 1 && k == so.serviceDetails.length - 1) {
           cell.border = {
             bottom: { style: 'thin' },
           };
@@ -411,12 +415,13 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
   ws.getColumn(8).width = 15;
   ws.getColumn(9).width = 15;
   ws.getColumn(10).width = 13;
+  ws.getColumn(11).width = 13;
   // detail
-  ws.getColumn(11).width = 20;
-  ws.getColumn(12).width = 15;
-  ws.getColumn(13).width = 12;
-  ws.getColumn(14).width = 15;
+  ws.getColumn(12).width = 20;
+  ws.getColumn(13).width = 15;
+  ws.getColumn(14).width = 12;
   ws.getColumn(15).width = 15;
+  ws.getColumn(16).width = 15;
 
   return await wb.xlsx.writeBuffer();
 }

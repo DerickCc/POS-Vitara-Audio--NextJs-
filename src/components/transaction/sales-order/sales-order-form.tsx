@@ -118,7 +118,7 @@ export default function SalesOrderForm({
 
       setNoInvoice(defaultValues.code);
 
-      setTrxStatusColor(mapTrxStatusToColor[defaultValues.status] as Colors);
+      setTrxStatusColor(mapTrxStatusToColor[defaultValues.progressStatus] as Colors);
 
       setTotalProductSoldAmount(defaultValues.productDetails.reduce((acc, d) => acc + d.totalPrice, 0));
 
@@ -346,7 +346,9 @@ export default function SalesOrderForm({
                   <h5 className='font-medium'>Info Penjualan</h5>
                 </div>
                 {defaultValues.id && (
-                  <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>{defaultValues.status}</span>
+                  <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>
+                    {defaultValues.progressStatus}
+                  </span>
                 )}
               </div>
               {isLoading ? (
@@ -742,7 +744,7 @@ export default function SalesOrderForm({
                           <span className='font-semibold'>TOTAL</span>
                         </td>
                         <td className='table-cell'>
-                          <RupiahInput onChange={() => { }} defaultValue={totalProductSoldAmount} readOnly={true} />
+                          <RupiahInput onChange={() => {}} defaultValue={totalProductSoldAmount} readOnly={true} />
                         </td>
                       </tr>
                     </tbody>
@@ -878,7 +880,7 @@ export default function SalesOrderForm({
                           <span className='font-semibold'>TOTAL</span>
                         </td>
                         <td className='table-cell'>
-                          <RupiahInput onChange={() => { }} defaultValue={totalServiceSoldAmount} readOnly={true} />
+                          <RupiahInput onChange={() => {}} defaultValue={totalServiceSoldAmount} readOnly={true} />
                         </td>
                       </tr>
                     </tbody>
@@ -892,30 +894,37 @@ export default function SalesOrderForm({
         <div className='flex justify-end'>
           {/* if is create */}
           {!isReadOnly && (
-            <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
+            <Button
+              className={cn(baseButtonClass, buttonColorClass.green)}
+              type='submit'
+              disabled={isSubmitting || isSubmitSuccessful}
+            >
               {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
               <span>Simpan</span>
             </Button>
           )}
 
           {/* if is view and loaded */}
-          {isReadOnly && defaultValues.id && defaultValues.status === 'Belum Lunas' && (
-            <Button
-              onClick={() => {
-                openPaymentModal({
-                  id: defaultValues.id,
-                  code: defaultValues.code,
-                  type: 'so',
-                  grandTotal: defaultValues.grandTotal,
-                  paidAmount: defaultValues.paidAmount,
-                  redirectTo: routes.transaction.salesOrder.data,
-                });
-              }}
-              className={cn(buttonColorClass.green, baseButtonClass)}
-            >
-              <FaRegMoneyBillAlt className='size-4 me-2' /> <span>Bayar</span>
-            </Button>
-          )}
+          {isReadOnly &&
+            defaultValues.id &&
+            defaultValues.paymentStatus !== 'Batal' &&
+            defaultValues.paymentStatus === 'Belum Lunas' && (
+              <Button
+                onClick={() => {
+                  openPaymentModal({
+                    id: defaultValues.id,
+                    code: defaultValues.code,
+                    type: 'so',
+                    grandTotal: defaultValues.grandTotal,
+                    paidAmount: defaultValues.paidAmount,
+                    redirectTo: routes.transaction.salesOrder.data,
+                  });
+                }}
+                className={cn(buttonColorClass.green, baseButtonClass)}
+              >
+                <FaRegMoneyBillAlt className='size-4 me-2' /> <span>Bayar</span>
+              </Button>
+            )}
         </div>
       </form>
 

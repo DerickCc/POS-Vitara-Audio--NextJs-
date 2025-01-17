@@ -11,6 +11,7 @@ export const CURRENCY_OPTIONS = {
 export const mapTrxStatusToColor: { [key: string]: Colors } = {
   'Dalam Proses': 'blue',
   'Belum Lunas': 'blue',
+  'Belum Dikerjakan': 'blue',
   Selesai: 'green',
   Lunas: 'green',
   Batal: 'red',
@@ -87,8 +88,8 @@ export const prTypeOptions = [
 ];
 
 export const soStatusOptions = [
-  { label: 'Belum Lunas', value: 'Belum Lunas' },
-  { label: 'Lunas', value: 'Lunas' },
+  { label: 'Belum Dikerjakan', value: 'Belum Dikerjakan' },
+  { label: 'Selesai', value: 'Selesai' },
   { label: 'Batal', value: 'Batal' },
 ];
 

@@ -16,13 +16,7 @@ import { FaRegMoneyBillAlt } from 'react-icons/fa';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { useAuth } from '@/hooks/use-auth';
 
-function ActionColumn({
-  row,
-  actionHandlers,
-}: {
-  row: Row<SalesOrderModel>;
-  actionHandlers: any;
-}) {
+function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
   const { user } = useAuth();
@@ -45,7 +39,7 @@ function ActionColumn({
           </Link>
 
           {/* pay */}
-          {row.original.status === 'Belum Lunas' && (
+          {row.original.progressStatus !== 'Batal' && row.original.paymentStatus === 'Belum Lunas' && (
             <Dropdown.Item
               onClick={() => {
                 openPaymentModal({
@@ -63,7 +57,7 @@ function ActionColumn({
           )}
 
           {/* print */}
-          {row.original.status !== 'Batal' && (
+          {row.original.progressStatus !== 'Batal' && (
             <Link href={routes.transaction.salesOrder.print(row.original.id)}>
               <Dropdown.Item>
                 <LuPrinter className='text-purple-500 size-5 cursor-pointer mr-3' /> Print
@@ -72,7 +66,7 @@ function ActionColumn({
           )}
 
           {/* cancel */}
-          {user?.role === 'Admin' && row.original.status !== 'Batal' && (
+          {user?.role === 'Admin' && row.original.progressStatus !== 'Batal' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -152,23 +146,34 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
     enableSorting: true,
   }),
-  columnHelper.accessor('paidAmount', {
-    id: 'paidAmount',
-    size: 130,
-    header: () => 'Dibayar',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
-    enableSorting: false,
-  }),
-  columnHelper.accessor('status', {
-    id: 'status',
+  columnHelper.accessor('progressStatus', {
+    id: 'progressStatus',
     size: 150,
-    header: () => 'Status',
+    header: () => 'Status Pengerjaan',
     cell: (info) => {
       const status = info.getValue();
       const color = mapTrxStatusToColor[status];
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },
     enableSorting: true,
+  }),
+  columnHelper.accessor('paymentStatus', {
+    id: 'paymentStatus',
+    size: 150,
+    header: () => 'Status Pembayaran',
+    cell: (info) => {
+      const status = info.getValue();
+      const color = mapTrxStatusToColor[status];
+      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
+    },
+    enableSorting: true,
+  }),
+  columnHelper.accessor('paidAmount', {
+    id: 'paidAmount',
+    size: 130,
+    header: () => 'Dibayar',
+    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
+    enableSorting: false,
   }),
   columnHelper.accessor('cashier', {
     id: 'cashier',
