@@ -93,12 +93,20 @@ export const cancelSo = async (id: string): Promise<string> => {
   }
 };
 
+// DELETE
+export const deleteSo = async (id: string): Promise<string> => {
+  try {
+    const response = await apiFetch(`/api/sales-orders/${id}`, {
+      method: 'DELETE',
+    });
+    return response.message;
+  } catch (e) {
+    throw e + '';
+  }
+};
+
 // EXCEL
-export const exportSo = async ({
-  sortColumn,
-  sortOrder,
-  filters,
-}: QueryParamsModel): Promise<void> => {
+export const exportSo = async ({ sortColumn, sortOrder, filters }: QueryParamsModel): Promise<void> => {
   try {
     const blob = await apiFetch(
       `/api/sales-orders/export${toQueryString({ sortColumn, sortOrder, ...filters })}`,

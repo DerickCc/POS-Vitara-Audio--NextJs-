@@ -3,7 +3,7 @@
 import PurchaseOrderForm from '@/components/transaction/purchase-order/purchase-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { PurchaseOrderModel } from '@/models/purchase-order.model';
+import { PurchaseOrderModel, UpdatePurchaseOrderSchema } from '@/models/purchase-order.model';
 import { getPoById, updatePo } from '@/services/purchase-order-service';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -78,6 +78,7 @@ export default function EditPurchaseOrderPage() {
           isLoading={isLoading}
           onSubmit={update}
           isSubmitSuccessful={isSubmitSuccessful}
+          schema={UpdatePurchaseOrderSchema}
         />
       </div>
     </>

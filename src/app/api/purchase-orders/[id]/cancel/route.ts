@@ -138,6 +138,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           },
         },
       });
+
+      await prisma.purchaseOrderPaymentHistories.deleteMany({
+        where: { poId: id },
+      });
     });
 
     return NextResponse.json({ message: 'Transaksi Pembelian berhasil dibatalkan' }, { status: 200 });

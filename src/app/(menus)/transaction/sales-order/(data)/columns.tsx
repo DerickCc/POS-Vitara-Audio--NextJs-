@@ -12,7 +12,7 @@ import { LuEye, LuCircleSlash, LuPrinter } from 'react-icons/lu';
 import { FiMoreVertical } from 'react-icons/fi';
 import { Row } from '@tanstack/react-table';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
-import { FaRegMoneyBillAlt } from 'react-icons/fa';
+import { FaRegMoneyBillAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -65,8 +65,23 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; acti
             </Link>
           )}
 
+          {/* delete */}
+          {row.original.progressStatus === 'Belum Dikerjakan' && (
+            <Dropdown.Item
+              onClick={() => {
+                openConfirmationModal({
+                  title: 'Hapus Transaksi Penjualan',
+                  description: 'Transaksi yang sudah dihapus tidak dapat dikembalikan lagi. Apakah Anda yakin?',
+                  handleConfirm: () => actionHandlers.delete(row.original.id),
+                });
+              }}
+            >
+              <FaRegTrashAlt className='text-red-500 w-5 h-4 cursor-pointer mr-3' /> Hapus
+            </Dropdown.Item>
+          )}
+
           {/* cancel */}
-          {user?.role === 'Admin' && row.original.progressStatus !== 'Batal' && (
+          {user?.role === 'Admin' && row.original.progressStatus === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -148,7 +163,7 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
   }),
   columnHelper.accessor('progressStatus', {
     id: 'progressStatus',
-    size: 150,
+    size: 170,
     header: () => 'Status Pengerjaan',
     cell: (info) => {
       const status = info.getValue();

@@ -3,7 +3,7 @@
 import Card from '@/components/card';
 import Spinner from '@/components/spinner';
 import { BasicFormProps, Colors } from '@/models/global.model';
-import { PurchaseOrderModel, PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { PurchaseOrderModel } from '@/models/purchase-order.model';
 import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,9 +34,11 @@ import { mapTrxStatusToColor } from '@/config/global-variables';
 import ProductOptionTemplate from '@/components/inventory/product/product-option-template';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { routes } from '@/config/routes';
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 
 interface PurchaseOrderFormProps extends BasicFormProps<PurchaseOrderModel> {
   isReadOnly?: boolean;
+  schema?: any;
 }
 
 export default function PurchaseOrderForm({
@@ -45,6 +47,7 @@ export default function PurchaseOrderForm({
   isLoading = false,
   onSubmit,
   isSubmitSuccessful = false,
+  schema,
 }: PurchaseOrderFormProps) {
   const {
     watch,
@@ -57,7 +60,7 @@ export default function PurchaseOrderForm({
     reset,
   } = useForm<PurchaseOrderModel>({
     defaultValues,
-    resolver: isReadOnly ? undefined : zodResolver(PurchaseOrderSchema),
+    resolver: isReadOnly ? undefined : zodResolver(schema),
   });
 
   const {
@@ -82,15 +85,13 @@ export default function PurchaseOrderForm({
 
   const grandTotal = watch('grandTotal');
 
+  const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
 
   useEffect(() => {
     if (defaultValues.id) {
       defaultValues.purchaseDate = isoStringToReadableDate(defaultValues.purchaseDate);
       defaultValues.supplierReceivable += defaultValues.appliedReceivables;
-
-      // if edit, reset paidAmount to 0
-      if (!isReadOnly) defaultValues.paidAmount = 0;
 
       setTrxStatusColor(mapTrxStatusToColor[defaultValues.progressStatus] as Colors);
 
@@ -203,6 +204,19 @@ export default function PurchaseOrderForm({
   };
   // ------------------------
 
+  const submitConfirmation = async (payload: PurchaseOrderModel) => {
+    if (defaultValues.paidAmount > grandTotal) {
+      openConfirmationModal({
+        title: 'Simpan Pembelian',
+        description:
+          'Karena jumlah yang telah dibayar melebihi Grand Total baru, maka jumlah yang telah dibayar akan direset ke 0. Apakah Anda yakin?',
+        handleConfirm: async () => await onSubmit(payload),
+      });
+    } else {
+      await onSubmit(payload);
+    }
+  };
+
   const onError = (errors: any) => {
     if (errors?.details?.refinement) {
       toast.error(errors.details.refinement.message);
@@ -211,7 +225,7 @@ export default function PurchaseOrderForm({
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit, onError)}>
+      <form onSubmit={handleSubmit(submitConfirmation, onError)}>
         <Card className='mb-7'>
           <div className='flex items-center justify-between mb-5'>
             <div className='flex items-center'>
@@ -219,7 +233,9 @@ export default function PurchaseOrderForm({
               <h5 className='font-medium'>Info Pembelian</h5>
             </div>
             {defaultValues.id && (
-              <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>{defaultValues.progressStatus}</span>
+              <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>
+                {defaultValues.progressStatus}
+              </span>
             )}
           </div>
           {isLoading ? (
@@ -491,13 +507,13 @@ export default function PurchaseOrderForm({
                               fieldName='paidAmount'
                               defaultValue={value}
                               error={error?.message}
-                              readOnly={isReadOnly || grandTotal === 0}
+                              readOnly={!!defaultValues.id || grandTotal === 0}
                             />
                           )}
                         />
                       </td>
                     </tr>
-                    {!isReadOnly && (
+                    {!defaultValues.id && (
                       <tr>
                         <td className='table-cell text-right' colSpan={5}>
                           <span className='font-semibold'>METODE PEMBAYARAN</span>
@@ -579,6 +595,7 @@ export default function PurchaseOrderForm({
         </div>
       </form>
 
+      <ConfirmationModalComponent />
       <PaymentModalComponent />
     </>
   );

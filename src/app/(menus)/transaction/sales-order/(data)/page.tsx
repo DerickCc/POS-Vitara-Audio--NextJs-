@@ -2,7 +2,7 @@
 
 import { routes } from '@/config/routes';
 import { SalesOrderModel } from '@/models/sales-order';
-import { browseSo, cancelSo, exportSo } from '@/services/sales-order-service';
+import { browseSo, cancelSo, deleteSo, exportSo } from '@/services/sales-order-service';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { columns } from './columns';
 import Spinner from '@/components/spinner';
 import { useOverlayLoading } from '@/hooks/use-overlay-loading';
+import { handleTableAction } from '@/utils/handle-table-action';
 
 const pageHeader = {
   title: 'Penjualan',
@@ -116,19 +117,9 @@ export default function SalesOrderDataPage() {
     }
   };
 
-  const handleCancel = async (id: string) => {
-    try {
-      const message = await cancelSo(id);
-      toast.success(message, { duration: 5000 });
-
-      fetchSalesOrders();
-    } catch (e) {
-      toast.error(e + '', { duration: 10000 });
-    }
-  };
-
   const actionHandlers: any = {
-    cancel: (id: string) => handleCancel(id),
+    cancel: (id: string) => handleTableAction(cancelSo, fetchSalesOrders, id),
+    delete: (id: string) => handleTableAction(deleteSo, fetchSalesOrders, id),
     fetchData: () => fetchSalesOrders(),
   };
 

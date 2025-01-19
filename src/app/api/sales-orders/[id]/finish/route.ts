@@ -2,7 +2,7 @@ import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { NextResponse } from 'next/server';
 
-// FinishPurchaseOrder
+// FinishSalesOrder
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
 
@@ -16,44 +16,32 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const userId = session.id;
 
     await db.$transaction(async (prisma) => {
-      const po = await prisma.purchaseOrders.findUnique({
+      const so = await prisma.salesOrders.findUnique({
         where: { id },
         select: {
           progressStatus: true,
-          PurchaseOrderDetails: {
+          SalesOrderProductDetails: {
             select: {
               productId: true,
               quantity: true,
-              totalPrice: true,
-              Product: {
-                select: {
-                  stock: true,
-                  costPrice: true,
-                },
-              },
-            },
-          },
-        },
+
+            }
+          }
+        }
       });
 
-      if (!po) {
-        throw new Error('Data Transaksi Pembelian tidak ditemukan');
-      } else if (po.progressStatus !== 'Dalam Proses') {
-        throw new Error('Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat diselesaikan');
+      if (!so) {
+        throw new Error('Data Transaksi Penjualan tidak ditemukan');
+      } else if (so.progressStatus !== 'Belum Dikerjakan') {
+        throw new Error('Hanya Transaksi Penjualan berstatus "Belum Dikerjakan" yang dapat diselesaikan');
       }
 
-      // update stock and costPrice of each product in details
-      const updatePromises = po.PurchaseOrderDetails.map(async (d) => {
-        const totalCost = d.Product.stock.times(d.Product.costPrice); // total cost before added with purchase product
-        const updatedStock = d.Product.stock.plus(d.quantity); // stock after added with purchased product qty
-
-        const updatedCostPrice = totalCost.plus(d.totalPrice).div(updatedStock).round(); // cost price calculated after purchase product
-
+      // update stock of each product in details
+      const updatePromises = so.SalesOrderProductDetails.map(async (d) => {
         return prisma.products.update({
           where: { id: d.productId },
           data: {
-            stock: updatedStock,
-            costPrice: updatedCostPrice,
+            stock: { decrement: d.quantity },
             UpdatedBy: {
               connect: { id: userId },
             },
@@ -75,9 +63,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       });
     });
 
-    return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diselesaikan' }, { status: 200 });
+    return NextResponse.json({ message: 'Transaksi Penjualan Berhasil Diselesaikan' }, { status: 200 });
   } catch (e: any) {
-    if (e.message.includes('Hanya Transaksi Pembelian berstatus "Dalam Proses" yang dapat diselesaikan')) {
+    if (e.message.includes('Hanya Transaksi Penjualan berstatus "Belum Dikerjakan" yang dapat diselesaikan')) {
       return NextResponse.json({ message: e.message }, { status: 403 });
     }
     if (e.message.includes('tidak ditemukan')) {

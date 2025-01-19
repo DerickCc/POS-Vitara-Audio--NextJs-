@@ -243,7 +243,13 @@ export async function POST(request: Request) {
       const promises: any[] = [];
       if (data.productDetails.length > 0) {
         for (const d of data.productDetails) {
-          const product = await prisma.products.findUnique({ where: { id: d.productId } });
+          const product = await prisma.products.findUnique({
+            where: { id: d.productId },
+            select: {
+              costPrice: true,
+              sellingPrice: true,
+            },
+          });
 
           if (!product) {
             throw new Error('Barang yang ingin di-update tidak ditemukan');
@@ -265,21 +271,6 @@ export async function POST(request: Request) {
                 quantity: d.quantity,
                 totalPrice: d.sellingPrice * d.quantity,
                 CreatedBy: {
-                  connect: { id: userId },
-                },
-              },
-            })
-          );
-
-          const updatedStock = product.stock.minus(d.quantity); // stock after substracted with sales product qty
-
-          // update product stock
-          promises.push(
-            prisma.products.update({
-              where: { id: d.productId },
-              data: {
-                stock: updatedStock,
-                UpdatedBy: {
                   connect: { id: userId },
                 },
               },

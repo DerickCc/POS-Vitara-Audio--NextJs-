@@ -1,4 +1,4 @@
-import { PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { CreatePurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
-  const validationRes = PurchaseOrderSchema.safeParse(await request.json());
+  const validationRes = CreatePurchaseOrderSchema.safeParse(await request.json());
 
   // if validation failed
   if (!validationRes.success) {

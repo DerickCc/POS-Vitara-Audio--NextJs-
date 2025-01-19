@@ -7,7 +7,7 @@ import {
 import { getCurrDate } from '@/utils/helper-function';
 import { BasicSelectOptions } from './global.model';
 
-export const PurchaseOrderSchema = z
+export const CreatePurchaseOrderSchema = z
   .object({
     supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
     remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
@@ -40,6 +40,36 @@ export const PurchaseOrderSchema = z
     message: 'Jumlah yang telah dibayar tidak boleh melebihi Grand Total',
     path: ['paidAmount'],
   });
+
+export const UpdatePurchaseOrderSchema = z
+  .object({
+    supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
+    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+    appliedReceivables: z.coerce.number().min(0, { message: 'Potong Piutang tidak boleh negatif' }),
+    paidAmount: z.coerce.number().min(0, { message: 'Jumlah yang telah dibayar tidak boleh bernilai negatif' }),
+    paymentMethod: z.string().optional().nullable(),
+    details: z
+      .array(PurchaseOrderDetailSchema)
+      .refine(
+        (details) => {
+          const productIds = details.map((d) => d.productId);
+          return new Set(productIds).size === productIds.length;
+        },
+        {
+          message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+          path: ['refinement'],
+        }
+      )
+      .refine(
+        (details) => {
+          return details.length > 0;
+        },
+        {
+          message: 'Harap pilih minimal 1 barang yang ingin dibeli',
+          path: ['refinement'],
+        }
+      ),
+  })
 
 export class PurchaseOrderModel {
   id: string;

@@ -15,6 +15,7 @@ import BasicTable from '@/components/tables/basic-table';
 import { browsePo, cancelPo, deletePo, exportPo, finishPo } from '@/services/purchase-order-service';
 import Spinner from '@/components/spinner';
 import { useOverlayLoading } from '@/hooks/use-overlay-loading';
+import { handleTableAction } from '@/utils/handle-table-action';
 
 const pageHeader = {
   title: 'Pembelian',
@@ -116,43 +117,10 @@ export default function PurchaseOrderDataPage() {
     }
   };
 
-  const handleFinish = async (id: string) => {
-    try {
-      const message = await finishPo(id);
-      toast.success(message, { duration: 5000 });
-
-      fetchPurchaseOrders();
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      const message = await deletePo(id);
-      toast.success(message, { duration: 5000 });
-
-      fetchPurchaseOrders();
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
-  const handleCancel = async (id: string) => {
-    try {
-      const message = await cancelPo(id);
-      toast.success(message, { duration: 5000 });
-
-      fetchPurchaseOrders();
-    } catch (e) {
-      toast.error(e + '', { duration: 5000 });
-    }
-  };
-
   const actionHandlers: any = {
-    finish: (id: string) => handleFinish(id),
-    delete: (id: string) => handleDelete(id),
-    cancel: (id: string) => handleCancel(id),
+    finish: (id: string) => handleTableAction(finishPo, fetchPurchaseOrders, id),
+    delete: (id: string) => handleTableAction(deletePo, fetchPurchaseOrders, id),
+    cancel: (id: string) => handleTableAction(cancelPo, fetchPurchaseOrders, id),
     fetchData: () => fetchPurchaseOrders(),
   };
 

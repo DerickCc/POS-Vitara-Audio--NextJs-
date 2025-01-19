@@ -165,6 +165,7 @@ export default function SalesOrderForm({
       productName: product.name,
       oriSellingPrice: product.sellingPrice,
       quantity: 0,
+      totalPrice: 0,
       uom: product.uom,
       stock: product.stock,
     });
@@ -176,6 +177,10 @@ export default function SalesOrderForm({
     });
 
     setValue(`productDetails.${idx}.sellingPrice`, lastPrice || product.sellingPrice);
+    
+    updateTotalSoldAmount('productDetails', setTotalProductSoldAmount); // update total amount of all sold product
+    updateDiscount();
+    updateGrandTotalAndPayment();
 
     filterSelectedProductFromList(productList, idx);
 
@@ -202,17 +207,6 @@ export default function SalesOrderForm({
     }, 500),
     []
   );
-
-  const handleProductQtyChange = (idx: number, qty: number) => {
-    const product = getValues().productDetails[idx];
-    if (qty > product.stock) {
-      toast.error(`Stok ${product.productName} tidak mencukupi. Tersisa: ${product.stock} ${product.uom}`, {
-        duration: 5000,
-      });
-      setValue(`productDetails.${idx}.quantity`, product.stock);
-    }
-    updateProductTotalPrice(idx);
-  };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateProductTotalPrice = useCallback(
@@ -692,7 +686,7 @@ export default function SalesOrderForm({
                                   <DecimalFormInput
                                     setValue={setValue}
                                     limit={stock}
-                                    onChange={(qty: number) => handleProductQtyChange(idx, qty)}
+                                    onChange={() => updateProductTotalPrice(idx)}
                                     fieldName={`productDetails.${idx}.quantity`}
                                     defaultValue={value}
                                     error={error?.message}

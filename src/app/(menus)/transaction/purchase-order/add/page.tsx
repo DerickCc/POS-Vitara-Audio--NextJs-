@@ -3,7 +3,7 @@
 import PurchaseOrderForm from '@/components/transaction/purchase-order/purchase-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { PurchaseOrderModel } from '@/models/purchase-order.model';
+import { CreatePurchaseOrderSchema, PurchaseOrderModel } from '@/models/purchase-order.model';
 import { createPo } from '@/services/purchase-order-service';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -57,7 +57,11 @@ export default function AddPurchaseOrderPage() {
           </Button>
         </Link>
 
-        <PurchaseOrderForm onSubmit={create} isSubmitSuccessful={isSubmitSuccessful} />
+        <PurchaseOrderForm
+          onSubmit={create}
+          isSubmitSuccessful={isSubmitSuccessful}
+          schema={CreatePurchaseOrderSchema}
+        />
       </div>
     </>
   );

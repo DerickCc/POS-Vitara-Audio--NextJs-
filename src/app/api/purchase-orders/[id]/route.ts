@@ -1,4 +1,4 @@
-import { PurchaseOrderSchema } from '@/models/purchase-order.model';
+import { UpdatePurchaseOrderSchema } from '@/models/purchase-order.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -93,7 +93,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   const { id } = params;
 
-  const validationRes = PurchaseOrderSchema.safeParse(await request.json());
+  const validationRes = UpdatePurchaseOrderSchema.safeParse(await request.json());
 
   // if validation failed
   if (!validationRes.success) {
@@ -160,6 +160,22 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         },
       });
 
+      // Fetch existing details
+      const existingDetails = await prisma.purchaseOrderDetails.findMany({
+        where: { poId: id },
+        select: { id: true },
+      });
+
+      const updatedDetailsIds = data.details.map((detail) => detail.id);
+      const detailIdsToDelete = existingDetails.map((d) => d.id).filter((id) => !updatedDetailsIds.includes(id))
+
+      // Delete details that are no longer present in the update
+      if (detailIdsToDelete.length > 0) {
+        await prisma.purchaseOrderDetails.deleteMany({
+          where: { id: { in: detailIdsToDelete } },
+        });
+      }
+
       const updatePromises = data.details.map((d) => {
         if (d.id) {
           // update if there is poDetail id
@@ -212,24 +228,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         });
       }
 
-      // delete all related purchaseOrderPaymentHistories to reset paidAmount to 0
-      await prisma.purchaseOrderPaymentHistories.deleteMany({
-        where: { poId: id },
-      });
-
-      if (data.paidAmount > 0) {
-        // create payment history
-        await prisma.purchaseOrderPaymentHistories.create({
-          data: {
-            PurchaseOrder: {
-              connect: { id },
-            },
-            paymentMethod: data.paymentMethod,
-            amount: data.paidAmount,
-            CreatedBy: {
-              connect: { id: userId },
-            },
-          },
+      // delete all related purchaseOrderPaymentHistories
+      // if new grandtotal higher than total amount that has been paid
+      if (data.paidAmount > grandTotal) {
+        await prisma.purchaseOrderPaymentHistories.deleteMany({
+          where: { poId: id },
         });
       }
     });
@@ -277,12 +280,18 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         where: { id },
       });
 
-      await prisma.suppliers.update({
-        where: { id: po.supplierId },
-        data: {
-          receivables: { increment: po.appliedReceivables },
-        },
+      await prisma.purchaseOrderPaymentHistories.deleteMany({
+        where: { poId: id },
       });
+
+      if (po.appliedReceivables.greaterThan(0)) {
+        await prisma.suppliers.update({
+          where: { id: po.supplierId },
+          data: {
+            receivables: { increment: po.appliedReceivables },
+          },
+        });
+      }
     });
 
     return NextResponse.json({ message: 'Transaksi Pembelian berhasil dihapus' }, { status: 200 });
