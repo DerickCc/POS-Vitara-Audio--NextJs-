@@ -166,8 +166,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         select: { id: true },
       });
 
-      const updatedDetailsIds = data.details.map((detail) => detail.id);
-      const detailIdsToDelete = existingDetails.map((d) => d.id).filter((id) => !updatedDetailsIds.includes(id))
+      const updatedDetailIds = data.details.map((detail) => detail.id);
+      const detailIdsToDelete = existingDetails.map((d) => d.id).filter((id) => !updatedDetailIds.includes(id))
 
       // Delete details that are no longer present in the update
       if (detailIdsToDelete.length > 0) {

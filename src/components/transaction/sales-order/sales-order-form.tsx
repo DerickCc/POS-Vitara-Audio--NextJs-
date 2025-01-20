@@ -339,7 +339,7 @@ export default function SalesOrderForm({
                   <PiInfoBold className='size-5 mr-2' />
                   <h5 className='font-medium'>Info Penjualan</h5>
                 </div>
-                {defaultValues.id && (
+                {isReadOnly && (
                   <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>
                     {defaultValues.progressStatus}
                   </span>
@@ -478,7 +478,7 @@ export default function SalesOrderForm({
                               checked={value === 'DP'}
                               labelClassName='text-sm'
                               error={error?.message}
-                              disabled={isReadOnly}
+                              disabled={!!defaultValues.id}
                             />
                             <Radio
                               name='paymentType'
@@ -492,13 +492,13 @@ export default function SalesOrderForm({
                               checked={value === 'Lunas'}
                               labelClassName='text-sm'
                               error={error?.message}
-                              disabled={isReadOnly}
+                              disabled={!!defaultValues.id}
                             />
                           </div>
                         </RadioGroup>
                       )}
                     />
-                    {!isReadOnly && (
+                    {!defaultValues.id && (
                       <Controller
                         control={control}
                         name='paymentMethod'
@@ -572,7 +572,7 @@ export default function SalesOrderForm({
                           fieldName='paidAmount'
                           defaultValue={value}
                           error={error?.message}
-                          readOnly={isReadOnly || value === grandTotal || grandTotal === 0}
+                          readOnly={!!defaultValues.id || value === grandTotal || grandTotal === 0}
                         />
                       );
                     }}

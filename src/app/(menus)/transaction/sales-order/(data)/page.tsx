@@ -2,7 +2,7 @@
 
 import { routes } from '@/config/routes';
 import { SalesOrderModel } from '@/models/sales-order';
-import { browseSo, cancelSo, deleteSo, exportSo } from '@/services/sales-order-service';
+import { browseSo, cancelSo, deleteSo, exportSo, finishSo } from '@/services/sales-order-service';
 import { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -118,6 +118,7 @@ export default function SalesOrderDataPage() {
   };
 
   const actionHandlers: any = {
+    finish: (id: string) => handleTableAction(finishSo, fetchSalesOrders, id),
     cancel: (id: string) => handleTableAction(cancelSo, fetchSalesOrders, id),
     delete: (id: string) => handleTableAction(deleteSo, fetchSalesOrders, id),
     fetchData: () => fetchSalesOrders(),

@@ -8,13 +8,14 @@ import { SalesOrderModel } from '@/models/sales-order';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
-import { LuEye, LuCircleSlash, LuPrinter } from 'react-icons/lu';
+import { LuEye, LuCircleSlash, LuPrinter, LuPencil } from 'react-icons/lu';
 import { FiMoreVertical } from 'react-icons/fi';
 import { Row } from '@tanstack/react-table';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { useAuth } from '@/hooks/use-auth';
+import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
@@ -37,6 +38,31 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; acti
               <LuEye className='text-blue-500 w-5 h-5 cursor-pointer mr-3' /> Detail
             </Dropdown.Item>
           </Link>
+
+          {/* edit */}
+          {row.original.progressStatus === 'Belum Dikerjakan' && (
+            <Link href={routes.transaction.salesOrder.edit(row.original.id)}>
+              <Dropdown.Item>
+                <LuPencil className='text-yellow-500 w-5 h-5 cursor-pointer mr-3' /> Edit
+              </Dropdown.Item>
+            </Link>
+          )}
+
+          {/* finish */}
+          {row.original.progressStatus === 'Belum Dikerjakan' && (
+            <Dropdown.Item
+              onClick={() => {
+                openConfirmationModal({
+                  title: 'Selesaikan Transaksi Penjualan',
+                  description:
+                    'Transaksi yang sudah diselesaikan tidak dapat diedit atau dihapus lagi. Apakah Anda yakin?',
+                  handleConfirm: () => actionHandlers.finish(row.original.id),
+                });
+              }}
+            >
+              <IoCheckmarkDoneSharp className='text-green-500 w-5 h-5 cursor-pointer mr-3' /> Selesai
+            </Dropdown.Item>
+          )}
 
           {/* pay */}
           {row.original.progressStatus !== 'Batal' && row.original.paymentStatus === 'Belum Lunas' && (
