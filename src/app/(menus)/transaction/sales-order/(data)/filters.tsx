@@ -1,7 +1,7 @@
 'use client';
 
 import Card from '@/components/card';
-import { paymentStatusOptions, soStatusOptions } from '@/config/global-variables';
+import { paymentStatusOptions, soSrStatusOptions } from '@/config/global-variables';
 import { FiltersProps } from '@/models/global.model';
 import { FormEvent, useCallback, useState } from 'react';
 import { PiCalendarBlank, PiFunnel } from 'react-icons/pi';
@@ -127,8 +127,8 @@ export default function SalesOrderFilter({
             className='sm:col-span-3'
             label='Status Pengerjaan'
             placeholder='Pilih Status Pengerjaan'
-            options={soStatusOptions}
-            displayValue={(value) => soStatusOptions.find((option) => option.value === value)?.label ?? ''}
+            options={soSrStatusOptions}
+            displayValue={(value) => soSrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
             onClear={() => handleFilterChange('progressStatus')('')}

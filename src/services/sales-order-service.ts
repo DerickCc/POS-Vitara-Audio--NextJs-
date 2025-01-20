@@ -47,9 +47,9 @@ export const getSoById = async (id: string): Promise<SalesOrderModel> => {
   }
 };
 
-export const searchSo = async (code?: string, status?: string): Promise<any[]> => {
+export const searchSo = async (code?: string, progressStatus?: string): Promise<any[]> => {
   try {
-    const response = await apiFetch(`/api/sales-orders/search${toQueryString({ code, status })}`, { method: 'GET' });
+    const response = await apiFetch(`/api/sales-orders/search${toQueryString({ code, progressStatus })}`, { method: 'GET' });
     return response.result;
   } catch (e) {
     throw e + '';

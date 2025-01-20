@@ -121,7 +121,7 @@ export default function SalesReturnForm({
       if (!code || code.trim() === '') return;
 
       try {
-        setSoList(await searchSo(code, 'Lunas'));
+        setSoList(await searchSo(code, 'Selesai'));
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }

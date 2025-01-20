@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
   // filters
   const code = queryParams.get('code') ?? '';
-  const status = queryParams.get('status') ?? '';
+  const progressStatus = queryParams.get('progressStatus') ?? '';
 
   const where: any = { AND: [] };
   if (code) {
@@ -30,8 +30,8 @@ export async function GET(request: Request) {
     });
   }
 
-  if (status) {
-    where.AND.push({ status });
+  if (progressStatus) {
+    where.AND.push({ progressStatus });
   }
   // ----------------
 

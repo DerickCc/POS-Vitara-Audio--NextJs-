@@ -35,20 +35,12 @@ export default function SaleReturnDataPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localFilters, setLocalFilters] = useState<SalesReturnTableFilters>({
-    code: '',
-    customerId: null,
     startDate: null,
     endDate: null,
-    soCode: '',
-    status: '',
   });
   const [filters, setFilters] = useState<SalesReturnTableFilters>({
-    code: '',
-    customerId: null,
     startDate: null,
     endDate: null,
-    soCode: '',
-    status: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);

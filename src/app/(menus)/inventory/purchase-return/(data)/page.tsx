@@ -35,20 +35,12 @@ export default function PurchaseReturnDataPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localFilters, setLocalFilters] = useState<PurchaseReturnTableFilters>({
-    code: '',
-    supplierId: null,
     startDate: null,
     endDate: null,
-    poCode: '',
-    status: '',
   });
   const [filters, setFilters] = useState<PurchaseReturnTableFilters>({
-    code: '',
-    supplierId: null,
     startDate: null,
     endDate: null,
-    poCode: '',
-    status: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);

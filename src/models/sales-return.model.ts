@@ -30,7 +30,7 @@ export class SalesReturnModel {
   productDetails: SalesReturnProductDetailModel[]; // detail product
   serviceDetails: SalesReturnServiceDetailModel[]; // detail service
   grandTotal: number;
-  status: 'Dalam Proses' | 'Selesai' | 'Batal';
+  status: 'Belum Dikerjakan' | 'Selesai' | 'Batal';
 
   constructor(data: any = {}) {
     this.id = data.id;
@@ -43,7 +43,7 @@ export class SalesReturnModel {
     this.productDetails = data.productDetails || [];
     this.serviceDetails = data.serviceDetails || [];
     this.grandTotal = data.grandTotal;
-    this.status = data.status || 'Dalam Proses';
+    this.status = data.status || 'Belum Dikerjakan';
   }
 }
 

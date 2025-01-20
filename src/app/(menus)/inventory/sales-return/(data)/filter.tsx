@@ -14,15 +14,15 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { id } from 'date-fns/locale';
 import cn from '@/utils/class-names';
 import { datepickerClass } from '@/config/tailwind-classes';
-import { srStatusOptions } from '@/config/global-variables';
+import { soSrStatusOptions } from '@/config/global-variables';
 
 export type SalesReturnTableFilters = {
-  code: string;
-  customerId: string | null;
+  code?: string;
+  customerId?: string;
   startDate: any;
   endDate: any;
-  soCode: string;
-  status: string;
+  soCode?: string;
+  status?: string;
 };
 
 export default function SalesReturnFilter({
@@ -134,8 +134,8 @@ export default function SalesReturnFilter({
             className='sm:col-span-3'
             label='Status'
             placeholder='Pilih Status'
-            options={srStatusOptions}
-            displayValue={(value) => srStatusOptions.find((option) => option.value === value)?.label ?? ''}
+            options={soSrStatusOptions}
+            displayValue={(value) => soSrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
             onClear={() => handleFilterChange('status')('')}

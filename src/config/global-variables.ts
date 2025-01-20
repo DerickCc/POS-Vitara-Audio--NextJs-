@@ -87,14 +87,9 @@ export const prTypeOptions = [
   { label: 'Piutang', value: 'Piutang' },
 ];
 
-export const soStatusOptions = [
+export const soSrStatusOptions = [
   { label: 'Belum Dikerjakan', value: 'Belum Dikerjakan' },
   { label: 'Selesai', value: 'Selesai' },
-  { label: 'Batal', value: 'Batal' },
-];
-
-export const srStatusOptions = [
-  { label: 'Lunas', value: 'Lunas' },
   { label: 'Batal', value: 'Batal' },
 ];
 

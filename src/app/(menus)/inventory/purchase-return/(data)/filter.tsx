@@ -17,12 +17,12 @@ import { datepickerClass } from '@/config/tailwind-classes';
 import { poPrStatusOptions } from '@/config/global-variables';
 
 export type PurchaseReturnTableFilters = {
-  code: string;
-  supplierId: string | null;
+  code?: string;
+  supplierId?: string;
   startDate: any;
   endDate: any;
-  poCode: string;
-  status: string;
+  poCode?: string;
+  status?: string;
 };
 
 export default function PurchaseReturnFilter({
