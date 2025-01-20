@@ -137,10 +137,10 @@ export default function SalesOrderFilter({
             value={localFilters.paymentStatus}
             onChange={(value: string) => handleFilterChange('paymentStatus')(value)}
             className='sm:col-span-3'
-            label='Status Pengerjaan'
-            placeholder='Pilih Status Pengerjaan'
+            label='Status Pembayaran'
+            placeholder='Pilih Status Pembayaran'
             options={paymentStatusOptions}
-            displayValue={(value) => soStatusOptions.find((option) => option.value === value)?.label ?? ''}
+            displayValue={(value) => paymentStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
             onClear={() => handleFilterChange('paymentStatus')('')}

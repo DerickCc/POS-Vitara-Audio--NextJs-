@@ -84,5 +84,5 @@ export const isoStringToDateWithTime = (isoString: string) => {
 
   const [date, time] = dateTime.split(', ');
 
-  return `${date?.replaceAll('/', '-')} ${time?.replaceAll('.', ':')}`;
+  return `${date?.replaceAll('/', ' / ')}, ${time?.replaceAll('.', ':')}`;
 };

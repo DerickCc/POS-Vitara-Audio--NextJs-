@@ -38,7 +38,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
         id: true,
         createdAt: true,
         code: true,
-        status: true,
+        progressStatus: true,
+        paymentStatus: true,
         grandTotal: true,
       },
       where: {
@@ -51,7 +52,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       date: so.createdAt,
       id: so.id,
       code: so.code,
-      status: so.status,
+      progressStatus: so.progressStatus,
+      paymentStatus: so.paymentStatus,
       grandTotal: so.grandTotal,
       type: 'Penjualan',
     }));
@@ -82,7 +84,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       date: sr.createdAt,
       id: sr.id,
       code: sr.code,
-      status: sr.status,
+      progressStatus: sr.status,
       grandTotal: sr.SalesReturnProductDetails.reduce(
         (acc, d) => acc.plus(d.returnPrice.times(d.returnQuantity)),
         new Decimal(0)

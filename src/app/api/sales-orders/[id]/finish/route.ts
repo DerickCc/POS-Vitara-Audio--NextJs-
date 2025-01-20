@@ -22,12 +22,21 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           progressStatus: true,
           SalesOrderProductDetails: {
             select: {
+              id: true,
               productId: true,
               quantity: true,
-
-            }
-          }
-        }
+              costPrice: true,
+              Product: {
+                select: {
+                  name: true,
+                  stock: true,
+                  uom: true,
+                  costPrice: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!so) {
@@ -36,23 +45,52 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         throw new Error('Hanya Transaksi Penjualan berstatus "Belum Dikerjakan" yang dapat diselesaikan');
       }
 
+      // Validate stock for each product
+      const insufficientStock = so.SalesOrderProductDetails.filter((d) => d.Product.stock < d.quantity);
+
+      if (insufficientStock.length > 0) {
+        const errorMessage = insufficientStock
+          .map(
+            (d) =>
+              `${d.Product.name} yang diperlukan sebanyak ${d.quantity} ${d.Product.uom}, tetapi tersisa ${d.Product.stock} ${d.Product.uom}.`
+          )
+          .join(' ');
+
+        throw new Error(`${errorMessage}`);
+      }
+
       // update stock of each product in details
-      const updatePromises = so.SalesOrderProductDetails.map(async (d) => {
-        return prisma.products.update({
-          where: { id: d.productId },
-          data: {
-            stock: { decrement: d.quantity },
-            UpdatedBy: {
-              connect: { id: userId },
+      let updatePromises: any = [];
+      so.SalesOrderProductDetails.forEach(async (d) => {
+        if (d.costPrice.isZero()) {
+          updatePromises.push(
+            prisma.salesOrderProductDetails.update({
+              where: { id: d.id },
+              data: {
+                costPrice: d.Product.costPrice,
+              },
+            })
+          );
+        }
+
+        updatePromises.push(
+          prisma.products.update({
+            where: { id: d.productId },
+            data: {
+              stock: { decrement: d.quantity },
+              ...(d.Product.stock === d.quantity ? { costPrice: 0 } : {}), // reset cost price if qty 0 after reduction
+              UpdatedBy: {
+                connect: { id: userId },
+              },
             },
-          },
-        });
+          })
+        );
       });
 
       await Promise.all(updatePromises);
 
       // set po status to 'Selesai'
-      await prisma.purchaseOrders.update({
+      await prisma.salesOrders.update({
         where: { id },
         data: {
           progressStatus: 'Selesai',
@@ -70,6 +108,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     if (e.message.includes('tidak ditemukan')) {
       return NextResponse.json({ message: e.message }, { status: 404 });
+    }
+    if (e.message.includes('yang diperlukan sebanyak')) {
+      return NextResponse.json({ message: e.message }, { status: 422 }); // Unprocessable entity
     }
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }

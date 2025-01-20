@@ -38,7 +38,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
         id: true,
         createdAt: true,
         code: true,
-        status: true,
+        progressStatus: true,
+        paymentStatus: true,
         grandTotal: true,
       },
       where: {
@@ -51,7 +52,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       date: po.createdAt,
       id: po.id,
       code: po.code,
-      status: po.status,
+      progressStatus: po.progressStatus,
+      paymentStatus: po.paymentStatus,
       grandTotal: po.grandTotal,
       type: 'Pembelian',
     }));
@@ -83,7 +85,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       date: pr.createdAt,
       id: pr.id,
       code: pr.code,
-      status: pr.status,
+      progressStatus: pr.status,
       grandTotal:
         pr.returnType === 'Penggantian Barang'
           ? 0

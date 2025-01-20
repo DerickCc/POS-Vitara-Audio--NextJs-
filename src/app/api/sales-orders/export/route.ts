@@ -205,7 +205,8 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
     'Diskon',
     'Grand Total',
     'Telah Dibayar',
-    'Status',
+    'Status Pengerjaan',
+    'Status Pembayaran',
     'Barang / Jasa',
     'Harga Jual',
     'Qty',
@@ -409,7 +410,7 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
   ws.getColumn(2).width = 20;
   ws.getColumn(3).width = 20;
   ws.getColumn(4).width = 20;
-  ws.getColumn(5).width = 18;
+  ws.getColumn(5).width = 14;
   ws.getColumn(6).width = 15;
   ws.getColumn(7).width = 15;
   ws.getColumn(8).width = 15;

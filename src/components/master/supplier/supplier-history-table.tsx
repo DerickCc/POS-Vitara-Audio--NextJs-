@@ -39,12 +39,25 @@ const columns = (): ColumnDef<SupplierHistoryModel, any>[] => [
     cell: (info) => info.getValue(),
     enableSorting: false,
   }),
-  columnHelper.accessor('status', {
-    id: 'status',
+  columnHelper.accessor('progressStatus', {
+    id: 'progressStatus',
     size: 100,
-    header: () => 'Status',
+    header: () => 'Status Progres',
     cell: (info) => {
       const status = info.getValue();
+      const color = mapTrxStatusToColor[status];
+      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
+    },
+    enableSorting: false,
+  }),
+  columnHelper.accessor('paymentStatus', {
+    id: 'paymentStatus',
+    size: 100,
+    header: () => 'Status Pembayaran',
+    cell: (info) => {
+      const status = info.getValue();
+      if (!status) return '-';
+      
       const color = mapTrxStatusToColor[status];
       return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
     },

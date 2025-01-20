@@ -58,6 +58,7 @@ export interface SupplierHistoryModel {
   id: string;
   code: string;
   type: string;
-  status: string;
+  progressStatus: string;
+  paymentStatus?: string;
   grandTotal: number;
 }

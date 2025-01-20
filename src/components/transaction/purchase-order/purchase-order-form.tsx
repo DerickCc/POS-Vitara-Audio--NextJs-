@@ -155,6 +155,9 @@ export default function PurchaseOrderForm({
     });
 
     setValue(`details.${idx}.purchasePrice`, lastPrice || product.purchasePrice);
+    setValue(`details.${idx}.totalPrice`, 0);
+
+    updateSubTotal();
 
     filterSelectedProductFromList(productList, idx);
 
@@ -165,6 +168,21 @@ export default function PurchaseOrderForm({
       return updated;
     });
   };
+
+  const handleRemoveProduct = (idx: number) => {
+    removeDetail(idx);
+
+    updateSubTotal();
+
+    filterSelectedProductFromList(productList, idx);
+
+    // updated selected products
+    setSelectedProducts((prev) => {
+      const updated = [...prev];
+      updated.splice(idx, 1);
+      return updated;
+    });
+  }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProductSearchChange = useCallback(
@@ -337,7 +355,7 @@ export default function PurchaseOrderForm({
                               isReadOnly ? actionIconColorClass.gray : actionIconColorClass.red + 'cursor-pointer',
                               'mt-1'
                             )}
-                            onClick={() => removeDetail(idx)}
+                            onClick={() => handleRemoveProduct(idx)}
                             disabled={isReadOnly}
                           >
                             <FaRegTrashAlt className='h-4 w-4' />

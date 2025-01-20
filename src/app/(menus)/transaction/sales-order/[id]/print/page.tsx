@@ -50,7 +50,7 @@ export default function PrintSalesOrderPage() {
         setIsLoading(true);
         const res = await getSoById(id);
 
-        if (res.status === 'Batal') {
+        if (res.progressStatus === 'Batal') {
           toast.error('Invoice tidak dapat di-print karena telah dibatalkan.');
         } else {
           setSo(res);
@@ -176,7 +176,7 @@ export default function PrintSalesOrderPage() {
                   { label: 'Alamat Pelanggan', value: so.customerAddress || '-' },
                   { label: 'No. Telp. Pelanggan', value: so.customerPhoneNo || '-' },
                   { label: 'Tanggal Transaksi', value: isoStringToDateWithTime(so.salesDate) },
-                  { label: 'Status Transaksi', value: so.status },
+                  { label: 'Status Transaksi', value: so.progressStatus },
                 ].map((item, index) => (
                   <div key={index} className='flex'>
                     <span className='w-40 font-medium'>{item.label}</span>:&nbsp;<span>{item.value}</span>

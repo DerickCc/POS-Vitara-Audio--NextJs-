@@ -1,4 +1,4 @@
-import { SalesOrderSchema } from '@/models/sales-order';
+import { CreateSalesOrderSchema } from '@/models/sales-order';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const validationRes = SalesOrderSchema.safeParse(await request.json());
+  const validationRes = CreateSalesOrderSchema.safeParse(await request.json());
 
   // if validation failed
   if (!validationRes.success) {

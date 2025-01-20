@@ -3,7 +3,7 @@
 import SalesOrderForm from '@/components/transaction/sales-order/sales-order-form';
 import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
-import { SalesOrderModel } from '@/models/sales-order';
+import { CreateSalesOrderSchema, SalesOrderModel } from '@/models/sales-order';
 import { createSo, getNewSoCode } from '@/services/sales-order-service';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -69,7 +69,12 @@ export default function AddSalesOrderPage() {
           </Button>
         </Link>
 
-        <SalesOrderForm newSoCode={newSoCode} onSubmit={create} isSubmitSuccessful={isSubmitSuccessful} />
+        <SalesOrderForm
+          newSoCode={newSoCode}
+          onSubmit={create}
+          isSubmitSuccessful={isSubmitSuccessful}
+          schema={CreateSalesOrderSchema}
+        />
       </div>
     </>
   );

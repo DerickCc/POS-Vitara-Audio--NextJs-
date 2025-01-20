@@ -6,7 +6,7 @@ import { SalesOrderServiceDetailModel, SalesOrderServiceDetailSchema } from './s
 const today = new Date();
 today.setHours(0, 0, 0, 0); // Set time to the start of the day
 
-export const SalesOrderSchema = z
+export const CreateSalesOrderSchema = z
   .object({
     customerId: z.string().min(1, { message: 'Mohon memilih pelanggan' }),
     entryDate: z
@@ -46,6 +46,41 @@ export const SalesOrderSchema = z
   .refine((data) => data.paidAmount <= data.grandTotal, {
     message: 'Jumlah yang telah dibayar tidak boleh melebihi Grand Total',
     path: ['paidAmount'],
+  });
+
+export const UpdateSalesOrderSchema = z
+  .object({
+    customerId: z.string().min(1, { message: 'Mohon memilih pelanggan' }),
+    entryDate: z
+      .union([z.string(), z.date()])
+      .transform((val) => (typeof val === 'string' ? new Date(val) : val))
+      .refine((date) => date >= today, { message: 'Tanggal masuk minimal adalah hari ini' }),
+    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+    paidAmount: z.coerce.number().min(0, { message: 'Jumlah yang telah dibayar tidak boleh bernilai negatif' }),
+    productDetails: z.array(SalesOrderProductDetailSchema).refine(
+      (details) => {
+        const productIds = details.map((d) => d.productId);
+        return new Set(productIds).size === productIds.length;
+      },
+      {
+        message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+        path: ['refinement'],
+      }
+    ),
+    serviceDetails: z.array(SalesOrderServiceDetailSchema).refine(
+      (details) => {
+        const services = details.map((d) => d.serviceName);
+        return new Set(services).size === services.length;
+      },
+      {
+        message: 'Mohon tidak meng-input jasa yang sama dalam 1 transaksi',
+        path: ['refinement'],
+      }
+    ),
+  })
+  .refine((data) => data.productDetails.length > 0 || data.serviceDetails.length > 0, {
+    message: 'Harap pilih minimal 1 barang atau jasa untuk dijual',
+    path: ['refinement'],
   });
 
 export class SalesOrderModel {

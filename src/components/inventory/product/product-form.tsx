@@ -84,6 +84,7 @@ export default function ProductForm({
                   displayValue={(value) => productTypeOptions.find((option) => option.value === value)?.label ?? ''}
                   getOptionValue={(option) => option.value}
                   error={error?.message}
+                  disabled={isReadOnly}
                 />
               )}
             />

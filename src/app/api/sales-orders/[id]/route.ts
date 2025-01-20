@@ -1,4 +1,4 @@
-import { SalesOrderSchema } from "@/models/sales-order";
+import { UpdateSalesOrderSchema } from "@/models/sales-order";
 import { db } from "@/utils/prisma";
 import { getSession } from "@/utils/sessionlib";
 import { Decimal } from "@prisma/client/runtime/library";
@@ -135,7 +135,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   const { id } = params;
 
-  const validationRes = SalesOrderSchema.safeParse(await request.json());
+  const validationRes = UpdateSalesOrderSchema.safeParse(await request.json());
 
   // if validation failed
   if (!validationRes.success) {
@@ -203,7 +203,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         Customer: {
           connect: { id: data.customerId },
         },
-        paymentType: data.paymentType,
         remarks: data.remarks,
         subTotal,
         discount,
@@ -220,13 +219,17 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       where: { soId: id },
       select: { id: true },
     });
+    console.log(existingProductDetails)
 
     const updatedProductDetailIds = data.productDetails.map((detail) => detail.id);
+    console.log(updatedProductDetailIds)
+
     const productDetailIdsToDelete = existingProductDetails.map((d) => d.id).filter((id) => !updatedProductDetailIds.includes(id));
+    console.log(productDetailIdsToDelete)
 
     // Delete product details that are no longer present in the update
     if (productDetailIdsToDelete.length > 0) {
-      await prisma.purchaseOrderDetails.deleteMany({
+      await prisma.salesOrderProductDetails.deleteMany({
         where: { id: { in: productDetailIdsToDelete } },
       });
     }
@@ -289,7 +292,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     // Delete Service details that are no longer present in the update
     if (serviceDetailIdsToDelete.length > 0) {
-      await prisma.purchaseOrderDetails.deleteMany({
+      await prisma.salesOrderServiceDetails.deleteMany({
         where: { id: { in: serviceDetailIdsToDelete } },
       });
     }

@@ -3,7 +3,7 @@
 import PageHeader from "@/components/page-header";
 import SalesOrderForm from "@/components/transaction/sales-order/sales-order-form";
 import { routes } from "@/config/routes";
-import { SalesOrderModel } from "@/models/sales-order";
+import { SalesOrderModel, UpdateSalesOrderSchema } from "@/models/sales-order";
 import { getSoById, updateSo } from "@/services/sales-order-service";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -80,6 +80,7 @@ export default function EditSalesOrderPage() {
           isLoading={isLoading}
           onSubmit={update}
           isSubmitSuccessful={isSubmitSuccessful}
+          schema={UpdateSalesOrderSchema}
         />
       </div>
     </>

@@ -51,7 +51,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       where: {
         productId: id,
         PurchaseOrder: {
-          status: { not: 'Batal' },
+          progressStatus: { not: 'Batal' },
         },
       },
       orderBy,
@@ -88,7 +88,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       where: {
         productId: id,
         SalesOrder: {
-          status: { not: 'Batal' },
+          progressStatus: { not: 'Batal' },
         },
       },
       orderBy,

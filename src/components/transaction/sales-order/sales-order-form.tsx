@@ -10,7 +10,7 @@ import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { SearchCustomerModel } from '@/models/customer.model';
 import { BasicFormProps, Colors } from '@/models/global.model';
 import { SearchProductModel } from '@/models/product.model';
-import { SalesOrderModel, SalesOrderSchema } from '@/models/sales-order';
+import { SalesOrderModel } from '@/models/sales-order';
 import { SalesOrderProductDetailModel } from '@/models/sales-order-product-detail';
 import { SalesOrderServiceDetailModel } from '@/models/sales-order-service-detail';
 import { searchCustomer } from '@/services/customer-service';
@@ -46,6 +46,7 @@ import { id } from 'date-fns/locale';
 interface SalesOrderFormProps extends BasicFormProps<SalesOrderModel> {
   isReadOnly?: boolean;
   newSoCode?: string;
+  schema?: any;
 }
 
 export default function SalesOrderForm({
@@ -55,6 +56,7 @@ export default function SalesOrderForm({
   newSoCode = 'Loading...',
   onSubmit,
   isSubmitSuccessful = false,
+  schema,
 }: SalesOrderFormProps) {
   const {
     watch,
@@ -68,7 +70,7 @@ export default function SalesOrderForm({
     reset,
   } = useForm<SalesOrderModel>({
     defaultValues,
-    resolver: isReadOnly ? undefined : zodResolver(SalesOrderSchema),
+    resolver: isReadOnly ? undefined : zodResolver(schema),
   });
 
   const {
@@ -177,7 +179,7 @@ export default function SalesOrderForm({
     });
 
     setValue(`productDetails.${idx}.sellingPrice`, lastPrice || product.sellingPrice);
-    
+
     updateTotalSoldAmount('productDetails', setTotalProductSoldAmount); // update total amount of all sold product
     updateDiscount();
     updateGrandTotalAndPayment();
@@ -188,6 +190,23 @@ export default function SalesOrderForm({
     setSelectedProducts((prev) => {
       const updated = [...prev];
       updated[idx] = product;
+      return updated;
+    });
+  };
+
+  const handleRemoveProduct = (idx: number) => {
+    removeProductDetail(idx);
+
+    updateTotalSoldAmount('productDetails', setTotalProductSoldAmount); // update total amount of all sold product
+    updateDiscount();
+    updateGrandTotalAndPayment();
+
+    filterSelectedProductFromList(productList, idx);
+
+    // updated selected products
+    setSelectedProducts((prev) => {
+      const updated = [...prev];
+      updated.splice(idx, 1);
       return updated;
     });
   };
@@ -234,6 +253,13 @@ export default function SalesOrderForm({
     }, 500),
     []
   );
+
+  const handleRemoveService = (idx: number) => {
+    removeServiceDetail(idx);
+
+    updateTotalSoldAmount('serviceDetails', setTotalServiceSoldAmount); // update total amount of all sold service
+    updateGrandTotalAndPayment();
+  };
   // ------------------------
 
   // Invoice, Payment, and Prices
@@ -296,27 +322,41 @@ export default function SalesOrderForm({
 
     setValue('grandTotal', updatedGrandTotal);
 
-    // the paidAmount will follow grandTotal if paymentType is lunas
-    if (formValues.paymentType === 'Lunas') {
-      setValue('paidAmount', updatedGrandTotal);
-    }
-    // if paidAmount exceed grandTotal, patch paidAmount to grandTotal and status 'Lunas'
-    else if (formValues.paidAmount >= updatedGrandTotal && updatedGrandTotal !== 0) {
-      setValue('paymentType', 'Lunas');
-      setValue('paidAmount', updatedGrandTotal);
+    if (!defaultValues.id) {
+      // when create
+      // the paidAmount will follow grandTotal if paymentType is lunas
+      if (formValues.paymentType === 'Lunas') {
+        setValue('paidAmount', updatedGrandTotal);
+      }
+      // if paidAmount exceed grandTotal, patch paidAmount to grandTotal and status 'Lunas'
+      else if (formValues.paidAmount >= updatedGrandTotal && updatedGrandTotal !== 0) {
+        setValue('paymentType', 'Lunas');
+        setValue('paidAmount', updatedGrandTotal);
+      }
+    } else {
+      // when update
+      if (updatedGrandTotal > defaultValues.paidAmount) {
+        setValue('paymentType', 'DP');
+      }
     }
   };
   // ------------------------
 
-  const submitConfirmation = (payload: SalesOrderModel) => {
-    openConfirmationModal({
-      title: 'Simpan Penjualan',
-      description: 'Penjualan yang telah disimpan tidak dapat diedit atau dihapus lagi. Apakah Anda yakin?',
-      handleConfirm: () => onSubmit(payload),
-    });
+  const submitConfirmation = async (payload: SalesOrderModel) => {
+    if (defaultValues.paidAmount > grandTotal) {
+      openConfirmationModal({
+        title: 'Simpan Penjualan',
+        description:
+          'Karena jumlah yang telah dibayar melebihi Grand Total baru, maka jumlah yang telah dibayar akan direset ke 0. Apakah Anda yakin?',
+        handleConfirm: async () => await onSubmit(payload),
+      });
+    } else {
+      await onSubmit(payload);
+    }
   };
 
   const onError = (errors: any) => {
+    console.log(errors);
     if (errors?.refinement) {
       toast.error(errors.refinement.message);
     }
@@ -622,7 +662,7 @@ export default function SalesOrderForm({
                                 'mt-1'
                               )}
                               disabled={isReadOnly}
-                              onClick={() => removeProductDetail(idx)}
+                              onClick={() => handleRemoveProduct(idx)}
                             >
                               <FaRegTrashAlt className='h-4 w-4' />
                             </ActionIcon>
@@ -787,7 +827,7 @@ export default function SalesOrderForm({
                                 'mt-1'
                               )}
                               disabled={isReadOnly}
-                              onClick={() => removeServiceDetail(idx)}
+                              onClick={() => handleRemoveService(idx)}
                             >
                               <FaRegTrashAlt className='h-4 w-4' />
                             </ActionIcon>
