@@ -134,7 +134,7 @@ export default function SalesReturnFilter({
             className='sm:col-span-3'
             label='Status'
             placeholder='Pilih Status'
-            options={soSrStatusOptions}
+            options={soSrStatusOptions.filter((s) => s.value !== 'Belum Dikerjakan')}
             displayValue={(value) => soSrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}

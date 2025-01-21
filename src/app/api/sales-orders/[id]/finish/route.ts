@@ -78,7 +78,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             where: { id: d.productId },
             data: {
               stock: { decrement: d.quantity },
-              ...(d.Product.stock === d.quantity ? { costPrice: 0 } : {}), // reset cost price if qty 0 after reduction
+              ...(d.Product.stock.minus(d.quantity).isZero() ? { costPrice: 0 } : {}), // reset cost price if qty 0 after reduction
               UpdatedBy: {
                 connect: { id: userId },
               },

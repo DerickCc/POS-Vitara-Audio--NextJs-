@@ -29,7 +29,7 @@ const pageHeader = {
   ],
 };
 
-export default function SaleReturnDataPage() {
+export default function SalesReturnDataPage() {
   const [salesReturns, setSalesReturns] = useState<SalesReturnModel[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);

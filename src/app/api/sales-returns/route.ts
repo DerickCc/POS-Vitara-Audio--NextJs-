@@ -244,12 +244,10 @@ export async function POST(request: Request) {
             })
           );
 
-          const product = sopDetail.Product;
-
           // update product stock
           updatePromises.push(
             prisma.products.update({
-              where: { id: product.id },
+              where: { id: sopDetail.Product.id },
               data: {
                 stock: { decrement: new Decimal(d.returnQuantity) },
                 UpdatedBy: {

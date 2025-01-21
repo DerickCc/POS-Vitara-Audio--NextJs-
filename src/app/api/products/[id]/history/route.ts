@@ -51,7 +51,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       where: {
         productId: id,
         PurchaseOrder: {
-          progressStatus: { not: 'Batal' },
+          progressStatus: 'Selesai',
         },
       },
       orderBy,
@@ -88,7 +88,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       where: {
         productId: id,
         SalesOrder: {
-          progressStatus: { not: 'Batal' },
+          progressStatus: 'Selesai',
         },
       },
       orderBy,
@@ -132,7 +132,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           productId: id,
         },
         PurchaseReturn: {
-          status: { not: 'Batal' },
+          status: 'Selesai',
         },
       },
       orderBy,
@@ -176,7 +176,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           productId: id,
         },
         SalesReturn: {
-          status: { not: 'Batal' },
+          status: 'Selesai',
         },
       },
       orderBy,
