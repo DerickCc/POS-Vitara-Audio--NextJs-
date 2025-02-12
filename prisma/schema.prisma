@@ -279,7 +279,6 @@ model SalesOrderServiceDetails {
   serviceName      String    @map("service_name")
   sellingPrice     Decimal   @map("selling_price") @db.Decimal(10, 2)
   quantity         Decimal   @db.Decimal(10, 2)
-  returnedQuantity Decimal   @default(0) @map("returned_quantity") @db.Decimal(10, 2)
   totalPrice       Decimal   @map("total_price") @db.Decimal(10, 2)
   createdBy        String    @map("created_by")
   createdAt        DateTime  @default(now()) @map("created_at")
