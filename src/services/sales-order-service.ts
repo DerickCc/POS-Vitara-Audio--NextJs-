@@ -1,5 +1,4 @@
 import { PaginatedApiResponse, QueryParamsModel } from '@/models/global.model';
-import { PaymentModel } from '@/models/payment-history.model';
 import { SalesOrderModel } from '@/models/sales-order';
 import { apiFetch, toQueryString } from '@/utils/api';
 
