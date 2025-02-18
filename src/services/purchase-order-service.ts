@@ -73,18 +73,6 @@ export const updatePo = async (id: string, payload: PurchaseOrderModel): Promise
   }
 };
 
-export const updatePoPayment = async (payload: PaymentModel): Promise<string> => {
-  try {
-    const response = await apiFetch(`/api/purchase-orders/${payload.id}/payment`, {
-      method: 'POST',
-      body: payload,
-    });
-    return response.message;
-  } catch (e) {
-    throw e + '';
-  }
-};
-
 export const finishPo = async (id: string): Promise<string> => {
   try {
     const response = await apiFetch(`/api/purchase-orders/${id}/finish`, {
