@@ -52,6 +52,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
             Product: {
               select: { name: true, uom: true, type: true },
             },
+            oriSellingPrice: true,
             sellingPrice: true,
             quantity: true,
             totalPrice: true,
@@ -80,6 +81,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const formattedSoProductDetail = so.SalesOrderProductDetails.map((d) => ({
       ...d,
       productName: d.Product.name,
+      oriSellingPrice: Number(d.oriSellingPrice),
       sellingPrice: Number(d.sellingPrice),
       quantity: Number(d.quantity),
       totalPrice: Number(d.totalPrice),

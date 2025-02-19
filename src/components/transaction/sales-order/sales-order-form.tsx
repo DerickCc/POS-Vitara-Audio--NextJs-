@@ -106,7 +106,7 @@ export default function SalesOrderForm({
 
   const grandTotal = watch('grandTotal');
 
-  const [noInvoice, setNoInvoice] = useState('');
+  const [noInvoice, setNoInvoice] = useState<string>('');
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
 
@@ -289,6 +289,10 @@ export default function SalesOrderForm({
     setAmount(totalSoldAmount);
 
     // update sub total value
+    setValue('subTotal', calculateSubTotal());
+  };
+
+  const calculateSubTotal = () => {
     const totalOriProductSoldAmount = getValues().productDetails.reduce((acc, d) => {
       // check if price is getting discount or marked up
       const priceAdjustment = d.sellingPrice - d.oriSellingPrice;
@@ -299,11 +303,12 @@ export default function SalesOrderForm({
       else return acc + d.oriSellingPrice * d.quantity;
     }, 0);
 
-    if (detailsKey === 'productDetails') {
-      setValue('subTotal', totalOriProductSoldAmount + totalServiceSoldAmount);
-    } else if (detailsKey === 'serviceDetails') {
-      setValue('subTotal', totalOriProductSoldAmount + totalSoldAmount);
-    }
+    const totalServiceSoldAmount = getValues().serviceDetails.reduce((acc, d) => acc + d.totalPrice, 0);
+    console.log(getValues())
+    console.log(totalOriProductSoldAmount)
+    console.log(totalServiceSoldAmount)
+
+    return totalOriProductSoldAmount + totalServiceSoldAmount;
   };
 
   const updateDiscount = () => {
@@ -356,7 +361,6 @@ export default function SalesOrderForm({
   };
 
   const onError = (errors: any) => {
-    console.log(errors);
     if (errors?.refinement) {
       toast.error(errors.refinement.message);
     }

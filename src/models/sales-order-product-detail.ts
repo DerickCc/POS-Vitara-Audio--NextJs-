@@ -22,7 +22,7 @@ export class SalesOrderProductDetailModel {
   totalPrice: number;
 
   constructor(data: any = {}) {
-    this.id = data.id;
+    this.id = data.id || '';
     this.soId = data.soId || '';
     this.productId = data.productId || '';
     this.productName = data.productName || '';
@@ -30,7 +30,7 @@ export class SalesOrderProductDetailModel {
     this.oriSellingPrice = data.oriSellingPrice;
     this.sellingPrice = data.sellingPrice || 0;
     this.quantity = data.quantity || 0;
-    this.uom = data.uom;
+    this.uom = data.uom || '';
     this.stock = data.stock || 0;
     this.type = data.type;
     this.totalPrice = data.totalPrice || 0;

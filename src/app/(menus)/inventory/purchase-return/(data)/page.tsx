@@ -15,6 +15,8 @@ import { browsePr, cancelPr, exportPr, finishPr } from '@/services/purchase-retu
 import { columns } from './column';
 import Spinner from '@/components/spinner';
 import { useOverlayLoading } from '@/hooks/use-overlay-loading';
+import cn from '@/utils/class-names';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 
 const pageHeader = {
   title: 'Retur Pembelian',
@@ -164,7 +166,7 @@ export default function PurchaseReturnDataPage() {
             )}
           </Button>
           <Link href={routes.inventory.purchaseReturn.add} className='w-full sm:w-auto'>
-            <Button className='w-full sm:w-auto'>
+            <Button className={cn(buttonColorClass.green, baseButtonClass, 'w-full sm:w-auto')}>
               <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>

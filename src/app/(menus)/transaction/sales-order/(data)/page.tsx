@@ -16,6 +16,8 @@ import { columns } from './columns';
 import Spinner from '@/components/spinner';
 import { useOverlayLoading } from '@/hooks/use-overlay-loading';
 import { handleTableAction } from '@/utils/handle-table-action';
+import cn from '@/utils/class-names';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 
 const pageHeader = {
   title: 'Penjualan',
@@ -145,7 +147,7 @@ export default function SalesOrderDataPage() {
             )}
           </Button>
           <Link href={routes.transaction.salesOrder.add} className='w-full sm:w-auto'>
-            <Button className='w-full sm:w-auto'>
+            <Button className={cn(buttonColorClass.green, baseButtonClass, 'w-full sm:w-auto')}>
               <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>

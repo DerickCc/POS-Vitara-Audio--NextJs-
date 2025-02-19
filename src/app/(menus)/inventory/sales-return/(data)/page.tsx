@@ -15,6 +15,8 @@ import { columns } from './column';
 import SalesReturnFilter, { SalesReturnTableFilters } from './filter';
 import { useOverlayLoading } from '@/hooks/use-overlay-loading';
 import Spinner from '@/components/spinner';
+import cn from '@/utils/class-names';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 
 const pageHeader = {
   title: 'Retur Penjualan',
@@ -152,7 +154,7 @@ export default function SalesReturnDataPage() {
             )}
           </Button>
           <Link href={routes.inventory.salesReturn.add} className='w-full sm:w-auto'>
-            <Button className='w-full sm:w-auto'>
+            <Button className={cn(buttonColorClass.green, baseButtonClass, 'w-full sm:w-auto')}>
               <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>

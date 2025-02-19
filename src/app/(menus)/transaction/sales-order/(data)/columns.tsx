@@ -166,20 +166,6 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     ),
     enableSorting: true,
   }),
-  columnHelper.accessor('subTotal', {
-    id: 'subTotal',
-    size: 130,
-    header: () => 'Sub Total',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
-    enableSorting: true,
-  }),
-  columnHelper.accessor('discount', {
-    id: 'discount',
-    size: 130,
-    header: () => 'Diskon',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
-    enableSorting: true,
-  }),
   columnHelper.accessor('grandTotal', {
     id: 'grandTotal',
     size: 130,
@@ -202,19 +188,20 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     id: 'paymentStatus',
     size: 150,
     header: () => 'Status Pembayaran',
-    cell: (info) => {
-      const status = info.getValue();
+    cell: ({ row }) => {
+      const status = row.original.paymentStatus;
+      const remainingAmount = row.original.grandTotal - row.original.paidAmount;
       const color = mapTrxStatusToColor[status];
-      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
+      return (
+        <>
+          <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>
+          {status === 'Belum Lunas' && (
+            <div className='mt-2'>Sisa: {`Rp ${formatToReadableNumber(remainingAmount)}`}</div>
+          )}
+        </>
+      );
     },
     enableSorting: true,
-  }),
-  columnHelper.accessor('paidAmount', {
-    id: 'paidAmount',
-    size: 130,
-    header: () => 'Dibayar',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
-    enableSorting: false,
   }),
   columnHelper.accessor('cashier', {
     id: 'cashier',

@@ -149,20 +149,6 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     cell: (info) => info.getValue(),
     enableSorting: true,
   }),
-  columnHelper.accessor('subTotal', {
-    id: 'subTotal',
-    size: 150,
-    header: () => 'Sub Total',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
-    enableSorting: true,
-  }),
-  columnHelper.accessor('appliedReceivables', {
-    id: 'appliedReceivables',
-    size: 150,
-    header: () => 'Potong Piutang',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
-    enableSorting: true,
-  }),
   columnHelper.accessor('grandTotal', {
     id: 'grandTotal',
     size: 150,
@@ -185,29 +171,19 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     id: 'paymentStatus',
     size: 150,
     header: () => 'Status Pembayaran',
-    cell: (info) => {
-      const status = info.getValue();
-      const color = mapTrxStatusToColor[status];
-      return <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>;
-    },
-    enableSorting: true,
-  }),
-  columnHelper.accessor('paidAmount', {
-    id: 'paidAmount',
-    size: 150,
-    header: () => 'Telah Dibayar',
     cell: ({ row }) => {
-      if (row.original.paymentStatus === 'Batal') return '-';
-
-      return `Rp ${formatToReadableNumber(row.original.paidAmount)}`;
+      const status = row.original.paymentStatus;
+      const remainingAmount = row.original.grandTotal - row.original.paidAmount;
+      const color = mapTrxStatusToColor[status];
+      return (
+        <>
+          <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>
+          {status === 'Belum Lunas' && (
+            <div className='mt-2'>Sisa: {`Rp ${formatToReadableNumber(remainingAmount)}`}</div>
+          )}
+        </>
+      );
     },
-    enableSorting: false,
-  }),
-  columnHelper.accessor('totalItem', {
-    id: 'totalItem',
-    size: 60,
-    header: () => 'Total Item',
-    cell: (info) => info.getValue(),
     enableSorting: true,
   }),
   columnHelper.accessor('remarks', {

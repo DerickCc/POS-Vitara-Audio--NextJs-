@@ -13,6 +13,8 @@ import BasicTable from '@/components/tables/basic-table';
 import { columns } from './colomns';
 import { ProductModel } from '@/models/product.model';
 import { browseProduct, deleteProduct } from '@/services/product-service';
+import cn from '@/utils/class-names';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 
 const pageHeader = {
   title: 'Barang',
@@ -112,7 +114,7 @@ export default function ProductDataPage() {
       <PageHeader {...pageHeader}>
         <div className='flex items-center gap-3 mt-4 sm:mt-0'>
           <Link href={routes.inventory.product.add} className='w-full sm:w-auto'>
-            <Button className='w-full sm:w-auto'>
+            <Button className={cn(buttonColorClass.green, baseButtonClass, 'w-full sm:w-auto')}>
               <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>

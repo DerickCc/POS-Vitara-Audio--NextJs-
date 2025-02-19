@@ -14,6 +14,8 @@ import { columns } from './columns';
 import { UserModel } from '@/models/user.model';
 import { TableAction } from '@/models/global.model';
 import { changeUserStatus, browseUser } from '@/services/user-service';
+import cn from '@/utils/class-names';
+import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
 
 const pageHeader = {
   title: 'User',
@@ -111,7 +113,7 @@ export default function UserDataPage() {
       <PageHeader {...pageHeader}>
         <div className='flex items-center gap-3 mt-4 sm:mt-0'>
           <Link href={routes.settings.user.add} className='w-full sm:w-auto'>
-            <Button className='w-full sm:w-auto'>
+            <Button className={cn(buttonColorClass.green, baseButtonClass, 'w-full sm:w-auto')}>
               <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />
               Tambah
             </Button>
