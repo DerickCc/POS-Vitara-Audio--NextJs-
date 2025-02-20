@@ -38,6 +38,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       const pod = await db.purchaseOrderDetails.findFirst({
         where: {
           productId,
+          purchasePrice: { gt: 0 },
           PurchaseOrder: {
             supplierId: supOrCusId,
             progressStatus: { not: 'Batal' }
@@ -52,6 +53,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       const sopd = await db.salesOrderProductDetails.findFirst({
         where: {
           productId,
+          sellingPrice: { gt: 0 },
           SalesOrder: {
             customerId: supOrCusId,
             progressStatus: { not: 'Batal' }

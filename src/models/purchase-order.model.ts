@@ -18,11 +18,16 @@ export const CreatePurchaseOrderSchema = z
       .array(PurchaseOrderDetailSchema)
       .refine(
         (details) => {
-          const productIds = details.map((d) => d.productId);
-          return new Set(productIds).size === productIds.length;
+          const seen = new Map<string, number>();
+          for (const product of details) {
+            const key = `${product.productId}-${product.purchasePrice}`;
+            if (seen.has(key)) return false;
+            seen.set(key, 1);
+          }
+          return true;
         },
         {
-          message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+          message: 'Barang yang sama tidak boleh memiliki harga beli yang sama',
           path: ['refinement'],
         }
       )
@@ -31,7 +36,7 @@ export const CreatePurchaseOrderSchema = z
           return details.length > 0;
         },
         {
-          message: 'Harap pilih minimal 1 barang yang ingin dibeli',
+          message: 'Mohon pilih minimal 1 barang yang ingin dibeli',
           path: ['refinement'],
         }
       ),
@@ -52,11 +57,16 @@ export const UpdatePurchaseOrderSchema = z
       .array(PurchaseOrderDetailSchema)
       .refine(
         (details) => {
-          const productIds = details.map((d) => d.productId);
-          return new Set(productIds).size === productIds.length;
+          const seen = new Map<string, number>();
+          for (const product of details) {
+            const key = `${product.productId}-${product.purchasePrice}`;
+            if (seen.has(key)) return false;
+            seen.set(key, 1);
+          }
+          return true;
         },
         {
-          message: 'Mohon tidak memilih barang yang sama dalam 1 transaksi',
+          message: 'Barang yang sama tidak boleh memiliki harga beli yang sama',
           path: ['refinement'],
         }
       )
@@ -65,7 +75,7 @@ export const UpdatePurchaseOrderSchema = z
           return details.length > 0;
         },
         {
-          message: 'Harap pilih minimal 1 barang yang ingin dibeli',
+          message: 'Mohon pilih minimal 1 barang yang ingin dibeli',
           path: ['refinement'],
         }
       ),

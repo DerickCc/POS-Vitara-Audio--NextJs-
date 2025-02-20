@@ -131,14 +131,14 @@ export default function PurchaseOrderForm({
   // ------------------------
 
   // transaction detail
-  const filterSelectedProductFromList = (list: SearchProductModel[], idx: number = -1) => {
-    const selectedProductIds = getValues().details.map((v) => v.productId);
-    const filteredProductList = list.filter((item) => !selectedProductIds.includes(item.id));
+  // const filterSelectedProductFromList = (list: SearchProductModel[], idx: number = -1) => {
+  //   const selectedProductIds = getValues().details.map((v) => v.productId);
+  //   const filteredProductList = list.filter((item) => !selectedProductIds.includes(item.id));
 
-    // add back previously selected product
-    if (idx >= 0 && selectedProducts[idx]) filteredProductList.unshift(selectedProducts[idx]);
-    setProductList(filteredProductList);
-  };
+  //   // add back previously selected product
+  //   if (idx >= 0 && selectedProducts[idx]) filteredProductList.unshift(selectedProducts[idx]);
+  //   setProductList(filteredProductList);
+  // };
 
   const handleProductChange = async (idx: number, product: SearchProductModel) => {
     setValue(`details.${idx}`, {
@@ -159,14 +159,14 @@ export default function PurchaseOrderForm({
 
     updateSubTotal();
 
-    filterSelectedProductFromList(productList, idx);
+    // filterSelectedProductFromList(productList, idx);
 
     // updated selected products
-    setSelectedProducts((prev) => {
-      const updated = [...prev];
-      updated[idx] = product;
-      return updated;
-    });
+    // setSelectedProducts((prev) => {
+    //   const updated = [...prev];
+    //   updated[idx] = product;
+    //   return updated;
+    // });
   };
 
   const handleRemoveProduct = (idx: number) => {
@@ -174,14 +174,14 @@ export default function PurchaseOrderForm({
 
     updateSubTotal();
 
-    filterSelectedProductFromList(productList, idx);
+    // filterSelectedProductFromList(productList, idx);
 
-    // updated selected products
-    setSelectedProducts((prev) => {
-      const updated = [...prev];
-      updated.splice(idx, 1);
-      return updated;
-    });
+    // // updated selected products
+    // setSelectedProducts((prev) => {
+    //   const updated = [...prev];
+    //   updated.splice(idx, 1);
+    //   return updated;
+    // });
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,7 +192,8 @@ export default function PurchaseOrderForm({
 
       try {
         const result = await searchProduct(name);
-        filterSelectedProductFromList(result);
+        // filterSelectedProductFromList(result);
+        setProductList(result);
       } catch (e) {
         toast.error(e + '', { duration: 5000 });
       }
