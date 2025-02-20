@@ -21,4 +21,4 @@ export const config = {
     '/transaction/:path*',
     '/settings/:path*',
   ]
-}
+}  
