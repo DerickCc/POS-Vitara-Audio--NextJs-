@@ -110,7 +110,7 @@ export class SalesOrderModel {
     this.id = data.id || '';
     this.code = data.code || '';
     this.salesDate = data.salesDate || getCurrDate();
-    this.entryDate = data.entryDate || getCurrDate();
+    this.entryDate = data.entryDate;
     this.customerId = data.customerId || '';
     this.customerName = data.customerName || '';
     this.customerLicensePlate = data.customerLicensePlate || '';
