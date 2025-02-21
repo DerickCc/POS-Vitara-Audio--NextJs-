@@ -186,7 +186,7 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
   }),
   columnHelper.accessor('paymentStatus', {
     id: 'paymentStatus',
-    size: 150,
+    size: 200,
     header: () => 'Status Pembayaran',
     cell: ({ row }) => {
       const status = row.original.paymentStatus;

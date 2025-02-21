@@ -221,13 +221,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       where: { soId: id },
       select: { id: true },
     });
-    console.log(existingProductDetails)
 
     const updatedProductDetailIds = data.productDetails.map((detail) => detail.id);
-    console.log(updatedProductDetailIds)
 
     const productDetailIdsToDelete = existingProductDetails.map((d) => d.id).filter((id) => !updatedProductDetailIds.includes(id));
-    console.log(productDetailIdsToDelete)
 
     // Delete product details that are no longer present in the update
     if (productDetailIdsToDelete.length > 0) {
