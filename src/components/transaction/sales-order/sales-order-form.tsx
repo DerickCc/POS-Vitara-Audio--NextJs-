@@ -304,9 +304,6 @@ export default function SalesOrderForm({
     }, 0);
 
     const totalServiceSoldAmount = getValues().serviceDetails.reduce((acc, d) => acc + d.totalPrice, 0);
-    console.log(getValues())
-    console.log(totalOriProductSoldAmount)
-    console.log(totalServiceSoldAmount)
 
     return totalOriProductSoldAmount + totalServiceSoldAmount;
   };
@@ -327,7 +324,7 @@ export default function SalesOrderForm({
 
     setValue('grandTotal', updatedGrandTotal);
 
-    if (!defaultValues.id) {
+    if (!formValues.id) {
       // when create
       // the paidAmount will follow grandTotal if paymentType is lunas
       if (formValues.paymentType === 'Lunas') {
@@ -340,7 +337,7 @@ export default function SalesOrderForm({
       }
     } else {
       // when update
-      if (updatedGrandTotal > defaultValues.paidAmount) {
+      if (updatedGrandTotal > formValues.paidAmount) {
         setValue('paymentType', 'DP');
       }
     }

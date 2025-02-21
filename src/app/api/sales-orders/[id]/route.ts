@@ -1,8 +1,8 @@
-import { UpdateSalesOrderSchema } from "@/models/sales-order";
-import { db } from "@/utils/prisma";
-import { getSession } from "@/utils/sessionlib";
-import { Decimal } from "@prisma/client/runtime/library";
-import { NextResponse } from "next/server";
+import { UpdateSalesOrderSchema } from '@/models/sales-order';
+import { db } from '@/utils/prisma';
+import { getSession } from '@/utils/sessionlib';
+import { Decimal } from '@prisma/client/runtime/library';
+import { NextResponse } from 'next/server';
 
 // GetSalesOrderById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   if (!session.id) {
     return NextResponse.json(
-      { message: "Unauthorized, mohon melakukan login ulang", result: null, recordsTotal: 0 },
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
       { status: 401 }
     );
   }
@@ -75,7 +75,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     });
 
     if (!so) {
-      return NextResponse.json({ message: "Transaksi Penjualan tidak ditemukan" }, { status: 404 });
+      return NextResponse.json({ message: 'Transaksi Penjualan tidak ditemukan' }, { status: 404 });
     }
 
     const formattedSoProductDetail = so.SalesOrderProductDetails.map((d) => ({
@@ -121,9 +121,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
       CreatedBy: undefined,
     };
 
-    return NextResponse.json({ message: "Success", result: formattedSo }, { status: 200 });
+    return NextResponse.json({ message: 'Success', result: formattedSo }, { status: 200 });
   } catch (e) {
-    return NextResponse.json({ message: "Internal Server Error: " + e }, { status: 500 });
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }
 
@@ -132,7 +132,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const session = await getSession();
 
   if (!session.id) {
-    return NextResponse.json({ message: "Unauthorized, mohon melakukan login ulang" }, { status: 401 });
+    return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
   const { id } = params;
@@ -143,7 +143,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   if (!validationRes.success) {
     return NextResponse.json(
       {
-        message: "Terdapat kesalahan pada data yang dikirim",
+        message: 'Terdapat kesalahan pada data yang dikirim',
         error: validationRes.error.flatten().fieldErrors,
       },
       { status: 400 }
@@ -158,136 +158,122 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     let subTotal = new Decimal(0);
     let discount = new Decimal(0);
 
-    // calculate subTotal and discount
-    if (data.productDetails.length > 0) {
-      for (const d of data.productDetails) {
-        const product = await prisma.products.findUnique({
-          where: { id: d.productId },
-          select: { sellingPrice: true },
-        });
+    // fetch all required product details in one query
+    const productIds = data.productDetails.map((d) => d.productId);
+    const products = await prisma.products.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, sellingPrice: true, costPrice: true },
+    });
 
-        if (!product) {
-          throw new Error("Barang yang ingin di-update tidak ditemukan");
-        }
+    const productMap = new Map(products.map((p) => [p.id, p]));
 
-        // calculate subTotal
-        // check if price is getting discount or marked up
-        const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
+    // process products
+    for (const d of data.productDetails) {
+      const product = productMap.get(d.productId);
+      if (!product) throw new Error('Barang yang ingin di-update tidak ditemukan');
 
-        // if marked up, calculate subtotal with the marked up selling price
-        if (priceAdjustment?.greaterThan(0)) subTotal = subTotal.plus(d.sellingPrice * d.quantity);
-        // if discount, calculate subtotal with the ori selling price
-        else subTotal = subTotal.plus(product.sellingPrice.times(d.quantity));
-
-        // calculate discount
-        // priceAdjusment negative means discount
-        if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
-      }
-    }
-
-    // calculate subTotal
-    if (data.serviceDetails.length > 0) {
-      const subTotalService = data.serviceDetails.reduce(
-        (acc, d) => acc.plus(d.sellingPrice * d.quantity),
-        new Decimal(0)
+      // calculate subTotal
+      // check if price is getting discount or marked up
+      const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
+      const totalPrice = (priceAdjustment.greaterThan(0) ? new Decimal(d.sellingPrice) : product.sellingPrice).times(
+        d.quantity
       );
-      subTotal = subTotal.plus(subTotalService);
+      subTotal = subTotal.plus(totalPrice);
+
+      // calculate discount
+      // priceAdjusment negative means discount
+      if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
     }
+
+    // process services
+    const subTotalService = data.serviceDetails.reduce(
+      (acc, d) => acc.plus(d.sellingPrice * d.quantity),
+      new Decimal(0)
+    );
+    subTotal = subTotal.plus(subTotalService);
 
     const grandTotal = subTotal.minus(discount);
-
-    const paymentStatus = grandTotal.equals(new Decimal(data.paidAmount)) ? "Lunas" : "Belum Lunas";
+    const isPaidInFull = grandTotal.equals(new Decimal(data.paidAmount));
+    const paymentType = isPaidInFull ? 'Lunas' : 'DP';
+    const paymentStatus = isPaidInFull ? 'Lunas' : 'Belum Lunas';
 
     await prisma.salesOrders.update({
       where: { id },
       data: {
         entryDate: data.entryDate,
-        Customer: {
-          connect: { id: data.customerId },
-        },
+        Customer: { connect: { id: data.customerId } },
         remarks: data.remarks,
         subTotal,
         discount,
         grandTotal,
+        paymentType,
         paymentStatus,
-        UpdatedBy: {
-          connect: { id: userId },
-        },
+        UpdatedBy: { connect: { id: userId } },
       },
     });
 
     // Fetch existing product details
-    const existingProductDetails = await prisma.salesOrderProductDetails.findMany({
-      where: { soId: id },
-      select: { id: true },
-    });
+    const existingProductDetailsIds = await prisma.salesOrderProductDetails
+      .findMany({
+        where: { soId: id },
+        select: { id: true },
+      })
+      .then((res) => res.map((d) => d.id));
 
-    const updatedProductDetailIds = data.productDetails.map((detail) => detail.id);
-
-    const productDetailIdsToDelete = existingProductDetails.map((d) => d.id).filter((id) => !updatedProductDetailIds.includes(id));
+    const updatedProductDetailIds = data.productDetails.map((d) => d.id);
+    const productDetailIdsToDelete = existingProductDetailsIds.filter((id) => !updatedProductDetailIds.includes(id));
 
     // Delete product details that are no longer present in the update
-    if (productDetailIdsToDelete.length > 0) {
+    if (productDetailIdsToDelete.length) {
       await prisma.salesOrderProductDetails.deleteMany({
         where: { id: { in: productDetailIdsToDelete } },
       });
     }
 
-    const productPromises = data.productDetails.map(async (d) => {
-      const product = await prisma.products.findUniqueOrThrow({
-        where: { id: d.productId },
-      });
+    const productDetailsPromises = data.productDetails.map(async (d) => {
+      const product = productMap.get(d.productId);
+      if (!product) throw new Error('Produk tidak ditemukan');
 
-      if (d.id) {
-        // update if there is id
-        return prisma.salesOrderProductDetails.update({
-          where: { id: d.id },
-          data: {
-            Product: {
-              connect: { id: d.productId },
+      return d.id
+        ? // update if there is id
+          prisma.salesOrderProductDetails.update({
+            where: { id: d.id },
+            data: {
+              Product: { connect: { id: d.productId } },
+              costPrice: product.costPrice,
+              oriSellingPrice: product.sellingPrice,
+              sellingPrice: d.sellingPrice,
+              quantity: d.quantity,
+              totalPrice: d.sellingPrice * d.quantity,
+              UpdatedBy: { connect: { id: userId } },
             },
-            costPrice: product.costPrice,
-            oriSellingPrice: product.sellingPrice,
-            sellingPrice: d.sellingPrice,
-            quantity: d.quantity,
-            totalPrice: d.sellingPrice * d.quantity,
-            UpdatedBy: {
-              connect: { id: userId },
+          })
+        : // create if id is null
+          prisma.salesOrderProductDetails.create({
+            data: {
+              SalesOrder: { connect: { id } },
+              Product: { connect: { id: d.productId } },
+              costPrice: product.costPrice,
+              oriSellingPrice: product.sellingPrice,
+              sellingPrice: d.sellingPrice,
+              quantity: d.quantity,
+              totalPrice: d.sellingPrice * d.quantity,
+              CreatedBy: { connect: { id: userId } },
             },
-          },
-        });
-      } else {
-        // create if id is null
-        return prisma.salesOrderProductDetails.create({
-          data: {
-            SalesOrder: {
-              connect: { id },
-            },
-            Product: {
-              connect: { id: d.productId },
-            },
-            costPrice: product.costPrice,
-            oriSellingPrice: product.sellingPrice,
-            sellingPrice: d.sellingPrice,
-            quantity: d.quantity,
-            totalPrice: d.sellingPrice * d.quantity,
-            CreatedBy: {
-              connect: { id: userId },
-            },
-          },
-        });
-      }
+          });
     });
-    await Promise.all(productPromises);
+    await Promise.all(productDetailsPromises);
 
     // Fetch existing service details
-    const existingServiceDetails = await prisma.salesOrderServiceDetails.findMany({
-      where: { soId: id },
-      select: { id: true },
-    });
+    const existingServiceDetailsIds = await prisma.salesOrderServiceDetails
+      .findMany({
+        where: { soId: id },
+        select: { id: true },
+      })
+      .then((res) => res.map((d) => d.id));
 
-    const updatedServiceDetailIds = data.serviceDetails.map((detail) => detail.id);
-    const serviceDetailIdsToDelete = existingServiceDetails.map((d) => d.id).filter((id) => !updatedServiceDetailIds.includes(id));
+    const updatedServiceDetailIds = data.serviceDetails.map((d) => d.id);
+    const serviceDetailIdsToDelete = existingServiceDetailsIds.filter((id) => !updatedServiceDetailIds.includes(id));
 
     // Delete Service details that are no longer present in the update
     if (serviceDetailIdsToDelete.length > 0) {
@@ -296,43 +282,35 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       });
     }
 
-    const servicePromises = data.serviceDetails.map(async (d) => {
-      if (d.id) {
-        // update if there is id
-        return prisma.salesOrderServiceDetails.update({
-          where: { id: d.id },
-          data: {
-            serviceName: d.serviceName,
-            sellingPrice: d.sellingPrice,
-            quantity: d.quantity,
-            totalPrice: d.sellingPrice * d.quantity,
-            UpdatedBy: {
-              connect: { id: userId },
+    const serviceDetailsPromises = data.serviceDetails.map(async (d) => {
+      return d.id
+        ? // update if there is id
+          prisma.salesOrderServiceDetails.update({
+            where: { id: d.id },
+            data: {
+              serviceName: d.serviceName,
+              sellingPrice: d.sellingPrice,
+              quantity: d.quantity,
+              totalPrice: d.sellingPrice * d.quantity,
+              UpdatedBy: { connect: { id: userId } },
             },
-          },
-        });
-      } else {
-        // create if id is null
-        return prisma.salesOrderServiceDetails.create({
-          data: {
-            SalesOrder: {
-              connect: { id },
+          })
+        : // create if id is null
+          prisma.salesOrderServiceDetails.create({
+            data: {
+              SalesOrder: { connect: { id } },
+              serviceName: d.serviceName,
+              sellingPrice: d.sellingPrice,
+              quantity: d.quantity,
+              totalPrice: d.sellingPrice * d.quantity,
+              CreatedBy: { connect: { id: userId } },
             },
-            serviceName: d.serviceName,
-            sellingPrice: d.sellingPrice,
-            quantity: d.quantity,
-            totalPrice: d.sellingPrice * d.quantity,
-            CreatedBy: {
-              connect: { id: userId },
-            },
-          },
-        });
-      }
+          });
     });
-    await Promise.all(servicePromises);
+    await Promise.all(serviceDetailsPromises);
 
     // delete all related salesOrderPaymentHistories
-    // if new grandtotal higher than total amount that has been paid
+    // if overpaid
     if (new Decimal(data.paidAmount).greaterThan(grandTotal)) {
       await prisma.salesOrderPaymentHistories.deleteMany({
         where: { soId: id },
@@ -341,9 +319,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   });
 
   try {
-    return NextResponse.json({ message: "Transaksi Penjualan berhasil diupdate" }, { status: 200 });
+    return NextResponse.json({ message: 'Transaksi Penjualan berhasil diupdate' }, { status: 200 });
   } catch (e) {
-    return NextResponse.json({ message: "Internal Server Error: " + e }, { status: 500 });
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }
 
@@ -353,7 +331,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
   if (!session.id) {
     return NextResponse.json(
-      { message: "Unauthorized, mohon melakukan login ulang", result: null, recordsTotal: 0 },
+      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
       { status: 401 }
     );
   }
@@ -370,8 +348,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     });
 
     if (!so) {
-      return NextResponse.json({ message: "Transaksi Penjualan tidak ditemukan" }, { status: 404 });
-    } else if (so.progressStatus !== "Belum Dikerjakan") {
+      return NextResponse.json({ message: 'Transaksi Penjualan tidak ditemukan' }, { status: 404 });
+    } else if (so.progressStatus !== 'Belum Dikerjakan') {
       return NextResponse.json(
         { message: 'Hanya Transaksi Penjualan berstatus "Belum Dikerjakan" yang dapat dihapus' },
         { status: 403 } // 403 = Forbidden
@@ -388,8 +366,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       });
     });
 
-    return NextResponse.json({ message: "Transaksi Penjualan berhasil dihapus" }, { status: 200 });
+    return NextResponse.json({ message: 'Transaksi Penjualan berhasil dihapus' }, { status: 200 });
   } catch (e) {
-    return NextResponse.json({ message: "Internal Server Error: " + e }, { status: 500 });
+    return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

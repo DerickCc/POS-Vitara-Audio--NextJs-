@@ -229,7 +229,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
 
       // delete all related purchaseOrderPaymentHistories
-      // if new grandtotal higher than total amount that has been paid
+      // if paid amount higher than new grandtotal
       if (data.paidAmount > grandTotal) {
         await prisma.purchaseOrderPaymentHistories.deleteMany({
           where: { poId: id },
