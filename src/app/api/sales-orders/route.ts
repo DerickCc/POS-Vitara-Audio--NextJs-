@@ -136,10 +136,7 @@ export async function POST(request: Request) {
   const session = await getSession();
 
   if (!session.id) {
-    return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang', result: null, recordsTotal: 0 },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang', result: null }, { status: 401 });
   }
 
   const validationRes = CreateSalesOrderSchema.safeParse(await request.json());
@@ -179,44 +176,41 @@ export async function POST(request: Request) {
       let subTotal = new Decimal(0);
       let discount = new Decimal(0);
 
-      // calculate subTotal and discount
-      if (data.productDetails.length > 0) {
-        for (const d of data.productDetails) {
-          const product = await prisma.products.findUnique({
-            where: { id: d.productId },
-            select: { sellingPrice: true },
-          });
+      // fetch all required product details in one query
+      const productIds = data.productDetails.map((d) => d.productId);
+      const products = await prisma.products.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, sellingPrice: true, costPrice: true },
+      });
 
-          if (!product) {
-            throw new Error('Barang yang ingin di-update tidak ditemukan');
-          }
+      const productMap = new Map(products.map((p) => [p.id, p]));
 
-          // calculate subTotal
-          // check if price is getting discount or marked up
-          const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
+      // process products
+      for (const d of data.productDetails) {
+        const product = productMap.get(d.productId);
+        if (!product) throw new Error('Barang yang ingin di-update tidak ditemukan');
 
-          // if marked up, calculate subtotal with the marked up selling price
-          if (priceAdjustment?.greaterThan(0)) subTotal = subTotal.plus(d.sellingPrice * d.quantity);
-          // if discount, calculate subtotal with the ori selling price
-          else subTotal = subTotal.plus(product.sellingPrice.times(d.quantity));
-
-          // calculate discount
-          // priceAdjusment negative means discount
-          if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
-        }
-      }
-
-      // calculate subTotal
-      if (data.serviceDetails.length > 0) {
-        const subTotalService = data.serviceDetails.reduce(
-          (acc, d) => acc.plus(d.sellingPrice * d.quantity),
-          new Decimal(0)
+        // calculate subTotal
+        // check if price is getting discount or marked up
+        const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
+        const totalPrice = (priceAdjustment.greaterThan(0) ? new Decimal(d.sellingPrice) : product.sellingPrice).times(
+          d.quantity
         );
-        subTotal = subTotal.plus(subTotalService);
+        subTotal = subTotal.plus(totalPrice);
+
+        // calculate discount
+        // priceAdjusment negative means discount
+        if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
       }
+
+      // process services
+      const subTotalService = data.serviceDetails.reduce(
+        (acc, d) => acc.plus(d.sellingPrice * d.quantity),
+        new Decimal(0)
+      );
+      subTotal = subTotal.plus(subTotalService);
 
       const grandTotal = subTotal.minus(discount);
-
       const paymentStatus = grandTotal.equals(new Decimal(data.paidAmount)) ? 'Lunas' : 'Belum Lunas';
 
       // create so
@@ -240,72 +234,46 @@ export async function POST(request: Request) {
         },
       });
 
-      const promises: any[] = [];
-      if (data.productDetails.length > 0) {
-        for (const d of data.productDetails) {
-          const product = await prisma.products.findUnique({
-            where: { id: d.productId },
-            select: {
-              costPrice: true,
-              sellingPrice: true,
-            },
-          });
+      const productDetailsData = data.productDetails.map((d) => {
+        const product = productMap.get(d.productId);
+        return {
+          soId: so.id,
+          productId: d.productId,
+          costPrice: product!.costPrice,
+          oriSellingPrice: product!.sellingPrice,
+          sellingPrice: d.sellingPrice,
+          quantity: d.quantity,
+          totalPrice: new Decimal(d.sellingPrice).times(d.quantity),
+          createdBy: userId,
+        };
+      });
 
-          if (!product) {
-            throw new Error('Barang yang ingin di-update tidak ditemukan');
-          }
+      const serviceDetailsData = data.serviceDetails.map((d) => ({
+        soId: so.id,
+        serviceName: d.serviceName,
+        sellingPrice: d.sellingPrice,
+        quantity: d.quantity,
+        totalPrice: d.sellingPrice * d.quantity,
+        createdBy: userId,
+      }));
 
-          // create soProductDetail
-          promises.push(
-            prisma.salesOrderProductDetails.create({
-              data: {
-                SalesOrder: {
-                  connect: { id: so.id },
-                },
-                Product: {
-                  connect: { id: d.productId },
-                },
-                costPrice: product.costPrice,
-                oriSellingPrice: product.sellingPrice,
-                sellingPrice: d.sellingPrice,
-                quantity: d.quantity,
-                totalPrice: d.sellingPrice * d.quantity,
-                CreatedBy: {
-                  connect: { id: userId },
-                },
-              },
-            })
-          );
-        }
+      // bulk create product
+      if (productDetailsData.length > 0) {
+        await prisma.salesOrderProductDetails.createMany({ data: productDetailsData });
       }
 
-      await Promise.all(promises);
-
-      // create soServiceDetail
-      if (data.serviceDetails.length > 0) {
-        await prisma.salesOrderServiceDetails.createMany({
-          data: data.serviceDetails.map((d) => ({
-            soId: so.id,
-            serviceName: d.serviceName,
-            sellingPrice: d.sellingPrice,
-            quantity: d.quantity,
-            totalPrice: d.sellingPrice * d.quantity,
-            createdBy: userId,
-          })),
-        });
+      // bulk create service
+      if (serviceDetailsData.length > 0) {
+        await prisma.salesOrderServiceDetails.createMany({ data: serviceDetailsData });
       }
 
       // create payment history
       await prisma.salesOrderPaymentHistories.create({
         data: {
-          SalesOrder: {
-            connect: { id: so.id },
-          },
+          SalesOrder: { connect: { id: so.id } },
           paymentMethod: data.paymentMethod,
           amount: data.paidAmount,
-          CreatedBy: {
-            connect: { id: userId },
-          },
+          CreatedBy: { connect: { id: userId } },
         },
       });
     });

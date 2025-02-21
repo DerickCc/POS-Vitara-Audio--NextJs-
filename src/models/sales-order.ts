@@ -102,16 +102,16 @@ export class SalesOrderModel {
   cashier: string;
 
   constructor(data: any = {}) {
-    this.id = data.id || '';
+    this.id = data.id;
     this.code = data.code || '';
     this.salesDate = data.salesDate || getCurrDate();
     this.entryDate = data.entryDate || getCurrDate();
     this.customerId = data.customerId || '';
-    this.customerName = data.customerName || '';
-    this.customerLicensePlate = data.customerLicensePlate || '';
-    this.customerAddress = data.customerAddress || '';
-    this.customerPhoneNo = data.customerPhoneNo || '';
-    this.remarks = data.remarks || '';
+    this.customerName = data.customerName;
+    this.customerLicensePlate = data.customerLicensePlate;
+    this.customerAddress = data.customerAddress;
+    this.customerPhoneNo = data.customerPhoneNo;
+    this.remarks = data.remarks;
     this.paymentType = data.paymentType || 'DP';
     this.paymentMethod = data.paymentMethod || 'Non-tunai';
     this.subTotal = data.subTotal || 0;
@@ -122,7 +122,7 @@ export class SalesOrderModel {
     this.serviceDetails = data.serviceDetails || [];
     this.progressStatus = data.progressStatus || 'Belum Dikerjakan';
     this.paymentStatus = data.paymentStatus || 'Belum Lunas';
-    this.cashier = data.cashier || '';
+    this.cashier = data.cashier;
   }
 }
 
