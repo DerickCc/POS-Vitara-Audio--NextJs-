@@ -46,7 +46,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
 
       // Validate stock for each product
-      const insufficientStock = so.SalesOrderProductDetails.filter((d) => d.Product.stock < d.quantity);
+      const insufficientStock = so.SalesOrderProductDetails.filter((d) => d.Product.stock.lessThan(d.quantity));
 
       if (insufficientStock.length > 0) {
         const errorMessage = insufficientStock
@@ -54,9 +54,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             (d) =>
               `${d.Product.name} yang diperlukan sebanyak ${d.quantity} ${d.Product.uom}, tetapi tersisa ${d.Product.stock} ${d.Product.uom}.`
           )
-          .join(' ');
+          .join('\n\n');
 
-        throw new Error(`${errorMessage}`);
+        throw new Error(`Gagal diselesaikan \n\n${errorMessage}`);
       }
 
       // update stock of each product in details

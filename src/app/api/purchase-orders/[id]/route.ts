@@ -141,101 +141,107 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const grandTotal = subTotal - data.appliedReceivables;
     const paymentStatus = data.paidAmount === grandTotal ? 'Lunas' : 'Belum Lunas';
 
-    await db.$transaction(async (prisma) => {
-      await prisma.purchaseOrders.update({
-        where: { id },
-        data: {
-          Supplier: {
-            connect: { id: data.supplierId },
-          },
-          remarks: data.remarks,
-          totalItem: data.details.length,
-          subTotal,
-          appliedReceivables: data.appliedReceivables,
-          grandTotal,
-          paymentStatus,
-          UpdatedBy: {
-            connect: { id: userId },
-          },
-        },
-      });
-
-      // Fetch existing details
-      const existingDetails = await prisma.purchaseOrderDetails.findMany({
-        where: { poId: id },
-        select: { id: true },
-      });
-
-      const updatedDetailIds = data.details.map((detail) => detail.id);
-      const detailIdsToDelete = existingDetails.map((d) => d.id).filter((id) => !updatedDetailIds.includes(id))
-
-      // Delete details that are no longer present in the update
-      if (detailIdsToDelete.length > 0) {
-        await prisma.purchaseOrderDetails.deleteMany({
-          where: { id: { in: detailIdsToDelete } },
-        });
-      }
-
-      const updatePromises = data.details.map((d) => {
-        if (d.id) {
-          // update if there is poDetail id
-          return prisma.purchaseOrderDetails.update({
-            where: { id: d.id },
-            data: {
-              Product: {
-                connect: { id: d.productId },
-              },
-              purchasePrice: d.purchasePrice,
-              quantity: d.quantity,
-              totalPrice: d.purchasePrice * d.quantity,
-              UpdatedBy: {
-                connect: { id: userId },
-              },
+    await db.$transaction(
+      async (prisma) => {
+        await prisma.purchaseOrders.update({
+          where: { id },
+          data: {
+            Supplier: {
+              connect: { id: data.supplierId },
             },
+            remarks: data.remarks,
+            totalItem: data.details.length,
+            subTotal,
+            appliedReceivables: data.appliedReceivables,
+            grandTotal,
+            paymentStatus,
+            UpdatedBy: {
+              connect: { id: userId },
+            },
+          },
+        });
+
+        // Fetch existing details
+        const existingDetails = await prisma.purchaseOrderDetails.findMany({
+          where: { poId: id },
+          select: { id: true },
+        });
+
+        const updatedDetailIds = data.details.map((detail) => detail.id);
+        const detailIdsToDelete = existingDetails.map((d) => d.id).filter((id) => !updatedDetailIds.includes(id));
+
+        // Delete details that are no longer present in the update
+        if (detailIdsToDelete.length > 0) {
+          await prisma.purchaseOrderDetails.deleteMany({
+            where: { id: { in: detailIdsToDelete } },
           });
-        } else {
-          // create if poDetail id is null
-          return prisma.purchaseOrderDetails.create({
+        }
+
+        const updatePromises = data.details.map((d) => {
+          if (d.id) {
+            // update if there is poDetail id
+            return prisma.purchaseOrderDetails.update({
+              where: { id: d.id },
+              data: {
+                Product: {
+                  connect: { id: d.productId },
+                },
+                purchasePrice: d.purchasePrice,
+                quantity: d.quantity,
+                totalPrice: d.purchasePrice * d.quantity,
+                UpdatedBy: {
+                  connect: { id: userId },
+                },
+              },
+            });
+          } else {
+            // create if poDetail id is null
+            return prisma.purchaseOrderDetails.create({
+              data: {
+                PurchaseOrder: {
+                  connect: { id },
+                },
+                Product: {
+                  connect: { id: d.productId },
+                },
+                purchasePrice: d.purchasePrice,
+                quantity: d.quantity,
+                totalPrice: d.purchasePrice * d.quantity,
+                CreatedBy: {
+                  connect: { id: userId },
+                },
+              },
+            });
+          }
+        });
+
+        await Promise.all(updatePromises);
+
+        // update supplier's receivable if there is adjustment on appliedReceivables
+        if (!appliedReceivablesAdjustment.isZero()) {
+          await prisma.suppliers.update({
+            where: { id: data.supplierId },
             data: {
-              PurchaseOrder: {
-                connect: { id },
-              },
-              Product: {
-                connect: { id: d.productId },
-              },
-              purchasePrice: d.purchasePrice,
-              quantity: d.quantity,
-              totalPrice: d.purchasePrice * d.quantity,
-              CreatedBy: {
-                connect: { id: userId },
-              },
+              receivables: appliedReceivablesAdjustment.isPositive()
+                ? { decrement: appliedReceivablesAdjustment }
+                : { increment: appliedReceivablesAdjustment.abs() },
             },
           });
         }
-      });
 
-      await Promise.all(updatePromises);
-
-      // update supplier's receivable if there is adjustment on appliedReceivables
-      if (!appliedReceivablesAdjustment.isZero()) {
-        await prisma.suppliers.update({
-          where: { id: data.supplierId },
-          data: {
-            receivables: appliedReceivablesAdjustment.isPositive()
-              ? { decrement: appliedReceivablesAdjustment }
-              : { increment: appliedReceivablesAdjustment.abs() },
-          },
-        });
+        // delete all related purchaseOrderPaymentHistories
+        // if paid amount higher than new grandtotal
+        if (data.paidAmount > grandTotal) {
+          await prisma.purchaseOrderPaymentHistories.deleteMany({
+            where: { poId: id },
+          });
+        }
+      },
+      {
+        maxWait: 10000, // 10 seconds max wait to connect to prisma
+        timeout: 20000, // 20 seconds
       }
-
-      // delete all related purchaseOrderPaymentHistories
-      // if paid amount higher than new grandtotal
-      if (data.paidAmount > grandTotal) {
-        await prisma.purchaseOrderPaymentHistories.deleteMany({
-          where: { poId: id },
-        });
-      }
-    });
+    );
 
     return NextResponse.json({ message: 'Transaksi Pembelian berhasil diupdate' }, { status: 200 });
   } catch (e) {

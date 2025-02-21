@@ -154,169 +154,175 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   const userId = session.id;
 
-  await db.$transaction(async (prisma) => {
-    let subTotal = new Decimal(0);
-    let discount = new Decimal(0);
+  await db.$transaction(
+    async (prisma) => {
+      let subTotal = new Decimal(0);
+      let discount = new Decimal(0);
 
-    // fetch all required product details in one query
-    const productIds = data.productDetails.map((d) => d.productId);
-    const products = await prisma.products.findMany({
-      where: { id: { in: productIds } },
-      select: { id: true, sellingPrice: true, costPrice: true },
-    });
+      // fetch all required product details in one query
+      const productIds = data.productDetails.map((d) => d.productId);
+      const products = await prisma.products.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, sellingPrice: true, costPrice: true },
+      });
 
-    const productMap = new Map(products.map((p) => [p.id, p]));
+      const productMap = new Map(products.map((p) => [p.id, p]));
 
-    // process products
-    for (const d of data.productDetails) {
-      const product = productMap.get(d.productId);
-      if (!product) throw new Error('Barang yang ingin di-update tidak ditemukan');
+      // process products
+      for (const d of data.productDetails) {
+        const product = productMap.get(d.productId);
+        if (!product) throw new Error('Barang yang ingin di-update tidak ditemukan');
 
-      // calculate subTotal
-      // check if price is getting discount or marked up
-      const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
-      const totalPrice = (priceAdjustment.greaterThan(0) ? new Decimal(d.sellingPrice) : product.sellingPrice).times(
-        d.quantity
+        // calculate subTotal
+        // check if price is getting discount or marked up
+        const priceAdjustment = new Decimal(d.sellingPrice).minus(product.sellingPrice);
+        const totalPrice = (priceAdjustment.greaterThan(0) ? new Decimal(d.sellingPrice) : product.sellingPrice).times(
+          d.quantity
+        );
+        subTotal = subTotal.plus(totalPrice);
+
+        // calculate discount
+        // priceAdjusment negative means discount
+        if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
+      }
+
+      // process services
+      const subTotalService = data.serviceDetails.reduce(
+        (acc, d) => acc.plus(d.sellingPrice * d.quantity),
+        new Decimal(0)
       );
-      subTotal = subTotal.plus(totalPrice);
+      subTotal = subTotal.plus(subTotalService);
 
-      // calculate discount
-      // priceAdjusment negative means discount
-      if (priceAdjustment.lessThan(0)) discount = discount.plus(priceAdjustment.negated().times(d.quantity));
-    }
+      const grandTotal = subTotal.minus(discount);
+      const isPaidInFull = grandTotal.equals(new Decimal(data.paidAmount));
+      const paymentType = isPaidInFull ? 'Lunas' : 'DP';
+      const paymentStatus = isPaidInFull ? 'Lunas' : 'Belum Lunas';
 
-    // process services
-    const subTotalService = data.serviceDetails.reduce(
-      (acc, d) => acc.plus(d.sellingPrice * d.quantity),
-      new Decimal(0)
-    );
-    subTotal = subTotal.plus(subTotalService);
-
-    const grandTotal = subTotal.minus(discount);
-    const isPaidInFull = grandTotal.equals(new Decimal(data.paidAmount));
-    const paymentType = isPaidInFull ? 'Lunas' : 'DP';
-    const paymentStatus = isPaidInFull ? 'Lunas' : 'Belum Lunas';
-
-    await prisma.salesOrders.update({
-      where: { id },
-      data: {
-        entryDate: data.entryDate,
-        Customer: { connect: { id: data.customerId } },
-        remarks: data.remarks,
-        subTotal,
-        discount,
-        grandTotal,
-        paymentType,
-        paymentStatus,
-        UpdatedBy: { connect: { id: userId } },
-      },
-    });
-
-    // Fetch existing product details
-    const existingProductDetailsIds = await prisma.salesOrderProductDetails
-      .findMany({
-        where: { soId: id },
-        select: { id: true },
-      })
-      .then((res) => res.map((d) => d.id));
-
-    const updatedProductDetailIds = data.productDetails.map((d) => d.id);
-    const productDetailIdsToDelete = existingProductDetailsIds.filter((id) => !updatedProductDetailIds.includes(id));
-
-    // Delete product details that are no longer present in the update
-    if (productDetailIdsToDelete.length) {
-      await prisma.salesOrderProductDetails.deleteMany({
-        where: { id: { in: productDetailIdsToDelete } },
+      await prisma.salesOrders.update({
+        where: { id },
+        data: {
+          entryDate: data.entryDate,
+          Customer: { connect: { id: data.customerId } },
+          remarks: data.remarks,
+          subTotal,
+          discount,
+          grandTotal,
+          paymentType,
+          paymentStatus,
+          UpdatedBy: { connect: { id: userId } },
+        },
       });
-    }
 
-    const productDetailsPromises = data.productDetails.map(async (d) => {
-      const product = productMap.get(d.productId);
-      if (!product) throw new Error('Produk tidak ditemukan');
+      // Fetch existing product details
+      const existingProductDetailsIds = await prisma.salesOrderProductDetails
+        .findMany({
+          where: { soId: id },
+          select: { id: true },
+        })
+        .then((res) => res.map((d) => d.id));
 
-      return d.id
-        ? // update if there is id
-          prisma.salesOrderProductDetails.update({
-            where: { id: d.id },
-            data: {
-              Product: { connect: { id: d.productId } },
-              costPrice: product.costPrice,
-              oriSellingPrice: product.sellingPrice,
-              sellingPrice: d.sellingPrice,
-              quantity: d.quantity,
-              totalPrice: d.sellingPrice * d.quantity,
-              UpdatedBy: { connect: { id: userId } },
-            },
-          })
-        : // create if id is null
-          prisma.salesOrderProductDetails.create({
-            data: {
-              SalesOrder: { connect: { id } },
-              Product: { connect: { id: d.productId } },
-              costPrice: product.costPrice,
-              oriSellingPrice: product.sellingPrice,
-              sellingPrice: d.sellingPrice,
-              quantity: d.quantity,
-              totalPrice: d.sellingPrice * d.quantity,
-              CreatedBy: { connect: { id: userId } },
-            },
-          });
-    });
-    await Promise.all(productDetailsPromises);
+      const updatedProductDetailIds = data.productDetails.map((d) => d.id);
+      const productDetailIdsToDelete = existingProductDetailsIds.filter((id) => !updatedProductDetailIds.includes(id));
 
-    // Fetch existing service details
-    const existingServiceDetailsIds = await prisma.salesOrderServiceDetails
-      .findMany({
-        where: { soId: id },
-        select: { id: true },
-      })
-      .then((res) => res.map((d) => d.id));
+      // Delete product details that are no longer present in the update
+      if (productDetailIdsToDelete.length) {
+        await prisma.salesOrderProductDetails.deleteMany({
+          where: { id: { in: productDetailIdsToDelete } },
+        });
+      }
 
-    const updatedServiceDetailIds = data.serviceDetails.map((d) => d.id);
-    const serviceDetailIdsToDelete = existingServiceDetailsIds.filter((id) => !updatedServiceDetailIds.includes(id));
+      const productDetailsPromises = data.productDetails.map(async (d) => {
+        const product = productMap.get(d.productId);
+        if (!product) throw new Error('Produk tidak ditemukan');
 
-    // Delete Service details that are no longer present in the update
-    if (serviceDetailIdsToDelete.length > 0) {
-      await prisma.salesOrderServiceDetails.deleteMany({
-        where: { id: { in: serviceDetailIdsToDelete } },
+        return d.id
+          ? // update if there is id
+            prisma.salesOrderProductDetails.update({
+              where: { id: d.id },
+              data: {
+                Product: { connect: { id: d.productId } },
+                costPrice: product.costPrice,
+                oriSellingPrice: product.sellingPrice,
+                sellingPrice: d.sellingPrice,
+                quantity: d.quantity,
+                totalPrice: d.sellingPrice * d.quantity,
+                UpdatedBy: { connect: { id: userId } },
+              },
+            })
+          : // create if id is null
+            prisma.salesOrderProductDetails.create({
+              data: {
+                SalesOrder: { connect: { id } },
+                Product: { connect: { id: d.productId } },
+                costPrice: product.costPrice,
+                oriSellingPrice: product.sellingPrice,
+                sellingPrice: d.sellingPrice,
+                quantity: d.quantity,
+                totalPrice: d.sellingPrice * d.quantity,
+                CreatedBy: { connect: { id: userId } },
+              },
+            });
       });
-    }
+      await Promise.all(productDetailsPromises);
 
-    const serviceDetailsPromises = data.serviceDetails.map(async (d) => {
-      return d.id
-        ? // update if there is id
-          prisma.salesOrderServiceDetails.update({
-            where: { id: d.id },
-            data: {
-              serviceName: d.serviceName,
-              sellingPrice: d.sellingPrice,
-              quantity: d.quantity,
-              totalPrice: d.sellingPrice * d.quantity,
-              UpdatedBy: { connect: { id: userId } },
-            },
-          })
-        : // create if id is null
-          prisma.salesOrderServiceDetails.create({
-            data: {
-              SalesOrder: { connect: { id } },
-              serviceName: d.serviceName,
-              sellingPrice: d.sellingPrice,
-              quantity: d.quantity,
-              totalPrice: d.sellingPrice * d.quantity,
-              CreatedBy: { connect: { id: userId } },
-            },
-          });
-    });
-    await Promise.all(serviceDetailsPromises);
+      // Fetch existing service details
+      const existingServiceDetailsIds = await prisma.salesOrderServiceDetails
+        .findMany({
+          where: { soId: id },
+          select: { id: true },
+        })
+        .then((res) => res.map((d) => d.id));
 
-    // delete all related salesOrderPaymentHistories
-    // if overpaid
-    if (new Decimal(data.paidAmount).greaterThan(grandTotal)) {
-      await prisma.salesOrderPaymentHistories.deleteMany({
-        where: { soId: id },
+      const updatedServiceDetailIds = data.serviceDetails.map((d) => d.id);
+      const serviceDetailIdsToDelete = existingServiceDetailsIds.filter((id) => !updatedServiceDetailIds.includes(id));
+
+      // Delete Service details that are no longer present in the update
+      if (serviceDetailIdsToDelete.length > 0) {
+        await prisma.salesOrderServiceDetails.deleteMany({
+          where: { id: { in: serviceDetailIdsToDelete } },
+        });
+      }
+
+      const serviceDetailsPromises = data.serviceDetails.map(async (d) => {
+        return d.id
+          ? // update if there is id
+            prisma.salesOrderServiceDetails.update({
+              where: { id: d.id },
+              data: {
+                serviceName: d.serviceName,
+                sellingPrice: d.sellingPrice,
+                quantity: d.quantity,
+                totalPrice: d.sellingPrice * d.quantity,
+                UpdatedBy: { connect: { id: userId } },
+              },
+            })
+          : // create if id is null
+            prisma.salesOrderServiceDetails.create({
+              data: {
+                SalesOrder: { connect: { id } },
+                serviceName: d.serviceName,
+                sellingPrice: d.sellingPrice,
+                quantity: d.quantity,
+                totalPrice: d.sellingPrice * d.quantity,
+                CreatedBy: { connect: { id: userId } },
+              },
+            });
       });
+      await Promise.all(serviceDetailsPromises);
+
+      // delete all related salesOrderPaymentHistories
+      // if overpaid
+      if (new Decimal(data.paidAmount).greaterThan(grandTotal)) {
+        await prisma.salesOrderPaymentHistories.deleteMany({
+          where: { soId: id },
+        });
+      }
+    },
+    {
+      maxWait: 10000, // 10 seconds max wait to connect to prisma
+      timeout: 20000, // 20 seconds
     }
-  });
+  );
 
   try {
     return NextResponse.json({ message: 'Transaksi Penjualan berhasil diupdate' }, { status: 200 });
