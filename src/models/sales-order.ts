@@ -3,16 +3,12 @@ import { z } from 'zod';
 import { SalesOrderProductDetailModel, SalesOrderProductDetailSchema } from './sales-order-product-detail';
 import { SalesOrderServiceDetailModel, SalesOrderServiceDetailSchema } from './sales-order-service-detail';
 
-const today = new Date();
-today.setHours(0, 0, 0, 0); // Set time to the start of the day
-
 export const CreateSalesOrderSchema = z
   .object({
     customerId: z.string().min(1, { message: 'Mohon memilih pelanggan' }),
     entryDate: z
       .union([z.string(), z.date()])
-      .transform((val) => (typeof val === 'string' ? new Date(val) : val))
-      .refine((date) => date >= today, { message: 'Tanggal masuk minimal adalah hari ini' }),
+      .transform((val) => (typeof val === 'string' ? new Date(val) : val)),
     remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
     paymentType: z.string().min(1, { message: 'Mohon memilih tipe pembayaran' }),
     paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
@@ -53,8 +49,7 @@ export const UpdateSalesOrderSchema = z
     customerId: z.string().min(1, { message: 'Mohon memilih pelanggan' }),
     entryDate: z
       .union([z.string(), z.date()])
-      .transform((val) => (typeof val === 'string' ? new Date(val) : val))
-      .refine((date) => date >= today, { message: 'Tanggal masuk minimal adalah hari ini' }),
+      .transform((val) => (typeof val === 'string' ? new Date(val) : val)),
     remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
     paidAmount: z.coerce.number().min(0, { message: 'Jumlah yang telah dibayar tidak boleh bernilai negatif' }),
     productDetails: z.array(SalesOrderProductDetailSchema).refine(
@@ -110,7 +105,7 @@ export class SalesOrderModel {
     this.id = data.id || '';
     this.code = data.code || '';
     this.salesDate = data.salesDate || getCurrDate();
-    this.entryDate = data.entryDate;
+    this.entryDate = data.entryDate || getCurrDate();
     this.customerId = data.customerId || '';
     this.customerName = data.customerName || '';
     this.customerLicensePlate = data.customerLicensePlate || '';
