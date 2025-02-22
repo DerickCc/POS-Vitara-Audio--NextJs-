@@ -81,17 +81,18 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const suppliers = await db.suppliers.findMany({
-      skip: pageIndex * pageSize,
-      take: pageSize,
-      orderBy: {
-        [sortColumn]: sortOrder,
-      },
-      where,
-    });
-
-    const recordsTotal = await db.suppliers.count({ where });
-
+    const [suppliers, recordsTotal] = await Promise.all([
+      db.suppliers.findMany({
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        orderBy: {
+          [sortColumn]: sortOrder,
+        },
+        where,
+      }),
+      await db.suppliers.count({ where }),
+    ]);
+    
     return NextResponse.json({ message: 'Success', result: suppliers, recordsTotal }, { status: 200 });
   } catch (e) {
     return NextResponse.json(

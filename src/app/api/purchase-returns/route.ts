@@ -109,23 +109,25 @@ export async function GET(request: Request) {
   }
 
   try {
-    const purchaseReturns = await db.purchaseReturns.findMany({
-      skip: pageIndex * pageSize,
-      take: pageSize,
-      orderBy,
-      where,
-      include: {
-        PurchaseOrder: {
-          select: {
-            Supplier: {
-              select: { name: true },
+    const [purchaseReturns, recordsTotal] = await Promise.all([
+      db.purchaseReturns.findMany({
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        orderBy,
+        where,
+        include: {
+          PurchaseOrder: {
+            select: {
+              Supplier: {
+                select: { name: true },
+              },
+              code: true,
             },
-            code: true,
           },
         },
-      },
-    });
-    const recordsTotal = await db.purchaseReturns.count({ where });
+      }),
+      await db.purchaseReturns.count({ where }),
+    ]);
 
     const formattedPurchaseReturns = purchaseReturns.map((pr) => ({
       ...pr,

@@ -67,16 +67,17 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const users = await db.users.findMany({
-      skip: pageIndex * pageSize,
-      take: pageSize,
-      orderBy: {
-        [sortColumn]: sortOrder,
-      },
-      where,
-    });
-
-    const recordsTotal = await db.users.count({ where });
+    const [users, recordsTotal] = await Promise.all([
+      db.users.findMany({
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        orderBy: {
+          [sortColumn]: sortOrder,
+        },
+        where,
+      }),
+      await db.users.count({ where }),
+    ]);
 
     return NextResponse.json({ message: 'Success', result: users, recordsTotal }, { status: 200 });
   } catch (e) {

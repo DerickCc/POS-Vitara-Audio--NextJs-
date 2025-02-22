@@ -81,31 +81,33 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const salesOrders = await db.salesOrders.findMany({
-      skip: pageIndex * pageSize,
-      take: pageSize,
-      orderBy:
-        sortColumn === 'customerName'
-          ? {
-              Customer: { name: sortOrder as Prisma.SortOrder },
-            }
-          : {
-              [sortColumn]: sortOrder,
-            },
-      where,
-      include: {
-        Customer: {
-          select: { name: true, licensePlate: true },
+    const [salesOrders, recordsTotal] = await Promise.all([
+      db.salesOrders.findMany({
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        orderBy:
+          sortColumn === 'customerName'
+            ? {
+                Customer: { name: sortOrder as Prisma.SortOrder },
+              }
+            : {
+                [sortColumn]: sortOrder,
+              },
+        where,
+        include: {
+          Customer: {
+            select: { name: true, licensePlate: true },
+          },
+          SalesOrderPaymentHistories: {
+            select: { amount: true },
+          },
+          CreatedBy: {
+            select: { name: true },
+          },
         },
-        SalesOrderPaymentHistories: {
-          select: { amount: true },
-        },
-        CreatedBy: {
-          select: { name: true },
-        },
-      },
-    });
-    const recordsTotal = await db.salesOrders.count({ where });
+      }),
+      await db.salesOrders.count({ where })
+    ]);
 
     const mappedSalesOrders = salesOrders.map((so) => {
       const paidAmount = so.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));

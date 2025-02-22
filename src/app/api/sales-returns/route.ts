@@ -109,23 +109,25 @@ export async function GET(request: Request) {
   }
 
   try {
-    const salesReturns = await db.salesReturns.findMany({
-      skip: pageIndex * pageSize,
-      take: pageSize,
-      orderBy,
-      where,
-      include: {
-        SalesOrder: {
-          select: {
-            Customer: {
-              select: { name: true, licensePlate: true, },
+    const [salesReturns, recordsTotal] = await Promise.all([
+      db.salesReturns.findMany({
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        orderBy,
+        where,
+        include: {
+          SalesOrder: {
+            select: {
+              Customer: {
+                select: { name: true, licensePlate: true, },
+              },
+              code: true,
             },
-            code: true,
           },
         },
-      },
-    });
-    const recordsTotal = await db.salesReturns.count({ where });
+      }),
+      await db.salesReturns.count({ where }),
+    ]);
 
     const mappedSalesReturns = salesReturns.map((pr) => ({
       ...pr,

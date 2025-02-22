@@ -81,28 +81,30 @@ export async function GET(request: Request) {
   // ----------------
 
   try {
-    const purchaseOrders = await db.purchaseOrders.findMany({
-      skip: pageIndex * pageSize,
-      take: pageSize,
-      orderBy:
-        sortColumn === 'supplierName'
-          ? {
-              Supplier: { name: sortOrder as Prisma.SortOrder },
-            }
-          : {
-              [sortColumn]: sortOrder,
-            },
-      where,
-      include: {
-        Supplier: {
-          select: { name: true },
+    const [purchaseOrders, recordsTotal] = await Promise.all([
+      db.purchaseOrders.findMany({
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        orderBy:
+          sortColumn === 'supplierName'
+            ? {
+                Supplier: { name: sortOrder as Prisma.SortOrder },
+              }
+            : {
+                [sortColumn]: sortOrder,
+              },
+        where,
+        include: {
+          Supplier: {
+            select: { name: true },
+          },
+          PurchaseOrderPaymentHistories: {
+            select: { amount: true },
+          },
         },
-        PurchaseOrderPaymentHistories: {
-          select: { amount: true },
-        },
-      },
-    });
-    const recordsTotal = await db.purchaseOrders.count({ where });
+      }),
+      await db.purchaseOrders.count({ where })
+    ]);
 
     const mappedPurchaseOrders = purchaseOrders.map((po) => {
       const paidAmount = po.PurchaseOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0));
@@ -146,7 +148,6 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-
   const data = validationRes.data;
 
   try {
