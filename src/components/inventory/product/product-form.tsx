@@ -145,7 +145,7 @@ export default function ProductForm({
             />
             <Input
               label='Kode Harga Beli'
-              placeholder='Kode Modal'
+              placeholder='Kode Harga Beli'
               inputClassName={'bg-gray-100'}
               readOnly={true}
               error={errors.purchasePriceCode?.message}
