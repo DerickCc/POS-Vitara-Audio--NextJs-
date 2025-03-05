@@ -109,24 +109,24 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const data = validationRes.data;
 
   try {
-    const supplierReceivables = (
-      await db.suppliers.findUniqueOrThrow({
+    const [supplier, po] = await Promise.all([
+      db.suppliers.findUniqueOrThrow({
         where: { id: data.supplierId },
         select: { receivables: true },
-      })
-    ).receivables;
-
-    const hasBeenAppliedReceivables = (
-      await db.purchaseOrders.findUniqueOrThrow({
+      }),
+      db.purchaseOrders.findUniqueOrThrow({
         where: { id },
         select: { appliedReceivables: true },
-      })
-    ).appliedReceivables;
+      }),
+    ]);
+
+    const supplierReceivables = supplier.receivables.toNumber();
+    const hasBeenAppliedReceivables = po.appliedReceivables.toNumber();
 
     // adjustment may be + or -
-    const appliedReceivablesAdjustment = new Decimal(data.appliedReceivables).minus(hasBeenAppliedReceivables);
+    const appliedReceivablesAdjustment = data.appliedReceivables - hasBeenAppliedReceivables;
 
-    if (new Decimal(appliedReceivablesAdjustment).greaterThan(supplierReceivables)) {
+    if (appliedReceivablesAdjustment > supplierReceivables) {
       return NextResponse.json(
         { message: 'Potongan piutang melebihi piutang yang dimiliki supplier' },
         { status: 422 } // unprocessable entity
@@ -162,13 +162,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         });
 
         // Fetch existing details
-        const existingDetails = await prisma.purchaseOrderDetails.findMany({
-          where: { poId: id },
-          select: { id: true },
-        });
+        const existingDetailsIds = await prisma.purchaseOrderDetails
+          .findMany({
+            where: { poId: id },
+            select: { id: true },
+          })
+          .then((res) => res.map((d) => d.id));
 
-        const updatedDetailIds = data.details.map((detail) => detail.id);
-        const detailIdsToDelete = existingDetails.map((d) => d.id).filter((id) => !updatedDetailIds.includes(id));
+        const updatedDetailIds = data.details.map((d) => d.id);
+        const detailIdsToDelete = existingDetailsIds.filter((id) => !updatedDetailIds.includes(id));
 
         // Delete details that are no longer present in the update
         if (detailIdsToDelete.length > 0) {
@@ -177,54 +179,52 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           });
         }
 
-        const updatePromises = data.details.map((d) => {
-          if (d.id) {
-            // update if there is poDetail id
-            return prisma.purchaseOrderDetails.update({
-              where: { id: d.id },
-              data: {
-                Product: {
-                  connect: { id: d.productId },
+        const updatePromises = data.details.map(async (d) => {
+          return d.id
+            ? // update if there is poDetail id
+              prisma.purchaseOrderDetails.update({
+                where: { id: d.id },
+                data: {
+                  Product: {
+                    connect: { id: d.productId },
+                  },
+                  purchasePrice: d.purchasePrice,
+                  quantity: d.quantity,
+                  totalPrice: d.purchasePrice * d.quantity,
+                  UpdatedBy: {
+                    connect: { id: userId },
+                  },
                 },
-                purchasePrice: d.purchasePrice,
-                quantity: d.quantity,
-                totalPrice: d.purchasePrice * d.quantity,
-                UpdatedBy: {
-                  connect: { id: userId },
+              })
+            : // create if poDetail id is null
+              prisma.purchaseOrderDetails.create({
+                data: {
+                  PurchaseOrder: {
+                    connect: { id },
+                  },
+                  Product: {
+                    connect: { id: d.productId },
+                  },
+                  purchasePrice: d.purchasePrice,
+                  quantity: d.quantity,
+                  totalPrice: d.purchasePrice * d.quantity,
+                  CreatedBy: {
+                    connect: { id: userId },
+                  },
                 },
-              },
-            });
-          } else {
-            // create if poDetail id is null
-            return prisma.purchaseOrderDetails.create({
-              data: {
-                PurchaseOrder: {
-                  connect: { id },
-                },
-                Product: {
-                  connect: { id: d.productId },
-                },
-                purchasePrice: d.purchasePrice,
-                quantity: d.quantity,
-                totalPrice: d.purchasePrice * d.quantity,
-                CreatedBy: {
-                  connect: { id: userId },
-                },
-              },
-            });
-          }
+              });
         });
 
         await Promise.all(updatePromises);
 
         // update supplier's receivable if there is adjustment on appliedReceivables
-        if (!appliedReceivablesAdjustment.isZero()) {
+        if (appliedReceivablesAdjustment !== 0) {
           await prisma.suppliers.update({
             where: { id: data.supplierId },
             data: {
-              receivables: appliedReceivablesAdjustment.isPositive()
+              receivables: appliedReceivablesAdjustment > 0
                 ? { decrement: appliedReceivablesAdjustment }
-                : { increment: appliedReceivablesAdjustment.abs() },
+                : { increment: Math.abs(appliedReceivablesAdjustment) },
             },
           });
         }
