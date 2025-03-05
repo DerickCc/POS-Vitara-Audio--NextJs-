@@ -4,8 +4,6 @@ import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
 // GetPurchaseOrderById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
