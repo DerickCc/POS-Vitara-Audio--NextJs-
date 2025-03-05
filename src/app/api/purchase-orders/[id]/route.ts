@@ -4,9 +4,7 @@ import { getSession } from '@/utils/sessionlib';
 import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
-export const config = {
-  runtime: 'edge',
-};
+export const runtime = 'edge';
 
 // GetPurchaseOrderById
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -150,18 +148,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         await prisma.purchaseOrders.update({
           where: { id },
           data: {
-            Supplier: {
-              connect: { id: data.supplierId },
-            },
+            Supplier: { connect: { id: data.supplierId } },
             remarks: data.remarks,
             totalItem: data.details.length,
             subTotal,
             appliedReceivables: data.appliedReceivables,
             grandTotal,
             paymentStatus,
-            UpdatedBy: {
-              connect: { id: userId },
-            },
+            UpdatedBy: { connect: { id: userId } },
           },
         });
 
@@ -189,36 +183,25 @@ export async function PUT(request: Request, { params }: { params: { id: string }
               prisma.purchaseOrderDetails.update({
                 where: { id: d.id },
                 data: {
-                  Product: {
-                    connect: { id: d.productId },
-                  },
+                  Product: { connect: { id: d.productId } },
                   purchasePrice: d.purchasePrice,
                   quantity: d.quantity,
                   totalPrice: d.purchasePrice * d.quantity,
-                  UpdatedBy: {
-                    connect: { id: userId },
-                  },
+                  UpdatedBy: { connect: { id: userId } },
                 },
               })
             : // create if poDetail id is null
               prisma.purchaseOrderDetails.create({
                 data: {
-                  PurchaseOrder: {
-                    connect: { id },
-                  },
-                  Product: {
-                    connect: { id: d.productId },
-                  },
+                  PurchaseOrder: { connect: { id } },
+                  Product: { connect: { id: d.productId } },
                   purchasePrice: d.purchasePrice,
                   quantity: d.quantity,
                   totalPrice: d.purchasePrice * d.quantity,
-                  CreatedBy: {
-                    connect: { id: userId },
-                  },
+                  CreatedBy: { connect: { id: userId } },
                 },
               });
         });
-
         await Promise.all(updatePromises);
 
         // update supplier's receivable if there is adjustment on appliedReceivables
@@ -226,9 +209,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           await prisma.suppliers.update({
             where: { id: data.supplierId },
             data: {
-              receivables: appliedReceivablesAdjustment > 0
-                ? { decrement: appliedReceivablesAdjustment }
-                : { increment: Math.abs(appliedReceivablesAdjustment) },
+              receivables:
+                appliedReceivablesAdjustment > 0
+                  ? { decrement: appliedReceivablesAdjustment }
+                  : { increment: Math.abs(appliedReceivablesAdjustment) },
             },
           });
         }
