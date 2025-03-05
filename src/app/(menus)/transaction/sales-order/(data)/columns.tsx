@@ -14,13 +14,11 @@ import { Row } from '@tanstack/react-table';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
-import { useAuth } from '@/hooks/use-auth';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
-  const { user } = useAuth();
 
   return (
     <>
@@ -107,7 +105,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; acti
           )}
 
           {/* cancel */}
-          {user?.role === 'Admin' && row.original.progressStatus === 'Selesai' && (
+          {row.original.progressStatus === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({

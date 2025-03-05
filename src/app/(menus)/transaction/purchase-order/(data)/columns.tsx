@@ -12,13 +12,11 @@ import { FaRegMoneyBillAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
-import { useAuth } from '@/hooks/use-auth';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
-  const { user } = useAuth();
 
   return (
     <>
@@ -96,7 +94,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
           )}
 
           {/* cancel */}
-          {user?.role === 'Admin' && row.original.progressStatus === 'Selesai' && (
+          {row.original.progressStatus === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({

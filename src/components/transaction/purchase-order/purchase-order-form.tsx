@@ -470,7 +470,7 @@ export default function PurchaseOrderForm({
                       <td className='table-cell text-right' colSpan={4}>
                         {!isReadOnly && (
                           <>
-                            <span>Piutang Supplier: Rp. {formatToReadableNumber(supplierReceivables)}</span>
+                            <span>Piutang Supplier: Rp {formatToReadableNumber(supplierReceivables)}</span>
                             <span className='mx-3'>|</span>
                           </>
                         )}

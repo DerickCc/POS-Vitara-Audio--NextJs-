@@ -12,11 +12,9 @@ import { LuCircleSlash, LuEye } from 'react-icons/lu';
 import { FiMoreVertical } from 'react-icons/fi';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/use-auth';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseReturnModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
-  const { user } = useAuth();
 
   return (
     <>
@@ -56,7 +54,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseReturnModel>; 
           )}
 
           {/* cancel */}
-          {user?.role === 'Admin' && (
+          {row.original.status !== 'Batal' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
