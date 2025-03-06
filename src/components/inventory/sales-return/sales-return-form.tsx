@@ -33,7 +33,7 @@ import toast from 'react-hot-toast';
 import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
 import { TbTruckReturn } from 'react-icons/tb';
-import { ActionIcon, Button, Input, Loader, Select, Textarea } from 'rizzui';
+import { ActionIcon, Button, Input, Loader, Select, Textarea, Tooltip } from 'rizzui';
 
 interface SalesReturnFormProps extends BasicFormProps<SalesReturnModel> {
   isReadOnly?: boolean;
@@ -320,8 +320,8 @@ export default function SalesReturnForm({
                     <th className='w-[70px]' style={{ textAlign: 'center' }}>
                       Aksi
                     </th>
-                    <th className='w-[250px]'>Barang</th>
-                    <th className='w-[200px]'>Harga Retur</th>
+                    <th>Barang</th>
+                    <th className='w-[180px]'>Harga Retur</th>
                     <th className='w-[100px]'>Qty</th>
                     <th className='w-[130px]'>Satuan</th>
                     <th>Alasan</th>
@@ -362,9 +362,15 @@ export default function SalesReturnForm({
                               }}
                               placeholder='Pilih Barang'
                               options={filteredSoProductDetailList}
-                              displayValue={(value) =>
-                                soProductDetailList.find((option) => option.value === value)?.label ?? ''
-                              }
+                              displayValue={(value) => {
+                                const productName =
+                                  soProductDetailList.find((option) => option.value === value)?.label || '';
+                                return (
+                                  <Tooltip content={productName}>
+                                    <span>{productName}</span>
+                                  </Tooltip>
+                                );
+                              }}
                               getOptionValue={(option: SearchSalesOrderProductDetailModel) => option}
                               error={error?.message}
                               disabled={isReadOnly}
@@ -527,10 +533,12 @@ export default function SalesReturnForm({
                         </ActionIcon>
                       </td>
                       <td className='table-cell align-top'>
-                        <Input
+                        <Textarea
                           placeholder='Jasa yang diretur'
-                          disabled={isReadOnly}
+                          rows={2}
+                          labelClassName='text-gray-600'
                           error={errors.serviceDetails && errors.serviceDetails[idx]?.serviceName?.message}
+                          disabled={isReadOnly}
                           {...register(`serviceDetails.${idx}.serviceName`)}
                         />
                       </td>
@@ -586,7 +594,11 @@ export default function SalesReturnForm({
 
       {!isReadOnly && (
         <div className='flex justify-end'>
-          <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
+          <Button
+            className={cn(baseButtonClass, buttonColorClass.green)}
+            type='submit'
+            disabled={isSubmitting || isSubmitSuccessful}
+          >
             {isSubmitting ? <Loader variant='spinner' className='me-1.5' /> : <FaSave className='size-4 me-1.5' />}
             <span>Simpan</span>
           </Button>

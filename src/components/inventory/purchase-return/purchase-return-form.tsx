@@ -3,7 +3,6 @@
 import Card from '@/components/card';
 import RupiahFormInput from '@/components/form-inputs/rupiah-form-input';
 import Spinner from '@/components/spinner';
-import { routes } from '@/config/routes';
 import { BasicFormProps, BasicSelectOptions, Colors } from '@/models/global.model';
 import { PurchaseReturnDetailModel } from '@/models/purchase-return-detail.model';
 import { PurchaseReturnModel, PurchaseReturnSchema } from '@/models/purchase-return.model';
@@ -20,13 +19,12 @@ import {
 } from '@/config/tailwind-classes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { debounce } from 'lodash';
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegTrashAlt, FaSave } from 'react-icons/fa';
-import { PiArrowLeftBold, PiInfoBold, PiPlusBold } from 'react-icons/pi';
-import { ActionIcon, Button, Input, Loader, Select, Textarea } from 'rizzui';
+import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
+import { ActionIcon, Button, Input, Loader, Select, Textarea, Tooltip } from 'rizzui';
 import { TbTruckReturn } from 'react-icons/tb';
 import { SearchPurchaseOrderModel } from '@/models/purchase-order.model';
 import { searchPo } from '@/services/purchase-order-service';
@@ -269,9 +267,7 @@ export default function PurchaseReturnForm({
                     labelClassName='text-gray-600'
                     placeholder='Pilih Tipe Retur'
                     options={prTypeOptions}
-                    displayValue={(value) =>
-                      prTypeOptions.find((option) => option.value === value)?.label ?? ''
-                    }
+                    displayValue={(value) => prTypeOptions.find((option) => option.value === value)?.label ?? ''}
                     getOptionValue={(option) => option.value}
                     error={error?.message}
                     disabled={isReadOnly}
@@ -300,8 +296,8 @@ export default function PurchaseReturnForm({
                     <th className='w-[70px]' style={{ textAlign: 'center' }}>
                       Aksi
                     </th>
-                    <th className='w-[250px]'>Barang</th>
-                    <th className='w-[200px]'>Harga Retur</th>
+                    <th>Barang</th>
+                    <th className='w-[180px]'>Harga Retur</th>
                     <th className='w-[100px]'>Qty</th>
                     <th className='w-[130px]'>Satuan</th>
                     <th>Alasan</th>
@@ -342,9 +338,14 @@ export default function PurchaseReturnForm({
                               }}
                               placeholder='Pilih Barang'
                               options={filteredPoDetailList}
-                              displayValue={(value) =>
-                                poDetailList.find((option) => option.value === value)?.label ?? ''
-                              }
+                              displayValue={(value) => {
+                                const productName = poDetailList.find((option) => option.value === value)?.label || '';
+                                return (
+                                  <Tooltip content={productName}>
+                                    <span>{productName}</span>
+                                  </Tooltip>
+                                );
+                              }}
                               getOptionValue={(option: SearchPurchaseOrderDetailModel) => option}
                               error={error?.message}
                               disabled={isReadOnly}
@@ -462,7 +463,11 @@ export default function PurchaseReturnForm({
 
             {!isReadOnly && (
               <div className='flex justify-end px-7'>
-                <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
+                <Button
+                  className={cn(baseButtonClass, buttonColorClass.green)}
+                  type='submit'
+                  disabled={isSubmitting || isSubmitSuccessful}
+                >
                   {isSubmitting ? (
                     <Loader variant='spinner' className='me-1.5' />
                   ) : (

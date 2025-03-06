@@ -33,7 +33,7 @@ import toast from 'react-hot-toast';
 import { FaRegMoneyBillAlt, FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { IoCartOutline } from 'react-icons/io5';
 import { PiCalendarBlank, PiInfoBold, PiPlusBold } from 'react-icons/pi';
-import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
+import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, Tooltip, cn } from 'rizzui';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import ProductOptionTemplate from '@/components/inventory/product/product-option-template';
@@ -644,9 +644,9 @@ export default function SalesOrderForm({
                           Aksi
                         </th>
                         <th>Barang</th>
-                        <th className='w-[220px]'>Harga Jual</th>
-                        <th className='w-[120px]'>Qty</th>
-                        <th className='w-[150px]'>Satuan</th>
+                        <th className='w-[180px]'>Harga Jual</th>
+                        <th className='w-[100px]'>Qty</th>
+                        <th className='w-[130px]'>Satuan</th>
                         <th className='w-[230px]'>Total</th>
                       </tr>
                     </thead>
@@ -683,7 +683,11 @@ export default function SalesOrderForm({
                                     }}
                                     placeholder='Pilih Barang'
                                     options={productList}
-                                    displayValue={() => productName}
+                                    displayValue={() => (
+                                      <Tooltip content={productName}>
+                                        <span>{productName}</span>
+                                      </Tooltip>
+                                    )}
                                     getOptionValue={(option: SearchProductModel) => option}
                                     getOptionDisplayValue={(option) => <ProductOptionTemplate option={option} />}
                                     searchable={true}
@@ -810,8 +814,8 @@ export default function SalesOrderForm({
                           Aksi
                         </th>
                         <th>Jasa</th>
-                        <th className='w-[220px]'>Harga Jual</th>
-                        <th className='w-[120px]'>Qty</th>
+                        <th className='w-[180px]'>Harga Jual</th>
+                        <th className='w-[100px]'>Qty</th>
                         <th className='w-[230px]'>Total</th>
                       </tr>
                     </thead>
@@ -834,19 +838,13 @@ export default function SalesOrderForm({
                             </ActionIcon>
                           </td>
                           <td className='table-cell align-top'>
-                            <Controller
-                              control={control}
-                              name={`serviceDetails.${idx}.serviceName`}
-                              render={({ field: { value, onChange }, fieldState: { error } }) => (
-                                <Input
-                                  placeholder='Nama Jasa'
-                                  value={value}
-                                  onChange={onChange}
-                                  error={error?.message}
-                                  inputClassName={isReadOnly ? readOnlyClass : ''}
-                                  readOnly={isReadOnly}
-                                />
-                              )}
+                            <Textarea
+                              placeholder='Nama Jasa'
+                              rows={2}
+                              labelClassName='text-gray-600'
+                              error={errors.serviceDetails && errors.serviceDetails[idx]?.serviceName?.message}
+                              disabled={isReadOnly}
+                              {...register(`serviceDetails.${idx}.serviceName`)}
                             />
                           </td>
                           <td className='table-cell align-top'>

@@ -12,7 +12,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaRegMoneyBillAlt, FaRegTrashAlt, FaSave } from 'react-icons/fa';
 import { PiInfoBold, PiPlusBold } from 'react-icons/pi';
-import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, cn } from 'rizzui';
+import { ActionIcon, Button, Input, Loader, Radio, RadioGroup, Select, Text, Textarea, Tooltip, cn } from 'rizzui';
 import { IoCartOutline } from 'react-icons/io5';
 import {
   actionIconColorClass,
@@ -182,7 +182,7 @@ export default function PurchaseOrderForm({
     //   updated.splice(idx, 1);
     //   return updated;
     // });
-  }
+  };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProductSearchChange = useCallback(
@@ -337,11 +337,11 @@ export default function PurchaseOrderForm({
                       <th className='w-[70px]' style={{ textAlign: 'center' }}>
                         Aksi
                       </th>
-                      <th className='w-[300px]'>Barang</th>
-                      <th className=''>Harga Beli</th>
+                      <th>Barang</th>
+                      <th className='w-[180px]'>Harga Beli</th>
                       <th className='w-[100px]'>Qty</th>
-                      <th className='w-[150px]'>Satuan</th>
-                      <th className=''>Total</th>
+                      <th className='w-[130px]'>Satuan</th>
+                      <th className='w-[230px]'>Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -378,7 +378,11 @@ export default function PurchaseOrderForm({
                                   }}
                                   placeholder='Pilih Barang'
                                   options={productList}
-                                  displayValue={() => productName}
+                                  displayValue={() => (
+                                    <Tooltip content={productName}>
+                                      <span>{productName}</span>
+                                    </Tooltip>
+                                  )}
                                   getOptionValue={(option: SearchProductModel) => option}
                                   getOptionDisplayValue={(option) => <ProductOptionTemplate option={option} />}
                                   searchable
