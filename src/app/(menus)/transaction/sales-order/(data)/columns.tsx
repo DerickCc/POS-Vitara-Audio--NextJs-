@@ -15,10 +15,12 @@ import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { FaRegMoneyBillAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
+import { useAuth } from '@/hooks/use-auth';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
+  const { user } = useAuth();
 
   return (
     <>
@@ -47,7 +49,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; acti
           )}
 
           {/* finish */}
-          {row.original.progressStatus === 'Belum Dikerjakan' && (
+          {user?.role === "Admin" && row.original.progressStatus === 'Belum Dikerjakan' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -105,7 +107,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; acti
           )}
 
           {/* cancel */}
-          {row.original.progressStatus === 'Selesai' && (
+          {user?.role === "Admin" && row.original.progressStatus === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({

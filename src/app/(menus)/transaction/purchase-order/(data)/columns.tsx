@@ -13,10 +13,12 @@ import { ActionIcon, Dropdown } from 'rizzui';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
+import { useAuth } from '@/hooks/use-auth';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
   const { openPaymentModal, PaymentModalComponent } = usePaymentModal();
+  const { user } = useAuth();
 
   return (
     <>
@@ -94,7 +96,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<PurchaseOrderModel>; a
           )}
 
           {/* cancel */}
-          {row.original.progressStatus === 'Selesai' && (
+          {user?.role === "Admin" && row.original.progressStatus === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({

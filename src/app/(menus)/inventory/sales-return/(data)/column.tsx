@@ -9,9 +9,11 @@ import { LuCircleSlash, LuEye } from 'react-icons/lu';
 import { routes } from '@/config/routes';
 import Link from 'next/link';
 import { SalesReturnModel } from '@/models/sales-return.model';
+import { useAuth } from '@/hooks/use-auth';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<SalesReturnModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
+  const { user } = useAuth();
 
   return (
     <>
@@ -34,7 +36,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesReturnModel>; act
         </Tooltip>
 
         {/* cancel */}
-        {row.original.status !== 'Batal' && (
+        {user?.role === "Admin" && row.original.status !== 'Batal' && (
           <Tooltip size='sm' content='Batal' color='invert'>
             <ActionIcon
               size='sm'
