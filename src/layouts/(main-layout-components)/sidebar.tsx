@@ -8,9 +8,13 @@ import { cn } from '@/utils/class-names';
 import { PiCaretDownBold } from 'react-icons/pi';
 import SimpleBar from '@/components/simplebar';
 import { menuItems } from '@/layouts/(main-layout-components)/menu-items';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const validatedMenuItems = user?.role === "Admin" ? menuItems : menuItems.slice(0, -1);
+  
   return (
     <aside
       className={cn(
@@ -26,7 +30,7 @@ export default function Sidebar({ className }: { className?: string }) {
 
       <SimpleBar className="h-[calc(100%-80px)]">
         <div className="mt-4 pb-3 3xl:mt-6">
-          {menuItems.map((item, index) => {
+          {validatedMenuItems.map((item, index) => {
             const isActive = pathname === (item?.href as string);
             const pathnameExistInDropdowns: any = item?.dropdownItems?.filter(
               (dropdownItem) => dropdownItem.href === pathname
