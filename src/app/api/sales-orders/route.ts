@@ -278,10 +278,6 @@ export async function POST(request: Request) {
           CreatedBy: { connect: { id: userId } },
         },
       });
-    },
-    {
-      maxWait: 10000, // 10 seconds max wait to connect to prisma
-      timeout: 20000, // 20 seconds
     });
 
     return NextResponse.json({ message: 'Data Transaksi Penjualan berhasil disimpan' }, { status: 201 });

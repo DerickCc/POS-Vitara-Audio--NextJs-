@@ -73,10 +73,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           },
         },
       });
-    },
-    {
-      maxWait: 10000, // 10 seconds max wait to connect to prisma
-      timeout: 20000, // 20 seconds
     });
 
     return NextResponse.json({ message: 'Transaksi Pembelian Berhasil Diselesaikan' }, { status: 200 });
