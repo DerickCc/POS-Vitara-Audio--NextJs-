@@ -35,11 +35,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             returnQuantity: true,
             returnPrice: true,
             SalesOrderProductDetail: {
-              select: { productId: true }
+              select: { id: true, productId: true }
             }
           }
         },
-        SalesOrder: true,
       },
     });
 
@@ -56,7 +55,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         {
           entity: 'purchaseOrders',
           errorMessage:
-            'Retur tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
+            'Retur tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
           relationPath: 'PurchaseOrderDetails',
         },
         {
@@ -68,7 +67,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         {
           entity: 'purchaseReturns',
           errorMessage:
-            'Retur tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
+            'Retur tidak dapat dibatalkan karena telah ada retur pembelian terkait salah satu barang dari retur penjualan yang ingin dibatalkan.',
           relationPath: 'PurchaseReturnDetails',
           additionalPath: 'PurchaseOrderDetail',
         },
@@ -82,36 +81,28 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       ];
 
       // check if there is transaction or return that was created after the canceled purchase return, is not 'batal', and contains the cancelled products
-      for (const { entity, errorMessage, relationPath, additionalPath } of entities) {
-        await checkForRelatedRecords(
-          entity as any,
-          cancelledProducts,
-          sr.createdAt,
-          errorMessage,
-          relationPath,
-          additionalPath
-        );
-      }
+      await Promise.all(
+        entities.map(({ entity, errorMessage, relationPath, additionalPath }) =>
+          checkForRelatedRecords(
+            entity as any,
+            cancelledProducts,
+            sr.createdAt,
+            errorMessage,
+            relationPath,
+            additionalPath
+          )
+        )
+      );
 
       const updatePromises: Promise<any>[] = [];
 
-      for (const d of sr.SalesReturnProductDetails) {
-        const sopDetail = await prisma.salesOrderProductDetails.findUniqueOrThrow({
-          where: { id: d.sopdId },
-          select: {
-            id: true,
-            Product: {
-              select: { id: true },
-            },
-          },
-        });
-
+      for (const srpd of sr.SalesReturnProductDetails) {
         // update sop detail's returned qty
         updatePromises.push(
           prisma.salesOrderProductDetails.update({
-            where: { id: sopDetail.id },
+            where: { id: srpd.SalesOrderProductDetail.id },
             data: {
-              returnedQuantity: { decrement: new Decimal(d.returnQuantity) },
+              returnedQuantity: { decrement: new Decimal(srpd.returnQuantity) },
               UpdatedBy: {
                 connect: { id: userId },
               },
@@ -122,9 +113,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         // update product stock
         updatePromises.push(
           prisma.products.update({
-            where: { id: sopDetail.Product.id },
+            where: { id: srpd.SalesOrderProductDetail.productId },
             data: {
-              stock: { increment: new Decimal(d.returnQuantity) },
+              stock: { increment: new Decimal(srpd.returnQuantity) },
               UpdatedBy: {
                 connect: { id: userId },
               },
@@ -148,18 +139,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json({ message: 'Retur penjualan berhasil dibatalkan' }, { status: 200 });
   } catch (e: any) {
-    if (e.message.includes('Hanya Retur penjualan berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 403 }); // forbidden
+    const errorResponses = [
+      { match: 'Hanya Retur penjualan berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan', status: 403 },
+      { match: 'tidak ditemukan', status: 404 },
+      { match: 'akan minus', status: 422 },
+      { match: 'tidak dapat dibatalkan', status: 409 },
+    ];
+
+    for (const { match, status } of errorResponses ) {
+      if (e.message.includes(match)) {
+        return NextResponse.json({ message: e.message }, { status });
+      }
     }
-    if (e.message.includes('tidak ditemukan')) {
-      return NextResponse.json({ message: e.message }, { status: 404 });
-    }
-    if (e.message.includes('akan minus')) {
-      return NextResponse.json({ message: e.message }, { status: 422 }); // unprocessable entity
-    }
-    if (e.message.includes('tidak dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 409 }); // conflict
-    }
+
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

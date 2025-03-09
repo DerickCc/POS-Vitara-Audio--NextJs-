@@ -251,7 +251,7 @@ export default function PurchaseOrderForm({
               <PiInfoBold className='size-5 mr-2' />
               <h5 className='font-medium'>Info Pembelian</h5>
             </div>
-            {isReadOnly && (
+            {isReadOnly && defaultValues.id && (
               <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>
                 {defaultValues.progressStatus}
               </span>

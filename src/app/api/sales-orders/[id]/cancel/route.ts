@@ -47,7 +47,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         {
           entity: 'purchaseOrders',
           errorMessage:
-            'Transaksi tidak dapat dibatalkan karena telah ada penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
+            'Transaksi tidak dapat dibatalkan karena telah ada pembelian terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
           relationPath: 'PurchaseOrderDetails',
         },
         {
@@ -59,7 +59,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         {
           entity: 'purchaseReturns',
           errorMessage:
-            'Transaksi tidak dapat dibatalkan karena telah ada retur penjualan terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
+            'Transaksi tidak dapat dibatalkan karena telah ada retur pembelian terkait salah satu barang dari transaksi penjualan yang ingin dibatalkan.',
           relationPath: 'PurchaseReturnDetails',
           additionalPath: 'PurchaseOrderDetail',
         },
@@ -73,34 +73,31 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       ];
 
       // check if there is transaction or return that was created after the canceled purchase return, is not 'batal', and contains the cancelled products
-      for (const { entity, errorMessage, relationPath, additionalPath } of entities) {
-        await checkForRelatedRecords(
-          entity as any,
-          cancelledProducts,
-          so.createdAt,
-          errorMessage,
-          relationPath,
-          additionalPath
-        );
-      }
+      await Promise.all(
+        entities.map(({ entity, errorMessage, relationPath, additionalPath }) =>
+          checkForRelatedRecords(
+            entity as any,
+            cancelledProducts,
+            so.createdAt,
+            errorMessage,
+            relationPath,
+            additionalPath
+          )
+        )
+      );
 
       // update stock of each product in details
-      const adjustProductPromises = so.SalesOrderProductDetails.map(async (d) => {
-        return prisma.products.update({
-          where: { id: d.productId },
+      const adjustProductPromises = so.SalesOrderProductDetails.map(({ productId, quantity }) =>
+        prisma.products.update({
+          where: { id: productId },
           data: {
-            stock: { increment: new Decimal(d.quantity)},
-            UpdatedBy: {
-              connect: { id: userId },
-            },
+            stock: { increment: new Decimal(quantity) },
+            UpdatedBy: { connect: { id: userId } },
           },
-        });
-      });
+        })
+      );
 
-      await Promise.all(adjustProductPromises);
-
-      // set so status to 'Batal'
-      await db.salesOrders.update({
+      const updateSo = prisma.salesOrders.update({
         where: { id },
         data: {
           progressStatus: 'Batal',
@@ -111,22 +108,27 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         },
       });
 
-      await prisma.salesOrderPaymentHistories.deleteMany({
+      const deleteSoPaymentHistories = prisma.salesOrderPaymentHistories.deleteMany({
         where: { soId: id },
       });
+
+      await Promise.all([...adjustProductPromises, updateSo, deleteSoPaymentHistories]);
     });
 
     return NextResponse.json({ message: 'Transaksi Penjualan berhasil dibatalkan' }, { status: 200 });
   } catch (e: any) {
-    if (e.message.includes('Transaksi Penjualan telah berstatus "Batal"')) {
-      return NextResponse.json({ message: e.message }, { status: 403 }); // forbidden
+    const errorResponses = [
+      { match: 'Transaksi Penjualan telah berstatus "Batal"', status: 403 },
+      { match: 'tidak ditemukan', status: 404 },
+      { match: 'tidak dapat dibatalkan', status: 409 },
+    ];
+
+    for (const { match, status } of errorResponses ) {
+      if (e.message.includes(match)) {
+        return NextResponse.json({ message: e.message }, { status });
+      }
     }
-    if (e.message.includes('tidak ditemukan')) {
-      return NextResponse.json({ message: e.message }, { status: 404 });
-    }
-    if (e.message.includes('tidak dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 409 }); // conflict
-    }
+
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

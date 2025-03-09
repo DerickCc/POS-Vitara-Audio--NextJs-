@@ -132,7 +132,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           productId: id,
         },
         PurchaseReturn: {
-          status: 'Selesai',
+          status: { not: 'Batal' },
         },
       },
       orderBy,

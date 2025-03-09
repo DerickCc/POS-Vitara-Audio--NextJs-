@@ -380,7 +380,7 @@ export default function SalesOrderForm({
                   <PiInfoBold className='size-5 mr-2' />
                   <h5 className='font-medium'>Info Penjualan</h5>
                 </div>
-                {isReadOnly && (
+                {isReadOnly && defaultValues.id && (
                   <span className={cn(badgeColorClass[trxStatusColor], baseBadgeClass)}>
                     {defaultValues.progressStatus}
                   </span>

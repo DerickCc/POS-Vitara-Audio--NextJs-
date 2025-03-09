@@ -79,16 +79,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       ];
 
       // check if there is transaction or return that was created after the canceled purchase order, is not 'batal', and contains the cancelled products
-      for (const { entity, errorMessage, relationPath, additionalPath } of entities) {
-        await checkForRelatedRecords(
-          entity as any,
-          cancelledProducts,
-          po.createdAt,
-          errorMessage,
-          relationPath,
-          additionalPath
-        );
-      }
+      await Promise.all(
+        entities.map(({ entity, errorMessage, relationPath, additionalPath }) =>
+          checkForRelatedRecords(
+            entity as any,
+            cancelledProducts,
+            po.createdAt,
+            errorMessage,
+            relationPath,
+            additionalPath
+          )
+        )
+      );
 
       // update stock and costPrice of each product in details
       const adjustProductPromises = po.PurchaseOrderDetails.map(async (d) => {
@@ -118,17 +120,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         });
       });
 
-      await Promise.all(adjustProductPromises);
-
-      await db.suppliers.update({
-        where: { id: po.supplierId },
-        data: {
-          receivables: { increment: po.appliedReceivables },
-        }
-      });
-
-      // set po status to 'Batal'
-      await db.purchaseOrders.update({
+      const updatePo = db.purchaseOrders.update({
         where: { id },
         data: {
           progressStatus: 'Batal',
@@ -139,25 +131,45 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         },
       });
 
-      await prisma.purchaseOrderPaymentHistories.deleteMany({
+      const deletePoPaymentHistories = prisma.purchaseOrderPaymentHistories.deleteMany({
         where: { poId: id },
       });
+
+      const promises = [
+        ...adjustProductPromises,
+        updatePo,
+        deletePoPaymentHistories, 
+      ];
+
+      if (po.appliedReceivables.isPositive()) {
+        promises.push(
+          db.suppliers.update({
+            where: { id: po.supplierId },
+            data: {
+              receivables: { increment: po.appliedReceivables },
+            }
+          }) as any
+        )
+      }
+
+      await Promise.all(promises);
     });
 
     return NextResponse.json({ message: 'Transaksi Pembelian berhasil dibatalkan' }, { status: 200 });
   } catch (e: any) {
-    if (e.message.includes('Hanya Transaksi Pembelian berstatus "Selesai" yang dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 403 }); // forbidden
+    const errorResponses = [
+      { match: 'Hanya Transaksi Pembelian berstatus "Selesai" yang dapat dibatalkan', status: 403 },
+      { match: 'tidak ditemukan', status: 404 },
+      { match: 'akan minus', status: 422 },
+      { match: 'tidak dapat dibatalkan', status: 409 },
+    ];
+
+    for (const { match, status } of errorResponses ) {
+      if (e.message.includes(match)) {
+        return NextResponse.json({ message: e.message }, { status });
+      }
     }
-    if (e.message.includes('tidak ditemukan')) {
-      return NextResponse.json({ message: e.message }, { status: 404 });
-    }
-    if (e.message.includes('akan minus')) {
-      return NextResponse.json({ message: e.message }, { status: 422 }); // unprocessable entity
-    }
-    if (e.message.includes('tidak dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 409 }); // conflict
-    }
+
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }

@@ -13,10 +13,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   if (!session.id) {
-    return NextResponse.json(
-      { message: 'Unauthorized, mohon melakukan login ulang' },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
   const { id } = params;
@@ -36,11 +33,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             returnQuantity: true,
             returnPrice: true,
             PurchaseOrderDetail: {
-              select: { productId: true }
-            }
-          }
+              select: { id: true, productId: true },
+            },
+          },
         },
-        PurchaseOrder: true,
+        PurchaseOrder: {
+          select: { supplierId: true },
+        },
       },
     });
 
@@ -83,19 +82,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       ];
 
       // check if there is transaction or return that was created after the canceled purchase return, is not 'batal', and contains the cancelled products
-      for (const { entity, errorMessage, relationPath, additionalPath } of entities) {
-        await checkForRelatedRecords(
-          entity as any,
-          cancelledProducts,
-          pr.createdAt,
-          errorMessage,
-          relationPath,
-          additionalPath
-        );
-      }
+      await Promise.all(
+        entities.map(({ entity, errorMessage, relationPath, additionalPath }) =>
+          checkForRelatedRecords(
+            entity as any,
+            cancelledProducts,
+            pr.createdAt,
+            errorMessage,
+            relationPath,
+            additionalPath
+          )
+        )
+      );
 
-      const updatePromises: Promise<any>[] = [];
-      let grandTotal = new Decimal(0);
       // stock adjustment if
       // - dalam proses
       // - selesai && ('Pengembalian Dana' || 'Piutang')
@@ -103,26 +102,17 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         pr.status === 'Dalam Proses' ||
         (pr.status === 'Selesai' && (pr.returnType === 'Pengembalian Dana' || pr.returnType === 'Piutang'));
 
-      for (const prd of pr.PurchaseReturnDetails) {
-        const poDetail = await prisma.purchaseOrderDetails.findUniqueOrThrow({
-          where: { id: prd.podId },
-          select: {
-            id: true,
-            Product: {
-              select: { id: true },
-            },
-          },
-        });
+      const updatePromises: Promise<any>[] = [];
+      let grandTotal = new Decimal(0);
 
+      for (const prd of pr.PurchaseReturnDetails) {
         // update po detail's returned qty
         updatePromises.push(
           prisma.purchaseOrderDetails.update({
-            where: { id: poDetail.id },
+            where: { id: prd.PurchaseOrderDetail.id },
             data: {
               returnedQuantity: { decrement: new Decimal(prd.returnQuantity) },
-              UpdatedBy: {
-                connect: { id: userId },
-              },
+              UpdatedBy: { connect: { id: userId } },
             },
           })
         );
@@ -131,12 +121,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           // update product stock
           updatePromises.push(
             prisma.products.update({
-              where: { id: poDetail.Product.id },
+              where: { id: prd.PurchaseOrderDetail.productId },
               data: {
                 stock: { increment: new Decimal(prd.returnQuantity) },
-                UpdatedBy: {
-                  connect: { id: userId },
-                },
+                UpdatedBy: { connect: { id: userId } },
               },
             })
           );
@@ -151,7 +139,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       // update supplier's receivable if returnType 'Piutang'
       if (pr.returnType === 'Piutang') {
         updatePromises.push(
-          db.suppliers.update({
+          prisma.suppliers.update({
             where: { id: pr.PurchaseOrder.supplierId },
             data: { receivables: { decrement: grandTotal } },
           })
@@ -160,31 +148,30 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       await Promise.all(updatePromises);
 
       // set pr status to 'Batal'
-      await db.purchaseReturns.update({
+      await prisma.purchaseReturns.update({
         where: { id },
         data: {
           status: 'Batal',
-          UpdatedBy: {
-            connect: { id: userId },
-          },
+          UpdatedBy: { connect: { id: userId } },
         },
       });
     });
 
     return NextResponse.json({ message: 'Retur Pembelian berhasil dibatalkan' }, { status: 200 });
   } catch (e: any) {
-    if (e.message.includes('Hanya Retur Pembelian berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 403 }); // forbidden
+    const errorResponses = [
+      { match: 'Hanya Retur Pembelian berstatus "Dalam Proses" dan "Selesai" yang dapat dibatalkan', status: 403 },
+      { match: 'tidak ditemukan', status: 404 },
+      { match: 'akan minus', status: 422 },
+      { match: 'tidak dapat dibatalkan', status: 409 },
+    ];
+
+    for (const { match, status } of errorResponses ) {
+      if (e.message.includes(match)) {
+        return NextResponse.json({ message: e.message }, { status });
+      }
     }
-    if (e.message.includes('tidak ditemukan')) {
-      return NextResponse.json({ message: e.message }, { status: 404 });
-    }
-    if (e.message.includes('akan minus')) {
-      return NextResponse.json({ message: e.message }, { status: 422 }); // unprocessable entity
-    }
-    if (e.message.includes('tidak dapat dibatalkan')) {
-      return NextResponse.json({ message: e.message }, { status: 409 }); // conflict
-    }
+   
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }
