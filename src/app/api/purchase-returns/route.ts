@@ -306,6 +306,10 @@ export async function POST(request: Request) {
       }
 
       await Promise.all(updatePromises);
+    },
+    {
+      maxWait: 10000, // 10 seconds max wait to connect to prisma
+      timeout: 20000, // 20 seconds
     });
 
     return NextResponse.json({ message: 'Data Retur Pembelian berhasil disimpan' }, { status: 201 });
