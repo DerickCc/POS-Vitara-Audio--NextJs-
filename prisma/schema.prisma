@@ -172,6 +172,7 @@ model PurchaseOrders {
   PurchaseOrderPaymentHistories PurchaseOrderPaymentHistories[]
 
   @@index([code, purchaseDate, supplierId, grandTotal, progressStatus, paymentStatus], map: "purchase_orders_index")
+  @@index([progressStatus, createdAt])
 }
 
 model PurchaseOrderDetails {
@@ -196,6 +197,9 @@ model PurchaseOrderDetails {
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@index([poId])
+  @@index([productId])
 }
 
 model PurchaseOrderPaymentHistories {
@@ -245,6 +249,7 @@ model SalesOrders {
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   @@index([code, salesDate, customerId, paymentType, grandTotal, progressStatus, paymentStatus], map: "sales_orders_index")
+  @@index([progressStatus, createdAt])
 }
 
 model SalesOrderProductDetails {
@@ -271,6 +276,9 @@ model SalesOrderProductDetails {
   CreatedBy Users @relation(fields: [createdBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@index([soId])
+  @@index([productId])
 }
 
 model SalesOrderServiceDetails {
@@ -328,6 +336,7 @@ model PurchaseReturns {
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   @@index([code, returnDate, returnType, grandTotal, status], map: "purchase_returns_index")
+  @@index([status, createdAt])
 }
 
 model PurchaseReturnDetails {
@@ -374,6 +383,7 @@ model SalesReturns {
   UpdatedBy Users? @relation("UpdatedByUser", fields: [updatedBy], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   @@index([code, returnDate, grandTotal, status], map: "sales_returns_index")
+  @@index([status, createdAt])
 }
 
 model SalesReturnProductDetails {
