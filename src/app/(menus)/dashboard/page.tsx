@@ -95,7 +95,7 @@ export default function DashboardPage() {
             <MetricCard
               key={data.title}
               title={data.title}
-              metric={data.key === 'totalSales' ? `Rp. ${formatToReadableNumber(data.metric)}` : data.metric}
+              metric={data.key === 'totalSales' ? `Rp ${formatToReadableNumber(data.metric)}` : data.metric}
               icon={data.icon}
               iconColor={data.iconColor}
               navigateTo={data.link}

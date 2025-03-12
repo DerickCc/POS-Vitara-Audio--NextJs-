@@ -17,6 +17,7 @@ import { useOverlayLoading } from '@/hooks/use-overlay-loading';
 import Spinner from '@/components/spinner';
 import cn from '@/utils/class-names';
 import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';
+import { useAuth } from '@/hooks/use-auth';
 
 const pageHeader = {
   title: 'Retur Penjualan',
@@ -48,6 +49,7 @@ export default function SalesReturnDataPage() {
   const [isExporting, setIsExporting] = useState(false);
   const { showOverlayLoading, hideOverlayLoading } = useOverlayLoading();
   const [totalRowCount, setTotalRowCount] = useState(0);
+  const { user } = useAuth();
 
   const fetchSalesOrderReturns = useCallback(async () => {
     try {
@@ -102,6 +104,8 @@ export default function SalesReturnDataPage() {
   };
 
   const handleExportExcel = async () => {
+    if (user?.role !== 'Admin') return;
+
     try {
       setIsExporting(true);
       showOverlayLoading('Sedang meng-export data...');
@@ -137,22 +141,24 @@ export default function SalesReturnDataPage() {
     <>
       <PageHeader {...pageHeader}>
         <div className='flex items-center gap-3 mt-4 sm:mt-0'>
-          <Button
-            variant='outline'
-            className='w-full sm:w-auto'
-            disabled={isExporting}
-            onClick={() => handleExportExcel()}
-          >
-            {isExporting ? (
-              <>
-                <Spinner className='mr-2' /> Sedang Meng-export
-              </>
-            ) : (
-              <>
-                <PiArrowLineUpBold className='me-1.5 h-[17px] w-[17px]' /> Export Excel
-              </>
-            )}
-          </Button>
+          {user?.role === 'Admin' && (
+            <Button
+              variant='outline'
+              className='w-full sm:w-auto'
+              disabled={isExporting}
+              onClick={() => handleExportExcel()}
+            >
+              {isExporting ? (
+                <>
+                  <Spinner className='mr-2' /> Sedang Meng-export
+                </>
+              ) : (
+                <>
+                  <PiArrowLineUpBold className='me-1.5 h-[17px] w-[17px]' /> Export Excel
+                </>
+              )}
+            </Button>
+          )}
           <Link href={routes.inventory.salesReturn.add} className='w-full sm:w-auto'>
             <Button className={cn(buttonColorClass.green, baseButtonClass, 'w-full sm:w-auto')}>
               <PiPlusBold className='me-1.5 h-[17px] w-[17px]' />

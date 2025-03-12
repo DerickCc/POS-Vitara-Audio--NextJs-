@@ -15,7 +15,7 @@ const columnHelper = createColumnHelper<IncompletePaymentModel>();
 const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [
   columnHelper.accessor('soCode', {
     id: 'code',
-    size: 100,
+    size: 80,
     header: 'Kode',
     cell: ({ row }) => (
       <Link href={routes.transaction.salesOrder.detail(row.original.soId)}>
@@ -47,8 +47,8 @@ const columns = (): ColumnDef<IncompletePaymentModel, any>[] => [
   columnHelper.accessor('paidAmount', {
     id: 'paidAmount',
     size: 100,
-    header: () => 'Dibayar',
-    cell: (info) => `Rp ${formatToReadableNumber(info.getValue())}`,
+    header: () => 'Sisa (Belum Bayar)',
+    cell: ({ row }) => `Rp ${formatToReadableNumber(row.original.grandTotal - row.original.paidAmount)}`,
     enableSorting: false,
   }),
 ];

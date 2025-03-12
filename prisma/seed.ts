@@ -78,7 +78,7 @@ async function main() {
   const product1 = await prisma.products.create({
     data: {
       code: 'PRD00000001',
-      name: 'Stir Mobil Universal',
+      name: 'Stir Mobil',
       type: 'Barang Jadi',
       restockThreshold: 10,
       uom: 'Pcs',
@@ -94,7 +94,7 @@ async function main() {
       code: 'PRD00000002',
       name: 'Ban Anti Bocor',
       type: 'Barang Jadi',
-      restockThreshold: 30,
+      restockThreshold: 5,
       uom: 'Pcs',
       purchasePrice: 300000,
       purchasePriceCode: await encodePurchasePrice(300000),
@@ -106,7 +106,7 @@ async function main() {
   const product3 = await prisma.products.create({
     data: {
       code: 'PRD00000003',
-      name: 'Kain Sapi Wagyu',
+      name: 'Kain Sapi',
       type: 'Material',
       restockThreshold: 20,
       uom: 'Meter',
