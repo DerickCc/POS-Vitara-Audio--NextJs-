@@ -95,6 +95,8 @@ export default function PurchaseReturnDataPage() {
   };
 
   const handleSearch = () => {
+    if (isLoading) return;
+    
     if (pageIndex === 0 && localFilters === filters) {
       fetchPurchaseOrderReturns();
     } else {

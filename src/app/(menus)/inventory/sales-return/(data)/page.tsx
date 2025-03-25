@@ -95,6 +95,8 @@ export default function SalesReturnDataPage() {
   };
 
   const handleSearch = () => {
+    if (isLoading) return;
+
     if (pageIndex === 0 && localFilters === filters) {
       fetchSalesOrderReturns();
     } else {

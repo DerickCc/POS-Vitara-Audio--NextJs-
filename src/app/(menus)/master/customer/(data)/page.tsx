@@ -84,6 +84,8 @@ export default function CustomerDataPage() {
   };
 
   const handleSearch = () => {
+    if (isLoading) return;
+    
     if (pageIndex === 0 && localFilters === filters) {
       fetchCustomers();
     } else {

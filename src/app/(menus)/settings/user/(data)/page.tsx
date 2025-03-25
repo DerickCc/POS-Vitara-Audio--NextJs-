@@ -85,6 +85,8 @@ export default function UserDataPage() {
   };
 
   const handleSearch = () => {
+    if (isLoading) return;
+
     if (pageIndex === 0 && localFilters === filters) {
       fetchUsers();
     } else {

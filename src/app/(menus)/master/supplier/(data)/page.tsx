@@ -88,6 +88,8 @@ export default function SupplierDataPage() {
   };
 
   const handleSearch = () => {
+    if (isLoading) return;
+
     if (pageIndex === 0 && localFilters === filters) {
       fetchSuppliers();
     } else {
