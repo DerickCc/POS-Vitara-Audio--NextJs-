@@ -72,7 +72,7 @@ export default function PurchaseOrderFilter({
             onChange={(e) => handleFilterChange('code')(e.target.value)}
             className='sm:col-span-3'
             label='Kode'
-            placeholder='Cari Kode Transaksi'
+            placeholder='Cari Kode'
           />
           <Select<SearchSupplierModel>
             value={localFilters.supplierId}
