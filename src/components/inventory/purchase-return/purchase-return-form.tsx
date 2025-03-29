@@ -166,6 +166,12 @@ export default function PurchaseReturnForm({
     updatePrDetailTotalPrice(idx);
   };
 
+  const handleRemovePrDetail = (idx: number) => {
+    removeDetail(idx);
+    filterSelectedPoDetails();
+    updateGrandTotal();
+  };
+
   const updatePrDetailTotalPrice = (idx: number) => {
     const detail = getValues().details[idx];
     const totalPrice = detail.returnPrice * detail.returnQuantity;
@@ -316,10 +322,7 @@ export default function PurchaseReturnForm({
                             isReadOnly ? actionIconColorClass.gray : actionIconColorClass.red + 'cursor-pointer',
                             'mt-1'
                           )}
-                          onClick={() => {
-                            removeDetail(idx);
-                            filterSelectedPoDetails();
-                          }}
+                          onClick={() => handleRemovePrDetail(idx)}
                           disabled={isReadOnly}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />

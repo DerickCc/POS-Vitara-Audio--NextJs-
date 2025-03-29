@@ -207,6 +207,12 @@ export default function SalesReturnForm({
     updateSrProductDetailTotalPrice(idx);
   };
 
+  const handleRemoveSrDetail = (idx: number) => {
+    removeProductDetail(idx);
+    filterSelectedSoProductDetails();
+    updateGrandTotal();
+  }
+
   const updateSrProductDetailTotalPrice = (idx: number) => {
     const detail = getValues().productDetails[idx];
     const totalPrice = detail.returnPrice * detail.returnQuantity;
@@ -340,10 +346,7 @@ export default function SalesReturnForm({
                             isReadOnly ? actionIconColorClass.gray : actionIconColorClass.red + 'cursor-pointer',
                             'mt-1'
                           )}
-                          onClick={() => {
-                            removeProductDetail(idx);
-                            filterSelectedSoProductDetails();
-                          }}
+                          onClick={() => handleRemoveSrDetail(idx)}
                           disabled={isReadOnly}
                         >
                           <FaRegTrashAlt className='h-4 w-4' />
