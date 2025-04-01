@@ -130,3 +130,28 @@ export const deleteProduct = async (id: string): Promise<string> => {
     throw e + '';
   }
 };
+
+// EXPORT
+export const exportProducts = async ({ sortColumn, sortOrder, filters }: QueryParamsModel): Promise<void> => {
+  try {
+    const type = filters.type;
+
+    if (type !== 'excel' && type !== 'csv') throw 'Tipe export tidak valid';
+
+    const blob = await apiFetch(
+      `/api/products/export${toQueryString({ sortColumn, sortOrder, ...filters })}`,
+      { method: 'GET' },
+      'blob'
+    );
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `DaftarBarang.${type === 'excel' ? 'xlsx' : 'csv'}`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (e) {
+    throw e + '';
+  }
+};

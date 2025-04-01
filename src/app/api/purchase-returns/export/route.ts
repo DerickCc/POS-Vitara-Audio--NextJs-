@@ -13,6 +13,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: 'Unauthorized, mohon melakukan login ulang' }, { status: 401 });
   }
 
+  if (session.role !== 'Admin') {
+    return NextResponse.json({ message: 'Anda tidak memiliki hak untuk export' }, { status: 401 });
+  }
+
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
 
