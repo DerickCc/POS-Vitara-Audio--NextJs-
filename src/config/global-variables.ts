@@ -96,5 +96,4 @@ export const soSrStatusOptions = [
 export const paymentStatusOptions = [
   { label: 'Belum Lunas', value: 'Belum Lunas' },
   { label: 'Lunas', value: 'Lunas' },
-  { label: 'Batal', value: 'Batal' },
 ];
