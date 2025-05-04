@@ -99,7 +99,8 @@ export async function GET(request: Request) {
             select: { name: true, licensePlate: true },
           },
           SalesOrderPaymentHistories: {
-            select: { amount: true },
+            select: { paymentDate: true, paymentMethod: true, amount: true },
+            orderBy: { createdAt: 'asc'},
           },
           CreatedBy: {
             select: { name: true },
@@ -117,6 +118,7 @@ export async function GET(request: Request) {
         customerName: so.Customer.name,
         customerLicensePlate: so.Customer.licensePlate,
         paidAmount,
+        paymentHistory: so.SalesOrderPaymentHistories,
         cashier: so.CreatedBy.name,
         Customer: undefined,
         SalesOrderPaymentHistories: undefined,

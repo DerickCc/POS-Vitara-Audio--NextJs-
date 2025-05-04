@@ -1,19 +1,9 @@
 import { z } from "zod";
 
-export class PaymentHistoryModel {
-  id: string;
-  soId: string;
+export interface PaymentHistoryModel {
   paymentDate: string;
   paymentMethod: string;
-  paidAmount: number;
-
-  constructor(data: any = {}) {
-    this.id = data.id;
-    this.soId = data.soId || '';
-    this.paymentDate = data.paymentDate || '';
-    this.paymentMethod = data.paymentMethod || 'Non-tunai';
-    this.paidAmount = data.paidAmount || 0;
-  }
+  amount: number;
 }
 
 export const PaymentSchema = z.object({

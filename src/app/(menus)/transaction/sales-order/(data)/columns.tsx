@@ -16,6 +16,7 @@ import { FaRegMoneyBillAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { usePaymentModal } from '@/hooks/use-payment-modal';
 import { IoCheckmarkDoneSharp } from 'react-icons/io5';
 import { useAuth } from '@/hooks/use-auth';
+import PaymentHistoryPopover from '@/components/payment-history-popover';
 
 function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; actionHandlers: any }) {
   const { openConfirmationModal, ConfirmationModalComponent } = useConfirmationModal();
@@ -49,7 +50,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; acti
           )}
 
           {/* finish */}
-          {user?.role === "Admin" && row.original.progressStatus === 'Belum Dikerjakan' && (
+          {user?.role === 'Admin' && row.original.progressStatus === 'Belum Dikerjakan' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -107,7 +108,7 @@ function ActionColumn({ row, actionHandlers }: { row: Row<SalesOrderModel>; acti
           )}
 
           {/* cancel */}
-          {user?.role === "Admin" && row.original.progressStatus === 'Selesai' && (
+          {user?.role === 'Admin' && row.original.progressStatus === 'Selesai' && (
             <Dropdown.Item
               onClick={() => {
                 openConfirmationModal({
@@ -194,7 +195,11 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
       const color = mapTrxStatusToColor[status];
       return (
         <>
-          <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>
+          {row.original.paymentHistory.length > 0 ? (
+            <PaymentHistoryPopover row={row.original} color={color} />
+          ) : (
+            <span className={cn(badgeColorClass[color], baseBadgeClass)}>{status}</span>
+          )}
           {status === 'Belum Lunas' && (
             <div className='mt-2'>Sisa: {`Rp ${formatToReadableNumber(remainingAmount)}`}</div>
           )}

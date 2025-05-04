@@ -6,6 +6,7 @@ import {
 } from './purchase-order-detail.model';
 import { getCurrDate } from '@/utils/helper-function';
 import { BasicSelectOptions } from './global.model';
+import { PaymentHistoryModel } from './payment-history.model';
 
 export const CreatePurchaseOrderSchema = z
   .object({
@@ -95,6 +96,7 @@ export class PurchaseOrderModel {
   subTotal: number;
   grandTotal: number;
   paidAmount: number;
+  paymentHistory: PaymentHistoryModel[];
   paymentMethod: 'Tunai' | 'Non-tunai'; // for UI
   progressStatus: 'Dalam Proses' | 'Selesai' | 'Batal';
   paymentStatus: 'Belum Lunas' | 'Lunas' | 'Batal';
@@ -113,6 +115,7 @@ export class PurchaseOrderModel {
     this.subTotal = data.subTotal || 0;
     this.grandTotal = data.grandTotal || 0;
     this.paidAmount = data.paidAmount || 0;
+    this.paymentHistory = data.paymentHistory || [];
     this.paymentMethod = data.paymentMethod || 'Non-tunai';
     this.progressStatus = data.progressStatus || 'Dalam Proses';
     this.paymentStatus = data.paymentStatus || 'Belum Lunas';

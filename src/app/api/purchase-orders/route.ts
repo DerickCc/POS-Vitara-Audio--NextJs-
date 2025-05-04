@@ -99,11 +99,12 @@ export async function GET(request: Request) {
             select: { name: true },
           },
           PurchaseOrderPaymentHistories: {
-            select: { amount: true },
+            select: { paymentDate: true, paymentMethod: true, amount: true },
+            orderBy: { createdAt: 'asc'},
           },
         },
       }),
-      await db.purchaseOrders.count({ where })
+      await db.purchaseOrders.count({ where }),
     ]);
 
     const mappedPurchaseOrders = purchaseOrders.map((po) => {
@@ -114,6 +115,7 @@ export async function GET(request: Request) {
         supplierName: po.Supplier.name,
         paidAmount: Number(paidAmount),
         grandTotal: Number(po.grandTotal),
+        paymentHistory: po.PurchaseOrderPaymentHistories,
         Supplier: undefined,
         PurchaseOrderPaymentHistories: undefined,
       };

@@ -2,6 +2,7 @@ import { getCurrDate } from '@/utils/helper-function';
 import { z } from 'zod';
 import { SalesOrderProductDetailModel, SalesOrderProductDetailSchema } from './sales-order-product-detail';
 import { SalesOrderServiceDetailModel, SalesOrderServiceDetailSchema } from './sales-order-service-detail';
+import { PaymentHistoryModel } from './payment-history.model';
 
 export const CreateSalesOrderSchema = z
   .object({
@@ -95,6 +96,7 @@ export class SalesOrderModel {
   discount: number;
   grandTotal: number;
   paidAmount: number;
+  paymentHistory: PaymentHistoryModel[];
   productDetails: SalesOrderProductDetailModel[];
   serviceDetails: SalesOrderServiceDetailModel[];
   progressStatus: 'Belum Dikerjakan' | 'Selesai' | 'Batal';
@@ -118,6 +120,7 @@ export class SalesOrderModel {
     this.discount = data.discount || 0;
     this.grandTotal = data.grandTotal || 0;
     this.paidAmount = data.paidAmount || 0;
+    this.paymentHistory = data.paymentHistory || [];
     this.productDetails = data.productDetails || [];
     this.serviceDetails = data.serviceDetails || [];
     this.progressStatus = data.progressStatus || 'Belum Dikerjakan';
