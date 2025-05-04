@@ -450,7 +450,7 @@ export default function SalesOrderForm({
                             minDate={new Date()}
                             locale={id}
                             dateFormat='d MMMM yyyy'
-                            selected={value ? new Date(value) : null}
+                            selected={value && !isNaN(new Date(value).getTime()) ? new Date(value) : new Date()}
                             onChange={onChange}
                             placeholderText='Pilih Tanggal'
                             calendarClassName={cn(datepickerClass, 'w-full')}
