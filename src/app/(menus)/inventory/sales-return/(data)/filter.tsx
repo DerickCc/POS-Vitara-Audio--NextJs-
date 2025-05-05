@@ -15,6 +15,7 @@ import { id } from 'date-fns/locale';
 import cn from '@/utils/class-names';
 import { datepickerClass } from '@/config/tailwind-classes';
 import { soSrStatusOptions } from '@/config/global-variables';
+import { useFilterHandlers } from '@/hooks/useFilterHandlers';
 
 export type SalesReturnTableFilters = {
   code?: string;
@@ -46,12 +47,8 @@ export default function SalesReturnFilter({
     []
   );
 
-  const handleFilterChange = (field: keyof SalesReturnTableFilters) => (value: string | number | Date | null) => {
-    setLocalFilters((prevFilters) => ({
-      ...prevFilters,
-      [field]: value,
-    }));
-  };
+  const { handleInputChange, handleSelectChange, handleSelectClear } =
+    useFilterHandlers<SalesReturnTableFilters>(setLocalFilters);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -69,15 +66,17 @@ export default function SalesReturnFilter({
         <div className='grid sm:grid-cols-10 gap-6 mb-5'>
           <Input
             value={localFilters.code}
-            onChange={(e) => handleFilterChange('code')(e.target.value)}
+            name='code'
+            onChange={handleInputChange}
             className='sm:col-span-3'
             label='Kode Retur Penjualan'
             placeholder='Cari Kode Retur Penjualan'
           />
           <Select<SearchCustomerModel>
             value={localFilters.customerId}
+            name='customerId'
             onChange={(option: SearchCustomerModel) => {
-              handleFilterChange('customerId')(option.id);
+             handleSelectChange('customerId')(option.id);
               setSelectedCustomer(`${option.name} (${option.licensePlate})`);
             }}
             className='sm:col-span-3'
@@ -91,7 +90,7 @@ export default function SalesReturnFilter({
             onSearchChange={(search: string) => handleCustomerSearchChange(search)}
             disableDefaultFilter={true}
             clearable={true}
-            onClear={() => handleFilterChange('customerId')(null)}
+            onClear={handleSelectClear('customerId')}
           />
           <div className='sm:col-span-4 flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full'>
             <ReactDatePicker
@@ -109,11 +108,11 @@ export default function SalesReturnFilter({
               startDate={localFilters.startDate}
               endDate={localFilters.endDate}
               onCalendarOpen={() => {
-                if (!localFilters.endDate) handleFilterChange('startDate')(null);
+                if (!localFilters.endDate) handleSelectClear('startDate')();
               }}
               onChange={(value: [Date | null, Date | null]) => {
-                handleFilterChange('startDate')(value[0]);
-                handleFilterChange('endDate')(value[1]);
+                handleSelectChange('startDate')(value[0]);
+                handleSelectChange('endDate')(value[1]);
               }}
               isClearable={true}
               placeholderText='Pilih Tanggal'
@@ -123,14 +122,16 @@ export default function SalesReturnFilter({
           </div>
           <Input
             value={localFilters.soCode}
-            onChange={(e) => handleFilterChange('soCode')(e.target.value)}
+            name='soCode'
+            onChange={handleInputChange}
             className='sm:col-span-3'
             label='Kode Transaksi Penjualan'
             placeholder='Cari Kode Transaksi Penjualan'
           />
           <Select
             value={localFilters.status}
-            onChange={(value: string) => handleFilterChange('status')(value)}
+            name='status'
+            onChange={handleSelectChange('status')}
             className='sm:col-span-3'
             label='Status'
             placeholder='Pilih Status'
@@ -138,7 +139,7 @@ export default function SalesReturnFilter({
             displayValue={(value) => soSrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
-            onClear={() => handleFilterChange('status')('')}
+            onClear={handleSelectClear('status')}
           />
           <div className='sm:col-span-4 flex justify-end items-end'>
             <Button className='w-20' type='submit'>

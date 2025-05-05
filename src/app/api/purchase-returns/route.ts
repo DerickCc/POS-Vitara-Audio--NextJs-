@@ -31,6 +31,7 @@ export async function GET(request: Request) {
   const endDate = queryParams.get('endDate') ?? '';
   const poCode = queryParams.get('poCode') ?? '';
   const status = queryParams.get('status') ?? '';
+  const returnType = queryParams.get('returnType') ?? '';
 
   const where: any = { AND: [] };
   if (code) {
@@ -86,6 +87,10 @@ export async function GET(request: Request) {
 
   if (status) {
     where.AND.push({ status });
+  }
+
+  if (returnType) {
+    where.AND.push({ returnType });
   }
   // ----------------
 

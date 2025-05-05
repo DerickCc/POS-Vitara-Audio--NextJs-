@@ -15,6 +15,7 @@ import { SearchSupplierModel } from '@/models/supplier.model';
 import { searchSupplier } from '@/services/supplier-service';
 import toast from 'react-hot-toast';
 import { debounce } from 'lodash';
+import { useFilterHandlers } from '@/hooks/useFilterHandlers';
 
 export type PurchaseOrderTableFilters = {
   code?: string | undefined;
@@ -46,12 +47,8 @@ export default function PurchaseOrderFilter({
     []
   );
 
-  const handleFilterChange = (field: keyof PurchaseOrderTableFilters) => (value: string | number | Date | null) => {
-    setLocalFilters((prevFilters) => ({
-      ...prevFilters,
-      [field]: value,
-    }));
-  };
+  const { handleInputChange, handleSelectChange, handleSelectClear } =
+    useFilterHandlers<PurchaseOrderTableFilters>(setLocalFilters);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -69,15 +66,17 @@ export default function PurchaseOrderFilter({
         <div className='grid sm:grid-cols-10 gap-6 mb-5'>
           <Input
             value={localFilters.code}
-            onChange={(e) => handleFilterChange('code')(e.target.value)}
+            name='code'
+            onChange={handleInputChange}
             className='sm:col-span-3'
             label='Kode'
             placeholder='Cari Kode'
           />
           <Select<SearchSupplierModel>
             value={localFilters.supplierId}
+            name='supplierId'
             onChange={(option: SearchSupplierModel) => {
-              handleFilterChange('supplierId')(option.id);
+              handleSelectChange('supplierId')(option.id);
               setSelectedSupplier(option.name);
             }}
             className='sm:col-span-3'
@@ -91,8 +90,8 @@ export default function PurchaseOrderFilter({
             onSearchChange={(name: string) => handleSupplierSearchChange(name)}
             disableDefaultFilter={true}
             clearable={true}
-            onClear={() => handleFilterChange('supplierId')(null)}
-            searchProps={{autoFocus: true}}
+            onClear={handleSelectClear('supplierId')}
+            searchProps={{ autoFocus: true }}
           />
           <div className='sm:col-span-4 flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full'>
             <ReactDatePicker
@@ -110,11 +109,11 @@ export default function PurchaseOrderFilter({
               startDate={localFilters.startDate}
               endDate={localFilters.endDate}
               onCalendarOpen={() => {
-                if (!localFilters.endDate) handleFilterChange('startDate')(null);
+                if (!localFilters.endDate) handleSelectClear('startDate')();
               }}
               onChange={(value: [Date | null, Date | null]) => {
-                handleFilterChange('startDate')(value[0]);
-                handleFilterChange('endDate')(value[1]);
+                handleSelectChange('startDate')(value[0]);
+                handleSelectChange('endDate')(value[1]);
               }}
               isClearable={true}
               placeholderText='Pilih Tanggal'
@@ -124,7 +123,8 @@ export default function PurchaseOrderFilter({
           </div>
           <Select
             value={localFilters.progressStatus}
-            onChange={(value: string) => handleFilterChange('progressStatus')(value)}
+            name='progressStatus'
+            onChange={handleSelectChange('progressStatus')}
             className='sm:col-span-3'
             label='Status Pengiriman'
             placeholder='Pilih Status Pengiriman'
@@ -132,11 +132,12 @@ export default function PurchaseOrderFilter({
             displayValue={(value) => poPrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
-            onClear={() => handleFilterChange('progressStatus')('')}
+            onClear={handleSelectClear('progressStatus')}
           />
           <Select
             value={localFilters.paymentStatus}
-            onChange={(value: string) => handleFilterChange('paymentStatus')(value)}
+            name='paymentStatus'
+            onChange={handleSelectChange('paymentStatus')}
             className='sm:col-span-3'
             label='Status Pembayaran'
             placeholder='Pilih Status Pembayaran'
@@ -144,7 +145,7 @@ export default function PurchaseOrderFilter({
             displayValue={(value) => paymentStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
-            onClear={() => handleFilterChange('paymentStatus')('')}
+            onClear={handleSelectClear('paymentStatus')}
           />
           <div className='sm:col-span-4 flex justify-end items-end'>
             <Button className='w-20' type='submit'>

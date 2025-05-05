@@ -61,8 +61,8 @@ export const filterOperatorOptions = [
 ];
 
 export const accountStatusOptions = [
-  { label: 'Aktif', value: true },
-  { label: 'Nonaktif', value: false },
+  { label: 'Aktif', value: 'true' },
+  { label: 'Nonaktif', value: 'false' },
 ];
 
 export const productTypeOptions = [

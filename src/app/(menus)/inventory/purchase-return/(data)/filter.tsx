@@ -14,7 +14,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { id } from 'date-fns/locale';
 import cn from '@/utils/class-names';
 import { datepickerClass } from '@/config/tailwind-classes';
-import { poPrStatusOptions } from '@/config/global-variables';
+import { poPrStatusOptions, prTypeOptions } from '@/config/global-variables';
+import { useFilterHandlers } from '@/hooks/useFilterHandlers';
 
 export type PurchaseReturnTableFilters = {
   code?: string;
@@ -23,6 +24,7 @@ export type PurchaseReturnTableFilters = {
   endDate: any;
   poCode?: string;
   status?: string;
+  returnType?: string;
 };
 
 export default function PurchaseReturnFilter({
@@ -46,12 +48,8 @@ export default function PurchaseReturnFilter({
     []
   );
 
-  const handleFilterChange = (field: keyof PurchaseReturnTableFilters) => (value: string | number | Date | null) => {
-    setLocalFilters((prevFilters) => ({
-      ...prevFilters,
-      [field]: value,
-    }));
-  };
+  const { handleInputChange, handleSelectChange, handleSelectClear } =
+    useFilterHandlers<PurchaseReturnTableFilters>(setLocalFilters);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -69,15 +67,17 @@ export default function PurchaseReturnFilter({
         <div className='grid sm:grid-cols-10 gap-6 mb-5'>
           <Input
             value={localFilters.code}
-            onChange={(e) => handleFilterChange('code')(e.target.value)}
+            name='code'
+            onChange={handleInputChange}
             className='sm:col-span-3'
             label='Kode Retur Pembelian'
             placeholder='Cari Kode Retur Pembelian'
           />
           <Select<SearchSupplierModel>
             value={localFilters.supplierId}
+            name='supplierId'
             onChange={(option: SearchSupplierModel) => {
-              handleFilterChange('supplierId')(option.id);
+              handleSelectChange('supplierId')(option.id);
               setSelectedSupplier(option.name);
             }}
             className='sm:col-span-3'
@@ -91,7 +91,7 @@ export default function PurchaseReturnFilter({
             onSearchChange={(name: string) => handleSupplierSearchChange(name)}
             disableDefaultFilter={true}
             clearable={true}
-            onClear={() => handleFilterChange('supplierId')(null)}
+            onClear={handleSelectClear('supplierId')}
           />
           <div className='sm:col-span-4 flex [&_.react-datepicker-wrapper]:flex [&_.react-datepicker-wrapper]:w-full'>
             <ReactDatePicker
@@ -109,11 +109,11 @@ export default function PurchaseReturnFilter({
               startDate={localFilters.startDate}
               endDate={localFilters.endDate}
               onCalendarOpen={() => {
-                if (!localFilters.endDate) handleFilterChange('startDate')(null);
+                if (!localFilters.endDate) handleSelectClear('startDate')();
               }}
               onChange={(value: [Date | null, Date | null]) => {
-                handleFilterChange('startDate')(value[0]);
-                handleFilterChange('endDate')(value[1]);
+                handleSelectChange('startDate')(value[0]);
+                handleSelectChange('endDate')(value[1]);
               }}
               isClearable={true}
               placeholderText='Pilih Tanggal'
@@ -123,14 +123,16 @@ export default function PurchaseReturnFilter({
           </div>
           <Input
             value={localFilters.poCode}
-            onChange={(e) => handleFilterChange('poCode')(e.target.value)}
+            name='poCode'
+            onChange={handleInputChange}
             className='sm:col-span-3'
             label='Kode Transaksi Pembelian'
             placeholder='Cari Kode Transaksi Pembelian'
           />
           <Select
             value={localFilters.status}
-            onChange={(value: string) => handleFilterChange('status')(value)}
+            name='status'
+            onChange={handleSelectChange('status')}
             className='sm:col-span-3'
             label='Status'
             placeholder='Pilih Status'
@@ -138,9 +140,22 @@ export default function PurchaseReturnFilter({
             displayValue={(value) => poPrStatusOptions.find((option) => option.value === value)?.label ?? ''}
             getOptionValue={(option) => option.value}
             clearable={true}
-            onClear={() => handleFilterChange('status')('')}
+            onClear={handleSelectClear('status')}
           />
-          <div className='sm:col-span-4 flex justify-end items-end'>
+          <Select
+            value={localFilters.returnType}
+            name='returnType'
+            onChange={handleSelectChange('returnType')}
+            className='sm:col-span-3'
+            label='Tipe Retur'
+            placeholder='Pilih Tipe Retur'
+            options={prTypeOptions}
+            displayValue={(value) => prTypeOptions.find((option) => option.value === value)?.label ?? ''}
+            getOptionValue={(option) => option.value}
+            clearable={true}
+            onClear={handleSelectClear('returnType')}
+          />
+          <div className='sm:col-span-1 flex justify-end items-end'>
             <Button className='w-20' type='submit'>
               Cari
             </Button>

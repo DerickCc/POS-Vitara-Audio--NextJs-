@@ -7,6 +7,7 @@ import { PiFunnel } from 'react-icons/pi';
 import { Button, Input, Select } from 'rizzui';
 import { filterOperatorOptions } from '@/config/global-variables';
 import { FiltersProps } from '@/models/global.model';
+import { useFilterHandlers } from '@/hooks/useFilterHandlers';
 
 export type SupplierTableFilters = {
   name: string;
@@ -26,62 +27,55 @@ export default function SupplierFilter({
     handleSearch();
   };
 
-  const handleFilterChange = (field: keyof SupplierTableFilters) => (value: string | number) => {
-    setLocalFilters((prevFilters) => ({
-      ...prevFilters,
-      [field]: value,
-    }));
-  };
+  const { handleInputChange, handleSelectChange } = useFilterHandlers<SupplierTableFilters>(setLocalFilters);
 
   return (
-    <Card className="mb-8">
-      <h4 className="flex items-center font-medium mb-5">
-        <PiFunnel className="me-1.5 h-[18px] w-[18px]" />
+    <Card className='mb-8'>
+      <h4 className='flex items-center font-medium mb-5'>
+        <PiFunnel className='me-1.5 h-[18px] w-[18px]' />
         Filter
       </h4>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid sm:grid-cols-3 gap-6 mb-5">
+        <div className='grid sm:grid-cols-3 gap-6 mb-5'>
           <Input
             value={localFilters.name}
-            onChange={(e) => handleFilterChange('name')(e.target.value)}
-            label="Nama"
-            placeholder="Cari Nama"
+            name='name'
+            onChange={handleInputChange}
+            label='Nama'
+            placeholder='Cari Nama'
           />
-          <Input
-            value={localFilters.pic}
-            onChange={(e) => handleFilterChange('pic')(e.target.value)}
-            label="PIC"
-            placeholder="Cari PIC"
-          />
+          <Input value={localFilters.pic} name='pic' onChange={handleInputChange} label='PIC' placeholder='Cari PIC' />
           <Input
             value={localFilters.phoneNo}
-            onChange={(e) => handleFilterChange('phoneNo')(e.target.value)}
-            label="No. Telepon"
-            placeholder="Cari No. Telepon"
+            name='phoneNo'
+            onChange={handleInputChange}
+            label='No. Telepon'
+            placeholder='Cari No. Telepon'
           />
 
-          <div className="grid sm:grid-cols-1">
-            <label className="block text-sm font-medium mb-2">Piutang</label>
-            <div className="flex">
+          <div className='grid sm:grid-cols-1'>
+            <label className='block text-sm font-medium mb-2'>Piutang</label>
+            <div className='flex'>
               <Select
                 value={localFilters.receivablesOperator}
-                onChange={(value: string) => handleFilterChange('receivablesOperator')(value)}
-                className="w-24"
+                name='receivablesOperator'
+                onChange={handleSelectChange('receivablesOperator')}
+                className='w-24'
                 options={filterOperatorOptions}
                 displayValue={(value) => filterOperatorOptions.find((option) => option.value === value)?.label ?? ''}
                 getOptionValue={(option) => option.value}
               />
               <RupiahInput
                 defaultValue={localFilters.receivables}
-                onChange={(value) => handleFilterChange('receivables')(value)}
-                className="w-full ps-3"
+                onChange={handleSelectChange('receivables')}
+                className='w-full ps-3'
               />
             </div>
           </div>
         </div>
 
-        <Button className="float-right w-20" type="submit">
+        <Button className='float-right w-20' type='submit'>
           Cari
         </Button>
       </form>
