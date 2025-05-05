@@ -112,12 +112,12 @@ export default function PrintSalesOrderPage() {
     let newGrandTotal = totalServicePrice;
 
     productDetails.map((d) => {
-      newSubTotal += (d.sellingPrice * d.quantity);
+      newSubTotal += d.sellingPrice * d.quantity;
       if (d.oriSellingPrice > d.sellingPrice) {
         newDiscount += (d.oriSellingPrice - d.sellingPrice) * d.quantity;
       }
       newGrandTotal += d.totalPrice;
-    })
+    });
 
     setSo((prev) => ({
       ...prev,
@@ -160,39 +160,47 @@ export default function PrintSalesOrderPage() {
         ) : (
           <div className='print-ref'>
             {/* Invoice Header */}
-            <div className='flex justify-between mb-5'>
-              <div>
-                <h1 className='text-3xl font-bold mb-2'>VITARA AUDIO</h1>
-                <p className='mb-1'>Spesial Pemasangan: AC Mobil - Tape Mobil - Variasi</p>
-                <p className='mb-1'>Jl. Guru Patimpus No. 11G Medan</p>
-                <p className='mb-1'>Telp. 061-4158354 / 4556141 / 0811616989</p>
-              </div>
-
-              {/* Customer & Invoice Info */}
-              <div className='pr-5'>
-                {[
-                  { label: 'Kode', value: so.code },
-                  { label: 'Pelanggan', value: `${so.customerName} (${so.customerLicensePlate})` },
-                  { label: 'Alamat Pelanggan', value: so.customerAddress || '-' },
-                  { label: 'No. Telp. Pelanggan', value: so.customerPhoneNo || '-' },
-                  { label: 'Tanggal Transaksi', value: isoStringToDateWithTime(so.salesDate) },
-                  { label: 'Status Transaksi', value: so.progressStatus },
-                ].map((item, index) => (
-                  <div key={index} className='flex'>
-                    <span className='w-40 font-medium'>{item.label}</span>:&nbsp;<span>{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <table className='w-full mb-5 table-fixed'>
+              <tbody>
+                <tr className='align-top'>
+                  <td className='w-1/2 pr-4'>
+                    <h1 className='text-3xl font-bold mb-2'>VITARA AUDIO</h1>
+                    <p className='mb-1'>Spesial Pemasangan: AC Mobil - Tape Mobil - Variasi</p>
+                    <p className='mb-1'>Kaca Rayban - Jok Mobil - Auto</p>
+                    <p className='mb-1'>Jl. Guru Patimpus No. 11G Medan</p>
+                    <p className='mb-1'>Telp. 061-4158354 / 4556141 / 0811616989</p>
+                  </td>
+                  <td className='w-1/2 align-top'>
+                    <table className='w-full'>
+                      <tbody>
+                        {[
+                          { label: 'Kode', value: so.code },
+                          { label: 'Pelanggan', value: `${so.customerName} (${so.customerLicensePlate})` },
+                          { label: 'Alamat Pelanggan', value: so.customerAddress || '-' },
+                          { label: 'No. Telp. Pelanggan', value: so.customerPhoneNo || '-' },
+                          { label: 'Tanggal Transaksi', value: isoStringToDateWithTime(so.salesDate) },
+                          { label: 'Status Transaksi', value: so.progressStatus },
+                        ].map((item, index) => (
+                          <tr key={index}>
+                            <td className='font-medium w-40'>{item.label}</td>
+                            <td>: {item.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
             {/* Details */}
-            <table className='w-full border border-gray-300 mb-4'>
+            <table className='w-full border border-gray-300 mb-4 product-table'>
               <thead>
                 <tr className='bg-gray-100 border-b'>
                   <th className='border p-2 text-left'>Banyaknya</th>
                   <th className='border p-2 text-left'>Nama Barang / Jasa</th>
-                  <th className='border p-2 text-left'>Harga</th>
-                  <th className='border p-2 text-left'>Jumlah</th>
+                  <th className='border p-2 text-right'>Harga</th>
+                  <th className='border p-2 text-right'>Jumlah</th>
                 </tr>
               </thead>
               <tbody>
@@ -200,27 +208,21 @@ export default function PrintSalesOrderPage() {
                   <tr key={index} className='border-b'>
                     <td className='border p-2'>{item.quantity}</td>
                     <td className='border p-2'>{item.name}</td>
-                    <td className='border p-2'>Rp {formatToReadableNumber(item.sellingPrice)}</td>
-                    <td className='border p-2'>Rp {formatToReadableNumber(item.totalPrice)}</td>
+                    <td className='border p-2 text-right'>Rp {formatToReadableNumber(item.sellingPrice)}</td>
+                    <td className='border p-2 text-right'>Rp {formatToReadableNumber(item.totalPrice)}</td>
                   </tr>
                 ))}
-                <tr>
-                  <td colSpan={3}></td>
-                  <td className='border p-2'>Rp {formatToReadableNumber(so.grandTotal)}</td>
-                </tr>
               </tbody>
             </table>
 
-            <p>
-              <strong>Tanggal Masuk:</strong> {isoStringToReadableDate(so.entryDate)}
-            </p>
-            <p>
-              <strong>Keterangan:</strong> {so.remarks || '-'}
-            </p>
-
             <div className='flex justify-between'>
-              {/* Warning */}
               <div>
+                <p>
+                  <strong>Tanggal Masuk:</strong> {isoStringToReadableDate(so.entryDate)}
+                </p>
+                <p>
+                  <strong>Keterangan:</strong> {so.remarks || '-'}
+                </p>
                 <p>
                   <strong>Perhatian:</strong> Barang yang sudah dibeli tidak dapat dikembalikan.
                 </p>
@@ -228,21 +230,31 @@ export default function PrintSalesOrderPage() {
 
               {/* Totals */}
               <div className='pr-5'>
-                {[
-                  { label: 'Sub Total', value: so.subTotal },
-                  { label: 'Diskon Total', value: so.discount },
-                  { label: 'Grand Total', value: so.grandTotal },
-                ].map((item, index) => (
-                  <div key={index} className='flex'>
-                    <span className='w-28 font-medium'>{item.label}</span> : &nbsp;
-                    <span>Rp {formatToReadableNumber(item.value)}</span>
-                  </div>
-                ))}
-                <br />
-                <div className='flex'>
-                  <span className='w-28 font-medium'>Sudah Dibayar</span> : &nbsp;
-                  <span>Rp {formatToReadableNumber(so.paidAmount)}</span>
-                </div>
+                {/* Payment Summary as Table */}
+                <table>
+                  <tbody>
+                    {[
+                      { label: 'Sub Total', value: so.subTotal },
+                      { label: 'Diskon Total', value: so.discount },
+                      { label: 'Grand Total', value: so.grandTotal },
+                    ].map((item, index) => (
+                      <tr key={index}>
+                        <td className='w-36 font-medium align-top'>{item.label}</td>
+                        <td className='pl-1'>: Rp {formatToReadableNumber(item.value)}</td>
+                      </tr>
+                    ))}
+
+                    {/* Optional empty row as spacing, or use CSS margin if preferred */}
+                    <tr>
+                      <td colSpan={2} className='h-2'></td>
+                    </tr>
+
+                    <tr>
+                      <td className='w-36 font-medium align-top'>Sudah Dibayar</td>
+                      <td className='pl-1'>: Rp {formatToReadableNumber(so.paidAmount)}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 

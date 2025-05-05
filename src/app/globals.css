@@ -1354,33 +1354,34 @@ div[style='z-index: 1000001;'],
     display: none !important;
   }
 
-  body {
-    font-size: 10px;
-    font-family: 'Courier New', monospace;
+  @page {
+    size: auto;
     margin: 0;
-    padding: 0;
   }
 
-  .print-ref {
-    width: 5.5in;
-    padding: 0.2in;
-    box-sizing: border-box;
+  html,
+  body {
+    font-family: 'Calibri' !important;
+    font-size: 7.5px !important;
+    margin: 0;
+    color: black !important;
   }
 
   table {
+    border-collapse: collapse !important;
     width: 100%;
-    border-collapse: collapse;
   }
 
-  th, td {
-    padding: 2px 4px;
-    font-size: 9px;
+  th td {
+    padding: 0.5px 3px;
   }
 
-  @page {
-    size: 5.5in auto;
-    margin: 0;
+  .product-table {
+    th,
+    td {
+      border: 1px solid black !important;
+      line-height: 1px !important;
+    }
   }
-
 }
 
