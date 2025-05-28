@@ -1,6 +1,6 @@
 import { LoginSchema } from '@/models/session.model';
 import { db } from '@/utils/prisma';
-import { getSession, saveSession } from '@/utils/sessionlib';
+import { saveSession } from '@/utils/sessionlib';
 import { compare } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 

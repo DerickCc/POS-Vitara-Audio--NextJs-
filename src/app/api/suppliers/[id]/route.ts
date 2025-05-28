@@ -1,4 +1,4 @@
-import { SupplierModel, SupplierSchema } from '@/models/supplier.model';
+import { SupplierSchema } from '@/models/supplier.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';

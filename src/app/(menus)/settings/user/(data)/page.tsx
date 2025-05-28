@@ -12,7 +12,6 @@ import { Button } from 'rizzui';
 import UserFilter, { UserTableFilters } from './filters';
 import { columns } from './columns';
 import { UserModel } from '@/models/user.model';
-import { TableAction } from '@/models/global.model';
 import { changeUserStatus, browseUser } from '@/services/user-service';
 import cn from '@/utils/class-names';
 import { baseButtonClass, buttonColorClass } from '@/config/tailwind-classes';

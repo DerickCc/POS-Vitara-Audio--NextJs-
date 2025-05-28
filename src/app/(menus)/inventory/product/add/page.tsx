@@ -5,7 +5,6 @@ import PageHeader from '@/components/page-header';
 import { routes } from '@/config/routes';
 import { ProductModel } from '@/models/product.model';
 import { createProduct } from '@/services/product-service';
-import { apiFetch } from '@/utils/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

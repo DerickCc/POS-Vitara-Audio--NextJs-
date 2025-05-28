@@ -4,8 +4,6 @@ import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table';
 import Link from 'next/link';
 import { LuEye, LuPencil } from 'react-icons/lu';
 import { ActionIcon, Tooltip, cn } from 'rizzui';
-import Image from 'next/image';
-import imgPlaceholder from '@public/image-placeholder.png';
 import { ProductModel } from '@/models/product.model';
 import { actionIconColorClass } from '@/config/tailwind-classes';
 import { FaRegTrashAlt } from 'react-icons/fa';
