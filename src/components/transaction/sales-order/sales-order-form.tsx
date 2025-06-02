@@ -441,7 +441,7 @@ export default function SalesOrderForm({
                             customInput={
                               <Input
                                 prefix={<PiCalendarBlank className='h-5 w-5 text-gray-500' />}
-                                label='Tanggal Masuk'
+                                label='Tanggal Masuk Bengkel'
                                 labelClassName='font-medium text-gray-700'
                                 inputClassName={cn(isReadOnly ? readOnlyClass : '', '[&_input]:text-ellipsis')}
                                 error={error?.message}

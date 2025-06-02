@@ -218,7 +218,7 @@ export default function PrintSalesOrderPage() {
             <div className='flex justify-between'>
               <div>
                 <p>
-                  <strong>Tanggal Masuk:</strong> {isoStringToReadableDate(so.entryDate)}
+                  <strong>Tanggal Masuk Bengkel:</strong> {isoStringToReadableDate(so.entryDate)}
                 </p>
                 <p>
                   <strong>Keterangan:</strong> {so.remarks || '-'}
