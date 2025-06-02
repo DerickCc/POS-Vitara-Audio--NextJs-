@@ -2,8 +2,13 @@ import { z } from 'zod';
 import { BasicSelectOptions } from './global.model';
 
 export const CustomerSchema = z.object({
-  name: z.string().min(1, { message: 'Nama harus diisi' }),
-  licensePlate: z.string().min(1, { message: 'No. Plat harus diisi' }),
+  name: z.string().min(2, { message: 'Nama harus lebih dari 2 karakter' }),
+  licensePlate: z
+    .string()
+    .min(1, { message: 'No. Plat harus diisi' })
+    .refine((val) => /^[A-Z]{1,2} \d{1,4} [A-Z]{1,3}$/.test(val), {
+      message: 'Format tidak valid. Contoh BK 1234 ABC',
+    }),
   phoneNo: z
     .string()
     .refine((val) => !val || /^\d+$/.test(val), {
@@ -11,7 +16,7 @@ export const CustomerSchema = z.object({
     })
     .optional()
     .nullable(),
-  address: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 250 huruf' }).optional().nullable(),
+  address: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 250 karakter' }).optional().nullable(),
 });
 
 export class CustomerModel {

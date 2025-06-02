@@ -2,14 +2,14 @@ import { z } from 'zod';
 import { BasicSelectOptions } from './global.model';
 
 export const ProductSchema = z.object({
-  name: z.string().min(1, { message: 'Nama harus diisi' }),
+  name: z.string().min(2, { message: 'Nama harus lebih dari 2 karakter' }),
   type: z.string().min(1, { message: 'Mohon memilih tipe barang' }),
   stock: z.coerce.number().min(0, { message: 'Stok tidak boleh negatif' }),
   restockThreshold: z.coerce.number().min(0, { message: 'Ambang Batas Restok tidak boleh negatif' }),
   uom: z.string().min(1, { message: 'Satuan harus diisi' }),
   purchasePrice: z.coerce.number().min(0, { message: 'Harga beli tidak boleh negatif' }),
   sellingPrice: z.coerce.number().min(0, { message: 'Harga Jual Restok tidak boleh negatif' }),
-  remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+  remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 karakter' }).optional().nullable(),
 });
 
 export class ProductModel {

@@ -62,6 +62,7 @@ export default function SupplierForm({
               {...register('pic')}
             />
             <Input
+              type='number'
               label='No. Telepon'
               placeholder='No. Telepon'
               readOnly={isReadOnly}
@@ -122,7 +123,11 @@ export default function SupplierForm({
 
           {!isReadOnly && (
             <div className='flex justify-end'>
-              <Button className={cn(baseButtonClass, buttonColorClass.green)} type='submit' disabled={isSubmitting || isSubmitSuccessful}>
+              <Button
+                className={cn(baseButtonClass, buttonColorClass.green)}
+                type='submit'
+                disabled={isSubmitting || isSubmitSuccessful}
+              >
                 {isSubmitting ? (
                   <Loader variant='spinner' className='me-1.5' />
                 ) : (

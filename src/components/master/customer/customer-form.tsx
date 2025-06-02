@@ -59,6 +59,7 @@ export default function CustomerForm({
               {...register('licensePlate')}
             />
             <Input
+              type='number'
               label='No. Telepon'
               placeholder='No. Telepon'
               readOnly={isReadOnly}

@@ -9,7 +9,7 @@ export const SalesReturnProductDetailSchema = z.object({
   reason: z
     .string()
     .min(1, { message: 'Mohon mengisi alasan retur' })
-    .max(500, { message: 'Alasan tidak boleh lebih dari 500 huruf' }),
+    .max(500, { message: 'Alasan tidak boleh lebih dari 500 karakter' }),
 });
 
 export class SalesReturnProductDetailModel {

@@ -11,7 +11,7 @@ import { PaymentHistoryModel } from './payment-history.model';
 export const CreatePurchaseOrderSchema = z
   .object({
     supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
-    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 karakter' }).optional().nullable(),
     appliedReceivables: z.coerce.number().min(0, { message: 'Potong Piutang tidak boleh negatif' }),
     paidAmount: z.coerce.number().min(0, { message: 'Jumlah yang telah dibayar tidak boleh bernilai negatif' }),
     paymentMethod: z.string().min(1, { message: 'Mohon memilih metode pembayaran' }),
@@ -50,7 +50,7 @@ export const CreatePurchaseOrderSchema = z
 export const UpdatePurchaseOrderSchema = z
   .object({
     supplierId: z.string().min(1, { message: 'Mohon memilih supplier' }),
-    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 karakter' }).optional().nullable(),
     appliedReceivables: z.coerce.number().min(0, { message: 'Potong Piutang tidak boleh negatif' }),
     paidAmount: z.coerce.number().min(0, { message: 'Jumlah yang telah dibayar tidak boleh bernilai negatif' }),
     paymentMethod: z.string().optional().nullable(),

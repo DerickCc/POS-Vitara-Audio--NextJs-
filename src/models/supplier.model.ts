@@ -3,8 +3,8 @@ import { BasicSelectOptions } from './global.model';
 
 export const SupplierSchema = z
   .object({
-    name: z.string().min(1, { message: 'Nama harus diisi' }),
-    pic: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 100 huruf' }).optional().nullable(),
+    name: z.string().min(2, { message: 'Nama harus lebih dari 2 karakter' }),
+    pic: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 100 karakter' }).optional().nullable(),
     phoneNo: z
       .string()
       .refine((val) => !val || /^\d+$/.test(val), {
@@ -12,8 +12,8 @@ export const SupplierSchema = z
       })
       .optional()
       .nullable(),
-    address: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 250 huruf' }).optional().nullable(),
-    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 huruf' }).optional().nullable(),
+    address: z.string().max(250, { message: 'Alamat tidak boleh lebih dari 250 karakter' }).optional().nullable(),
+    remarks: z.string().max(500, { message: 'Keterangan tidak boleh lebih dari 500 karakter' }).optional().nullable(),
     receivables: z.coerce.number().min(0, { message: 'Piutang tidak boleh negatif' }),
     receivablesLimit: z.coerce.number().min(0, { message: 'Limit Piutang tidak boleh negatif' }),
   })

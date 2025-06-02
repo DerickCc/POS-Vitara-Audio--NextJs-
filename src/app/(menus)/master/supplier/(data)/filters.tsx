@@ -47,6 +47,7 @@ export default function SupplierFilter({
           />
           <Input value={localFilters.pic} name='pic' onChange={handleInputChange} label='PIC' placeholder='Cari PIC' />
           <Input
+            type='number'
             value={localFilters.phoneNo}
             name='phoneNo'
             onChange={handleInputChange}
