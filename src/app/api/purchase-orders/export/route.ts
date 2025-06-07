@@ -2,8 +2,9 @@ import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { Workbook } from 'exceljs';
-import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
+import { Fill, Workbook } from 'exceljs';
+import { isoStringToReadableDate } from '@/utils/helper-function';
+import { EXCEL_MONEY_FMT, STYLES } from '@/config/excel-variables';
 
 // ExportPurchaseOrder
 export async function GET(request: Request) {
@@ -120,11 +121,17 @@ export async function GET(request: Request) {
         ...d,
         productName: d.Product.name,
         uom: d.Product.uom,
+        purchasePrice: d.purchasePrice.toNumber(),
+        quantity: d.quantity.toNumber(),
+        totalPrice: d.totalPrice.toNumber(),
         Product: undefined,
       }));
 
       return {
         ...po,
+        subTotal: po.subTotal.toNumber(),
+        appliedReceivables: po.appliedReceivables.toNumber(),
+        grandTotal: po.grandTotal.toNumber(),
         purchaseDate: isoStringToReadableDate(po.purchaseDate.toISOString()),
         details: formattedPoDetails,
         supplierName: po.Supplier.name,
@@ -148,25 +155,27 @@ export async function GET(request: Request) {
 }
 
 async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, data: any[]) {
-  const reportDate =
-    startDate && endDate && `${new Date(startDate).toISOString()} - ${new Date(endDate).toISOString()}`;
-  const title = `Laporan Transaksi Pembelian ${reportDate}`;
-
   const wb = new Workbook();
-  const ws = wb.addWorksheet('Laporan');
+  const ws = wb.addWorksheet('Laporan Pembelian');
 
-  // title
-  ws.addRow([title]).eachCell((cell) => {
-    cell.font = {
-      size: 16,
-      bold: true,
-      underline: true,
-    };
-  });
+  const reportDateText = startDate
+    ? `${isoStringToReadableDate(new Date(startDate).toISOString())} - ${isoStringToReadableDate(
+        endDate ? new Date(endDate).toISOString() : isoStringToReadableDate(new Date().toISOString())
+      )}`
+    : `Hingga ${isoStringToReadableDate(new Date().toISOString())}`;
+
+  ws.mergeCells('A1:C1');
+  const titleCell = ws.getCell('A1');
+  titleCell.value = 'Laporan Transaksi Pembelian';
+  titleCell.style = STYLES.title;
+
+  ws.mergeCells('A2:C2');
+  const dateCell = ws.getCell('A2');
+  dateCell.value = reportDateText;
 
   ws.addRow([]);
 
-  // headers
+  // --- Header Tabel ---
   const headerRow = ws.addRow([
     'Kode PO',
     'Tanggal Pembelian',
@@ -174,159 +183,88 @@ async function exportPurchaseOrdersToExcel(startDate: string, endDate: string, d
     'Sub Total',
     'Potong Piutang',
     'Grand Total',
-    'Item',
     'Status Pengiriman',
     'Status Pembayaran',
     'Barang',
-    'Harga Beli',
     'Qty',
+    'Satuan',
+    'Harga Beli',
     'Total Harga',
   ]);
-
-  headerRow.font = { bold: true, size: 12 };
-  headerRow.alignment = {
-    horizontal: 'center',
-    vertical: 'middle',
-    wrapText: true,
-  };
   headerRow.eachCell((cell) => {
-    cell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' },
-    };
-    cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFFFFF00' },
-      bgColor: { argb: 'FF0000FF' },
-    };
+    cell.style = STYLES.header;
   });
+  headerRow.height = 33;
 
-  data.forEach((po, i) => {
-    ws.addRow([
+  // --- Content ---
+  data.forEach((po) => {
+    let statusFill: Fill | undefined = undefined;
+    if (po.paymentStatus === 'Lunas') {
+      statusFill = STYLES.greenFill;
+    } else if (po.paymentStatus === 'Belum Lunas') {
+      statusFill = STYLES.redFill;
+    } else if (po.paymentStatus === 'Batal') {
+      statusFill = STYLES.grayFill;
+    }
+
+    const masterRow = ws.addRow([
       po.code,
       po.purchaseDate,
       po.supplierName,
-      'Rp ' + formatToReadableNumber(po.subTotal),
-      'Rp ' + formatToReadableNumber(po.appliedReceivables),
-      'Rp ' + formatToReadableNumber(po.grandTotal),
-      po.totalItem,
+      po.subTotal,
+      po.appliedReceivables,
+      po.grandTotal,
       po.progressStatus,
       po.paymentStatus,
-      '',
-      '',
-      '',
-      '',
-    ]).eachCell((cell, colNum) => {
-      if (i % 2 == 0) {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'fff2f2f2' },
-        };
-      } else {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'ffeeece1' },
-        };
-      }
+      ...Array(5).fill(''),
+    ]);
 
-      if (colNum < 10) {
-        cell.border = {
-          top: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-          right: { style: 'thin' },
-        };
+    masterRow.eachCell((cell, colNumber) => {
+      cell.alignment = STYLES.defaultAlignment;
+      cell.border = STYLES.topBorder;
+      if (statusFill) {
+        cell.fill = statusFill;
       }
-
-      if (colNum == 7) {
-        cell.alignment = {
-          horizontal: 'center',
-          vertical: 'middle',
-        };
-      }
-
-      // border for the rightmost side of table
-      if (colNum == 13) {
-        cell.border = {
-          right: { style: 'thin' },
-        };
+      if ([4, 5, 6].includes(colNumber)) {
+        cell.numFmt = EXCEL_MONEY_FMT;
       }
     });
 
-    // detail rows
-    po.details.forEach((detail: any, j: number) => {
-      ws.addRow([
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        detail.productName,
-        'Rp ' + formatToReadableNumber(detail.purchasePrice),
-        detail.quantity + ' ' + detail.uom,
-        'Rp ' + formatToReadableNumber(detail.totalPrice),
-      ]).eachCell((cell, colNum) => {
-        if (i % 2 == 0) {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'fff2f2f2' },
-          };
-        } else {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'ffeeece1' },
-          };
+    const applyDetailRowStyle = (row: any) => {
+      row.eachCell({ includeEmpty: true }, (cell: any, colNumber: number) => {
+        if (colNumber >= 9) {
+          cell.border = { ...STYLES.fullBorder };
         }
-
-        if (colNum >= 10) {
-          cell.border = {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          };
-
-          cell.alignment = {
-            wrapText: true,
-            horizontal: 'left',
-            vertical: 'middle',
-          };
-        }
-        // border for the bottom of table
-        else if (colNum < 10 && i == data.length - 1 && j == po.details.length - 1) {
-          cell.border = {
-            bottom: { style: 'thin' },
-          };
+        if (colNumber >= 12) {
+          cell.numFmt = EXCEL_MONEY_FMT;
         }
       });
+    };
+
+    po.details.forEach((detail: any, j: number) => {
+      const detailRow = ws.addRow([
+        ...Array(8).fill(''),
+        detail.productName,
+        detail.quantity,
+        detail.uom,
+        detail.purchasePrice,
+        detail.totalPrice,
+      ]);
+      applyDetailRowStyle(detailRow);
     });
+
+    const lastDetailRow = ws.lastRow ? ws.lastRow.number : masterRow.number;
+    if (lastDetailRow > masterRow.number) {
+      for (let i = 1; i <= 8; i++) {
+        ws.mergeCells(masterRow.number, i, lastDetailRow, i);
+      }
+    }
   });
 
-  ws.getColumn(1).width = 13;
-  ws.getColumn(2).width = 20;
-  ws.getColumn(3).width = 25;
-  ws.getColumn(4).width = 15;
-  ws.getColumn(5).width = 17;
-  ws.getColumn(6).width = 15;
-  ws.getColumn(7).width = 7;
-  ws.getColumn(8).width = 15;
-  ws.getColumn(9).width = 15;
-  // detail
-  ws.getColumn(10).width = 30;
-  ws.getColumn(11).width = 15;
-  ws.getColumn(12).width = 15;
-  ws.getColumn(13).width = 15;
+  const columnWidths = [15, 20, 25, 15, 15, 15, 16, 16, 35, 10, 10, 18, 18];
+  columnWidths.forEach((width, idx) => {
+    ws.getColumn(idx + 1).width = width;
+  });
 
   return await wb.xlsx.writeBuffer();
 }

@@ -1,10 +1,11 @@
-import { Workbook } from 'exceljs';
-import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
+import { Fill, Workbook } from 'exceljs';
+import { isoStringToReadableDate } from '@/utils/helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { Decimal } from '@prisma/client/runtime/library';
+import { EXCEL_MONEY_FMT, PPN_RATE, STYLES } from '@/config/excel-variables';
 
 export async function GET(request: Request) {
   const session = await getSession();
@@ -89,7 +90,7 @@ export async function GET(request: Request) {
         code: true,
         salesDate: true,
         Customer: {
-          select: { name: true },
+          select: { name: true, licensePlate: true },
         },
         paymentType: true,
         subTotal: true,
@@ -111,8 +112,10 @@ export async function GET(request: Request) {
                 uom: true,
               },
             },
+            oriSellingPrice: true,
             sellingPrice: true,
             quantity: true,
+            returnedQuantity: true,
             totalPrice: true,
             costPrice: true,
           },
@@ -129,34 +132,57 @@ export async function GET(request: Request) {
     });
 
     const formattedSalesOrders = salesOrders.map((so) => {
-      const formattedSoProductDetails = so.SalesOrderProductDetails.map((d) => ({
-        ...d,
-        productName: d.Product.name,
-        uom: d.Product.uom,
-        sellingPrice: Number(d.sellingPrice),
-        quantity: Number(d.quantity),
-        totalPrice: Number(d.totalPrice),
-        profit: d.sellingPrice.minus(d.costPrice).times(d.quantity),
-        Product: undefined,
-      }));
+      const formattedSoProductDetails = so.SalesOrderProductDetails.map((d) => {
+        const netQuantity = d.quantity.minus(d.returnedQuantity);
+        const netTotalPrice = d.sellingPrice.times(netQuantity);
+        const grossProfit = d.sellingPrice.minus(d.costPrice).times(netQuantity);
+        const ppn = netTotalPrice.times(PPN_RATE);
+        const netProfit = grossProfit.minus(ppn);
 
-      const formattedSoServiceDetails = so.SalesOrderServiceDetails.map((d) => ({
-        ...d,
-        sellingPrice: Number(d.sellingPrice),
-        quantity: Number(d.quantity),
-        totalPrice: Number(d.totalPrice),
-      }));
+        return {
+          ...d,
+          productName: d.Product.name,
+          uom: d.Product.uom,
+          sellingPrice: d.sellingPrice.toNumber(),
+          netQuantity: netQuantity.toNumber(),
+          netTotalPrice: netTotalPrice.toNumber(),
+          grossProfit: grossProfit.toNumber(),
+          ppn: ppn.toNumber(),
+          netProfit: netProfit.toNumber(),
+          Product: undefined,
+        };
+      });
+
+      const formattedSoServiceDetails = so.SalesOrderServiceDetails.map((d) => {
+        const netTotalPrice = d.totalPrice;
+        const ppn = d.totalPrice.times(PPN_RATE);
+        const netProfit = d.totalPrice.minus(ppn);
+
+        return {
+          ...d,
+          uom: 'PCS',
+          sellingPrice: d.sellingPrice.toNumber(),
+          netQuantity: d.quantity.toNumber(),
+          netTotalPrice: netTotalPrice.toNumber(),
+          grossProfit: netTotalPrice.toNumber(),
+          ppn: ppn.toNumber(),
+          netProfit: netProfit.toNumber(),
+        };
+      });
+
+      const allDetails = [...formattedSoProductDetails, ...formattedSoServiceDetails];
 
       return {
         ...so,
         salesDate: isoStringToReadableDate(so.salesDate.toISOString()),
-        subTotal: Number(so.subTotal),
-        discount: Number(so.discount),
-        grandTotal: Number(so.grandTotal),
-        paidAmount: so.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0)),
-        customerName: so.Customer.name,
+        subTotal: so.subTotal.toNumber(),
+        discount: so.discount.toNumber(),
+        grandTotal: so.grandTotal.toNumber(),
+        paidAmount: so.SalesOrderPaymentHistories.reduce((acc, p) => acc.plus(p.amount), new Decimal(0)).toNumber(),
+        customerName: so.Customer.name + ' (' + so.Customer.licensePlate + ')',
         productDetails: formattedSoProductDetails,
         serviceDetails: formattedSoServiceDetails,
+        totalNetProfit: allDetails.reduce((acc, d) => acc + d.netProfit, 0),
         cashier: so.CreatedBy.name,
         Customer: undefined,
         SalesOrderProductDetails: undefined,
@@ -180,25 +206,27 @@ export async function GET(request: Request) {
 }
 
 async function exportSalesOrdersToExcel(startDate: string, endDate: string, data: any[]) {
-  const reportDate =
-    startDate && endDate && `${new Date(startDate).toISOString()} - ${new Date(endDate).toISOString()}`;
-  const title = `Laporan Transaksi Penjualan ${reportDate}`;
-
   const wb = new Workbook();
-  const ws = wb.addWorksheet('Laporan');
+  const ws = wb.addWorksheet('Laporan Penjualan');
 
-  // title
-  ws.addRow([title]).eachCell((cell) => {
-    cell.font = {
-      size: 16,
-      bold: true,
-      underline: true,
-    };
-  });
+  const reportDateText = startDate
+    ? `${isoStringToReadableDate(new Date(startDate).toISOString())} - ${isoStringToReadableDate(
+        endDate ? new Date(endDate).toISOString() : isoStringToReadableDate(new Date().toISOString())
+      )}`
+    : `Hingga ${isoStringToReadableDate(new Date().toISOString())}`;
+
+  ws.mergeCells('A1:C1');
+  const titleCell = ws.getCell('A1');
+  titleCell.value = 'Laporan Transaksi Penjualan';
+  titleCell.style = STYLES.title;
+
+  ws.mergeCells('A2:C2');
+  const dateCell = ws.getCell('A2');
+  dateCell.value = reportDateText;
 
   ws.addRow([]);
 
-  // headers
+  // --- Header Tabel ---
   const headerRow = ws.addRow([
     'Kode',
     'Kasir',
@@ -208,225 +236,116 @@ async function exportSalesOrdersToExcel(startDate: string, endDate: string, data
     'Sub Total',
     'Diskon',
     'Grand Total',
-    'Telah Dibayar',
     'Status Pengerjaan',
     'Status Pembayaran',
+    'Sisa Bayar',
     'Barang / Jasa',
+    'Qty Bersih',
+    'Satuan',
     'Harga Jual',
-    'Qty',
-    'Total Harga',
-    'Keuntungan',
+    'Total Harga Jual',
+    'Laba Kotor',
+    'PPN (11%)',
+    'Laba Bersih',
+    'Total Laba Bersih',
   ]);
-
-  headerRow.font = { bold: true, size: 12 };
-  headerRow.alignment = {
-    horizontal: 'center',
-    vertical: 'middle',
-    wrapText: true,
-  };
   headerRow.eachCell((cell) => {
-    cell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' },
-    };
-    cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFFFFF00' },
-      bgColor: { argb: 'FF0000FF' },
-    };
+    cell.style = STYLES.header;
   });
+  headerRow.height = 33;
 
-  data.forEach((so, i) => {
-    // so row
-    ws.addRow([
+  // --- Content ---
+  data.forEach((so) => {
+    let statusFill: Fill | undefined = undefined;
+    if (so.paymentStatus === 'Lunas') {
+      statusFill = STYLES.greenFill;
+    } else if (so.paymentStatus === 'Belum Lunas') {
+      statusFill = STYLES.redFill;
+    } else if (so.paymentStatus === 'Batal') {
+      statusFill = STYLES.grayFill;
+    }
+
+    const masterRow = ws.addRow([
       so.code,
       so.cashier,
       so.salesDate,
       so.customerName,
       so.paymentType,
-      'Rp ' + formatToReadableNumber(so.subTotal),
-      'Rp ' + formatToReadableNumber(so.discount),
-      'Rp ' + formatToReadableNumber(so.grandTotal),
-      'Rp ' + formatToReadableNumber(so.paidAmount),
+      so.subTotal,
+      so.discount,
+      so.grandTotal,
       so.progressStatus,
       so.paymentStatus,
-      '',
-      '',
-      '',
-      '',
-      '',
-    ]).eachCell((cell, colNum) => {
-      if (i % 2 == 0) {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'fff2f2f2' },
-        };
-      } else {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'ffeeece1' },
-        };
-      }
+      so.grandTotal - so.paidAmount,
+      ...Array(8).fill(''),
+      so.totalNetProfit,
+    ]);
 
-      if (colNum < 12) {
-        cell.border = {
-          top: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-          right: { style: 'thin' },
-        };
+    masterRow.eachCell((cell, colNumber) => {
+      cell.alignment = STYLES.defaultAlignment;
+      cell.border = STYLES.topBorder;
+      if (statusFill) {
+        cell.fill = statusFill;
       }
-      // border for the rightmost side of table
-      if (colNum == 16) {
-        cell.border = {
-          right: { style: 'thin' },
-        };
+      if ([6, 7, 8, 11, 20].includes(colNumber)) {
+        cell.numFmt = EXCEL_MONEY_FMT;
       }
     });
 
-    // product detail rows
-    so.productDetails.forEach((detail: any, j: number) => {
-      ws.addRow([
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
+    const applyDetailRowStyle = (row: any) => {
+      row.eachCell({ includeEmpty: true }, (cell: any, colNumber: number) => {
+        if (colNumber >= 12 && colNumber < 20) {
+          cell.border = { ...STYLES.fullBorder };
+        }
+        if (colNumber >= 15) {
+          cell.numFmt = EXCEL_MONEY_FMT;
+        }
+      });
+    };
+
+    so.productDetails.forEach((detail: any) => {
+      const detailRow = ws.addRow([
+        ...Array(11).fill(''),
         detail.productName,
-        'Rp ' + formatToReadableNumber(detail.sellingPrice),
-        detail.quantity + ' ' + detail.uom,
-        'Rp ' + formatToReadableNumber(detail.totalPrice),
-        'Rp ' + formatToReadableNumber(detail.profit),
-      ]).eachCell((cell, colNum) => {
-        if (i % 2 == 0) {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'fff2f2f2' },
-          };
-        } else {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'ffeeece1' },
-          };
-        }
-
-        if (colNum >= 12) {
-          cell.border = {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          };
-
-
-          cell.alignment = {
-            wrapText: true,
-            horizontal: 'left',
-            vertical: 'middle',
-          };
-        }
-        // border for the bottom of table
-        else if (
-          colNum < 12 &&
-          i == data.length - 1 &&
-          j == so.productDetails.length - 1 &&
-          so.serviceDetails.length == 0
-        ) {
-          cell.border = {
-            bottom: { style: 'thin' },
-          };
-        }
-      });
+        detail.netQuantity,
+        detail.uom,
+        detail.sellingPrice,
+        detail.netTotalPrice,
+        detail.grossProfit,
+        detail.ppn,
+        detail.netProfit,
+      ]);
+      applyDetailRowStyle(detailRow);
     });
 
-    // service detail rows
-    so.serviceDetails.forEach((detail: any, k: number) => {
-      ws.addRow([
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
+    so.serviceDetails.forEach((detail: any) => {
+      const detailRow = ws.addRow([
+        ...Array(11).fill(''),
         detail.serviceName,
-        'Rp ' + formatToReadableNumber(detail.sellingPrice),
-        detail.quantity,
-        'Rp ' + formatToReadableNumber(detail.totalPrice),
-        'Rp ' + formatToReadableNumber(detail.totalPrice),
-      ]).eachCell((cell, colNum) => {
-        if (i % 2 == 0) {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'fff2f2f2' },
-          };
-        } else {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'ffeeece1' },
-          };
-        }
-
-        if (colNum >= 12) {
-          cell.border = {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          };
-
-          cell.alignment = {
-            wrapText: true,
-            horizontal: 'left',
-            vertical: 'middle',
-          };
-        }
-        // border for the bottom of table
-        else if (colNum < 12 && i == data.length - 1 && k == so.serviceDetails.length - 1) {
-          cell.border = {
-            bottom: { style: 'thin' },
-          };
-        }
-      });
+        detail.netQuantity,
+        detail.uom,
+        detail.sellingPrice,
+        detail.netTotalPrice,
+        detail.grossProfit,
+        detail.ppn,
+        detail.netProfit,
+      ]);
+      applyDetailRowStyle(detailRow);
     });
+
+    const lastDetailRow = ws.lastRow ? ws.lastRow.number : masterRow.number;
+    if (lastDetailRow > masterRow.number) {
+      for (let i = 1; i <= 11; i++) {
+        ws.mergeCells(masterRow.number, i, lastDetailRow, i);
+      }
+      ws.mergeCells(masterRow.number, 20, lastDetailRow, 20);
+    }
   });
 
-  ws.getColumn(1).width = 13;
-  ws.getColumn(2).width = 20;
-  ws.getColumn(3).width = 20;
-  ws.getColumn(4).width = 20;
-  ws.getColumn(5).width = 14;
-  ws.getColumn(6).width = 15;
-  ws.getColumn(7).width = 15;
-  ws.getColumn(8).width = 15;
-  ws.getColumn(9).width = 15;
-  ws.getColumn(10).width = 13;
-  ws.getColumn(11).width = 13;
-  // detail
-  ws.getColumn(12).width = 20;
-  ws.getColumn(13).width = 15;
-  ws.getColumn(14).width = 12;
-  ws.getColumn(15).width = 15;
-  ws.getColumn(16).width = 15;
+  const columnWidths = [15, 20, 20, 25, 15, 18, 18, 18, 16, 16, 18, 35, 10, 10, 18, 18, 18, 18, 18, 18];
+  columnWidths.forEach((width, idx) => {
+    ws.getColumn(idx + 1).width = width;
+  });
 
   return await wb.xlsx.writeBuffer();
 }

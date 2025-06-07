@@ -8,11 +8,8 @@ enum MODE {
 export const siteConfig = {
   title: "POS Vitara Audio",
   description: `Toko Modifikasi dan Reparasi Mobil No. 1 di Medan, Indonesia. Dijamin Puas!`,
-  // logo: logoImg,
-  // icon: logoIconImg,
   mode: MODE.LIGHT,
   layout: 'hydrogen',
-  // TODO: favicon
 };
 
 export const metaObject = (

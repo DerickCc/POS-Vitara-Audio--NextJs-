@@ -1,9 +1,10 @@
-import { Workbook } from 'exceljs';
+import { Fill, Workbook } from 'exceljs';
 import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { EXCEL_MONEY_FMT, STYLES } from '@/config/excel-variables';
 
 export async function GET(request: Request) {
   const session = await getSession();
@@ -155,15 +156,16 @@ export async function GET(request: Request) {
         ...d,
         productName: d.SalesOrderProductDetail.Product.name,
         uom: d.SalesOrderProductDetail.Product.uom,
-        returnPrice: Number(d.returnPrice),
-        returnQuantity: Number(d.returnQuantity),
-        totalPrice: d.returnPrice.times(d.returnQuantity),
+        returnPrice: d.returnPrice.toNumber(),
+        returnQuantity: d.returnQuantity.toNumber(),
+        totalPrice: d.returnPrice.times(d.returnQuantity).toNumber(),
         SalesOrderProductDetail: undefined,
       }));
 
       const formattedSrServiceDetails = sr.SalesReturnServiceDetails.map((d) => ({
         ...d,
-        returnQuantity: Number(d.returnQuantity),
+        uom: 'PCS',
+        returnQuantity: d.returnQuantity.toNumber(),
       }));
 
       return {
@@ -195,25 +197,27 @@ export async function GET(request: Request) {
 }
 
 async function exportSalesReturnsToExcel(startDate: string, endDate: string, data: any[]) {
-  const reportDate =
-    startDate && endDate && `${new Date(startDate).toISOString()} - ${new Date(endDate).toISOString()}`;
-  const title = `Laporan Transaksi Penjualan ${reportDate}`;
-
   const wb = new Workbook();
-  const ws = wb.addWorksheet('Laporan');
+  const ws = wb.addWorksheet('Laporan Retur Penjualan');
 
-  // title
-  ws.addRow([title]).eachCell((cell) => {
-    cell.font = {
-      size: 16,
-      bold: true,
-      underline: true,
-    };
-  });
+  const reportDateText = startDate
+    ? `${isoStringToReadableDate(new Date(startDate).toISOString())} - ${isoStringToReadableDate(
+        endDate ? new Date(endDate).toISOString() : isoStringToReadableDate(new Date().toISOString())
+      )}`
+    : `Hingga ${isoStringToReadableDate(new Date().toISOString())}`;
+
+  ws.mergeCells('A1:C1');
+  const titleCell = ws.getCell('A1');
+  titleCell.value = 'Laporan Transaksi Penjualan';
+  titleCell.style = STYLES.title;
+
+  ws.mergeCells('A2:C2');
+  const dateCell = ws.getCell('A2');
+  dateCell.value = reportDateText;
 
   ws.addRow([]);
 
-  // headers
+  // --- Header Tabel ---
   const headerRow = ws.addRow([
     'Kode SR',
     'Tanggal Retur',
@@ -222,189 +226,96 @@ async function exportSalesReturnsToExcel(startDate: string, endDate: string, dat
     'Grand Total',
     'Status',
     'Barang / Jasa',
-    'Harga Retur',
     'Qty',
+    'Satuan',
+    'Harga Retur',
     'Total Harga',
     'Alasan',
   ]);
-
-  headerRow.font = { bold: true, size: 12 };
-  headerRow.alignment = {
-    horizontal: 'center',
-    vertical: 'middle',
-  };
   headerRow.eachCell((cell) => {
-    cell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' },
-    };
-    cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFFFFF00' },
-      bgColor: { argb: 'FF0000FF' },
-    };
+    cell.style = STYLES.header;
   });
+  headerRow.height = 33;
 
-  data.forEach((sr, i) => {
-    // sr row
-    ws.addRow([
+  // --- Content ---
+  data.forEach((sr) => {
+    let statusFill: Fill | undefined = undefined;
+    if (sr.status === 'Selesai') {
+      statusFill = STYLES.greenFill;
+    } else if (sr.status === 'Batal') {
+      statusFill = STYLES.grayFill;
+    }
+
+    const masterRow = ws.addRow([
       sr.code,
       sr.returnDate,
       sr.soCode,
       sr.customerName,
-      'Rp ' + formatToReadableNumber(sr.grandTotal),
+      sr.grandTotal,
       sr.status,
-      '',
-      '',
-      '',
-      '',
-      '',
-    ]).eachCell((cell, colNum) => {
-      if (i % 2 == 0) {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'fff2f2f2' },
-        };
-      } else {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'ffeeece1' },
-        };
-      }
+      ...Array(6).fill(''),
+    ]);
 
-      if (colNum < 7) {
-        cell.border = {
-          top: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-          right: { style: 'thin' },
-        };
+    masterRow.eachCell((cell, colNumber) => {
+      cell.alignment = STYLES.defaultAlignment;
+      cell.border = STYLES.topBorder;
+      if (statusFill) {
+        cell.fill = statusFill;
       }
-      // border for the rightmost side of table
-      if (colNum == 12) {
-        cell.border = {
-          right: { style: 'thin' },
-        };
+      if (colNumber === 5) {
+        cell.numFmt = EXCEL_MONEY_FMT;
       }
     });
 
-    // product detail rows
-    sr.productDetails.forEach((detail: any, j: number) => {
-      ws.addRow([
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        detail.productName,
-        'Rp ' + formatToReadableNumber(detail.returnPrice),
-        detail.returnQuantity + ' ' + detail.uom,
-        'Rp ' + formatToReadableNumber(detail.totalPrice),
-        detail.reason,
-      ]).eachCell((cell, colNum) => {
-        if (i % 2 == 0) {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'fff2f2f2' },
-          };
-        } else {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'ffeeece1' },
-          };
+    const applyDetailRowStyle = (row: any) => {
+      row.eachCell({ includeEmpty: true }, (cell: any, colNumber: number) => {
+        if (colNumber >= 7) {
+          cell.border = { ...STYLES.fullBorder };
         }
-
-        if (colNum >= 7) {
-          cell.border = {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          };
-
-          cell.alignment = {
-            wrapText: true,
-            horizontal: 'left',
-            vertical: 'middle',
-          };
-        }
-        // border for the bottom of table
-        else if (
-          colNum < 11 &&
-          i == data.length - 1 &&
-          j == sr.productDetails.length - 1 &&
-          sr.serviceDetails.length == 0
-        ) {
-          cell.border = {
-            bottom: { style: 'thin' },
-          };
+        if (colNumber === 10 || colNumber === 11) {
+          cell.numFmt = EXCEL_MONEY_FMT;
         }
       });
+    };
+
+    sr.productDetails.forEach((detail: any) => {
+      const detailRow = ws.addRow([
+        ...Array(6).fill(''),
+        detail.productName,
+        detail.returnQuantity,
+        detail.uom,
+        detail.returnPrice,
+        detail.totalPrice,
+        detail.reason,
+      ]);
+      applyDetailRowStyle(detailRow);
     });
 
-    // service detail rows
     sr.serviceDetails.forEach((detail: any, k: number) => {
-      ws.addRow(['', '', '', '', '', '', detail.serviceName, '-', detail.returnQuantity, '-', detail.reason]).eachCell(
-        (cell, colNum) => {
-          if (i % 2 == 0) {
-            cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'fff2f2f2' },
-            };
-          } else {
-            cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'ffeeece1' },
-            };
-          }
-
-          if (colNum >= 7) {
-            cell.border = {
-              top: { style: 'thin' },
-              bottom: { style: 'thin' },
-              left: { style: 'thin' },
-              right: { style: 'thin' },
-            };
-
-            cell.alignment = {
-              wrapText: true,
-              horizontal: 'left',
-              vertical: 'middle',
-            };
-          }
-          // border for the bottom of table
-          else if (colNum < 11 && i == data.length - 1 && k == sr.serviceDetails.length - 1) {
-            cell.border = {
-              bottom: { style: 'thin' },
-            };
-          }
-        }
-      );
+      const detailRow = ws.addRow([
+        ...Array(6).fill(''),
+        detail.serviceName,
+        detail.returnQuantity,
+        detail.uom,
+        0,
+        0,
+        detail.reason,
+      ]);
+      applyDetailRowStyle(detailRow);
     });
+
+    const lastDetailRow = ws.lastRow ? ws.lastRow.number : masterRow.number;
+    if (lastDetailRow > masterRow.number) {
+      for (let i = 1; i <= 6; i++) {
+        ws.mergeCells(masterRow.number, i, lastDetailRow, i);
+      }
+    }
   });
 
-  ws.getColumn(1).width = 15;
-  ws.getColumn(2).width = 20;
-  ws.getColumn(3).width = 15;
-  ws.getColumn(4).width = 25;
-  ws.getColumn(5).width = 15;
-  ws.getColumn(6).width = 15;
-  // detail
-  ws.getColumn(7).width = 30;
-  ws.getColumn(8).width = 15;
-  ws.getColumn(9).width = 15;
-  ws.getColumn(10).width = 15;
-  ws.getColumn(11).width = 40;
+  const columnWidths = [15, 20, 15, 25, 18, 18, 35, 10, 10, 15, 18, 18, 40];
+  columnWidths.forEach((width, idx) => {
+    ws.getColumn(idx + 1).width = width;
+  });
 
   return await wb.xlsx.writeBuffer();
 }
