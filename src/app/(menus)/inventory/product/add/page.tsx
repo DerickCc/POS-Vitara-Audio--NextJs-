@@ -50,14 +50,16 @@ export default function AddProductPage() {
       <PageHeader {...pageHeader}></PageHeader>
 
       <div className='grid gap-6'>
-        <Link href={routes.inventory.product.data}>
-          <Button variant='outline' className='border-2 border-gray-200'>
-            <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
-            <span>Kembali</span>
-          </Button>
-        </Link>
+        <div className='flex'>
+          <Link href={routes.inventory.product.data}>
+            <Button variant='outline' className='border-2 border-gray-200'>
+              <PiArrowLeftBold className='size-4 me-1.5' />
+              <span>Kembali</span>
+            </Button>
+          </Link>
+        </div>
 
-        <ProductForm onSubmit={create} isSubmitSuccessful={isSubmitSuccessful}/>
+        <ProductForm onSubmit={create} isSubmitSuccessful={isSubmitSuccessful} />
       </div>
     </>
   );

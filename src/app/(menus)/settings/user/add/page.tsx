@@ -50,13 +50,15 @@ export default function AddUserPage() {
       <PageHeader {...pageHeader}></PageHeader>
 
       <div className='grid gap-6'>
-        <Link href={routes.settings.user.data}>
-          <Button variant='outline' className='border-2 border-gray-200'>
-            <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
-            <span>Kembali</span>
-          </Button>
-        </Link>
-        
+        <div className='flex'>
+          <Link href={routes.settings.user.data}>
+            <Button variant='outline' className='border-2 border-gray-200'>
+              <PiArrowLeftBold className='size-4 me-1.5' />
+              <span>Kembali</span>
+            </Button>
+          </Link>
+        </div>
+
         <UserForm schema={CreateUserSchema} onSubmit={create} isSubmitSuccessful={isSubmitSuccessful} />
       </div>
     </>

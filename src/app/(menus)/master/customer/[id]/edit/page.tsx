@@ -67,12 +67,14 @@ export default function EditCustomerPage() {
       <PageHeader {...pageHeader}></PageHeader>
 
       <div className='grid gap-6'>
-        <Link href={routes.master.customer.data}>
-          <Button variant='outline' className='border-2 border-gray-200'>
-            <PiArrowLeftBold className='size-4 me-1.5'></PiArrowLeftBold>
-            <span>Kembali</span>
-          </Button>
-        </Link>
+        <div className='flex'>
+          <Link href={routes.master.customer.data}>
+            <Button variant='outline' className='border-2 border-gray-200'>
+              <PiArrowLeftBold className='size-4 me-1.5' />
+              <span>Kembali</span>
+            </Button>
+          </Link>
+        </div>
 
         <CustomerForm defaultValues={customer} isLoading={isLoading} onSubmit={update} isSubmitSuccessful={isSubmitSuccessful} />
       </div>

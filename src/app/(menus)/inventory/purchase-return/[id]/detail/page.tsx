@@ -51,12 +51,14 @@ export default function DetailPurchaseReturnPage() {
       <PageHeader {...pageHeader}></PageHeader>
 
       <div className='grid gap-6'>
-        <Link href={routes.inventory.purchaseReturn.data}>
-          <Button variant='outline' className='border-2 border-gray-200'>
-            <PiArrowLeftBold className='size-4 me-1.5' />
-            <span>Kembali</span>
-          </Button>
-        </Link>
+        <div className='flex'>
+          <Link href={routes.inventory.purchaseReturn.data}>
+            <Button variant='outline' className='border-2 border-gray-200'>
+              <PiArrowLeftBold className='size-4 me-1.5' />
+              <span>Kembali</span>
+            </Button>
+          </Link>
+        </div>
 
         <PurchaseReturnForm defaultValues={pr} isReadOnly={true} isLoading={isLoading} onSubmit={async () => {}} />
       </div>
