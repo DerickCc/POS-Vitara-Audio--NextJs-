@@ -208,7 +208,7 @@ async function exportSalesReturnsToExcel(startDate: string, endDate: string, dat
 
   ws.mergeCells('A1:C1');
   const titleCell = ws.getCell('A1');
-  titleCell.value = 'Laporan Transaksi Penjualan';
+  titleCell.value = 'Laporan Retur Penjualan';
   titleCell.style = STYLES.title;
 
   ws.mergeCells('A2:C2');
