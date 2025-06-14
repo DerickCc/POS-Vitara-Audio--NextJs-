@@ -257,7 +257,7 @@ export default function SalesReturnForm({
           <>
             <div className='grid sm:grid-cols-3 gap-6'>
               <Input
-                label='Kode Transaksi Penjualan'
+                label='Kode Retur Penjualan'
                 placeholder='Auto Generate'
                 inputClassName={readOnlyClass}
                 readOnly

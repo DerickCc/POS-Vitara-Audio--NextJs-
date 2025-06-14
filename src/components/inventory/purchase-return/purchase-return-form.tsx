@@ -213,7 +213,7 @@ export default function PurchaseReturnForm({
           <>
             <div className='grid sm:grid-cols-3 gap-6'>
               <Input
-                label='Kode Transaksi Pembelian'
+                label='Kode Retur Pembelian'
                 placeholder='Auto Generate'
                 inputClassName={readOnlyClass}
                 readOnly
