@@ -31,35 +31,25 @@ export async function GET(request: Request) {
 
   const where: any = { AND: [] };
   if (name) {
-    // full text search
-    const searchTerm = name.split(' ').filter((term) => term);
+    const searchTerms = name.trim().split(' ').filter(term => term);
+    const formattedQuery = searchTerms.map(term => term + ':*').join(' & ');
 
-    if (searchTerm.length > 0) {
-      searchTerm.forEach((term) => {
-        where.AND.push({
-          name: {
-            contains: term,
-            mode: 'insensitive',
-          },
-        });
-      });
+    if (formattedQuery) {
+      where.name = {
+        search: formattedQuery,
+      };
     }
   }
 
   if (pic) {
-    // full text search
-    const searchTerm = pic.split(' ').filter((term) => term);
+      const searchTerms = pic.trim().split(' ').filter(term => term);
+    const formattedQuery = searchTerms.map(term => term + ':*').join(' & ');
 
-    if (searchTerm.length > 0) {
-      searchTerm.forEach((term) => {
-        where.AND.push({
-          pic: {
-            contains: term,
-            mode: 'insensitive',
-          },
-        });
-      });
-    }
+    if (formattedQuery) {
+      where.pic = {
+        search: formattedQuery,
+      };
+    } 
   }
 
   if (phoneNo) {

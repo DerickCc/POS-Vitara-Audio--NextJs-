@@ -18,16 +18,13 @@ export async function GET(request: Request) {
 
   const where: any = {};
   if (name) {
-    // full text search
-    const searchTerm = name.split(' ').filter((term) => term);
+    const searchTerms = name.trim().split(' ').filter(term => term);
+    const formattedQuery = searchTerms.map(term => term + ':*').join(' & ');
 
-    if (searchTerm.length > 0) {
-      where['AND'] = searchTerm.map((term) => ({
-        name: {
-          contains: term,
-          mode: 'insensitive',
-        },
-      }));
+    if (formattedQuery) {
+      where.name = {
+        search: formattedQuery,
+      };
     }
   }
   // ----------------

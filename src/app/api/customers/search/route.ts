@@ -1,6 +1,7 @@
 import { SearchCustomerModel } from '@/models/customer.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Customers } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 // SearchCustomner
@@ -17,48 +18,24 @@ export async function GET(request: Request) {
   // filters
   const search = queryParams.get('search') ?? '';
 
-  const where: any = { AND: [] };
-  if (search) {
-    // full text search
-    const searchTerm = search.split(' ').filter((term) => term);
-
-    if (searchTerm.length > 0) {
-      searchTerm.forEach((term) => {
-        where.AND.push({
-          OR: [
-            {
-              name: {
-                contains: term,
-                mode: 'insensitive',
-              },
-            },
-            {
-              licensePlate: {
-                contains: term,
-                mode: 'insensitive',
-              },
-            },
-          ],
-        });
-      });
-    }
-  }
-  // ----------------
-
   try {
-    const customers = await db.customers.findMany({
-      orderBy: { name: 'asc' },
-      where,
-      select: {
-        id: true,
-        code: true,
-        name: true,
-        licensePlate: true,
-      },
-    });
+    let customers: any[] = [];
+    const formattedQuery = search.trim().split(' ').filter(term => term).map(term => term + ':*').join(' & ');
+
+    customers = await db.$queryRaw<any[]>`
+      SELECT id, code, name, license_plate,
+        ts_rank(
+          to_tsvector('simple', coalesce(name, '') || ' ' || coalesce("license_plate", '')),
+          to_tsquery('simple', ${formattedQuery})
+        ) as rank
+      FROM "public"."Customers"
+      WHERE to_tsvector('simple', coalesce(name, '') || ' ' || coalesce("license_plate", '')) @@ to_tsquery('simple', ${formattedQuery})
+      ORDER BY rank DESC, name ASC;
+    `;
 
     const customersWithExtraData: SearchCustomerModel[] = customers.map((customer) => ({
       ...customer,
+      licensePlate: customer.license_plate,
       value: customer.id,
       label: customer.name,
     }));
