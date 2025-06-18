@@ -2,7 +2,7 @@ import { mapTrxStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
 import { Colors } from '@/models/global.model';
 import { PurchaseReturnModel } from '@/models/purchase-return.model';
-import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
+import { formatToReadableNumber, isoStringToReadableDate, mapTrxToRoute } from '@/utils/helper-function';
 import { badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
 import { ActionIcon, Dropdown } from 'rizzui';
@@ -105,7 +105,11 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     id: 'poCode',
     size: 150,
     header: () => 'Kode Transaksi Pembelian',
-    cell: (info) => info.getValue(),
+    cell: ({ row }) => (
+      <Link href={mapTrxToRoute("Pembelian", row.original.poId)}>
+        <span className='text-primary'>{row.original.poCode}</span>
+      </Link>
+    ),
     enableSorting: true,
   }),
   columnHelper.accessor('returnType', {
