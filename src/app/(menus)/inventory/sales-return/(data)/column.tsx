@@ -1,6 +1,6 @@
 import { mapTrxStatusToColor } from '@/config/global-variables';
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal';
-import { formatToReadableNumber, isoStringToReadableDate } from '@/utils/helper-function';
+import { formatToReadableNumber, isoStringToReadableDate, mapTrxToRoute } from '@/utils/helper-function';
 import { actionIconColorClass, badgeColorClass, baseBadgeClass } from '@/config/tailwind-classes';
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table';
 import { ActionIcon, Tooltip } from 'rizzui';
@@ -89,7 +89,11 @@ export const columns = ({ actionHandlers }: { actionHandlers: any }): ColumnDef<
     id: 'soCode',
     size: 150,
     header: () => 'Kode Transaksi Penjualan',
-    cell: (info) => info.getValue(),
+    cell: ({ row }) => (
+      <Link href={mapTrxToRoute("Penjualan", row.original.soId)}>
+        <span className='text-primary'>{row.original.soCode}</span>
+      </Link>
+    ),
     enableSorting: true,
   }),
   columnHelper.accessor('customerName', {
