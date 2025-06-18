@@ -112,7 +112,7 @@ async function main() {
       uom: 'Meter',
       purchasePrice: 100000,
       purchasePriceCode: await encodePurchasePrice(100000),
-      sellingPrice: 300000,
+      sellingPrice: 0,
       CreatedBy: { connect: { id: user.id } },
     },
   });
