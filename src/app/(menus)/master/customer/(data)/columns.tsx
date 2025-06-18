@@ -96,7 +96,7 @@ export const columns = (actionHandlers: any): ColumnDef<CustomerModel, any>[] =>
     id: 'phoneNo',
     size: 160,
     header: () => 'No. Telepon',
-    cell: (info) => info.getValue(),
+    cell: (info) => info.getValue() || '-',
     enableSorting: false,
   }),
   columnHelper.accessor('address', {

@@ -28,7 +28,7 @@ export async function GET(request: Request) {
           to_tsvector('simple', coalesce(name, '') || ' ' || coalesce("license_plate", '')),
           to_tsquery('simple', ${formattedQuery})
         ) as rank
-      FROM "public"."Customers"
+      FROM "Customers"
       WHERE to_tsvector('simple', coalesce(name, '') || ' ' || coalesce("license_plate", '')) @@ to_tsquery('simple', ${formattedQuery})
       ORDER BY rank DESC, name ASC;
     `;

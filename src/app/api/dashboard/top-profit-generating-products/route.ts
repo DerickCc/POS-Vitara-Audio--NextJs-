@@ -41,25 +41,23 @@ export async function GET(request: Request) {
     endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999); // End of today
   }
 
-  const isoStartDate = startDate?.toISOString();
-  const isoEndDate = endDate?.toISOString();
-
   try {
+    let whereClause = Prisma.sql`WHERE so.progress_status != 'Batal' AND p.type = 'Barang Jadi'`;
+    if (period !== 'all-time') {
+      whereClause = Prisma.sql`${whereClause} AND sopd.created_time BETWEEN ${startDate} AND ${endDate}`;
+    }
+
     const topProfitGeneratingProducts = await db.$queryRaw<rawQueryModel[]>`
       SELECT 
         p.name, 
         p.uom,
         SUM(sopd.quantity) AS item_sold,
         SUM(sopd.quantity * (sopd.selling_price - sopd.cost_price)) AS total_profit
-      FROM "public"."SalesOrderProductDetails" sopd
-      JOIN "public"."Products" p ON sopd.product_id = p.id
-      JOIN "public"."SalesOrders" so ON sopd.so_id = so.id
-      ${
-        period !== 'all-time'
-          ? Prisma.sql`WHERE sopd.created_at::text BETWEEN ${isoStartDate} AND ${isoEndDate} AND so.progress_status != 'Batal'`
-          : Prisma.sql`WHERE so.progress_status != 'Batal'`
-      }
-      GROUP BY p.id
+      FROM "SalesOrderProductDetails" sopd
+      JOIN "Products" p ON sopd.product_id = p.id
+      JOIN "SalesOrders" so ON sopd.so_id = so.id
+      ${whereClause}
+      GROUP BY p.id, p.name
       ORDER BY total_profit DESC
       LIMIT ${limit}
     `;

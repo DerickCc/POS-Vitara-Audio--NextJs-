@@ -36,14 +36,14 @@ export async function GET(request: Request) {
     const [lowStockProducts, recordsTotal] = await Promise.all([
       db.$queryRaw<LowStockProductRawQueryModel[]>`
         SELECT id, name, stock, uom, restock_threshold
-        FROM "public"."Products" WHERE stock < restock_threshold
+        FROM "Products" WHERE stock < restock_threshold
         ORDER BY stock ${direction} 
         LIMIT ${pageSize}
         OFFSET ${pageIndex * pageSize}
       `,
       db.$queryRaw<{ count: any }[]>`
         SELECT COUNT(id)
-        FROM "public"."Products"
+        FROM "Products"
         WHERE stock < restock_threshold
       `,
     ]);

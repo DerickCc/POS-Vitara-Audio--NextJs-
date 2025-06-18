@@ -1,7 +1,6 @@
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
 import { Prisma } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
 import { NextResponse } from 'next/server';
 
 // BrowseSupplierHistories
@@ -15,99 +14,59 @@ export async function GET(request: Request, { params }: { params: { id: string }
     );
   }
 
-  const { id } = params;
+  const { id: supplierId } = params;
 
-  if (!id) {
-    return NextResponse.json({ message: 'Id barang tidak boleh null' }, { status: 400 });
+  if (!supplierId) {
+    return NextResponse.json({ message: 'Id supplier tidak boleh null' }, { status: 400 });
   }
 
   const url = new URL(request.url);
   const queryParams = new URLSearchParams(url.search);
-
-  const pageIndex = Number(queryParams.get('pageIndex')) ?? 0;
-  const pageSize = Number(queryParams.get('pageSize')) ?? 5;
-  const sortOrder = queryParams.get('sortOrder') ?? 'desc';
-  const sortColumn = queryParams.get('sortColumn') ?? 'createdAt';
-
-  const orderBy = { createdAt: 'desc' as Prisma.SortOrder };
+  const pageIndex = Number(queryParams.get('pageIndex')) || 0;
+  const pageSize = Number(queryParams.get('pageSize')) || 5;
+  const sortOrder = (queryParams.get('sortOrder') as Prisma.SortOrder) || 'desc';
 
   try {
-    // Purchase Order
-    const purchaseOrders = await db.purchaseOrders.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        code: true,
-        progressStatus: true,
-        paymentStatus: true,
-        grandTotal: true,
-      },
-      where: {
-        supplierId: id,
-      },
-      orderBy,
+    const dataQuery = Prisma.sql`
+      (SELECT id, created_at as date, code, grand_total, payment_status, progress_status, 'Pembelian' AS type
+      FROM "PurchaseOrders" WHERE supplier_id = ${supplierId})
+      UNION ALL
+      (SELECT pr.id, pr.created_at as date, pr.code, pr.grand_total, '' AS payment_status, pr.status AS progress_status, 'Retur Pembelian' AS type
+      FROM "PurchaseReturns" pr JOIN "PurchaseOrders" po ON pr.po_id = po.id WHERE po.supplier_id = ${supplierId})
+      ORDER BY date ${sortOrder === 'desc' ? Prisma.sql`DESC` : Prisma.sql`ASC`}
+      LIMIT ${pageSize}
+      OFFSET ${pageIndex * pageSize}
+    `;
+
+    const countQuery = Prisma.sql`
+      SELECT SUM(total) FROM (
+        (SELECT COUNT(*) as total FROM "PurchaseOrders" WHERE supplier_id = ${supplierId})
+        UNION ALL
+        (SELECT COUNT(*) as total FROM "PurchaseReturns" pr JOIN "PurchaseOrders" po ON pr.po_id = po.id WHERE po.supplier_id = ${supplierId})
+      ) as "union_count"
+    `;
+
+    const [result, countResult] = await Promise.all([
+      db.$queryRaw<any[]>(dataQuery),
+      db.$queryRaw<{ sum: any }[]>(countQuery),
+    ]);
+
+    const mappedSupplierHistories = result.map((h) => {
+      return {
+        ...h,
+        grandTotal: h.grand_total,
+        paymentStatus: h.payment_status,
+        progressStatus: h.progress_status,
+        grand_total: undefined,
+        payment_status: undefined,
+        progress_status: undefined,
+      };
     });
 
-    const formattedPurchaseOrders = purchaseOrders.map((po) => ({
-      date: po.createdAt,
-      id: po.id,
-      code: po.code,
-      progressStatus: po.progressStatus,
-      paymentStatus: po.paymentStatus,
-      grandTotal: po.grandTotal,
-      type: 'Pembelian',
-    }));
-
-    // Purchase Return
-    const purchaseReturns = await db.purchaseReturns.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        code: true,
-        status: true,
-        returnType: true,
-        PurchaseReturnDetails: {
-          select: {
-            returnPrice: true,
-            returnQuantity: true,
-          },
-        },
-      },
-      where: {
-        PurchaseOrder: {
-          supplierId: id,
-        },
-      },
-      orderBy,
-    });
-
-    const formattedPurchaseReturns = purchaseReturns.map((pr) => ({
-      date: pr.createdAt,
-      id: pr.id,
-      code: pr.code,
-      progressStatus: pr.status,
-      grandTotal:
-        pr.returnType === 'Penggantian Barang'
-          ? 0
-          : pr.PurchaseReturnDetails.reduce(
-              (acc, d) => acc.plus(d.returnPrice.times(d.returnQuantity)),
-              new Decimal(0)
-            ),
-      type: `Retur Pembelian (${pr.returnType})`,
-    }));
-
-    const supplierHistories = [...formattedPurchaseOrders, ...formattedPurchaseReturns].sort((a, b) => {
-      if (sortOrder === 'desc') {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      } else {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      }
-    });
-
-    const pagedSupplierHistories = supplierHistories.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
+    const recordsTotal = Number(countResult[0]?.sum || 0);
 
     return NextResponse.json(
-      { message: 'Success', result: pagedSupplierHistories, recordsTotal: supplierHistories.length },
+      { message: 'Success', result: mappedSupplierHistories, recordsTotal },
       { status: 200 }
     );
   } catch (e) {
