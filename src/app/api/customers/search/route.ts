@@ -1,7 +1,6 @@
 import { SearchCustomerModel } from '@/models/customer.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
-import { Customers } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 // SearchCustomner
@@ -19,10 +18,9 @@ export async function GET(request: Request) {
   const search = queryParams.get('search') ?? '';
 
   try {
-    let customers: any[] = [];
     const formattedQuery = search.trim().split(' ').filter(term => term).map(term => term + ':*').join(' & ');
 
-    customers = await db.$queryRaw<any[]>`
+    const customers = await db.$queryRaw<any[]>`
       SELECT id, code, name, license_plate,
         ts_rank(
           to_tsvector('simple', coalesce(name, '') || ' ' || coalesce("license_plate", '')),
