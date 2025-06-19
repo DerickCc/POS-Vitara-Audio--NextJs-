@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   try {
     let whereClause = Prisma.sql`WHERE so.progress_status != 'Batal' AND p.type = 'Barang Jadi'`;
     if (period !== 'all-time') {
-      whereClause = Prisma.sql`${whereClause} AND sopd.created_time BETWEEN ${startDate} AND ${endDate}`;
+      whereClause = Prisma.sql`${whereClause} AND sopd.created_at BETWEEN ${startDate} AND ${endDate}`;
     }
 
     const topProfitGeneratingProducts = await db.$queryRaw<rawQueryModel[]>`
