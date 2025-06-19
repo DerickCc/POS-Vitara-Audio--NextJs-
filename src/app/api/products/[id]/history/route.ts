@@ -150,7 +150,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const mappedProductHistories = result.map((h) => {
       return {
         ...h,
-        date: h.created_at,
         supOrCus: h.partner_name,
         price: Number(h.price),
         quantity: Number(h.quantity),
