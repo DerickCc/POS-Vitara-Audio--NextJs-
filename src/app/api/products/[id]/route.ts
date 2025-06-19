@@ -65,6 +65,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       data: {
         ...data,
         purchasePriceCode: await encodePurchasePrice(data.purchasePrice),
+        sellingPrice: data.type === 'Barang Jadi' ? data.sellingPrice : 0,
         UpdatedBy: {
           connect: { id: userId },
         },
