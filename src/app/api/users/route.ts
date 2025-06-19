@@ -1,6 +1,7 @@
 import { CreateUserSchema } from '@/models/user.model';
 import { db } from '@/utils/prisma';
 import { getSession } from '@/utils/sessionlib';
+import { Prisma } from '@prisma/client';
 import { hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
@@ -125,6 +126,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: 'Data User Berhasil Disimpan' }, { status: 201 });
   } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === 'P2002') { // "Unique constraint failed"
+        const message = `Username '${data.username}' sudah digunakan.`;
+        return NextResponse.json({ message }, { status: 409 });
+      }
+    }
+
     return NextResponse.json({ message: 'Internal Server Error: ' + e }, { status: 500 });
   }
 }
